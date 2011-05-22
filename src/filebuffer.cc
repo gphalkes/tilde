@@ -14,9 +14,6 @@
 #include "filebuffer.h"
 #include "openfiles.h"
 
-file_buffer_t::file_buffer_t(const char *name) : text_buffer_t(name), show(false) {
+file_buffer_t::file_buffer_t(const char *name) : text_buffer_t(name) {
 	open_files.push_back(this);
 }
-
-void file_buffer_t::set_show(bool _show) { show = _show; }
-bool file_buffer_t::get_show(void) { return show; }

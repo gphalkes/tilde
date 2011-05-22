@@ -19,13 +19,8 @@
 using namespace t3_widget;
 
 class file_buffer_t : public text_buffer_t {
-	protected:
-		bool show;
-
 	public:
 		file_buffer_t(const char *name = NULL);
-		virtual void set_show(bool _show);
-		virtual bool get_show(void);
 };
 
 #endif

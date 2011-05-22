@@ -53,12 +53,12 @@ file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
 		for (; current != files.end() && *current != start; current++) {}
 
 	for (iter = current; iter != files.end(); iter++) {
-		if (!(*iter)->get_show())
+		if (!(*iter)->has_window())
 			return *iter;
 	}
 
 	for (iter = files.begin(); iter != current; iter++) {
-		if (!(*iter)->get_show())
+		if (!(*iter)->has_window())
 			return *iter;
 	}
 	return start;
@@ -71,12 +71,12 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
 		for (; current != files.rend() && *current != start; current++) {}
 
 	for (iter = current; iter != files.rend(); iter++) {
-		if (!(*iter)->get_show())
+		if (!(*iter)->has_window())
 			return *iter;
 	}
 
 	for (iter = files.rbegin(); iter != current; iter++) {
-		if (!(*iter)->get_show())
+		if (!(*iter)->has_window())
 			return *iter;
 	}
 	return start;
