@@ -31,8 +31,6 @@ using namespace t3_widget;
 static open_file_dialog_t open_file_dialog(20, 75);
 
 
-static void menu_activated(int id);
-
 class main_t : public main_window_base_t {
 	private:
 		menu_bar_t *menu;
@@ -42,10 +40,9 @@ class main_t : public main_window_base_t {
 
 	public:
 		main_t(void) {
-
 			menu = new menu_bar_t(option.hide_menubar);
 			push_back(menu);
-			menu->connect_activate(sigc::ptr_fun(menu_activated));
+			menu->connect_activate(sigc::mem_fun(this, &main_t::menu_activated));
 
 			panel = new menu_panel_t(menu, "_File;Ff");
 			panel->add_item("_New;nN", "^N", action_id_t::FILE_NEW);
@@ -74,12 +71,12 @@ class main_t : public main_window_base_t {
 			panel->add_item("Find _Next;nN", "F3", action_id_t::SEARCH_AGAIN);
 			panel->add_item("Find _Previous;pP", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
 			panel->add_item("_Replace...;rR", "^R", action_id_t::SEARCH_REPLACE);
-			panel->add_item("_Go to line_t...;gG", "^G", action_id_t::SEARCH_GOTO);
+			panel->add_item("_Go to Line...;gG", "^G", action_id_t::SEARCH_GOTO);
 
 			panel = new menu_panel_t(menu, "_Windows;wW");
-			panel->add_item("_Next buffer_t;nN", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
-			panel->add_item("_Previous buffer_t;pP", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
-			panel->add_item("_Select buffer_t...;sS", NULL, action_id_t::WINDOWS_SELECT);
+			panel->add_item("_Next Buffer;nN", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
+			panel->add_item("_Previous Buffer;pP", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
+			panel->add_item("_Select Buffer...;sS", NULL, action_id_t::WINDOWS_SELECT);
 			panel->add_separator();
 			panel->add_item("Split _Horizontal;hH", NULL, action_id_t::WINDOWS_HSPLIT);
 			panel->add_item("Split _Vertical;vV", NULL, action_id_t::WINDOWS_VSPLIT);
@@ -114,23 +111,156 @@ class main_t : public main_window_base_t {
 			split->set_size(height - !option.hide_menubar, width);
 			return true;
 		}
+
+	private:
+		void menu_activated(int id) {
+			switch (id) {
+				case action_id_t::FILE_EXIT:
+					//FIXME: ask whether to save/cancel
+					//~ #ifdef DEBUG
+					//~ delete editwin;
+					//~ #endif
+					exit(EXIT_SUCCESS);
+					break;
+				case action_id_t::WINDOWS_HSPLIT:
+					//FIXME: should this always be a new window?
+					split->split(new edit_window_t(), true);
+					break;
+				default:
+					break;
+			}
+		}
 };
 
-static void menu_activated(int id) {
-	lprintf("Menu activated: %d\n", id);
+/*
+void execute_action(ActionID id, ...) {
+	va_list args;
+	va_start(args, id);
+
 	switch (id) {
-		case action_id_t::FILE_EXIT:
+		case ActionID::FILE_NEW: {
+			text_file_t *new_text = new text_file_t();
+			editwin->get_current()->set_text_file(new_text);
+			break;
+		}
+		case ActionID::FILE_SAVE:
+			editwin->get_current()->save();
+			break;
+		case ActionID::FILE_OPEN:
+			//FIXME: set directory to dir of current file?
+			activate_window(WindowID::OPEN_FILE);
+			break;
+		case ActionID::FILE_OPEN_RECENT:
+			activate_window(WindowID::OPEN_RECENT);
+			break;
+		case ActionID::FILE_SAVE_AS:
+			//FIXME: set directory to dir of current file?
+			activate_window(WindowID::SAVE_FILE);
+			break;
+		case ActionID::FILE_CLOSE:
+			editwin->get_current()->close(false);
+			break;
+		case ActionID::FILE_REPAINT:
+			do_resize();
+			t3_term_redraw();
+			break;
+		case ActionID::FILE_SUSPEND:
+			deinit_keys();
+			t3_term_restore();
+		#warning FIXME: should also do terminal specific restore!
+			kill(getpid(), SIGSTOP);
+			//FIXME: check return values!
+			t3_term_init(-1, option.term);
+			reinit_keys();
+			do_resize();
+			break;
+		case ActionID::FILE_EXIT:
 			//FIXME: ask whether to save/cancel
-			//~ #ifdef DEBUG
-			//~ delete editwin;
-			//~ #endif
+			#ifdef DEBUG
+			delete editwin;
+			#endif
 			exit(EXIT_SUCCESS);
 			break;
+
+		case ActionID::EDIT_UNDO:
+			editwin->get_current()->action(EditAction::UNDO);
+			break;
+		case ActionID::EDIT_REDO:
+			editwin->get_current()->action(EditAction::REDO);
+			break;
+		case ActionID::EDIT_COPY:
+			editwin->get_current()->action(EditAction::COPY);
+			break;
+		case ActionID::EDIT_CUT:
+			editwin->get_current()->action(EditAction::CUT);
+			break;
+		case ActionID::EDIT_PASTE:
+			editwin->get_current()->action(EditAction::PASTE);
+			break;
+		case ActionID::EDIT_SELECT_ALL:
+			editwin->get_current()->action(EditAction::SELECT_ALL);
+			break;
+
+		case ActionID::EDIT_INSERT_CHAR:
+			if (components.back() != insert_char_dialog)
+				activate_window(WindowID::INSERT_CHAR);
+			break;
+
+		case ActionID::SEARCH_SEARCH:
+			activate_window(WindowID::FIND);
+			break;
+		case ActionID::SEARCH_REPLACE:
+			activate_window(WindowID::REPLACE);
+			break;
+		case ActionID::SEARCH_AGAIN:
+			find_next(true);
+			break;
+		case ActionID::SEARCH_AGAIN_BACKWARD:
+			find_next(false);
+			break;
+		case ActionID::SEARCH_GOTO:
+			activate_window(WindowID::GOTO_DIALOG);
+			break;
+
+		case ActionID::WINDOWS_NEXT_BUFFER:
+			editwin->get_current()->next_buffer();
+			break;
+		case ActionID::WINDOWS_PREV_BUFFER:
+			editwin->get_current()->previous_buffer();
+			break;
+		case ActionID::WINDOWS_SELECT:
+			activate_window(WindowID::SELECT_BUFFER);
+			break;
+		case ActionID::WINDOWS_HSPLIT:
+			editwin->split(true);
+			break;
+		case ActionID::WINDOWS_VSPLIT:
+			editwin->split(false);
+			break;
+		case ActionID::WINDOWS_MERGE:
+			editwin->unsplit();
+			break;
+
+		//FIXME should this stay here?
+		case ActionID::CLOSE_DISCARD:
+			editwin->get_current()->close(true);
+			break;
+
+		case ActionID::CALL_CONTINUATION:
+			(*va_arg(args, continuation_t *))();
+			break;
+		case ActionID::DROP_CONTINUATION: {
+			continuation_t *cont = va_arg(args, continuation_t *);
+			delete cont;
+			//delete va_arg(args, continuation_t *);
+			break;
+		}
 		default:
 			break;
 	}
+	va_end(args);
 }
-
+*/
 
 void resize(int height, int width) {
 	open_file_dialog.set_size(height - 4, width - 5);

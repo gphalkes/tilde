@@ -4,3 +4,4 @@ src/.deps
 src/.recordings
 src/widget
 src/window
+src/log.txt

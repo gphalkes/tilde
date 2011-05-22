@@ -19,6 +19,7 @@ using namespace std;
 split_t::split_t(widget_t *widget, bool _horizontal) : horizontal(_horizontal) {
 	init_unbacked_window(3, 3);
 	set_widget_parent(widget);
+	widget->set_anchor(this, 0);
 	widget->show();
 	widgets.push_back(widget);
 	current = widgets.begin();
@@ -78,7 +79,7 @@ bool split_t::set_size(optint height, optint width) {
 	if (!height.is_valid())
 		height = t3_win_get_height(window);
 	if (!width.is_valid())
-		width = t3_win_get_height(window);
+		width = t3_win_get_width(window);
 
 	result = t3_win_resize(window, height, width);
 
@@ -123,6 +124,7 @@ void split_t::split(widget_t *widget, bool _horizontal) {
 		current_window->split(widget, _horizontal);
 	} else if (_horizontal == horizontal) {
 		set_widget_parent(widget);
+		widget->set_anchor(this, 0);
 		widget->show();
 		if (focus)
 			(*current)->set_focus(false);
