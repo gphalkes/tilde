@@ -95,9 +95,19 @@ class main_t : public main_window_base_t {
 		}
 
 		virtual bool process_key(key_t key) {
-			if (key == (EKEY_CTRL | 'q'))
-				exit(EXIT_SUCCESS);
-			return main_window_base_t::process_key(key);
+			switch (key) {
+				case EKEY_CTRL | 'q':
+					exit(EXIT_SUCCESS);
+				case EKEY_F6:
+					menu_activated(action_id_t::WINDOWS_NEXT_BUFFER);
+					break;
+				case EKEY_F6 | EKEY_SHIFT:
+					menu_activated(action_id_t::WINDOWS_PREV_BUFFER);
+					break;
+				default:
+					return main_window_base_t::process_key(key);
+			}
+			return true;
 		}
 
 		virtual bool set_size(optint height, optint width) {

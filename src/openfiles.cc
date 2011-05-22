@@ -71,12 +71,12 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
 		for (; current != files.rend() && *current != start; current++) {}
 
 	for (iter = current; iter != files.rend(); iter++) {
-		if ((*iter)->get_show())
+		if (!(*iter)->get_show())
 			return *iter;
 	}
 
 	for (iter = files.rbegin(); iter != current; iter++) {
-		if ((*iter)->get_show())
+		if (!(*iter)->get_show())
 			return *iter;
 	}
 	return start;
