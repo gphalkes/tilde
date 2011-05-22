@@ -123,8 +123,9 @@ class main_t : public main_window_base_t {
 					exit(EXIT_SUCCESS);
 					break;
 				case action_id_t::WINDOWS_HSPLIT:
+				case action_id_t::WINDOWS_VSPLIT:
 					//FIXME: should this always be a new window?
-					split->split(new edit_window_t(), true);
+					split->split(new edit_window_t(), id == action_id_t::WINDOWS_HSPLIT);
 					break;
 				default:
 					break;

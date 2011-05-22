@@ -38,16 +38,15 @@ bool split_t::process_key(key_t key) {
 
 	switch (key) {
 		case EKEY_F8:
-			current_window = dynamic_cast<split_t *>(*current);
+ 			current_window = dynamic_cast<split_t *>(*current);
 			if (current_window == NULL || !current_window->next()) {
 				(*current)->set_focus(false);
 				current++;
 				if (current == widgets.end())
 					current = widgets.begin();
 
-				current_window = dynamic_cast<split_t *>(*current);
-				if (current_window != NULL)
-					current_window->current = current_window->widgets.begin();
+				if ((current_window = dynamic_cast<split_t *>(*current)) != NULL)
+					current_window->set_to_begin();
 				(*current)->set_focus(focus);
 			}
 			break;
@@ -59,11 +58,8 @@ bool split_t::process_key(key_t key) {
 					current = widgets.end();
 				current--;
 
-				current_window = dynamic_cast<split_t *>(*current);
-				if (current_window != NULL) {
-					current_window->current = current_window->widgets.end();
-					current_window->current--;
-				}
+				if ((current_window = dynamic_cast<split_t *>(*current)) != NULL)
+					current_window->set_to_end();
 				(*current)->set_focus(focus);
 			}
 			break;
@@ -137,9 +133,11 @@ void split_t::split(widget_t *widget, bool _horizontal) {
 		/* Create a new split_t with the current widget as its contents. Then
 		   add split that split_t to splice in the requested widget. */
 		current_window = new split_t(*current, _horizontal);
-		current_window->set_focus(focus);
+		set_widget_parent(current_window);
 		current_window->split(widget, _horizontal);
+		current_window->set_focus(focus);
 		*current = current_window;
+		set_size(None, None);
 	}
 }
 
@@ -179,10 +177,9 @@ bool split_t::next(void) {
 		(*current)->set_focus(false);
 		current++;
 		if (current != widgets.end()) {
-			current_window = dynamic_cast<split_t *>(*current);
-			if (current_window != NULL)
-				current_window->current = current_window->widgets.begin();
-			(*current)->set_focus(true);
+			if ((current_window = dynamic_cast<split_t *>(*current)) != NULL)
+				current_window->set_to_begin();
+			(*current)->set_focus(focus);
 			return true;
 		} else {
 			current--;
@@ -195,16 +192,13 @@ bool split_t::next(void) {
 bool split_t::previous(void) {
 	split_t *current_window = dynamic_cast<split_t *>(*current);
 	if (current_window == NULL || !current_window->previous()) {
+		(*current)->set_focus(false);
 		if (current == widgets.begin())
 			return false;
-		(*current)->set_focus(false);
 		current--;
 
-		current_window = dynamic_cast<split_t *>(*current);
-		if (current_window != NULL) {
-			current_window->current = current_window->widgets.end();
-			current_window->current--;
-		}
+		if ((current_window = dynamic_cast<split_t *>(*current)) != NULL)
+			current_window->set_to_end();
 		(*current)->set_focus(true);
 	}
 	return true;
@@ -218,3 +212,19 @@ widget_t *split_t::get_current(void) {
 		return current_window->get_current();
 }
 
+void split_t::set_to_begin(void) {
+	split_t *current_window;
+
+	current = widgets.begin();
+	if ((current_window = dynamic_cast<split_t *>(*current)) != NULL)
+		current_window->set_to_begin();
+}
+
+void split_t::set_to_end(void) {
+	split_t *current_window;
+
+	current = widgets.end();
+	current--;
+	if ((current_window = dynamic_cast<split_t *>(*current)) != NULL)
+		current_window->set_to_end();
+}

@@ -23,6 +23,11 @@ class split_t : public widget_t, public container_t {
 		widgets_t::iterator current;
 		bool horizontal, focus;
 
+		bool next(void);
+		bool previous(void);
+		void set_to_begin(void);
+		void set_to_end(void);
+
 	public:
 		split_t(widget_t *widget, bool _horizontal);
 		virtual ~split_t(void);
@@ -33,8 +38,6 @@ class split_t : public widget_t, public container_t {
 
 		void split(widget_t *widget, bool _horizontal);
 		bool unsplit(void);
-		bool next(void);
-		bool previous(void);
 		widget_t *get_current(void);
 };
 
