@@ -1,0 +1,4 @@
+syntax: glob
+src/.objects
+src/.deps
+src/.recordings

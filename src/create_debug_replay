@@ -1,0 +1,24 @@
+#!/bin/bash
+# Copyright (C) 2010 G.P. Halkes
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3, as
+# published by the Free Software Foundation.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+if [ $# -ne 2 ] ; then
+	echo "Usage: create_debug_replay <input> <output>"
+	exit 1
+fi
+
+DIR="`dirname \"$0\"`"
+
+"$DIR"/record/tdrerecord -o "$2" <( sed -r 's/(start.*)/\1 "--W"/;/[[:space:]]*start/a \
+expect "foo"\
+send 5000 "\\n"' "$1" )

@@ -1,0 +1,4 @@
+Got key 111003
+Got key 20000066
+Got key 0078
+Menu activated: 9
