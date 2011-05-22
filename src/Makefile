@@ -11,7 +11,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SOURCES..objects/edit := main.cc option.cc util.cc
+SOURCES..objects/edit := main.cc option.cc util.cc openfiles.cc filebuffer.cc filewindow.cc
 LDLIBS..objects/edit += -lt3widget -lt3window
 LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs
 LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`

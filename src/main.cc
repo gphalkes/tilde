@@ -17,19 +17,14 @@
 
 #include "option.h"
 #include "action.h"
-#include "widgets/split.h"
-
-#ifdef DEBUG
-#define _T3_WIDGET_INTERNAL
-#define _T3_WIDGET_DEBUG
-#include <log.h>
-#endif
+#include "filebuffer.h"
+#include "filewindow.h"
+#include "openfiles.h"
 
 using namespace std;
 using namespace t3_widget;
 
 static open_file_dialog_t open_file_dialog(20, 75);
-
 
 class main_t : public main_window_base_t {
 	private:
@@ -92,7 +87,7 @@ class main_t : public main_window_base_t {
 			panel->add_item("_Help;hH", "F1", action_id_t::HELP_HELP);
 			panel->add_item("_About;aA", NULL, action_id_t::HELP_ABOUT);
 
-			edit_window_t *edit = new edit_window_t(); //FIXME: load text
+			file_window_t *edit = new file_window_t(); //FIXME: load text
 			split = new split_t(edit, true);
 			split->set_position(!option.hide_menubar, 0);
 			split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
@@ -115,6 +110,12 @@ class main_t : public main_window_base_t {
 	private:
 		void menu_activated(int id) {
 			switch (id) {
+				case action_id_t::FILE_NEW: {
+					file_buffer_t *new_text = new file_buffer_t();
+					((file_window_t *) split->get_current())->set_text(new_text);
+					break;
+				}
+
 				case action_id_t::FILE_EXIT:
 					//FIXME: ask whether to save/cancel
 					//~ #ifdef DEBUG
@@ -122,13 +123,24 @@ class main_t : public main_window_base_t {
 					//~ #endif
 					exit(EXIT_SUCCESS);
 					break;
+
+				case action_id_t::WINDOWS_NEXT_BUFFER: {
+					file_window_t *current = (file_window_t *) split->get_current();
+					current->set_text(open_files.next_buffer((file_buffer_t *) current->get_text()));
+					break;
+				}
+				case action_id_t::WINDOWS_PREV_BUFFER: {
+					file_window_t *current = (file_window_t *) split->get_current();
+					current->set_text(open_files.previous_buffer((file_buffer_t *) current->get_text()));
+					break;
+				}
 				case action_id_t::WINDOWS_HSPLIT:
 				case action_id_t::WINDOWS_VSPLIT:
-					//FIXME: should this always be a new window?
-					split->split(new edit_window_t(), id == action_id_t::WINDOWS_HSPLIT);
+					split->split(new file_window_t(open_files.next_buffer(NULL)), id == action_id_t::WINDOWS_HSPLIT);
 					break;
 				case action_id_t::WINDOWS_MERGE:
 					delete split->unsplit();
+					break;
 				default:
 					break;
 			}
