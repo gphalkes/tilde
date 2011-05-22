@@ -11,12 +11,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SOURCES..objects/edit := main.cc option.cc util.cc
-LDLIBS..objects/edit += -lt3widget
-LDFLAGS..objects/edit += -Lwidget/.libs
+SOURCES..objects/edit := main.cc option.cc util.cc widgets/split.cc
+LDLIBS..objects/edit += -lt3widget -lt3window
+LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs
 LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`
 
-VERBOSE=1
 CXXTARGETS := .objects/edit
 CXX := clang++
 
@@ -29,7 +28,7 @@ CXXFLAGS += -I.
 #~ CXXFLAGS += -DUSE_GETTEXT -DLOCALEDIR=\"locales\"
 #~ CXXFLAGS += -DUSE_UNICODE
 #~ CXXFLAGS += -DUSE_NL_LANGINFO
-CXXFLAGS += -Iwidget
+CXXFLAGS += -Iwidget -Iwindow
 CXXFLAGS += `pkg-config --cflags sigc++-2.0`
 
 all: | links
@@ -47,6 +46,7 @@ xgettext: all
 
 links:
 	@[ -L record ] || ln -s ../../../record/src record
+	@[ -L window ] || ln -s ../../window/src window
 	@[ -L widget ] || ln -s ../../widget/src widget
 
 .PHONY: links xgettext linecount

@@ -17,6 +17,7 @@
 
 #include "option.h"
 #include "action.h"
+#include "widgets/split.h"
 
 #ifdef DEBUG
 #define _T3_WIDGET_INTERNAL
@@ -37,10 +38,12 @@ class main_t : public main_window_base_t {
 		menu_bar_t *menu;
 		menu_panel_t *panel;
 		menu_item_base_t *remove;
+		split_t *split;
 
 	public:
 		main_t(void) {
-			menu = new menu_bar_t();
+
+			menu = new menu_bar_t(option.hide_menubar);
 			push_back(menu);
 			menu->connect_activate(sigc::ptr_fun(menu_activated));
 
@@ -91,6 +94,12 @@ class main_t : public main_window_base_t {
 			panel = new menu_panel_t(menu, "_Help;hH");
 			panel->add_item("_Help;hH", "F1", action_id_t::HELP_HELP);
 			panel->add_item("_About;aA", NULL, action_id_t::HELP_ABOUT);
+
+			edit_window_t *edit = new edit_window_t(); //FIXME: load text
+			split = new split_t(edit, true);
+			split->set_position(!option.hide_menubar, 0);
+			split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
+			push_back(split);
 		}
 
 		virtual bool process_key(key_t key) {
@@ -102,6 +111,7 @@ class main_t : public main_window_base_t {
 		virtual bool set_size(optint height, optint width) {
 			(void) height;
 			menu->set_size(None, width);
+			split->set_size(height - !option.hide_menubar, width);
 			return true;
 		}
 };

@@ -2,3 +2,5 @@ syntax: glob
 src/.objects
 src/.deps
 src/.recordings
+src/widget
+src/window
