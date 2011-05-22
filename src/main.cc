@@ -127,6 +127,8 @@ class main_t : public main_window_base_t {
 					//FIXME: should this always be a new window?
 					split->split(new edit_window_t(), id == action_id_t::WINDOWS_HSPLIT);
 					break;
+				case action_id_t::WINDOWS_MERGE:
+					split->unsplit();
 				default:
 					break;
 			}

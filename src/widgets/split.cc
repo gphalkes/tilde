@@ -132,15 +132,18 @@ void split_t::split(widget_t *widget, bool _horizontal) {
 	} else {
 		/* Create a new split_t with the current widget as its contents. Then
 		   add split that split_t to splice in the requested widget. */
+		(*current)->set_focus(false);
 		current_window = new split_t(*current, _horizontal);
 		set_widget_parent(current_window);
-		current_window->split(widget, _horizontal);
 		current_window->set_focus(focus);
+		current_window->split(widget, _horizontal);
 		*current = current_window;
 		set_size(None, None);
 	}
 }
 
+#warning FIXME: instead of deleting the widget, it should be returned
+//FIXME: outside of this recursive function, we are not interested in the boolean it's returning now
 bool split_t::unsplit(void) {
 	split_t *current_window = dynamic_cast<split_t *>(*current);
 
