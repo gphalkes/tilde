@@ -129,6 +129,30 @@ class main_t : public main_window_base_t {
 					exit(EXIT_SUCCESS);
 					break;
 
+				case action_id_t::EDIT_UNDO:
+					((edit_window_t *) split->get_current())->undo();
+					break;
+				case action_id_t::EDIT_REDO:
+					((edit_window_t *) split->get_current())->redo();
+					break;
+				case action_id_t::EDIT_COPY:
+				case action_id_t::EDIT_CUT:
+					((edit_window_t *) split->get_current())->cut_copy(id == action_id_t::EDIT_CUT);
+					break;
+				case action_id_t::EDIT_PASTE:
+					((edit_window_t *) split->get_current())->paste();
+					break;
+				case action_id_t::EDIT_SELECT_ALL:
+					((edit_window_t *) split->get_current())->select_all();
+					break;
+				case action_id_t::EDIT_INSERT_CHAR:
+					((edit_window_t *) split->get_current())->insert_special();
+					break;
+
+				case action_id_t::SEARCH_GOTO:
+					((edit_window_t *) split->get_current())->goto_line();
+					break;
+
 				case action_id_t::WINDOWS_NEXT_BUFFER: {
 					edit_window_t *current = (edit_window_t *) split->get_current();
 					current->set_text(open_files.next_buffer((file_buffer_t *) current->get_text()));
@@ -162,11 +186,6 @@ void execute_action(ActionID id, ...) {
 	va_start(args, id);
 
 	switch (id) {
-		case ActionID::FILE_NEW: {
-			text_file_t *new_text = new text_file_t();
-			editwin->get_current()->set_text_file(new_text);
-			break;
-		}
 		case ActionID::FILE_SAVE:
 			editwin->get_current()->save();
 			break;
@@ -197,13 +216,6 @@ void execute_action(ActionID id, ...) {
 			t3_term_init(-1, option.term);
 			reinit_keys();
 			do_resize();
-			break;
-		case ActionID::FILE_EXIT:
-			//FIXME: ask whether to save/cancel
-			#ifdef DEBUG
-			delete editwin;
-			#endif
-			exit(EXIT_SUCCESS);
 			break;
 
 		case ActionID::EDIT_UNDO:
@@ -246,23 +258,8 @@ void execute_action(ActionID id, ...) {
 			activate_window(WindowID::GOTO_DIALOG);
 			break;
 
-		case ActionID::WINDOWS_NEXT_BUFFER:
-			editwin->get_current()->next_buffer();
-			break;
-		case ActionID::WINDOWS_PREV_BUFFER:
-			editwin->get_current()->previous_buffer();
-			break;
 		case ActionID::WINDOWS_SELECT:
 			activate_window(WindowID::SELECT_BUFFER);
-			break;
-		case ActionID::WINDOWS_HSPLIT:
-			editwin->split(true);
-			break;
-		case ActionID::WINDOWS_VSPLIT:
-			editwin->split(false);
-			break;
-		case ActionID::WINDOWS_MERGE:
-			editwin->unsplit();
 			break;
 
 		//FIXME should this stay here?
