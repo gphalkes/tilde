@@ -19,11 +19,13 @@
 #include "action.h"
 #include "filebuffer.h"
 #include "openfiles.h"
+#include "dialogs/selectbufferdialog.h"
 
 using namespace std;
 using namespace t3_widget;
 
-static open_file_dialog_t open_file_dialog(20, 75);
+//~ static open_file_dialog_t open_file_dialog(20, 75);
+static select_buffer_dialog_t *select_buffer_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -147,7 +149,7 @@ void main_t::menu_activated(int id) {
 			editwin->get_current()->close(false);
 			break;*/
 		case action_id_t::FILE_REPAINT:
-			redraw();
+			t3_widget::redraw();
 			break;
 		case action_id_t::FILE_SUSPEND:
 			suspend();
@@ -203,9 +205,9 @@ void main_t::menu_activated(int id) {
 			current->set_text(open_files.previous_buffer((file_buffer_t *) current->get_text()));
 			break;
 		}
-/*		case ActionID::WINDOWS_SELECT:
-			activate_window(WindowID::SELECT_BUFFER);
-			break;*/
+		case action_id_t::WINDOWS_SELECT:
+			select_buffer_dialog->show();
+			break;
 		case action_id_t::WINDOWS_HSPLIT:
 		case action_id_t::WINDOWS_VSPLIT: {
 			file_buffer_t *new_file = open_files.next_buffer(NULL);
@@ -258,7 +260,8 @@ void execute_action(ActionID id, ...) {
 */
 
 void resize(int height, int width) {
-	open_file_dialog.set_size(height - 4, width - 5);
+	//~ open_file_dialog.set_size(height - 4, width - 5);
+	select_buffer_dialog->set_size(None, width - 4);
 }
 
 int main(int argc, char *argv[]) {
@@ -286,6 +289,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	main_t main_window;
+	select_buffer_dialog = new select_buffer_dialog_t(11, 76); //FIXME: use proper size!
+	select_buffer_dialog->center_over(&main_window);
 
 	set_color_mode(false);
 	set_attribute(attribute_t::SELECTION_CURSOR, T3_ATTR_BG_GREEN);
