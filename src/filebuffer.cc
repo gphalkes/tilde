@@ -27,6 +27,10 @@ file_buffer_t::file_buffer_t(const char *name, const char *_encoding) : text_buf
 	open_files.push_back(this);
 }
 
+file_buffer_t::~file_buffer_t(void) {
+	open_files.erase(this);
+}
+
 rw_result_t file_buffer_t::load(load_state_t *state) {
 	string *line;
 

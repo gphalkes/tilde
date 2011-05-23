@@ -41,6 +41,7 @@ class open_files_t {
 		reverse_iterator rend(void);
 		file_buffer_t *operator[](size_t idx);
 
+		void erase(file_buffer_t *buffer);
 		file_buffer_t *next_buffer(file_buffer_t *start);
 		file_buffer_t *previous_buffer(file_buffer_t *start);
 };

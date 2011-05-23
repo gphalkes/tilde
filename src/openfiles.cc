@@ -46,6 +46,13 @@ open_files_t::reverse_iterator open_files_t::rbegin(void) { return files.rbegin(
 open_files_t::reverse_iterator open_files_t::rend(void) { return files.rend(); }
 file_buffer_t *open_files_t::operator[](size_t idx) { return files[idx]; }
 
+void open_files_t::erase(file_buffer_t *buffer) {
+	for (iterator iter = files.begin(); iter != files.end(); iter++) {
+		if (*iter == buffer)
+			files.erase(iter);
+	}
+}
+
 file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
 	iterator current = files.begin(), iter;
 

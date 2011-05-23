@@ -263,6 +263,19 @@ void main_t::menu_activated(int id) {
 }
 
 void main_t::switch_buffer(file_buffer_t *buffer) {
+	/* FIXME: for now we simply ignore the request if the buffer is already shown,
+	   but it would be better to force the other window to go another buffer and
+	   take over the requested buffer. However, we don't know which other window
+	   has the buffer, so at this point this is impossible.
+
+	   Even if we did know, we would still have to temporarily set the current
+	   window to an empty file, then force the other window to go to the next
+	   buffer, set the desired buffer in the current window and destroy the
+	   temporary buffer. All of this such that we avoid two windows pointing
+	   at the same buffer.
+	*/
+	if (buffer->has_window())
+		return;
 	get_current()->set_text(buffer);
 }
 
