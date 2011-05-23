@@ -131,6 +131,8 @@ bool main_t::process_key(key_t key) {
 	switch (key) {
 		case EKEY_CTRL | 'n':          menu_activated(action_id_t::FILE_NEW); break;
 		case EKEY_CTRL | 'o':          menu_activated(action_id_t::FILE_OPEN); break;
+		case EKEY_CTRL | 'w':          menu_activated(action_id_t::FILE_CLOSE); break;
+		case EKEY_CTRL | 's':          menu_activated(action_id_t::FILE_SAVE); break;
 		case EKEY_CTRL | 'q':          menu_activated(action_id_t::FILE_EXIT); break;
 		case EKEY_F6:                  menu_activated(action_id_t::WINDOWS_NEXT_BUFFER); break;
 		case EKEY_F6 | EKEY_SHIFT:     menu_activated(action_id_t::WINDOWS_PREV_BUFFER); break;
@@ -163,12 +165,22 @@ void main_t::menu_activated(int id) {
 			//FIXME: set encoding dialog to something useful
 			open_file_dialog->show();
 			break;
+
+		case action_id_t::FILE_CLOSE: {
+			const text_buffer_t *text = get_current()->get_text();
+			if (text->is_modified()) {
+				//FIXME: start dialog etc
+			} else {
+				menu_activated(action_id_t::WINDOWS_NEXT_BUFFER);
+				if (get_current()->get_text() == text)
+					get_current()->set_text(new file_buffer_t());
+				delete text;
+			}
+			break;
+		}
+
 /*		case ActionID::FILE_SAVE:
 			editwin->get_current()->save();
-			break;
-		case ActionID::FILE_OPEN:
-			//FIXME: set directory to dir of current file?
-			activate_window(WindowID::OPEN_FILE);
 			break;
 		case ActionID::FILE_OPEN_RECENT:
 			activate_window(WindowID::OPEN_RECENT);
@@ -176,9 +188,6 @@ void main_t::menu_activated(int id) {
 		case ActionID::FILE_SAVE_AS:
 			//FIXME: set directory to dir of current file?
 			activate_window(WindowID::SAVE_FILE);
-			break;
-		case ActionID::FILE_CLOSE:
-			editwin->get_current()->close(false);
 			break;*/
 		case action_id_t::FILE_REPAINT:
 			t3_widget::redraw();
@@ -314,16 +323,11 @@ void main_t::open_file(string *name) {
 void main_t::switch_to_new_buffer(file_buffer_t *buffer) {
 	const text_buffer_t *text = get_current()->get_text();
 	get_current()->set_text(buffer);
+	//FIXME: buffer should not be closed if the user specifically created it by asking for a new file!
 	if (text->get_name() == NULL && !text->is_modified())
 		delete text;
 }
 
-/*
-void main_t::open_successfull(file_buffer_t *file) {
-	//recentFiles.erase(file->getName());
-	get_current()->set_text(file);
-}
-*/
 int main(int argc, char *argv[]) {
 	setlocale(LC_ALL, "");
 	//FIXME: call this when internationalization is started. Requires #include <libintl.h>

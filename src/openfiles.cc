@@ -48,8 +48,10 @@ file_buffer_t *open_files_t::operator[](size_t idx) { return files[idx]; }
 
 void open_files_t::erase(file_buffer_t *buffer) {
 	for (iterator iter = files.begin(); iter != files.end(); iter++) {
-		if (*iter == buffer)
+		if (*iter == buffer) {
 			files.erase(iter);
+			return;
+		}
 	}
 }
 
