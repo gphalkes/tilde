@@ -73,7 +73,8 @@ rw_result_t file_buffer_t::load(load_state_t *state) {
 
 					/* Allocate a new text_line_t struct and initialize it with the newly read line */
 					try {
-						lines.push_back(new text_line_t(line));
+						lines.back()->set_text(line);
+						lines.push_back(new text_line_t());
 					} catch (...) {
 						delete line;
 						return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);

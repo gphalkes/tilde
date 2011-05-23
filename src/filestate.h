@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <transcript.h>
+#include <sigc++/sigc++.h>
 
 #include "util.h"
 #include "filewrapper.h"
@@ -61,12 +62,13 @@ class load_state_t : public continuation_t {
 			READING
 		} state;
 
+		sigc::slot<void, file_buffer_t *> callback;
 		file_buffer_t *file;
 		file_read_wrapper_t *wrapper;
 		int fd;
 
 	public:
-		load_state_t(const char *name, const char *encoding);
+		load_state_t(const char *name, const char *encoding, const sigc::slot<void, file_buffer_t *> &_callback);
 		virtual bool operator()(void);
 		virtual ~load_state_t(void);
 };

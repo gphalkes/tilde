@@ -17,7 +17,9 @@
 #include "filebuffer.h"
 #include "main.h"
 
-load_state_t::load_state_t(const char *name, const char *encoding) : state(INITIAL), file(NULL), wrapper(NULL), fd(-1) {
+load_state_t::load_state_t(const char *name, const char *encoding, const sigc::slot<void, file_buffer_t *> &_callback) :
+		state(INITIAL), callback(_callback), file(NULL), wrapper(NULL), fd(-1)
+{
 	file = new file_buffer_t(name, encoding);
 }
 
@@ -27,8 +29,7 @@ bool load_state_t::operator()(void) {
 
 	switch ((result = file->load(this))) {
 		case rw_result_t::SUCCESS:
-			//~ openSuccessful(file);
-			#warning FIXME: notify current edit window of successful open
+			callback(file);
 			file = NULL;
 			delete this;
 			return true;

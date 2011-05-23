@@ -24,8 +24,6 @@
 using namespace std;
 using namespace t3_widget;
 
-//~ static open_file_dialog_t open_file_dialog(20, 75);
-static select_buffer_dialog_t *select_buffer_dialog;
 question_dialog_t *continue_abort_dialog;
 
 class main_t : public main_window_base_t {
@@ -34,6 +32,9 @@ class main_t : public main_window_base_t {
 		menu_panel_t *panel;
 		menu_item_base_t *remove;
 		split_t *split;
+
+		select_buffer_dialog_t *select_buffer_dialog;
+		open_file_dialog_t *open_file_dialog;
 
 		continuation_t *current_continuation;
 
@@ -48,6 +49,8 @@ class main_t : public main_window_base_t {
 		void switch_buffer(file_buffer_t *buffer);
 		void call_continuation(void);
 		void abort_continuation(void);
+		void open_file(string *name);
+		void switch_to_new_buffer(file_buffer_t *buffer);
 };
 
 main_t::main_t(void) : current_continuation(NULL) {
@@ -116,11 +119,18 @@ main_t::main_t(void) : current_continuation(NULL) {
 	continue_abort_dialog = new question_dialog_t(t3_win_get_width(window) - 4, "Question", "_Continue;cC", "_Abort;aA");
 	continue_abort_dialog->connect_ok(sigc::mem_fun(this, &main_t::call_continuation));
 	continue_abort_dialog->connect_cancel(sigc::mem_fun(this, &main_t::abort_continuation));
+
+	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
+	open_file_dialog->center_over(this);
+	open_file_dialog->connect_file_selected(sigc::mem_fun(this, &main_t::open_file));
+	string wd = get_working_directory();
+	open_file_dialog->change_dir(&wd);
 }
 
 bool main_t::process_key(key_t key) {
 	switch (key) {
 		case EKEY_CTRL | 'n':          menu_activated(action_id_t::FILE_NEW); break;
+		case EKEY_CTRL | 'o':          menu_activated(action_id_t::FILE_OPEN); break;
 		case EKEY_CTRL | 'q':          menu_activated(action_id_t::FILE_EXIT); break;
 		case EKEY_F6:                  menu_activated(action_id_t::WINDOWS_NEXT_BUFFER); break;
 		case EKEY_F6 | EKEY_SHIFT:     menu_activated(action_id_t::WINDOWS_PREV_BUFFER); break;
@@ -137,6 +147,7 @@ bool main_t::set_size(optint height, optint width) {
 	result = menu->set_size(None, width);
 	result &= split->set_size(height - !option.hide_menubar, width);
 	result &= select_buffer_dialog->set_size(None, width - 4);
+	result &= open_file_dialog->set_size(height - 4, width - 4);
 	return true;
 }
 
@@ -148,6 +159,10 @@ void main_t::menu_activated(int id) {
 			break;
 		}
 
+		case action_id_t::FILE_OPEN:
+			//FIXME: set encoding dialog to something useful
+			open_file_dialog->show();
+			break;
 /*		case ActionID::FILE_SAVE:
 			editwin->get_current()->save();
 			break;
@@ -262,6 +277,32 @@ void main_t::abort_continuation(void) {
 	delete current_continuation;
 	current_continuation = NULL;
 }
+
+void main_t::open_file(string *name) {
+	open_files_t::iterator iter;
+	if ((iter = open_files.contains(name->c_str())) != open_files.end()) {
+		#warning FIXME: if already shown in another window, this will not work!!
+		get_current()->set_text(*iter);
+		return;
+	}
+
+	try {
+		//FIXME: get encoding from encoding dialog
+		load_state_t *load_state = new load_state_t(name->c_str(), "UTF-8"/* encodingDialog->getEncoding() */,
+			sigc::mem_fun(this, &main_t::switch_to_new_buffer));
+		(*load_state)();
+	} catch (...) {
+		string message;
+		printf_into(&message, "Can't open '%s': exception caught", name->c_str());
+		message_dialog->set_message(&message);
+		message_dialog->show();
+	}
+}
+
+void main_t::switch_to_new_buffer(file_buffer_t *buffer) {
+	get_current()->set_text(buffer);
+}
+
 /*
 void main_t::open_successfull(file_buffer_t *file) {
 	//recentFiles.erase(file->getName());
