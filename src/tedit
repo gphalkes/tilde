@@ -19,6 +19,8 @@ if ! [ -x "$DIR/.objects/edit" ] ; then
 	exit
 fi
 
+[ -d .recordings ] || mkdir .recordings
+
 export LD_LIBRARY_PATH="$DIR/widget/.libs:$DIR/window/.libs"
 DATE="`date +%F@%T`"
 rm "$DIR/.recordings/last" "$DIR/log.txt"
