@@ -25,6 +25,8 @@ using namespace std;
 using namespace t3_widget;
 
 //~ static open_file_dialog_t open_file_dialog(20, 75);
+static select_buffer_dialog_t *select_buffer_dialog;
+question_dialog_t *continue_abort_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -32,7 +34,8 @@ class main_t : public main_window_base_t {
 		menu_panel_t *panel;
 		menu_item_base_t *remove;
 		split_t *split;
-		select_buffer_dialog_t *select_buffer_dialog;
+
+		continuation_t *current_continuation;
 
 	public:
 		main_t(void);
@@ -43,9 +46,11 @@ class main_t : public main_window_base_t {
 		edit_window_t *get_current(void) { return (edit_window_t *) split->get_current(); }
 		void menu_activated(int id);
 		void switch_buffer(file_buffer_t *buffer);
+		void call_continuation(void);
+		void abort_continuation(void);
 };
 
-main_t::main_t(void) {
+main_t::main_t(void) : current_continuation(NULL) {
 	menu = new menu_bar_t(option.hide_menubar);
 	push_back(menu);
 	menu->connect_activate(sigc::mem_fun(this, &main_t::menu_activated));
@@ -107,6 +112,10 @@ main_t::main_t(void) {
 	select_buffer_dialog = new select_buffer_dialog_t(11, t3_win_get_width(window) - 4);
 	select_buffer_dialog->center_over(this);
 	select_buffer_dialog->connect_activate(sigc::mem_fun(this, &main_t::switch_buffer));
+
+	continue_abort_dialog = new question_dialog_t(t3_win_get_width(window) - 4, "Question", "_Continue;cC", "_Abort;aA");
+	continue_abort_dialog->connect_ok(sigc::mem_fun(this, &main_t::call_continuation));
+	continue_abort_dialog->connect_cancel(sigc::mem_fun(this, &main_t::abort_continuation));
 }
 
 bool main_t::process_key(key_t key) {
@@ -238,39 +247,27 @@ void main_t::menu_activated(int id) {
 	}
 }
 
-/*
-void execute_action(ActionID id, ...) {
-	va_list args;
-	va_start(args, id);
-
-	switch (id) {
-
-
-		//FIXME should this stay here?
-		case ActionID::CLOSE_DISCARD:
-			editwin->get_current()->close(true);
-			break;
-
-		case ActionID::CALL_CONTINUATION:
-			(*va_arg(args, continuation_t *))();
-			break;
-		case ActionID::DROP_CONTINUATION: {
-			continuation_t *cont = va_arg(args, continuation_t *);
-			delete cont;
-			//delete va_arg(args, continuation_t *);
-			break;
-		}
-		default:
-			break;
-	}
-	va_end(args);
-}
-*/
-
 void main_t::switch_buffer(file_buffer_t *buffer) {
 	get_current()->set_text(buffer);
 }
 
+void main_t::call_continuation(void) {
+	if (current_continuation == NULL)
+		PANIC();
+	if ((*current_continuation)())
+		current_continuation = NULL;
+}
+
+void main_t::abort_continuation(void) {
+	delete current_continuation;
+	current_continuation = NULL;
+}
+/*
+void main_t::open_successfull(file_buffer_t *file) {
+	//recentFiles.erase(file->getName());
+	get_current()->set_text(file);
+}
+*/
 int main(int argc, char *argv[]) {
 	setlocale(LC_ALL, "");
 	//FIXME: call this when internationalization is started. Requires #include <libintl.h>

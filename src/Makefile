@@ -11,10 +11,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SOURCES..objects/edit := main.cc option.cc util.cc openfiles.cc filebuffer.cc \
+SOURCES..objects/edit := \
+	filebuffer.cc \
+	filestate.cc \
+	filewrapper.cc \
+	main.cc \
+	openfiles.cc \
+	option.cc \
+	util.cc \
 	dialogs/selectbufferdialog.cc
-LDLIBS..objects/edit += -lt3widget -lt3window
-LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs
+LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode
+LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs -Ltranscript/.libs -Lunicode/.libs
 LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`
 
 CXXTARGETS := .objects/edit
@@ -29,7 +36,7 @@ CXXFLAGS += -I.
 #~ CXXFLAGS += -DUSE_GETTEXT -DLOCALEDIR=\"locales\"
 #~ CXXFLAGS += -DUSE_UNICODE
 #~ CXXFLAGS += -DUSE_NL_LANGINFO
-CXXFLAGS += -Iwidget -Iwindow
+CXXFLAGS += -Iwidget -Iwindow -Itranscript -Iunicode
 CXXFLAGS += `pkg-config --cflags sigc++-2.0`
 
 all: | links
@@ -47,7 +54,9 @@ xgettext: all
 
 links:
 	@[ -L record ] || ln -s ../../../record/src record
+	@[ -L unicode ] || ln -s ../../unicode/src unicode
 	@[ -L window ] || ln -s ../../window/src window
 	@[ -L widget ] || ln -s ../../widget/src widget
+	@[ -L transcript ] || ln -s ../../../transcript/src transcript
 
 .PHONY: links xgettext linecount

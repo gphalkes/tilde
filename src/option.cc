@@ -14,7 +14,8 @@
 #include "option.h"
 #include "util.h"
 #include "optionMacros.h"
-#include "main.h"
+
+#define MAX_TAB 16
 
 options_t option;
 

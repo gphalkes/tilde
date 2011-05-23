@@ -11,24 +11,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef FILE_BUFFER_H
-#define FILE_BUFFER_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <widget.h>
-
 using namespace t3_widget;
 
-#include "filestate.h"
-
-class file_buffer_t : public text_buffer_t {
-	protected:
-		const char *encoding;
-		bool file_has_bom;
-
-	public:
-		file_buffer_t(const char *name = NULL, const char *_encoding = NULL);
-		rw_result_t load(load_state_t *state);
-		rw_result_t save(save_state_t *state);
-};
-
+extern question_dialog_t *continue_abort_dialog;
 #endif

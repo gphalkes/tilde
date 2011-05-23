@@ -15,6 +15,7 @@
 #define UTIL_H
 
 #include <limits.h>
+#include <string>
 
 #ifdef DEBUG
 #define _T3_WIDGET_INTERNAL
@@ -54,7 +55,6 @@ class _name { \
 		_values _value; \
 }
 
-
 class version_t {
 	private:
 		int value;
@@ -71,8 +71,21 @@ class version_t {
 		bool operator==(int other) { return value == other; }
 };
 
+class continuation_t {
+	public:
+		enum result_t {
+			INCOMPLETE,
+			COMPLETED,
+			ABORTED
+		};
+		virtual bool operator()(void) = 0;
+		virtual ~continuation_t(void) {};
+};
+
 void enable_debugger_on_segfault(const char *_executable);
 void set_limits();
 
-
+char *resolve_links(const char *start_name);
+char *canonicalize_path(const char *path);
+void printf_into(std::string *message, const char *format, ...);
 #endif
