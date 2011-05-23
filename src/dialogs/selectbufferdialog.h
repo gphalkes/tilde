@@ -17,6 +17,8 @@
 #include <widget.h>
 using namespace t3_widget;
 
+#include "filebuffer.h"
+
 class select_buffer_dialog_t : public dialog_t {
 	private:
 		list_pane_t *list;
@@ -27,6 +29,8 @@ class select_buffer_dialog_t : public dialog_t {
 		virtual bool set_size(optint height, optint width);
 		virtual void show(void);
 		virtual void ok_activated(void);
+
+	T3_WIDET_SIGNAL(activate, void, file_buffer_t *);
 };
 
 #endif

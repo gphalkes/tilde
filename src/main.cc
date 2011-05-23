@@ -38,6 +38,7 @@ class main_t : public main_window_base_t {
 		main_t(void);
 		virtual bool process_key(key_t key);
 		virtual bool set_size(optint height, optint width);
+		void switch_buffer(file_buffer_t *buffer);
 
 	private:
 		void menu_activated(int id);
@@ -121,6 +122,10 @@ bool main_t::set_size(optint height, optint width) {
 	menu->set_size(None, width);
 	split->set_size(height - !option.hide_menubar, width);
 	return true;
+}
+
+void main_t::switch_buffer(file_buffer_t *buffer) {
+	get_current()->set_text(buffer);
 }
 
 void main_t::menu_activated(int id) {
@@ -291,6 +296,7 @@ int main(int argc, char *argv[]) {
 	main_t main_window;
 	select_buffer_dialog = new select_buffer_dialog_t(11, 76); //FIXME: use proper size!
 	select_buffer_dialog->center_over(&main_window);
+	select_buffer_dialog->connect_activate(sigc::mem_fun(&main_window, &main_t::switch_buffer));
 
 	set_color_mode(false);
 	set_attribute(attribute_t::SELECTION_CURSOR, T3_ATTR_BG_GREEN);

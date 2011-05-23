@@ -91,7 +91,5 @@ void select_buffer_dialog_t::show(void) {
 
 void select_buffer_dialog_t::ok_activated(void) {
 	hide();
-	// FIXME: switch buffer!
-	//~ if (list->size() > 0)
-		//~ switchBuffer(open_files[list->getCurrent()]);
+	activate(open_files[list->get_current()]);
 }
