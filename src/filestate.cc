@@ -38,6 +38,12 @@ bool load_state_t::operator()(void) {
 			message_dialog->set_message(&message);
 			delete this;
 			return true;
+		case rw_result_t::CONVERSION_OPEN_ERROR:
+			printf_into(&message, "Could not find a converter for selected encoding: %s",
+				transcript_strerror(result.get_transcript_error()));
+			message_dialog->set_message(&message);
+			delete this;
+			return true;
 		case rw_result_t::CONVERSION_ERROR:
 			printf_into(&message, "Could not load file in encoding FIXME: %s", transcript_strerror(result.get_transcript_error()));
 			message_dialog->set_message(&message);
@@ -47,6 +53,10 @@ bool load_state_t::operator()(void) {
 			printf_into(&message, "Conversion from encoding FIXME is irreversible");
 			continue_abort_dialog->set_message(&message);
 			return false;
+		case rw_result_t::CONVERSION_ILLEGAL:
+			//FIXME: handle illegal characters in input
+		case rw_result_t::CONVERSION_TRUNCATED:
+			//FIXME: handle truncated input
 		default:
 			PANIC();
 	}

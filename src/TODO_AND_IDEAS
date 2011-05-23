@@ -1,0 +1,31 @@
+BUGS
+====
+- select window allows selecting already visible buffer, without properly
+	doing a swap. This causes weird behaviour
+
+FILE OPEN
+=========
+- set dialog starting point to directory of currently open file
+- allow encoding selection
+- only check for BOM if encoding is UTF-8
+- check the order of operations in filebuffer.cc, especially with respect to
+	opening the transcript converter
+- check that on failure the transcript converter is properly closed
+
+MISSING FUNCTIONALITY
+=====================
+- file save
+- file close with confirmation
+- confirmation of file close [for save and for close itself if requested] on
+	exit
+- recent file tracking (with open recent menu item)
+- options setting
+- help text
+- about dialog
+
+
+GENERIC
+=======
+- set name of unbacked files to (Untitled)
+- fix of by 1 bug in edit_window.cc
+- FIXME's
