@@ -149,17 +149,10 @@ void main_t::menu_activated(int id) {
 		case ActionID::FILE_REPAINT:
 			do_resize();
 			t3_term_redraw();
-			break;
-		case ActionID::FILE_SUSPEND:
-			deinit_keys();
-			t3_term_restore();
-		#warning FIXME: should also do terminal specific restore!
-			kill(getpid(), SIGSTOP);
-			//FIXME: check return values!
-			t3_term_init(-1, option.term);
-			reinit_keys();
-			do_resize();
 			break;*/
+		case action_id_t::FILE_SUSPEND:
+			suspend();
+			break;
 
 		case action_id_t::FILE_EXIT:
 			//FIXME: ask whether to save/cancel
