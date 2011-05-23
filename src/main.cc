@@ -294,8 +294,7 @@ void main_t::abort_continuation(void) {
 void main_t::open_file(string *name) {
 	open_files_t::iterator iter;
 	if ((iter = open_files.contains(name->c_str())) != open_files.end()) {
-		#warning FIXME: if already shown in another window, this will not work!!
-		get_current()->set_text(*iter);
+		switch_buffer(*iter);
 		return;
 	}
 
@@ -313,7 +312,10 @@ void main_t::open_file(string *name) {
 }
 
 void main_t::switch_to_new_buffer(file_buffer_t *buffer) {
+	const text_buffer_t *text = get_current()->get_text();
 	get_current()->set_text(buffer);
+	if (text->get_name() == NULL && !text->is_modified())
+		delete text;
 }
 
 /*
