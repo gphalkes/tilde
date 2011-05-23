@@ -145,11 +145,10 @@ void main_t::menu_activated(int id) {
 			break;
 		case ActionID::FILE_CLOSE:
 			editwin->get_current()->close(false);
-			break;
-		case ActionID::FILE_REPAINT:
-			do_resize();
-			t3_term_redraw();
 			break;*/
+		case action_id_t::FILE_REPAINT:
+			redraw();
+			break;
 		case action_id_t::FILE_SUSPEND:
 			suspend();
 			break;
