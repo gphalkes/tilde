@@ -25,7 +25,6 @@ using namespace std;
 using namespace t3_widget;
 
 //~ static open_file_dialog_t open_file_dialog(20, 75);
-static select_buffer_dialog_t *select_buffer_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -33,16 +32,17 @@ class main_t : public main_window_base_t {
 		menu_panel_t *panel;
 		menu_item_base_t *remove;
 		split_t *split;
+		select_buffer_dialog_t *select_buffer_dialog;
 
 	public:
 		main_t(void);
 		virtual bool process_key(key_t key);
 		virtual bool set_size(optint height, optint width);
-		void switch_buffer(file_buffer_t *buffer);
 
 	private:
-		void menu_activated(int id);
 		edit_window_t *get_current(void) { return (edit_window_t *) split->get_current(); }
+		void menu_activated(int id);
+		void switch_buffer(file_buffer_t *buffer);
 };
 
 main_t::main_t(void) {
@@ -103,6 +103,10 @@ main_t::main_t(void) {
 	split->set_position(!option.hide_menubar, 0);
 	split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
 	push_back(split);
+
+	select_buffer_dialog = new select_buffer_dialog_t(11, t3_win_get_width(window) - 4);
+	select_buffer_dialog->center_over(this);
+	select_buffer_dialog->connect_activate(sigc::mem_fun(this, &main_t::switch_buffer));
 }
 
 bool main_t::process_key(key_t key) {
@@ -118,14 +122,13 @@ bool main_t::process_key(key_t key) {
 }
 
 bool main_t::set_size(optint height, optint width) {
+	bool result;
 	(void) height;
-	menu->set_size(None, width);
-	split->set_size(height - !option.hide_menubar, width);
-	return true;
-}
 
-void main_t::switch_buffer(file_buffer_t *buffer) {
-	get_current()->set_text(buffer);
+	result = menu->set_size(None, width);
+	result &= split->set_size(height - !option.hide_menubar, width);
+	result &= select_buffer_dialog->set_size(None, width - 4);
+	return true;
 }
 
 void main_t::menu_activated(int id) {
@@ -264,9 +267,8 @@ void execute_action(ActionID id, ...) {
 }
 */
 
-void resize(int height, int width) {
-	//~ open_file_dialog.set_size(height - 4, width - 5);
-	select_buffer_dialog->set_size(None, width - 4);
+void main_t::switch_buffer(file_buffer_t *buffer) {
+	get_current()->set_text(buffer);
 }
 
 int main(int argc, char *argv[]) {
@@ -294,9 +296,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	main_t main_window;
-	select_buffer_dialog = new select_buffer_dialog_t(11, 76); //FIXME: use proper size!
-	select_buffer_dialog->center_over(&main_window);
-	select_buffer_dialog->connect_activate(sigc::mem_fun(&main_window, &main_t::switch_buffer));
 
 	set_color_mode(false);
 	set_attribute(attribute_t::SELECTION_CURSOR, T3_ATTR_BG_GREEN);
@@ -304,7 +303,6 @@ int main(int argc, char *argv[]) {
 	main_window.show();
 
 	set_key_timeout(100);
-	//~ connect_resize(sigc::ptr_fun(resize));
 	main_loop();
 	return 0;
 }
