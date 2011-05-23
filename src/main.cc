@@ -179,10 +179,11 @@ void main_t::menu_activated(int id) {
 			split->split(new edit_window_t(new_file), id == action_id_t::WINDOWS_HSPLIT);
 			break;
 		}
-		#warning FIXME: implement these next
 		case action_id_t::WINDOWS_NEXT_WINDOW:
+			split->next();
 			break;
 		case action_id_t::WINDOWS_PREV_WINDOW:
+			split->previous();
 			break;
 		case action_id_t::WINDOWS_MERGE:
 			delete split->unsplit();
