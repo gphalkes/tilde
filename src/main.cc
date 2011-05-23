@@ -129,77 +129,7 @@ void main_t::menu_activated(int id) {
 			break;
 		}
 
-		case action_id_t::FILE_EXIT:
-			//FIXME: ask whether to save/cancel
-			//~ #ifdef DEBUG
-			//~ delete editwin;
-			//~ #endif
-			exit(EXIT_SUCCESS);
-			break;
-
-		case action_id_t::EDIT_UNDO:
-			get_current()->undo();
-			break;
-		case action_id_t::EDIT_REDO:
-			get_current()->redo();
-			break;
-		case action_id_t::EDIT_COPY:
-		case action_id_t::EDIT_CUT:
-			get_current()->cut_copy(id == action_id_t::EDIT_CUT);
-			break;
-		case action_id_t::EDIT_PASTE:
-			get_current()->paste();
-			break;
-		case action_id_t::EDIT_SELECT_ALL:
-			get_current()->select_all();
-			break;
-		case action_id_t::EDIT_INSERT_CHAR:
-			get_current()->insert_special();
-			break;
-
-		case action_id_t::SEARCH_GOTO:
-			get_current()->goto_line();
-			break;
-
-		case action_id_t::WINDOWS_NEXT_BUFFER: {
-			edit_window_t *current = (edit_window_t *) split->get_current();
-			current->set_text(open_files.next_buffer((file_buffer_t *) current->get_text()));
-			break;
-		}
-		case action_id_t::WINDOWS_PREV_BUFFER: {
-			edit_window_t *current = (edit_window_t *) split->get_current();
-			current->set_text(open_files.previous_buffer((file_buffer_t *) current->get_text()));
-			break;
-		}
-		case action_id_t::WINDOWS_HSPLIT:
-		case action_id_t::WINDOWS_VSPLIT: {
-			file_buffer_t *new_file = open_files.next_buffer(NULL);
-			if (new_file == NULL)
-				new_file = new file_buffer_t();
-			split->split(new edit_window_t(new_file), id == action_id_t::WINDOWS_HSPLIT);
-			break;
-		}
-		case action_id_t::WINDOWS_NEXT_WINDOW:
-			split->next();
-			break;
-		case action_id_t::WINDOWS_PREV_WINDOW:
-			split->previous();
-			break;
-		case action_id_t::WINDOWS_MERGE:
-			delete split->unsplit();
-			break;
-		default:
-			break;
-	}
-}
-
-/*
-void execute_action(ActionID id, ...) {
-	va_list args;
-	va_start(args, id);
-
-	switch (id) {
-		case ActionID::FILE_SAVE:
+/*		case ActionID::FILE_SAVE:
 			editwin->get_current()->save();
 			break;
 		case ActionID::FILE_OPEN:
@@ -229,28 +159,90 @@ void execute_action(ActionID id, ...) {
 			t3_term_init(-1, option.term);
 			reinit_keys();
 			do_resize();
+			break;*/
+
+		case action_id_t::FILE_EXIT:
+			//FIXME: ask whether to save/cancel
+			//~ #ifdef DEBUG
+			//~ delete editwin;
+			//~ #endif
+			exit(EXIT_SUCCESS);
 			break;
 
+		case action_id_t::EDIT_UNDO:
+			get_current()->undo();
+			break;
+		case action_id_t::EDIT_REDO:
+			get_current()->redo();
+			break;
+		case action_id_t::EDIT_COPY:
+		case action_id_t::EDIT_CUT:
+			get_current()->cut_copy(id == action_id_t::EDIT_CUT);
+			break;
+		case action_id_t::EDIT_PASTE:
+			get_current()->paste();
+			break;
+		case action_id_t::EDIT_SELECT_ALL:
+			get_current()->select_all();
+			break;
+		case action_id_t::EDIT_INSERT_CHAR:
+			get_current()->insert_special();
+			break;
 
-		case ActionID::SEARCH_SEARCH:
-			activate_window(WindowID::FIND);
+		case action_id_t::SEARCH_SEARCH:
+		case action_id_t::SEARCH_REPLACE:
+			get_current()->find_replace(id == action_id_t::SEARCH_REPLACE);
 			break;
-		case ActionID::SEARCH_REPLACE:
-			activate_window(WindowID::REPLACE);
+		case action_id_t::SEARCH_AGAIN:
+		case action_id_t::SEARCH_AGAIN_BACKWARD:
+			get_current()->find_next(id == action_id_t::SEARCH_AGAIN_BACKWARD);
 			break;
-		case ActionID::SEARCH_AGAIN:
-			find_next(true);
-			break;
-		case ActionID::SEARCH_AGAIN_BACKWARD:
-			find_next(false);
-			break;
-		case ActionID::SEARCH_GOTO:
-			activate_window(WindowID::GOTO_DIALOG);
+		case action_id_t::SEARCH_GOTO:
+			get_current()->goto_line();
 			break;
 
-		case ActionID::WINDOWS_SELECT:
+		case action_id_t::WINDOWS_NEXT_BUFFER: {
+			edit_window_t *current = (edit_window_t *) split->get_current();
+			current->set_text(open_files.next_buffer((file_buffer_t *) current->get_text()));
+			break;
+		}
+		case action_id_t::WINDOWS_PREV_BUFFER: {
+			edit_window_t *current = (edit_window_t *) split->get_current();
+			current->set_text(open_files.previous_buffer((file_buffer_t *) current->get_text()));
+			break;
+		}
+/*		case ActionID::WINDOWS_SELECT:
 			activate_window(WindowID::SELECT_BUFFER);
+			break;*/
+		case action_id_t::WINDOWS_HSPLIT:
+		case action_id_t::WINDOWS_VSPLIT: {
+			file_buffer_t *new_file = open_files.next_buffer(NULL);
+			if (new_file == NULL)
+				new_file = new file_buffer_t();
+			split->split(new edit_window_t(new_file), id == action_id_t::WINDOWS_HSPLIT);
 			break;
+		}
+		case action_id_t::WINDOWS_NEXT_WINDOW:
+			split->next();
+			break;
+		case action_id_t::WINDOWS_PREV_WINDOW:
+			split->previous();
+			break;
+		case action_id_t::WINDOWS_MERGE:
+			delete split->unsplit();
+			break;
+		default:
+			break;
+	}
+}
+
+/*
+void execute_action(ActionID id, ...) {
+	va_list args;
+	va_start(args, id);
+
+	switch (id) {
+
 
 		//FIXME should this stay here?
 		case ActionID::CLOSE_DISCARD:
