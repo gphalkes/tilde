@@ -21,9 +21,11 @@
 
 #define BOM_STRING "\xEF\xBB\xBF"
 
-file_buffer_t::file_buffer_t(const char *name, const char *_encoding) : text_buffer_t(name),
+file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name),
 		encoding(_encoding), file_has_bom(false)
 {
+	if (name == NULL)
+		name_line.set_text("(Untitled)");
 	open_files.push_back(this);
 }
 

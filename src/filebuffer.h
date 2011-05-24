@@ -26,7 +26,7 @@ class file_buffer_t : public text_buffer_t {
 		bool file_has_bom;
 
 	public:
-		file_buffer_t(const char *name = NULL, const char *_encoding = NULL);
+		file_buffer_t(const char *_name = NULL, const char *_encoding = NULL);
 		virtual ~file_buffer_t(void);
 		rw_result_t load(load_state_t *state);
 		rw_result_t save(save_state_t *state);
