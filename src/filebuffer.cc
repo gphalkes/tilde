@@ -172,6 +172,7 @@ rw_result_t file_buffer_t::save(save_state_t *state) {
 		}
 		case save_state_t::WRITING:
 			try {
+				//FIXME: only if in direct UTF-8 mode
 				if (file_has_bom && state->i == 0)
 					state->wrapper->write(BOM_STRING, 3);
 

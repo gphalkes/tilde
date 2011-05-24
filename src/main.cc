@@ -35,6 +35,7 @@ class main_t : public main_window_base_t {
 
 		select_buffer_dialog_t *select_buffer_dialog;
 		open_file_dialog_t *open_file_dialog;
+		save_as_dialog_t *save_as_dialog;
 
 		continuation_t *current_continuation;
 
@@ -50,6 +51,7 @@ class main_t : public main_window_base_t {
 		void call_continuation(void);
 		void abort_continuation(void);
 		void open_file(string *name);
+		void save_file(string *name);
 		void switch_to_new_buffer(file_buffer_t *buffer);
 };
 
@@ -120,11 +122,16 @@ main_t::main_t(void) : current_continuation(NULL) {
 	continue_abort_dialog->connect_ok(sigc::mem_fun(this, &main_t::call_continuation));
 	continue_abort_dialog->connect_cancel(sigc::mem_fun(this, &main_t::abort_continuation));
 
+	string wd = get_working_directory();
 	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	open_file_dialog->center_over(this);
 	open_file_dialog->connect_file_selected(sigc::mem_fun(this, &main_t::open_file));
-	string wd = get_working_directory();
 	open_file_dialog->change_dir(&wd);
+
+	save_as_dialog = new save_as_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
+	save_as_dialog->center_over(this);
+	save_as_dialog->connect_file_selected(sigc::mem_fun(this, &main_t::save_file));
+	save_as_dialog->change_dir(&wd);
 }
 
 bool main_t::process_key(key_t key) {
@@ -150,6 +157,7 @@ bool main_t::set_size(optint height, optint width) {
 	result &= split->set_size(height - !option.hide_menubar, width);
 	result &= select_buffer_dialog->set_size(None, width - 4);
 	result &= open_file_dialog->set_size(height - 4, width - 4);
+	result &= save_as_dialog->set_size(height - 4, width - 4);
 	return true;
 }
 
@@ -178,29 +186,14 @@ void main_t::menu_activated(int id) {
 			}
 			break;
 		}
-		case action_id_t::FILE_SAVE: {
-			file_buffer_t *text = dynamic_cast<file_buffer_t *>(get_current()->get_text());
-			if (text == NULL)
-				PANIC(); //FIXME do something a bit more sane here
-			if (text->get_name() != NULL) {
-				try {
-					//FIXME: get encoding from encoding dialog
-					current_continuation = new save_state_t(text, "UTF-8"/* encodingDialog->getEncoding() */);
-					(*current_continuation)();
-				} catch (...) {
-					string message;
-					//FIXME: better error message
-					printf_into(&message, "Can't save '%s': exception caught", text->get_name());
-					message_dialog->set_message(&message);
-					message_dialog->show();
-				}
-
-
+		case action_id_t::FILE_SAVE:
+			if (get_current()->get_text()->get_name() != NULL) {
+				save_file(NULL);
 				break;
 			}
-		}
-		/* FALLTHROUGH */
+			/* FALLTHROUGH */
 		case action_id_t::FILE_SAVE_AS:
+			save_as_dialog->show();
 			break;
 
 /*		case ActionID::FILE_SAVE:
@@ -340,6 +333,21 @@ void main_t::open_file(string *name) {
 		string message;
 					//FIXME: better error message
 		printf_into(&message, "Can't open '%s': exception caught", name->c_str());
+		message_dialog->set_message(&message);
+		message_dialog->show();
+	}
+}
+
+void main_t::save_file(string *name) {
+	file_buffer_t *text = (file_buffer_t *) get_current()->get_text();
+	try {
+		//FIXME: get encoding from encoding dialog
+		current_continuation = new save_state_t(text, NULL, name == NULL ? NULL : name->c_str());
+		(*current_continuation)();
+	} catch (...) {
+		string message;
+		//FIXME: better error message
+		printf_into(&message, "Can't save '%s': exception caught", text->get_name());
 		message_dialog->set_message(&message);
 		message_dialog->show();
 	}
