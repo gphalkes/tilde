@@ -36,6 +36,7 @@ class main_t : public main_window_base_t {
 		select_buffer_dialog_t *select_buffer_dialog;
 		open_file_dialog_t *open_file_dialog;
 		save_as_dialog_t *save_as_dialog;
+		message_dialog_t *close_confirm_dialog;
 
 		continuation_t *current_continuation;
 
@@ -53,6 +54,8 @@ class main_t : public main_window_base_t {
 		void open_file(string *name);
 		void save_file(string *name);
 		void switch_to_new_buffer(file_buffer_t *buffer);
+		void save_before_close(void);
+		void close_no_check(void);
 };
 
 main_t::main_t(void) : current_continuation(NULL) {
@@ -119,9 +122,9 @@ main_t::main_t(void) : current_continuation(NULL) {
 	select_buffer_dialog->connect_activate(sigc::mem_fun(this, &main_t::switch_buffer));
 
 	continue_abort_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Question", "_Continue;cC", "_Abort;aA", NULL);
+	continue_abort_dialog->center_over(this);
 	continue_abort_dialog->connect_activate(sigc::mem_fun(this, &main_t::call_continuation), 0);
 	continue_abort_dialog->connect_activate(sigc::mem_fun(this, &main_t::abort_continuation), 1);
-	continue_abort_dialog->center_over(this);
 
 	string wd = get_working_directory();
 	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
@@ -133,6 +136,11 @@ main_t::main_t(void) : current_continuation(NULL) {
 	save_as_dialog->center_over(this);
 	save_as_dialog->connect_file_selected(sigc::mem_fun(this, &main_t::save_file));
 	save_as_dialog->change_dir(&wd);
+
+	close_confirm_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Confirm", "_Save;sS", "_Discard;dD", "_Cancel;cC", NULL);
+	close_confirm_dialog->center_over(this);
+	close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::save_before_close), 0);
+	close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::close_no_check), 1);
 }
 
 bool main_t::process_key(key_t key) {
@@ -178,12 +186,12 @@ void main_t::menu_activated(int id) {
 		case action_id_t::FILE_CLOSE: {
 			const text_buffer_t *text = get_current()->get_text();
 			if (text->is_modified()) {
-				//FIXME: start dialog etc
+				string message;
+				printf_into(&message, "File '%s' is modified", text->get_name() == NULL ? "(Untitled)" : text->get_name());
+				close_confirm_dialog->set_message(&message);
+				close_confirm_dialog->show();
 			} else {
-				menu_activated(action_id_t::WINDOWS_NEXT_BUFFER);
-				if (get_current()->get_text() == text)
-					get_current()->set_text(new file_buffer_t());
-				delete text;
+				close_no_check();
 			}
 			break;
 		}
@@ -360,6 +368,18 @@ void main_t::switch_to_new_buffer(file_buffer_t *buffer) {
 	//FIXME: buffer should not be closed if the user specifically created it by asking for a new file!
 	if (text->get_name() == NULL && !text->is_modified())
 		delete text;
+}
+
+void main_t::save_before_close(void) {
+#warning FIXME: implement!
+}
+
+void main_t::close_no_check(void) {
+	text_buffer_t *text = get_current()->get_text();
+	menu_activated(action_id_t::WINDOWS_NEXT_BUFFER);
+	if (get_current()->get_text() == text)
+		get_current()->set_text(new file_buffer_t());
+	delete text;
 }
 
 int main(int argc, char *argv[]) {
