@@ -17,5 +17,5 @@
 #include <widget.h>
 using namespace t3_widget;
 
-extern question_dialog_t *continue_abort_dialog;
+extern message_dialog_t *continue_abort_dialog;
 #endif

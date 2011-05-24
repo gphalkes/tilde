@@ -24,7 +24,7 @@
 using namespace std;
 using namespace t3_widget;
 
-question_dialog_t *continue_abort_dialog;
+message_dialog_t *continue_abort_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -118,9 +118,9 @@ main_t::main_t(void) : current_continuation(NULL) {
 	select_buffer_dialog->center_over(this);
 	select_buffer_dialog->connect_activate(sigc::mem_fun(this, &main_t::switch_buffer));
 
-	continue_abort_dialog = new question_dialog_t(t3_win_get_width(window) - 4, "Question", "_Continue;cC", "_Abort;aA");
-	continue_abort_dialog->connect_ok(sigc::mem_fun(this, &main_t::call_continuation));
-	continue_abort_dialog->connect_cancel(sigc::mem_fun(this, &main_t::abort_continuation));
+	continue_abort_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Question", "_Continue;cC", "_Abort;aA", NULL);
+	continue_abort_dialog->connect_activate(sigc::mem_fun(this, &main_t::call_continuation), 0);
+	continue_abort_dialog->connect_activate(sigc::mem_fun(this, &main_t::abort_continuation), 1);
 	continue_abort_dialog->center_over(this);
 
 	string wd = get_working_directory();
