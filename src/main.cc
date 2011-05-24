@@ -121,6 +121,7 @@ main_t::main_t(void) : current_continuation(NULL) {
 	continue_abort_dialog = new question_dialog_t(t3_win_get_width(window) - 4, "Question", "_Continue;cC", "_Abort;aA");
 	continue_abort_dialog->connect_ok(sigc::mem_fun(this, &main_t::call_continuation));
 	continue_abort_dialog->connect_cancel(sigc::mem_fun(this, &main_t::abort_continuation));
+	continue_abort_dialog->center_over(this);
 
 	string wd = get_working_directory();
 	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);

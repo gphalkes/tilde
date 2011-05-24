@@ -90,9 +90,10 @@ bool save_state_t::operator()(void) {
 			delete this;
 			return true;
 		case rw_result_t::FILE_EXISTS:
-			//activateWindow(WindowID::OVERWRITE_CONFIRM, this);
-			//FIXME: activate dialog and return false!!!
-			PANIC();
+			printf_into(&message, "File '%s' already exists", new_name);
+			continue_abort_dialog->set_message(&message);
+			continue_abort_dialog->show();
+			return false;
 		case rw_result_t::ERRNO_ERROR:
 			printf_into(&message, "Could not save file: %s", strerror(result.get_errno_error()));
 			message_dialog->set_message(&message);
