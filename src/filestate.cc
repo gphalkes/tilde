@@ -71,7 +71,7 @@ load_state_t::~load_state_t(void) {
 		close(fd);
 }
 
-save_state_t::save_state_t(file_buffer_t *_file, const char *_name, const char *_encoding) :
+save_state_t::save_state_t(file_buffer_t *_file, const char *_encoding, const char *_name) :
 	state(INITIAL), file(_file), name(_name), encoding(_encoding), new_name(NULL),
 	real_name(NULL), temp_name(NULL), fd(-1), wrapper(NULL)
 {

@@ -97,7 +97,7 @@ class save_state_t : public continuation_t {
 		struct stat file_info;
 
 	public:
-		save_state_t(file_buffer_t *_file, const char *_name = NULL, const char *_encoding = NULL);
+		save_state_t(file_buffer_t *_file, const char *_encoding = NULL, const char *_name = NULL);
 		virtual bool operator()(void);
 		virtual ~save_state_t(void);
 };

@@ -53,8 +53,7 @@ rw_result_t file_buffer_t::load(load_state_t *state) {
 
 			if ((state->fd = open(name, O_RDONLY)) < 0)
 				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-#warning FIXME: check order of actions
-	//perhaps we should try opening the converter earlier
+
 			try {
 				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
 				if (handle == NULL)
@@ -69,10 +68,7 @@ rw_result_t file_buffer_t::load(load_state_t *state) {
 		case load_state_t::READING:
 			try {
 				while ((line = state->wrapper->read_line()) != NULL) {
-					#warning FIXME: check that file is UTF-8 encoded
-					if (lines.size() == 0 && line->size() >= 3 && /* encoding->getIndex() == utf8CharacterSetIndex && */
-							memcmp(line->c_str(), BOM_STRING, 3) == 0)
-					{
+					if (lines.size() == 0 && line->size() >= 3 && memcmp(line->c_str(), BOM_STRING, 3) == 0) {
 						file_has_bom = true;
 						line->erase(0, 3);
 					}
@@ -182,10 +178,10 @@ rw_result_t file_buffer_t::save(save_state_t *state) {
 				if (state->i != 0)
 					state->wrapper->write("\n", 1);
 
-				for (; state->i < lines.size(); state->i++)
-				{}
-				#warning FIXME: write line data!
-				//	lines[state->i]->write_line_data(state->wrapper, state->i < lines.size() - 1);
+				for (; state->i < lines.size(); state->i++) {
+					const string *data = lines[state->i]->get_data();
+					state->wrapper->write(data->data(), data->size());
+				}
 			} catch (rw_result_t error) {
 				return error;
 			}

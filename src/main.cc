@@ -178,6 +178,30 @@ void main_t::menu_activated(int id) {
 			}
 			break;
 		}
+		case action_id_t::FILE_SAVE: {
+			file_buffer_t *text = dynamic_cast<file_buffer_t *>(get_current()->get_text());
+			if (text == NULL)
+				PANIC(); //FIXME do something a bit more sane here
+			if (text->get_name() != NULL) {
+				try {
+					//FIXME: get encoding from encoding dialog
+					current_continuation = new save_state_t(text, "UTF-8"/* encodingDialog->getEncoding() */);
+					(*current_continuation)();
+				} catch (...) {
+					string message;
+					//FIXME: better error message
+					printf_into(&message, "Can't save '%s': exception caught", text->get_name());
+					message_dialog->set_message(&message);
+					message_dialog->show();
+				}
+
+
+				break;
+			}
+		}
+		/* FALLTHROUGH */
+		case action_id_t::FILE_SAVE_AS:
+			break;
 
 /*		case ActionID::FILE_SAVE:
 			editwin->get_current()->save();
@@ -309,11 +333,12 @@ void main_t::open_file(string *name) {
 
 	try {
 		//FIXME: get encoding from encoding dialog
-		load_state_t *load_state = new load_state_t(name->c_str(), "UTF-8"/* encodingDialog->getEncoding() */,
+		current_continuation = new load_state_t(name->c_str(), "UTF-8"/* encodingDialog->getEncoding() */,
 			sigc::mem_fun(this, &main_t::switch_to_new_buffer));
-		(*load_state)();
+		(*current_continuation)();
 	} catch (...) {
 		string message;
+					//FIXME: better error message
 		printf_into(&message, "Can't open '%s': exception caught", name->c_str());
 		message_dialog->set_message(&message);
 		message_dialog->show();
