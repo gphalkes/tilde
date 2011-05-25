@@ -20,6 +20,8 @@
 #include "filebuffer.h"
 #include "openfiles.h"
 #include "dialogs/selectbufferdialog.h"
+#include "dialogs/encodingdialog.h"
+#include "log.h"
 
 using namespace std;
 using namespace t3_widget;
@@ -383,6 +385,7 @@ void main_t::close_no_check(void) {
 }
 
 int main(int argc, char *argv[]) {
+	init_log();
 	setlocale(LC_ALL, "");
 	//FIXME: call this when internationalization is started. Requires #include <libintl.h>
 	// bind_textdomain_codeset("UTF-8");
@@ -406,6 +409,7 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	init_charsets();
 	main_t main_window;
 
 	set_color_mode(false);

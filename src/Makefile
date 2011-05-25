@@ -15,6 +15,7 @@ SOURCES..objects/edit := \
 	filebuffer.cc \
 	filestate.cc \
 	filewrapper.cc \
+	log.cc \
 	main.cc \
 	openfiles.cc \
 	option.cc \

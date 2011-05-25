@@ -1,4 +1,5 @@
 syntax: glob
+src/t3widgetlog.txt
 src/libt3window.log
 src/.objects
 src/.deps

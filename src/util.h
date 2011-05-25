@@ -17,12 +17,6 @@
 #include <limits.h>
 #include <string>
 
-#ifdef DEBUG
-#define _T3_WIDGET_INTERNAL
-#define _T3_WIDGET_DEBUG
-#include <log.h>
-#endif
-
 #ifdef __GNUC__
 void fatal(const char *fmt, ...) __attribute__((format (printf, 1, 2))) __attribute__((noreturn));
 #else

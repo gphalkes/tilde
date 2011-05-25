@@ -16,8 +16,8 @@
 #include <algorithm>
 #include <widget.h>
 #include <transcript.h>
-#include "util.h"
 #include "encodingdialog.h"
+#include "log.h"
 
 using namespace std;
 
@@ -93,10 +93,10 @@ void init_charsets(void) {
 	available_charsets.push_back(utf8);
 	for (charset_desc_t *ptr = &friendly_charsets[0]; ptr->name != NULL; ptr++) {
 		if (!transcript_probe_converter(ptr->tag)) {
-			//~ lprintf("Unavailable: %s\n", ptr->name);
+			lprintf("Unavailable: %s\n", ptr->name);
 			continue;
 		}
-		//~ lprintf("Adding character set %s with tag %s\n", ptr->name, ptr->tag);
+		lprintf("Adding character set %s with tag %s\n", ptr->name, ptr->tag);
 		available_charsets.push_back(*ptr);
 	}
 	sort(available_charsets.begin(), available_charsets.end(), compare_charset_names);
@@ -164,7 +164,7 @@ void encoding_dialog_t::ok_activated(void) {
 		// User specified character set
 		encoding = *manual_entry->get_text();
 
-		//~ lprintf("Testing encoding name: %s\n", encoding.c_str());
+		lprintf("Testing encoding name: %s\n", encoding.c_str());
 		if (transcript_probe_converter(encoding.c_str()) != TRANSCRIPT_SUCCESS) {
 			string message = "Requested character set is not available";
 			message_dialog->set_message(&message);
