@@ -1,4 +1,5 @@
 syntax: glob
+src/libt3window.log
 src/.objects
 src/.deps
 src/.recordings

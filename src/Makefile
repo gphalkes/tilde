@@ -19,6 +19,7 @@ SOURCES..objects/edit := \
 	openfiles.cc \
 	option.cc \
 	util.cc \
+	dialogs/encodingdialog.cc \
 	dialogs/selectbufferdialog.cc
 LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode
 LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs -Ltranscript/.libs -Lunicode/.libs

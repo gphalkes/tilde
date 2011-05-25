@@ -23,7 +23,7 @@ load_state_t::load_state_t(const char *name, const char *encoding, const sigc::s
 	file = new file_buffer_t(name, encoding);
 }
 
-bool load_state_t::operator()(void) {
+continuation_t::result_t load_state_t::operator()(void) {
 	rw_result_t result;
 	string message;
 
@@ -32,27 +32,27 @@ bool load_state_t::operator()(void) {
 			callback(file);
 			file = NULL;
 			delete this;
-			return true;
+			return COMPLETED;
 		case rw_result_t::ERRNO_ERROR:
 			printf_into(&message, "Could not load file: %s", strerror(result.get_errno_error()));
 			message_dialog->set_message(&message);
 			delete this;
-			return true;
+			return ABORTED;
 		case rw_result_t::CONVERSION_OPEN_ERROR:
 			printf_into(&message, "Could not find a converter for selected encoding: %s",
 				transcript_strerror(result.get_transcript_error()));
 			message_dialog->set_message(&message);
 			delete this;
-			return true;
+			return ABORTED;
 		case rw_result_t::CONVERSION_ERROR:
 			printf_into(&message, "Could not load file in encoding FIXME: %s", transcript_strerror(result.get_transcript_error()));
 			message_dialog->set_message(&message);
 			delete this;
-			return true;
+			return INCOMPLETE;
 		case rw_result_t::CONVERSION_IMPRECISE:
 			printf_into(&message, "Conversion from encoding FIXME is irreversible");
 			continue_abort_dialog->set_message(&message);
-			return false;
+			return INCOMPLETE;
 		case rw_result_t::CONVERSION_ILLEGAL:
 			//FIXME: handle illegal characters in input
 		case rw_result_t::CONVERSION_TRUNCATED:
@@ -61,7 +61,7 @@ bool load_state_t::operator()(void) {
 			PANIC();
 	}
 	delete this;
-	return true;
+	return ABORTED;
 }
 
 load_state_t::~load_state_t(void) {
@@ -81,39 +81,41 @@ save_state_t::save_state_t(file_buffer_t *_file, const char *_encoding, const ch
 	}
 }
 
-bool save_state_t::operator()(void) {
+continuation_t::result_t save_state_t::operator()(void) {
 	rw_result_t result;
 	string message;
 
 	switch ((result = file->save(this))) {
 		case rw_result_t::SUCCESS:
 			delete this;
-			return true;
+			return COMPLETED;
 		case rw_result_t::FILE_EXISTS:
 			printf_into(&message, "File '%s' already exists", new_name);
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
-			return false;
+		#warning FIXME: if the abort button is pressed, the continuation is not cleaned up!
+			return INCOMPLETE;
 		case rw_result_t::ERRNO_ERROR:
 			printf_into(&message, "Could not save file: %s", strerror(result.get_errno_error()));
 			message_dialog->set_message(&message);
 			delete this;
-			return true;
+			return ABORTED;
 		case rw_result_t::CONVERSION_ERROR:
 			printf_into(&message, "Could not save file in encoding FIXME: %s", transcript_strerror(result.get_transcript_error()));
 			message_dialog->set_message(&message);
 			delete this;
-			return true;
+			return ABORTED;
 		case rw_result_t::CONVERSION_IMPRECISE:
 			i++;
 			printf_into(&message, "Conversion into encoding FIXME is irreversible");
 			continue_abort_dialog->set_message(&message);
-			return false;
+		#warning FIXME: if the abort button is pressed, the continuation is not cleaned up!
+			return INCOMPLETE;
 		default:
 			PANIC();
 	}
 	delete this;
-	return true;
+	return ABORTED;
 }
 
 save_state_t::~save_state_t(void) {

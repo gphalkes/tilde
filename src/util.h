@@ -78,7 +78,7 @@ class continuation_t {
 			COMPLETED,
 			ABORTED
 		};
-		virtual bool operator()(void) = 0;
+		virtual result_t operator()(void) = 0;
 		virtual ~continuation_t(void) {};
 };
 

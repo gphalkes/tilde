@@ -137,7 +137,7 @@ main_t::main_t(void) : current_continuation(NULL) {
 	save_as_dialog->connect_file_selected(sigc::mem_fun(this, &main_t::save_file));
 	save_as_dialog->change_dir(&wd);
 
-	close_confirm_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Confirm", "_Save;sS", "_Discard;dD", "_Cancel;cC", NULL);
+	close_confirm_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
 	close_confirm_dialog->center_over(this);
 	close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::save_before_close), 0);
 	close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::close_no_check), 1);
@@ -187,7 +187,7 @@ void main_t::menu_activated(int id) {
 			const text_buffer_t *text = get_current()->get_text();
 			if (text->is_modified()) {
 				string message;
-				printf_into(&message, "File '%s' is modified", text->get_name() == NULL ? "(Untitled)" : text->get_name());
+				printf_into(&message, "Save changes to '%s'", text->get_name() == NULL ? "(Untitled)" : text->get_name());
 				close_confirm_dialog->set_message(&message);
 				close_confirm_dialog->show();
 			} else {
@@ -317,7 +317,7 @@ void main_t::switch_buffer(file_buffer_t *buffer) {
 void main_t::call_continuation(void) {
 	if (current_continuation == NULL)
 		PANIC();
-	if ((*current_continuation)())
+	if ((*current_continuation)() != continuation_t::INCOMPLETE)
 		current_continuation = NULL;
 }
 
@@ -337,7 +337,7 @@ void main_t::open_file(string *name) {
 		//FIXME: get encoding from encoding dialog
 		current_continuation = new load_state_t(name->c_str(), "UTF-8"/* encodingDialog->getEncoding() */,
 			sigc::mem_fun(this, &main_t::switch_to_new_buffer));
-		(*current_continuation)();
+		call_continuation();
 	} catch (...) {
 		string message;
 					//FIXME: better error message
@@ -352,7 +352,7 @@ void main_t::save_file(string *name) {
 	try {
 		//FIXME: get encoding from encoding dialog
 		current_continuation = new save_state_t(text, NULL, name == NULL ? NULL : name->c_str());
-		(*current_continuation)();
+		call_continuation();
 	} catch (...) {
 		string message;
 		//FIXME: better error message

@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 G.P. Halkes
+/* Copyright (C) 2011 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -11,26 +11,34 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef SELECTBUFFERDIALOG_H
-#define SELECTBUFFERDIALOG_H
+#ifndef ENCODINGDIALOG_H
+#define ENCODINGDIALOG_H
 
+#include <string>
 #include <widget.h>
+
 using namespace t3_widget;
 
-#include "filebuffer.h"
+void init_charsets(void);
 
-class select_buffer_dialog_t : public dialog_t {
-	private:
+class encoding_dialog_t : public dialog_t {
+	protected:
 		list_pane_t *list;
-		int known_version_t;
+		text_field_t *manual_entry;
+		int selected;
+		char *saved_tag;
+
+		void ok_activated(void);
+		void selection_changed(void);
 
 	public:
-		select_buffer_dialog_t(int height, int width);
+		encoding_dialog_t(int height, int width);
 		virtual bool set_size(optint height, optint width);
-		virtual void show(void);
-		virtual void ok_activated(void);
 
-	T3_WIDGET_SIGNAL(activate, void, file_buffer_t *);
+		void set_encoding(const char *encoding);
+
+	T3_WIDGET_SIGNAL(activate, void, const std::string *);
 };
+
 
 #endif

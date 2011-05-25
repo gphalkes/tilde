@@ -69,7 +69,7 @@ class load_state_t : public continuation_t {
 
 	public:
 		load_state_t(const char *name, const char *encoding, const sigc::slot<void, file_buffer_t *> &_callback);
-		virtual bool operator()(void);
+		virtual result_t operator()(void);
 		virtual ~load_state_t(void);
 };
 
@@ -98,7 +98,7 @@ class save_state_t : public continuation_t {
 
 	public:
 		save_state_t(file_buffer_t *_file, const char *_encoding = NULL, const char *_name = NULL);
-		virtual bool operator()(void);
+		virtual result_t operator()(void);
 		virtual ~save_state_t(void);
 };
 
