@@ -88,7 +88,8 @@ class save_as_process_t : public stepped_process_t {
 			INITIAL,
 			ALLOW_OVERWRITE,
 			WRITING
-		} state;
+		};
+		int state;
 
 		file_buffer_t *file;
 		std::string name;
@@ -117,6 +118,23 @@ class save_process_t : public save_as_process_t {
 		save_process_t(const callback_t &cb, file_buffer_t *_file);
 	public:
 		static void execute(const callback_t &cb, file_buffer_t *_file);
+};
+
+class close_process_t : public save_process_t {
+	protected:
+		enum {
+			CONFIRM_CLOSE = WRITING + 1,
+			CLOSE
+		};
+
+		close_process_t(const callback_t &cb, file_buffer_t *_file);
+		virtual bool step(void);
+		virtual void do_save(void);
+		virtual void dont_save(void);
+
+	public:
+		static void execute(const callback_t &cb, file_buffer_t *_file);
+		virtual const file_buffer_t *get_file_buffer_ptr(void); //Note: pointer is no longer valid if result == true. For check purposes only
 };
 
 #endif

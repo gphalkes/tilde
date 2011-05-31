@@ -29,6 +29,7 @@ using namespace t3_widget;
 message_dialog_t *continue_abort_dialog;
 open_file_dialog_t *open_file_dialog;
 save_as_dialog_t *save_as_dialog;
+message_dialog_t *close_confirm_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -38,7 +39,6 @@ class main_t : public main_window_base_t {
 		split_t *split;
 
 		select_buffer_dialog_t *select_buffer_dialog;
-		message_dialog_t *close_confirm_dialog;
 
 	public:
 		main_t(void);
@@ -50,8 +50,7 @@ class main_t : public main_window_base_t {
 		void menu_activated(int id);
 		void switch_buffer(file_buffer_t *buffer);
 		void switch_to_new_buffer(stepped_process_t *process);
-		void save_before_close(void);
-		void close_no_check(void);
+		void close_cb(stepped_process_t *process);
 };
 
 main_t::main_t(void) {
@@ -131,8 +130,8 @@ main_t::main_t(void) {
 
 	close_confirm_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
 	close_confirm_dialog->center_over(this);
-	close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::save_before_close), 0);
-	close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::close_no_check), 1);
+	//~ close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::save_before_close), 0);
+	//~ close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::close_no_check), 1);
 }
 
 bool main_t::process_key(key_t key) {
@@ -175,18 +174,9 @@ void main_t::menu_activated(int id) {
 			load_process_t::execute(sigc::mem_fun(this, &main_t::switch_to_new_buffer));
 			break;
 
-		case action_id_t::FILE_CLOSE: {
-			const text_buffer_t *text = get_current()->get_text();
-			if (text->is_modified()) {
-				string message;
-				printf_into(&message, "Save changes to '%s'", text->get_name() == NULL ? "(Untitled)" : text->get_name());
-				close_confirm_dialog->set_message(&message);
-				close_confirm_dialog->show();
-			} else {
-				close_no_check();
-			}
+		case action_id_t::FILE_CLOSE:
+			close_process_t::execute(sigc::mem_fun(this, &main_t::close_cb), (file_buffer_t *) get_current()->get_text());
 			break;
-		}
 		case action_id_t::FILE_SAVE:
 			save_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), (file_buffer_t *) get_current()->get_text());
 			break;
@@ -194,16 +184,11 @@ void main_t::menu_activated(int id) {
 			save_as_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), (file_buffer_t *) get_current()->get_text());
 			break;
 
-/*		case ActionID::FILE_SAVE:
-			editwin->get_current()->save();
-			break;
+/*
 		case ActionID::FILE_OPEN_RECENT:
 			activate_window(WindowID::OPEN_RECENT);
 			break;
-		case ActionID::FILE_SAVE_AS:
-			//FIXME: set directory to dir of current file?
-			activate_window(WindowID::SAVE_FILE);
-			break;*/
+*/
 		case action_id_t::FILE_REPAINT:
 			t3_widget::redraw();
 			break;
@@ -321,12 +306,16 @@ void main_t::switch_to_new_buffer(stepped_process_t *process) {
 		delete text;
 }
 
-void main_t::save_before_close(void) {
-#warning FIXME: implement!
-}
+void main_t::close_cb(stepped_process_t *process) {
+	text_buffer_t *text;
 
-void main_t::close_no_check(void) {
-	text_buffer_t *text = get_current()->get_text();
+	if (!process->get_result())
+		return;
+
+	text = get_current()->get_text();
+	if (((close_process_t *) process)->get_file_buffer_ptr() != text)
+		PANIC();
+
 	menu_activated(action_id_t::WINDOWS_NEXT_BUFFER);
 	if (get_current()->get_text() == text)
 		get_current()->set_text(new file_buffer_t());

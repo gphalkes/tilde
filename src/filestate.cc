@@ -198,3 +198,65 @@ save_process_t::save_process_t(const callback_t &cb, file_buffer_t *_file) : sav
 void save_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
 	(new save_process_t(cb, _file))->run();
 }
+
+close_process_t::close_process_t(const callback_t &cb, file_buffer_t *_file) : save_process_t(cb, _file) {
+	state = file->is_modified() ? CONFIRM_CLOSE : CLOSE;
+	if (!_file->is_modified())
+		state = CLOSE;
+}
+
+bool close_process_t::step(void) {
+	string message;
+
+	if (state < CONFIRM_CLOSE) {
+		if (save_process_t::step()) {
+			if (!result)
+				return true;
+			state = CLOSE;
+		} else {
+			return false;
+		}
+	}
+
+	disconnect();
+	if (state == CLOSE) {
+		open_files_t::iterator iter;
+		//FIXME: add to recent files
+		if ((iter = open_files.contains(file->get_name())) != open_files.end())
+			open_files.erase(file);
+		/* Can't delete the file_buffer_t here, because on switching buffers the
+		   edit_window_t will still want to do some stuff with it. Furthermore,
+		   the newly allocated file_buffer_t may be at the same address, causing
+		   further difficulties. So that has to be done in the callback :-( */
+		result = true;
+		return true;
+	} else if (state == CONFIRM_CLOSE) {
+		printf_into(&message, "Save changes to '%s'", file->get_name() == NULL ? "(Untitled)" : file->get_name());
+		connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &close_process_t::do_save), 0));
+		connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &close_process_t::dont_save), 1));
+		connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &close_process_t::abort), 2));
+		close_confirm_dialog->set_message(&message);
+		close_confirm_dialog->show();
+	} else {
+		PANIC();
+	}
+	return false;
+}
+
+void close_process_t::do_save(void) {
+	state = file->get_name() == NULL ? SELECT_FILE : INITIAL;
+	run();
+}
+
+void close_process_t::dont_save(void) {
+	state = CLOSE;
+	run();
+}
+
+void close_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
+	(new close_process_t(cb, _file))->run();
+}
+
+const file_buffer_t *close_process_t::get_file_buffer_ptr(void) {
+	return file;
+}
