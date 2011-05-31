@@ -18,8 +18,6 @@
 #include "main.h"
 #include "openfiles.h"
 
-#warning FIXME: center message dialog
-
 load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), state(SELECT_FILE), file(NULL), wrapper(NULL),
 		encoding("UTF-8"), fd(-1) {}
 
@@ -43,19 +41,19 @@ bool load_process_t::step(void) {
 			break;
 		case rw_result_t::ERRNO_ERROR:
 			printf_into(&message, "Could not load file: %s", strerror(rw_result.get_errno_error()));
-			message_dialog->set_message(&message);
-			message_dialog->show();
+			error_dialog->set_message(&message);
+			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_OPEN_ERROR:
 			printf_into(&message, "Could not find a converter for selected encoding: %s",
 				transcript_strerror(rw_result.get_transcript_error()));
-			message_dialog->set_message(&message);
-			message_dialog->show();
+			error_dialog->set_message(&message);
+			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_ERROR:
 			printf_into(&message, "Could not load file in encoding FIXME: %s", transcript_strerror(rw_result.get_transcript_error()));
-			message_dialog->set_message(&message);
-			message_dialog->show();
+			error_dialog->set_message(&message);
+			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_IMPRECISE:
 			printf_into(&message, "Conversion from encoding FIXME is irreversible");
@@ -139,13 +137,13 @@ bool save_as_process_t::step(void) {
 			return false;
 		case rw_result_t::ERRNO_ERROR:
 			printf_into(&message, "Could not save file: %s", strerror(rw_result.get_errno_error()));
-			message_dialog->set_message(&message);
-			message_dialog->show();
+			error_dialog->set_message(&message);
+			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_ERROR:
 			printf_into(&message, "Could not save file in encoding FIXME: %s", transcript_strerror(rw_result.get_transcript_error()));
-			message_dialog->set_message(&message);
-			message_dialog->show();
+			error_dialog->set_message(&message);
+			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_IMPRECISE:
 			i++;

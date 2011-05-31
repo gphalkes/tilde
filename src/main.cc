@@ -30,6 +30,7 @@ message_dialog_t *continue_abort_dialog;
 open_file_dialog_t *open_file_dialog;
 save_as_dialog_t *save_as_dialog;
 message_dialog_t *close_confirm_dialog;
+message_dialog_t *error_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -130,6 +131,9 @@ main_t::main_t(void) {
 
 	close_confirm_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
 	close_confirm_dialog->center_over(this);
+
+	error_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Error", "Ok;oO", NULL);
+	error_dialog->center_over(this);
 }
 
 bool main_t::process_key(key_t key) {
@@ -158,6 +162,7 @@ bool main_t::set_size(optint height, optint width) {
 	result &= save_as_dialog->set_size(height - 4, width - 4);
 	#warning FIXME: resize continue_abort_dialog as well
 	#warning FIXME: resize close_confirm_dialog as well
+	#warning FIXME: resize error_dialog as well
 	return true;
 }
 
@@ -197,7 +202,6 @@ void main_t::menu_activated(int id) {
 
 		case action_id_t::FILE_EXIT:
 			exit_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result));
-			//FIXME: ask whether to save/cancel
 			//~ #ifdef DEBUG
 			//~ delete editwin;
 			//~ #endif

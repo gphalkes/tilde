@@ -15,15 +15,13 @@ SAVE (AS)
 
 MISSING FUNCTIONALITY
 =====================
-- file close with confirmation
-- confirmation of file close [for save and for close itself if requested] on
-	exit
 - recent file tracking (with open recent menu item)
 - options setting
 - help text
 - about dialog
-
+- replace with regex is only partially working
 
 GENERIC
 =======
+- select buffer does not highlight buffer name under cursor
 - FIXME's
