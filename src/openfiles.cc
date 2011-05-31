@@ -14,6 +14,7 @@
 #include <cstring>
 
 #include "openfiles.h"
+#include "filebuffer.h"
 #include "option.h"
 
 open_files_t open_files;

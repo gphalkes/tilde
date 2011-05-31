@@ -19,8 +19,9 @@
 
 using namespace std;
 
-#include "filebuffer.h"
 #include "util.h"
+
+class file_buffer_t;
 
 class open_files_t {
 	private:

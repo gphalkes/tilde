@@ -130,8 +130,6 @@ main_t::main_t(void) {
 
 	close_confirm_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
 	close_confirm_dialog->center_over(this);
-	//~ close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::save_before_close), 0);
-	//~ close_confirm_dialog->connect_activate(sigc::mem_fun(this, &main_t::close_no_check), 1);
 }
 
 bool main_t::process_key(key_t key) {
@@ -159,6 +157,7 @@ bool main_t::set_size(optint height, optint width) {
 	result &= open_file_dialog->set_size(height - 4, width - 4);
 	result &= save_as_dialog->set_size(height - 4, width - 4);
 	#warning FIXME: resize continue_abort_dialog as well
+	#warning FIXME: resize close_confirm_dialog as well
 	return true;
 }
 
@@ -197,11 +196,11 @@ void main_t::menu_activated(int id) {
 			break;
 
 		case action_id_t::FILE_EXIT:
+			exit_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result));
 			//FIXME: ask whether to save/cancel
 			//~ #ifdef DEBUG
 			//~ delete editwin;
 			//~ #endif
-			exit(EXIT_SUCCESS);
 			break;
 
 		case action_id_t::EDIT_UNDO:

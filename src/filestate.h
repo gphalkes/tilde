@@ -20,6 +20,7 @@
 
 #include "util.h"
 #include "filewrapper.h"
+#include "openfiles.h"
 
 class file_buffer_t;
 
@@ -135,6 +136,21 @@ class close_process_t : public save_process_t {
 	public:
 		static void execute(const callback_t &cb, file_buffer_t *_file);
 		virtual const file_buffer_t *get_file_buffer_ptr(void); //Note: pointer is no longer valid if result == true. For check purposes only
+};
+
+class exit_process_t : public stepped_process_t {
+	protected:
+		open_files_t::iterator iter;
+		bool in_step, in_save;
+
+		virtual bool step(void);
+		virtual void do_save(void);
+		virtual void dont_save(void);
+		virtual void save_done(stepped_process_t *process);
+
+		exit_process_t(const callback_t &cb);
+	public:
+		static void execute(const callback_t &cb);
 };
 
 #endif

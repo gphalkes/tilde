@@ -206,7 +206,6 @@ close_process_t::close_process_t(const callback_t &cb, file_buffer_t *_file) : s
 }
 
 bool close_process_t::step(void) {
-	string message;
 
 	if (state < CONFIRM_CLOSE) {
 		if (save_process_t::step()) {
@@ -220,10 +219,8 @@ bool close_process_t::step(void) {
 
 	disconnect();
 	if (state == CLOSE) {
-		open_files_t::iterator iter;
 		//FIXME: add to recent files
-		if ((iter = open_files.contains(file->get_name())) != open_files.end())
-			open_files.erase(file);
+		open_files.erase(file);
 		/* Can't delete the file_buffer_t here, because on switching buffers the
 		   edit_window_t will still want to do some stuff with it. Furthermore,
 		   the newly allocated file_buffer_t may be at the same address, causing
@@ -231,6 +228,7 @@ bool close_process_t::step(void) {
 		result = true;
 		return true;
 	} else if (state == CONFIRM_CLOSE) {
+		string message;
 		printf_into(&message, "Save changes to '%s'", file->get_name() == NULL ? "(Untitled)" : file->get_name());
 		connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &close_process_t::do_save), 0));
 		connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &close_process_t::dont_save), 1));
@@ -260,3 +258,46 @@ void close_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
 const file_buffer_t *close_process_t::get_file_buffer_ptr(void) {
 	return file;
 }
+
+exit_process_t::exit_process_t(const callback_t &cb) : stepped_process_t(cb), iter(open_files.begin()), in_step(false), in_save(false) {}
+
+bool exit_process_t::step(void) {
+	for (; iter != open_files.end(); iter++) {
+		if ((*iter)->is_modified()) {
+			string message;
+			printf_into(&message, "Save changes to '%s'", (*iter)->get_name() == NULL ? "(Untitled)" : (*iter)->get_name());
+			connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &exit_process_t::do_save), 0));
+			connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &exit_process_t::dont_save), 1));
+			connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &exit_process_t::abort), 2));
+			close_confirm_dialog->set_message(&message);
+			close_confirm_dialog->show();
+			return false;
+		}
+	}
+	exit(EXIT_SUCCESS);
+/*	in_step = false;
+	return true;*/
+}
+
+void exit_process_t::do_save(void) {
+	save_process_t::execute(sigc::mem_fun(this, &exit_process_t::save_done), *iter);
+}
+
+void exit_process_t::dont_save(void) {
+	iter++;
+	run();
+}
+
+void exit_process_t::save_done(stepped_process_t *process) {
+	if (process->get_result()) {
+		iter++;
+		run();
+	} else {
+		abort();
+	}
+}
+
+void exit_process_t::execute(const callback_t &cb) {
+	(new exit_process_t(cb))->run();
+}
+
