@@ -22,15 +22,22 @@
 
 #define BOM_STRING "\xEF\xBB\xBF"
 
-file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name),
-		encoding(_encoding), file_has_bom(false)
+file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name), file_has_bom(false)
 {
+	if (_encoding == NULL)
+		encoding = strdup("UTF-8");
+	else
+		encoding = strdup(_encoding);
+	if (encoding == NULL)
+		throw bad_alloc();
+
 	if (name == NULL)
 		name_line.set_text("(Untitled)");
 	open_files.push_back(this);
 }
 
 file_buffer_t::~file_buffer_t(void) {
+	free(encoding);
 	open_files.erase(this);
 }
 
@@ -167,12 +174,13 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			transcript_t *handle;
 			transcript_error_t error;
 			//FIXME: bail out on error
-			if (!state->encoding.empty())
+			if (!state->encoding.empty()) {
 				handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0, &error);
-			else if (encoding != NULL)
+				free(encoding);
+				encoding = strdup(state->encoding.c_str());
+			} else {
 				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
-			else
-				handle = NULL;
+			}
 			state->wrapper = new file_write_wrapper_t(state->fd, handle);
 			state->i = 0;
 			state->state = save_as_process_t::WRITING;
@@ -216,4 +224,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 	return rw_result_t(rw_result_t::SUCCESS);
 }
 
+const char *file_buffer_t::get_encoding(void) const {
+	return encoding;
+}
 

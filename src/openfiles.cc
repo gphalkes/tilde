@@ -18,6 +18,7 @@
 #include "option.h"
 
 open_files_t open_files;
+recent_files_t recent_files;
 
 void open_files_t::push_back(file_buffer_t *text) {
 	files.push_back(text);
@@ -93,15 +94,37 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
 }
 
 
-#if 0
+recent_file_info_t::recent_file_info_t(file_buffer_t *file) {
+	if ((name = strdup(file->get_name())) == NULL)
+		throw bad_alloc();
+	if ((encoding = strdup(file->get_encoding())) == NULL) {
+		free(name);
+		throw bad_alloc();
+	}
+}
+
+recent_file_info_t::~recent_file_info_t(void) {
+	free(name);
+	free(encoding);
+}
+
+const char *recent_file_info_t::get_name(void) const {
+	return name;
+}
+
+const char *recent_file_info_t::get_encoding(void) const {
+	return encoding;
+}
+
+
 void recent_files_t::push_front(file_buffer_t *text) {
 	if (text->get_name() == NULL)
 		return;
 
-	for (deque<char *>::iterator iter = names.begin();
+	for (deque<recent_file_info_t *>::iterator iter = names.begin();
 			iter != names.end(); iter++)
 	{
-		if (strcmp(*iter, text->get_name()) == 0)
+		if (strcmp((*iter)->get_name(), text->get_name()) == 0)
 			return;
 	}
 
@@ -111,22 +134,18 @@ void recent_files_t::push_front(file_buffer_t *text) {
 		delete names.back();
 		names.pop_back();
 	}
-	names.push_front(strdup(text->get_name()));
-	delete text;
+	names.push_front(new recent_file_info_t(text));
 }
 
 void recent_files_t::open(size_t idx) {
-	string name = names[idx];
-	#warning FIXME: also save encoding such that we can pass it here!!
-	//openFile(&name, new UTF8Encoding());
-	return;
+	load_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), names[idx]);
 }
 
 void recent_files_t::erase(const char *name) {
-	for (deque<char *>::iterator iter = names.begin();
+	for (deque<recent_file_info_t *>::iterator iter = names.begin();
 			iter != names.end(); iter++)
 	{
-		if (strcmp(*iter, name) == 0) {
+		if (strcmp((*iter)->get_name(), name) == 0) {
 			delete *iter;
 			names.erase(iter);
 			version++;
@@ -136,6 +155,5 @@ void recent_files_t::erase(const char *name) {
 }
 
 int recent_files_t::get_version(void) { return version; }
-iterator recent_files_t::begin(void) { return names.begin(); }
-iterator recent_files_t::end(void) { return names.end(); }
-#endif
+recent_files_t::iterator recent_files_t::begin(void) { return names.begin(); }
+recent_files_t::iterator recent_files_t::end(void) { return names.end(); }

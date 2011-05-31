@@ -22,7 +22,7 @@ using namespace t3_widget;
 
 class file_buffer_t : public text_buffer_t {
 	protected:
-		const char *encoding;
+		char *encoding;
 		bool file_has_bom;
 
 	public:
@@ -30,6 +30,8 @@ class file_buffer_t : public text_buffer_t {
 		virtual ~file_buffer_t(void);
 		rw_result_t load(load_process_t *state);
 		rw_result_t save(save_as_process_t *state);
+
+		const char *get_encoding(void) const;
 };
 
 #endif

@@ -70,6 +70,7 @@ class load_process_t : public stepped_process_t {
 		int fd;
 
 		load_process_t(const callback_t &cb);
+		load_process_t(const callback_t &cb, const recent_file_info_t *info);
 		virtual bool step(void);
 		virtual void file_selected(const std::string *name);
 		virtual void encoding_selected(const std::string *_encoding);
@@ -78,6 +79,7 @@ class load_process_t : public stepped_process_t {
 	public:
 		virtual file_buffer_t *get_file_buffer(void);
 		static void execute(const callback_t &cb);
+		static void execute(const callback_t &cb, const recent_file_info_t *info);
 };
 
 class save_as_process_t : public stepped_process_t {
@@ -135,7 +137,7 @@ class close_process_t : public save_process_t {
 
 	public:
 		static void execute(const callback_t &cb, file_buffer_t *_file);
-		virtual const file_buffer_t *get_file_buffer_ptr(void); //Note: pointer is no longer valid if result == true. For check purposes only
+		virtual const file_buffer_t *get_file_buffer_ptr(void);
 };
 
 class exit_process_t : public stepped_process_t {

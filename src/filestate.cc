@@ -21,6 +21,10 @@
 load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), state(SELECT_FILE), file(NULL), wrapper(NULL),
 		encoding("UTF-8"), fd(-1) {}
 
+load_process_t::load_process_t(const callback_t &cb, const recent_file_info_t *info) : stepped_process_t(cb),
+		state(INITIAL), file(new file_buffer_t(info->get_name(), info->get_encoding())), wrapper(NULL), fd(-1) {}
+
+
 bool load_process_t::step(void) {
 	string message;
 	rw_result_t rw_result;
@@ -103,6 +107,10 @@ load_process_t::~load_process_t(void) {
 
 void load_process_t::execute(const callback_t &cb) {
 	(new load_process_t(cb))->run();
+}
+
+void load_process_t::execute(const callback_t &cb, const recent_file_info_t *info) {
+	(new load_process_t(cb, info))->run();
 }
 
 
@@ -217,8 +225,7 @@ bool close_process_t::step(void) {
 
 	disconnect();
 	if (state == CLOSE) {
-		//FIXME: add to recent files
-		open_files.erase(file);
+		recent_files.push_front(file);
 		/* Can't delete the file_buffer_t here, because on switching buffers the
 		   edit_window_t will still want to do some stuff with it. Furthermore,
 		   the newly allocated file_buffer_t may be at the same address, causing
@@ -272,6 +279,7 @@ bool exit_process_t::step(void) {
 			return false;
 		}
 	}
+	//FIXME: do we really want to call exit here, or do we need to do some clean-up elsewhere
 	exit(EXIT_SUCCESS);
 /*	in_step = false;
 	return true;*/

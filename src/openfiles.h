@@ -47,10 +47,21 @@ class open_files_t {
 		file_buffer_t *previous_buffer(file_buffer_t *start);
 };
 
-#if 0
+class recent_file_info_t {
+	private:
+		char *name;
+		char *encoding;
+	public:
+		recent_file_info_t(file_buffer_t *file);
+		~recent_file_info_t(void);
+
+		const char *get_name(void) const;
+		const char *get_encoding(void) const;
+};
+
 class recent_files_t {
 	private:
-		deque<char *> names;
+		deque<recent_file_info_t *> names;
 		version_t version;
 
 	public:
@@ -59,12 +70,12 @@ class recent_files_t {
 		void erase(const char *name);
 
 		int get_version(void);
-		typedef deque<char *>::iterator iterator;
+		typedef deque<recent_file_info_t *>::iterator iterator;
 		iterator begin(void);
 		iterator end(void);
 };
-#endif
 
 extern open_files_t open_files;
+extern recent_files_t recent_files;
 
 #endif
