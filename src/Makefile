@@ -21,6 +21,7 @@ SOURCES..objects/edit := \
 	option.cc \
 	util.cc \
 	dialogs/encodingdialog.cc \
+	dialogs/openrecentdialog.cc \
 	dialogs/selectbufferdialog.cc
 LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode
 LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs -Ltranscript/.libs -Lunicode/.libs

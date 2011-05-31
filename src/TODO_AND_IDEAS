@@ -15,11 +15,11 @@ SAVE (AS)
 
 MISSING FUNCTIONALITY
 =====================
-- recent file tracking (with open recent menu item)
 - options setting
 - help text
 - about dialog
 - replace with regex is only partially working
+- open from command line
 
 GENERIC
 =======

@@ -137,15 +137,15 @@ void recent_files_t::push_front(file_buffer_t *text) {
 	names.push_front(new recent_file_info_t(text));
 }
 
-void recent_files_t::open(size_t idx) {
-	load_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), names[idx]);
+recent_file_info_t *recent_files_t::get_info(size_t idx) {
+	return names[idx];
 }
 
-void recent_files_t::erase(const char *name) {
+void recent_files_t::erase(recent_file_info_t *info) {
 	for (deque<recent_file_info_t *>::iterator iter = names.begin();
 			iter != names.end(); iter++)
 	{
-		if (strcmp((*iter)->get_name(), name) == 0) {
+		if (*iter == info) {
 			delete *iter;
 			names.erase(iter);
 			version++;

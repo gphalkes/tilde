@@ -66,8 +66,8 @@ class recent_files_t {
 
 	public:
 		void push_front(file_buffer_t *text);
-		void open(size_t idx);
-		void erase(const char *name);
+		recent_file_info_t *get_info(size_t idx);
+		void erase(recent_file_info_t *info);
 
 		int get_version(void);
 		typedef deque<recent_file_info_t *>::iterator iterator;

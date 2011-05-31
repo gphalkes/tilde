@@ -145,12 +145,24 @@ class exit_process_t : public stepped_process_t {
 		open_files_t::iterator iter;
 		bool in_step, in_save;
 
+		exit_process_t(const callback_t &cb);
 		virtual bool step(void);
 		virtual void do_save(void);
 		virtual void dont_save(void);
 		virtual void save_done(stepped_process_t *process);
 
-		exit_process_t(const callback_t &cb);
+	public:
+		static void execute(const callback_t &cb);
+};
+
+class open_recent_process_t : public load_process_t	{
+	protected:
+		recent_file_info_t *info;
+
+		open_recent_process_t(const callback_t &cb);
+		~open_recent_process_t(void);
+		virtual void file_selected(recent_file_info_t *_info);
+		virtual bool step(void);
 	public:
 		static void execute(const callback_t &cb);
 };

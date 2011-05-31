@@ -307,3 +307,30 @@ void exit_process_t::execute(const callback_t &cb) {
 	(new exit_process_t(cb))->run();
 }
 
+open_recent_process_t::open_recent_process_t(const callback_t &cb) : load_process_t(cb) {}
+
+bool open_recent_process_t::step(void) {
+	if (state == SELECT_FILE) {
+		connections.push_back(open_recent_dialog->connect_file_selected(sigc::mem_fun(this, &open_recent_process_t::file_selected)));
+		connections.push_back(open_recent_dialog->connect_closed(sigc::mem_fun(this, &open_recent_process_t::abort)));
+		open_recent_dialog->show();
+		return false;
+	}
+	return load_process_t::step();
+}
+
+void open_recent_process_t::file_selected(recent_file_info_t *_info) {
+	info = _info;
+	file = new file_buffer_t(info->get_name(), info->get_encoding());
+	state = INITIAL;
+	run();
+}
+
+open_recent_process_t::~open_recent_process_t(void) {
+	if (result)
+		recent_files.erase(info);
+}
+
+void open_recent_process_t::execute(const callback_t &cb) {
+	(new open_recent_process_t(cb))->run();
+}

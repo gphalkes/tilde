@@ -21,6 +21,7 @@
 #include "openfiles.h"
 #include "dialogs/selectbufferdialog.h"
 #include "dialogs/encodingdialog.h"
+#include "dialogs/openrecentdialog.h"
 #include "log.h"
 
 using namespace std;
@@ -33,6 +34,7 @@ open_file_dialog_t *open_file_dialog;
 save_as_dialog_t *save_as_dialog;
 message_dialog_t *close_confirm_dialog;
 message_dialog_t *error_dialog;
+open_recent_dialog_t *open_recent_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -136,6 +138,9 @@ main_t::main_t(void) {
 
 	error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Ok;oO", NULL);
 	error_dialog->center_over(this);
+
+	open_recent_dialog = new open_recent_dialog_t(11, t3_win_get_width(window) - 4);
+	open_recent_dialog->center_over(this);
 }
 
 bool main_t::process_key(key_t key) {
@@ -162,6 +167,8 @@ bool main_t::set_size(optint height, optint width) {
 	result &= select_buffer_dialog->set_size(None, width - 4);
 	result &= open_file_dialog->set_size(height - 4, width - 4);
 	result &= save_as_dialog->set_size(height - 4, width - 4);
+	result &= open_recent_dialog->set_size(11, width - 4);
+
 	return true;
 }
 
@@ -186,12 +193,9 @@ void main_t::menu_activated(int id) {
 		case action_id_t::FILE_SAVE_AS:
 			save_as_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), (file_buffer_t *) get_current()->get_text());
 			break;
-
-/*
-		case ActionID::FILE_OPEN_RECENT:
-			activate_window(WindowID::OPEN_RECENT);
+		case action_id_t::FILE_OPEN_RECENT:
+			open_recent_process_t::execute(sigc::mem_fun(this, &main_t::switch_to_new_buffer));
 			break;
-*/
 		case action_id_t::FILE_REPAINT:
 			t3_widget::redraw();
 			break;

@@ -11,18 +11,27 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef OPENRECENTDIALOG_H
+#define OPENRECENTDIALOG_H
 
 #include <widget.h>
 using namespace t3_widget;
 
-#include "dialogs/openrecentdialog.h"
+#include "openfiles.h"
 
-extern message_dialog_t *continue_abort_dialog;
-extern open_file_dialog_t *open_file_dialog;
-extern save_as_dialog_t *save_as_dialog;
-extern message_dialog_t *close_confirm_dialog;
-extern message_dialog_t *error_dialog;
-extern open_recent_dialog_t *open_recent_dialog;
+class open_recent_dialog_t : public dialog_t {
+	private:
+		list_pane_t *list;
+		int known_version;
+
+	public:
+		open_recent_dialog_t(int height, int width);
+		virtual bool set_size(optint height, optint width);
+		virtual void show(void);
+		virtual void ok_activated(void);
+
+	T3_WIDGET_SIGNAL(file_selected, void, recent_file_info_t *);
+};
+
+
 #endif
