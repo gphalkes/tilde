@@ -26,6 +26,8 @@
 using namespace std;
 using namespace t3_widget;
 
+#define MESSAGE_DIALOG_WIDTH 50
+
 message_dialog_t *continue_abort_dialog;
 open_file_dialog_t *open_file_dialog;
 save_as_dialog_t *save_as_dialog;
@@ -117,7 +119,7 @@ main_t::main_t(void) {
 	select_buffer_dialog->center_over(this);
 	select_buffer_dialog->connect_activate(sigc::mem_fun(this, &main_t::switch_buffer));
 
-	continue_abort_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Question", "_Continue;cC", "_Abort;aA", NULL);
+	continue_abort_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Continue;cC", "_Abort;aA", NULL);
 	continue_abort_dialog->center_over(this);
 
 	string wd = get_working_directory();
@@ -129,10 +131,10 @@ main_t::main_t(void) {
 	save_as_dialog->center_over(this);
 	save_as_dialog->change_dir(&wd);
 
-	close_confirm_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
+	close_confirm_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
 	close_confirm_dialog->center_over(this);
 
-	error_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Error", "Ok;oO", NULL);
+	error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Ok;oO", NULL);
 	error_dialog->center_over(this);
 }
 
@@ -160,9 +162,6 @@ bool main_t::set_size(optint height, optint width) {
 	result &= select_buffer_dialog->set_size(None, width - 4);
 	result &= open_file_dialog->set_size(height - 4, width - 4);
 	result &= save_as_dialog->set_size(height - 4, width - 4);
-	#warning FIXME: resize continue_abort_dialog as well
-	#warning FIXME: resize close_confirm_dialog as well
-	#warning FIXME: resize error_dialog as well
 	return true;
 }
 
