@@ -18,6 +18,7 @@
 #include "filebuffer.h"
 #include "openfiles.h"
 #include "filestate.h"
+#include "log.h"
 
 #define BOM_STRING "\xEF\xBB\xBF"
 
@@ -33,14 +34,14 @@ file_buffer_t::~file_buffer_t(void) {
 	open_files.erase(this);
 }
 
-rw_result_t file_buffer_t::load(load_state_t *state) {
+rw_result_t file_buffer_t::load(load_process_t *state) {
 	string *line;
 
 	if (state->file != this)
 		PANIC();
 
 	switch (state->state) {
-		case load_state_t::INITIAL: {
+		case load_process_t::INITIAL: {
 			char *_name;
 			transcript_t *handle;
 			transcript_error_t error;
@@ -63,12 +64,12 @@ rw_result_t file_buffer_t::load(load_state_t *state) {
 			} catch (bad_alloc &ba) {
 				return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 			}
-			state->state = load_state_t::READING;
+			state->state = load_process_t::READING;
 		}
-		case load_state_t::READING:
+		case load_process_t::READING:
 			try {
 				while ((line = state->wrapper->read_line()) != NULL) {
-					if (lines.size() == 0 && line->size() >= 3 && memcmp(line->c_str(), BOM_STRING, 3) == 0) {
+					if (lines.size() == 1 && line->size() >= 3 && memcmp(line->c_str(), BOM_STRING, 3) == 0) {
 						file_has_bom = true;
 						line->erase(0, 3);
 					}
@@ -83,6 +84,12 @@ rw_result_t file_buffer_t::load(load_state_t *state) {
 					}
 					delete line;
 				}
+				/* If the file is not empty, remove the last added line, because
+				   it is not actually part of the file. */
+				if (lines.size() > 1) {
+					delete lines.back();
+					lines.pop_back();
+				}
 			} catch (rw_result_t &result) {
 				return result;
 			}
@@ -93,7 +100,7 @@ rw_result_t file_buffer_t::load(load_state_t *state) {
 	return rw_result_t(rw_result_t::SUCCESS);
 }
 
-rw_result_t file_buffer_t::save(save_state_t *state) {
+rw_result_t file_buffer_t::save(save_as_process_t *state) {
 	size_t idx;
 	const char *save_name;
 
@@ -101,13 +108,13 @@ rw_result_t file_buffer_t::save(save_state_t *state) {
 		PANIC();
 
 	switch (state->state) {
-		case save_state_t::INITIAL:
-			if (state->name == NULL) {
+		case save_as_process_t::INITIAL:
+			if (state->name.empty()) {
 				if (name == NULL)
 					PANIC();
 				save_name = name;
 			} else {
-				save_name = state->name;
+				save_name = state->name.c_str();
 			}
 
 			if ((state->real_name = resolve_links(save_name)) == NULL)
@@ -121,30 +128,30 @@ rw_result_t file_buffer_t::save(save_state_t *state) {
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 				}
 			} else {
-				state->state = save_state_t::ALLOW_OVERWRITE;
-				if (state->name != NULL)
+				state->state = save_as_process_t::ALLOW_OVERWRITE;
+				if (!state->name.empty())
 					return rw_result_t(rw_result_t::FILE_EXISTS);
 				/* Note that we have a new case in the middle of the else statement
 				   here. It is an ugly hack, but it does prevent a lot of code
 				   duplication and other hacks. */
-		case save_state_t::ALLOW_OVERWRITE:
-				string tempNameStr = state->real_name;
+		case save_as_process_t::ALLOW_OVERWRITE:
+				string temp_name_str = state->real_name;
 
-				if ((idx = tempNameStr.rfind('/')) == string::npos)
+				if ((idx = temp_name_str.rfind('/')) == string::npos)
 					idx = 0;
 				else
 					idx++;
 
-				tempNameStr.erase(idx);
+				temp_name_str.erase(idx);
 				try {
-					tempNameStr.append(".tildeXXXXXX");
+					temp_name_str.append(".tildeXXXXXX");
 				} catch (bad_alloc &ba) {
 					return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 				}
 
 				/* Unfortunately, we can't pass the c_str result to mkstemp as we are not allowed
 				   to change that string. So we'll just have to strdup it :-( */
-				if ((state->temp_name = strdup(tempNameStr.c_str())) == NULL)
+				if ((state->temp_name = strdup(temp_name_str.c_str())) == NULL)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
 				if ((state->fd = mkstemp(state->temp_name)) < 0)
@@ -160,27 +167,27 @@ rw_result_t file_buffer_t::save(save_state_t *state) {
 			transcript_t *handle;
 			transcript_error_t error;
 			//FIXME: bail out on error
-			if (state->encoding != NULL)
-				handle = transcript_open_converter(state->encoding, TRANSCRIPT_UTF8, 0, &error);
+			if (!state->encoding.empty())
+				handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0, &error);
 			else if (encoding != NULL)
 				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
 			else
 				handle = NULL;
 			state->wrapper = new file_write_wrapper_t(state->fd, handle);
 			state->i = 0;
-			state->state = save_state_t::WRITING;
+			state->state = save_as_process_t::WRITING;
 		}
-		case save_state_t::WRITING:
+		case save_as_process_t::WRITING:
 			try {
 				//FIXME: only if in direct UTF-8 mode
 				if (file_has_bom && state->i == 0)
 					state->wrapper->write(BOM_STRING, 3);
 
-				if (state->i != 0)
-					state->wrapper->write("\n", 1);
-
 				for (; state->i < lines.size(); state->i++) {
-					const string *data = lines[state->i]->get_data();
+					const string *data;
+					if (state->i != 0)
+						state->wrapper->write("\n", 1);
+					data = lines[state->i]->get_data();
 					state->wrapper->write(data->data(), data->size());
 				}
 			} catch (rw_result_t error) {
@@ -195,11 +202,10 @@ rw_result_t file_buffer_t::save(save_state_t *state) {
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 			}
 
-			if (state->new_name != NULL) {
+			if (!state->name.empty()) {
 				free(name);
-				name = state->new_name;
-				name_line.set_text(state->new_name);
-				state->new_name = NULL;
+				name = strdup(state->name.c_str());
+				name_line.set_text(name);
 			}
 			undo_list.set_mark();
 			last_undo_type = UNDO_NONE;

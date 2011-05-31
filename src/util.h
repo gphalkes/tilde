@@ -16,6 +16,8 @@
 
 #include <limits.h>
 #include <string>
+#include <list>
+#include <sigc++/sigc++.h>
 
 #ifdef __GNUC__
 void fatal(const char *fmt, ...) __attribute__((format (printf, 1, 2))) __attribute__((noreturn));
@@ -65,15 +67,25 @@ class version_t {
 		bool operator==(int other) { return value == other; }
 };
 
-class continuation_t {
+class stepped_process_t {
+	protected:
+		std::list<sigc::connection> connections;
+		typedef sigc::slot<void, stepped_process_t *> callback_t;
+		callback_t done_cb;
+		bool result;
+
+		stepped_process_t(void);
+		stepped_process_t(const callback_t &cb);
+		virtual bool step(void) = 0;
+		void run(void);
+		void abort(void);
+		void disconnect(void);
+		void done(bool _result);
+
 	public:
-		enum result_t {
-			INCOMPLETE,
-			COMPLETED,
-			ABORTED
-		};
-		virtual result_t operator()(void) = 0;
-		virtual ~continuation_t(void) {};
+		bool get_result(void);
+		virtual ~stepped_process_t();
+		static void ignore_result(stepped_process_t *process);
 };
 
 void enable_debugger_on_segfault(const char *_executable);

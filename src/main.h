@@ -18,4 +18,7 @@
 using namespace t3_widget;
 
 extern message_dialog_t *continue_abort_dialog;
+extern open_file_dialog_t *open_file_dialog;
+extern save_as_dialog_t *save_as_dialog;
+
 #endif

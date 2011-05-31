@@ -16,43 +16,52 @@
 #include "filestate.h"
 #include "filebuffer.h"
 #include "main.h"
+#include "openfiles.h"
 
-load_state_t::load_state_t(const char *name, const char *encoding, const sigc::slot<void, file_buffer_t *> &_callback) :
-		state(INITIAL), callback(_callback), file(NULL), wrapper(NULL), fd(-1)
-{
-	file = new file_buffer_t(name, encoding);
-}
+#warning FIXME: center message dialog
 
-continuation_t::result_t load_state_t::operator()(void) {
-	rw_result_t result;
+load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), state(SELECT_FILE), file(NULL), wrapper(NULL),
+		encoding("UTF-8"), fd(-1) {}
+
+bool load_process_t::step(void) {
 	string message;
+	rw_result_t rw_result;
 
-	switch ((result = file->load(this))) {
+	if (state == SELECT_FILE) {
+		connections.push_back(open_file_dialog->connect_closed(sigc::mem_fun(this, &load_process_t::abort)));
+		connections.push_back(open_file_dialog->connect_file_selected(sigc::mem_fun(this, &load_process_t::file_selected)));
+		open_file_dialog->show();
+		//~ connections.push_back(encoding_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::encoding_selected)));
+		//~ encoding_dialog->set_encoding(encoding->c_str());
+		return false;
+	}
+
+	disconnect();
+	switch ((rw_result = file->load(this))) {
 		case rw_result_t::SUCCESS:
-			callback(file);
-			file = NULL;
-			delete this;
-			return COMPLETED;
+			result = true;
+			break;
 		case rw_result_t::ERRNO_ERROR:
-			printf_into(&message, "Could not load file: %s", strerror(result.get_errno_error()));
+			printf_into(&message, "Could not load file: %s", strerror(rw_result.get_errno_error()));
 			message_dialog->set_message(&message);
-			delete this;
-			return ABORTED;
+			message_dialog->show();
+			break;
 		case rw_result_t::CONVERSION_OPEN_ERROR:
 			printf_into(&message, "Could not find a converter for selected encoding: %s",
-				transcript_strerror(result.get_transcript_error()));
+				transcript_strerror(rw_result.get_transcript_error()));
 			message_dialog->set_message(&message);
-			delete this;
-			return ABORTED;
+			message_dialog->show();
+			break;
 		case rw_result_t::CONVERSION_ERROR:
-			printf_into(&message, "Could not load file in encoding FIXME: %s", transcript_strerror(result.get_transcript_error()));
+			printf_into(&message, "Could not load file in encoding FIXME: %s", transcript_strerror(rw_result.get_transcript_error()));
 			message_dialog->set_message(&message);
-			delete this;
-			return INCOMPLETE;
+			message_dialog->show();
+			break;
 		case rw_result_t::CONVERSION_IMPRECISE:
 			printf_into(&message, "Conversion from encoding FIXME is irreversible");
 			continue_abort_dialog->set_message(&message);
-			return INCOMPLETE;
+			continue_abort_dialog->show();
+			return false;
 		case rw_result_t::CONVERSION_ILLEGAL:
 			//FIXME: handle illegal characters in input
 		case rw_result_t::CONVERSION_TRUNCATED:
@@ -60,66 +69,109 @@ continuation_t::result_t load_state_t::operator()(void) {
 		default:
 			PANIC();
 	}
-	delete this;
-	return ABORTED;
+	return true;
 }
 
-load_state_t::~load_state_t(void) {
-	delete file;
+void load_process_t::file_selected(const string *name) {
+	open_files_t::iterator iter;
+	if ((iter = open_files.contains(name->c_str())) != open_files.end()) {
+		file = *iter;
+		done(true);
+		return;
+	}
+
+	file = new file_buffer_t(name->c_str(), encoding.c_str());
+	state = INITIAL;
+	run();
+}
+
+void load_process_t::encoding_selected(const string *_encoding) {
+	encoding = *_encoding;
+}
+
+file_buffer_t *load_process_t::get_file_buffer(void) {
+	if (result)
+		return file;
+	return NULL;
+}
+
+load_process_t::~load_process_t(void) {
+	if (!result)
+		delete file;
 	delete wrapper;
 	if (fd >= 0)
 		close(fd);
 }
 
-save_state_t::save_state_t(file_buffer_t *_file, const char *_encoding, const char *_name) :
-	state(INITIAL), file(_file), name(_name), encoding(_encoding), new_name(NULL),
-	real_name(NULL), temp_name(NULL), fd(-1), wrapper(NULL)
-{
-	if (name != NULL) {
-		if ((new_name = strdup(name)) == NULL)
-			throw bad_alloc();
-	}
+void load_process_t::execute(const callback_t &cb) {
+	(new load_process_t(cb))->run();
 }
 
-continuation_t::result_t save_state_t::operator()(void) {
-	rw_result_t result;
-	string message;
 
-	switch ((result = file->save(this))) {
+save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file) : stepped_process_t(cb), state(SELECT_FILE),
+		file(_file), real_name(NULL), temp_name(NULL), fd(-1), wrapper(NULL)
+{}
+
+bool save_as_process_t::step(void) {
+	string message;
+	rw_result_t rw_result;
+
+	if (state == SELECT_FILE) {
+		connections.push_back(save_as_dialog->connect_closed(sigc::mem_fun(this, &save_as_process_t::abort)));
+		connections.push_back(save_as_dialog->connect_file_selected(sigc::mem_fun(this, &save_as_process_t::file_selected)));
+		save_as_dialog->show();
+		//~ connections.push_back(encoding_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::encoding_selected)));
+		//~ encoding_dialog->set_encoding(file->get_encoding());
+		return false;
+	}
+
+	disconnect();
+	switch ((rw_result = file->save(this))) {
 		case rw_result_t::SUCCESS:
-			delete this;
-			return COMPLETED;
+			result = true;
+			break;
 		case rw_result_t::FILE_EXISTS:
-			printf_into(&message, "File '%s' already exists", new_name);
+			printf_into(&message, "File '%s' already exists", name.c_str());
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
-		#warning FIXME: if the abort button is pressed, the continuation is not cleaned up!
-			return INCOMPLETE;
+			return false;
 		case rw_result_t::ERRNO_ERROR:
-			printf_into(&message, "Could not save file: %s", strerror(result.get_errno_error()));
+			printf_into(&message, "Could not save file: %s", strerror(rw_result.get_errno_error()));
 			message_dialog->set_message(&message);
-			delete this;
-			return ABORTED;
+			message_dialog->show();
+			break;
 		case rw_result_t::CONVERSION_ERROR:
-			printf_into(&message, "Could not save file in encoding FIXME: %s", transcript_strerror(result.get_transcript_error()));
+			printf_into(&message, "Could not save file in encoding FIXME: %s", transcript_strerror(rw_result.get_transcript_error()));
 			message_dialog->set_message(&message);
-			delete this;
-			return ABORTED;
+			message_dialog->show();
+			break;
 		case rw_result_t::CONVERSION_IMPRECISE:
 			i++;
 			printf_into(&message, "Conversion into encoding FIXME is irreversible");
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
-		#warning FIXME: if the abort button is pressed, the continuation is not cleaned up!
-			return INCOMPLETE;
+			continue_abort_dialog->show();
+			return false;
 		default:
 			PANIC();
 	}
-	delete this;
-	return ABORTED;
+	return true;
 }
 
-save_state_t::~save_state_t(void) {
-	free(new_name);
+void save_as_process_t::file_selected(const std::string *_name) {
+	name = *_name;
+	state = INITIAL;
+	run();
+}
+
+void save_as_process_t::encoding_selected(const std::string *_encoding) {
+	encoding = *_encoding;
+}
+
+save_as_process_t::~save_as_process_t(void) {
 	free(real_name);
 
 	if (fd >= 0) {
@@ -128,8 +180,21 @@ save_state_t::~save_state_t(void) {
 			unlink(temp_name);
 			free(temp_name);
 		} else {
-			unlink(name);
+			unlink(name.c_str());
 		}
 	}
 	delete wrapper;
+}
+
+void save_as_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
+	(new save_as_process_t(cb, _file))->run();
+}
+
+save_process_t::save_process_t(const callback_t &cb, file_buffer_t *_file) : save_as_process_t(cb, _file) {
+	if (file->get_name() != NULL)
+		state = INITIAL;
+}
+
+void save_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
+	(new save_process_t(cb, _file))->run();
 }

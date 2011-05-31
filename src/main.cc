@@ -27,6 +27,8 @@ using namespace std;
 using namespace t3_widget;
 
 message_dialog_t *continue_abort_dialog;
+open_file_dialog_t *open_file_dialog;
+save_as_dialog_t *save_as_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -36,11 +38,7 @@ class main_t : public main_window_base_t {
 		split_t *split;
 
 		select_buffer_dialog_t *select_buffer_dialog;
-		open_file_dialog_t *open_file_dialog;
-		save_as_dialog_t *save_as_dialog;
 		message_dialog_t *close_confirm_dialog;
-
-		continuation_t *current_continuation;
 
 	public:
 		main_t(void);
@@ -51,16 +49,12 @@ class main_t : public main_window_base_t {
 		edit_window_t *get_current(void) { return (edit_window_t *) split->get_current(); }
 		void menu_activated(int id);
 		void switch_buffer(file_buffer_t *buffer);
-		void call_continuation(void);
-		void abort_continuation(void);
-		void open_file(string *name);
-		void save_file(string *name);
-		void switch_to_new_buffer(file_buffer_t *buffer);
+		void switch_to_new_buffer(stepped_process_t *process);
 		void save_before_close(void);
 		void close_no_check(void);
 };
 
-main_t::main_t(void) : current_continuation(NULL) {
+main_t::main_t(void) {
 	menu = new menu_bar_t(option.hide_menubar);
 	push_back(menu);
 	menu->connect_activate(sigc::mem_fun(this, &main_t::menu_activated));
@@ -125,18 +119,14 @@ main_t::main_t(void) : current_continuation(NULL) {
 
 	continue_abort_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Question", "_Continue;cC", "_Abort;aA", NULL);
 	continue_abort_dialog->center_over(this);
-	continue_abort_dialog->connect_activate(sigc::mem_fun(this, &main_t::call_continuation), 0);
-	continue_abort_dialog->connect_activate(sigc::mem_fun(this, &main_t::abort_continuation), 1);
 
 	string wd = get_working_directory();
 	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	open_file_dialog->center_over(this);
-	open_file_dialog->connect_file_selected(sigc::mem_fun(this, &main_t::open_file));
 	open_file_dialog->change_dir(&wd);
 
 	save_as_dialog = new save_as_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	save_as_dialog->center_over(this);
-	save_as_dialog->connect_file_selected(sigc::mem_fun(this, &main_t::save_file));
 	save_as_dialog->change_dir(&wd);
 
 	close_confirm_dialog = new message_dialog_t(t3_win_get_width(window) - 4, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
@@ -169,6 +159,7 @@ bool main_t::set_size(optint height, optint width) {
 	result &= select_buffer_dialog->set_size(None, width - 4);
 	result &= open_file_dialog->set_size(height - 4, width - 4);
 	result &= save_as_dialog->set_size(height - 4, width - 4);
+	#warning FIXME: resize continue_abort_dialog as well
 	return true;
 }
 
@@ -181,8 +172,7 @@ void main_t::menu_activated(int id) {
 		}
 
 		case action_id_t::FILE_OPEN:
-			//FIXME: set encoding dialog to something useful
-			open_file_dialog->show();
+			load_process_t::execute(sigc::mem_fun(this, &main_t::switch_to_new_buffer));
 			break;
 
 		case action_id_t::FILE_CLOSE: {
@@ -198,13 +188,10 @@ void main_t::menu_activated(int id) {
 			break;
 		}
 		case action_id_t::FILE_SAVE:
-			if (get_current()->get_text()->get_name() != NULL) {
-				save_file(NULL);
-				break;
-			}
-			/* FALLTHROUGH */
+			save_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), (file_buffer_t *) get_current()->get_text());
+			break;
 		case action_id_t::FILE_SAVE_AS:
-			save_as_dialog->show();
+			save_as_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), (file_buffer_t *) get_current()->get_text());
 			break;
 
 /*		case ActionID::FILE_SAVE:
@@ -316,56 +303,18 @@ void main_t::switch_buffer(file_buffer_t *buffer) {
 	get_current()->set_text(buffer);
 }
 
-void main_t::call_continuation(void) {
-	if (current_continuation == NULL)
-		PANIC();
-	if ((*current_continuation)() != continuation_t::INCOMPLETE)
-		current_continuation = NULL;
-}
+void main_t::switch_to_new_buffer(stepped_process_t *process) {
+	const text_buffer_t *text;
+	file_buffer_t *buffer;
 
-void main_t::abort_continuation(void) {
-	delete current_continuation;
-	current_continuation = NULL;
-}
-
-void main_t::open_file(string *name) {
-	open_files_t::iterator iter;
-	if ((iter = open_files.contains(name->c_str())) != open_files.end()) {
-		switch_buffer(*iter);
+	if (!process->get_result())
 		return;
-	}
 
-	try {
-		//FIXME: get encoding from encoding dialog
-		current_continuation = new load_state_t(name->c_str(), "UTF-8"/* encodingDialog->getEncoding() */,
-			sigc::mem_fun(this, &main_t::switch_to_new_buffer));
-		call_continuation();
-	} catch (...) {
-		string message;
-					//FIXME: better error message
-		printf_into(&message, "Can't open '%s': exception caught", name->c_str());
-		message_dialog->set_message(&message);
-		message_dialog->show();
-	}
-}
+	buffer = ((load_process_t *) process)->get_file_buffer();
+	if (buffer->has_window())
+		return;
 
-void main_t::save_file(string *name) {
-	file_buffer_t *text = (file_buffer_t *) get_current()->get_text();
-	try {
-		//FIXME: get encoding from encoding dialog
-		current_continuation = new save_state_t(text, NULL, name == NULL ? NULL : name->c_str());
-		call_continuation();
-	} catch (...) {
-		string message;
-		//FIXME: better error message
-		printf_into(&message, "Can't save '%s': exception caught", text->get_name());
-		message_dialog->set_message(&message);
-		message_dialog->show();
-	}
-}
-
-void main_t::switch_to_new_buffer(file_buffer_t *buffer) {
-	const text_buffer_t *text = get_current()->get_text();
+	text = get_current()->get_text();
 	get_current()->set_text(buffer);
 	//FIXME: buffer should not be closed if the user specifically created it by asking for a new file!
 	if (text->get_name() == NULL && !text->is_modified())

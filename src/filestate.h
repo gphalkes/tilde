@@ -53,40 +53,46 @@ class rw_result_t {
 		operator int (void) const { return (int) reason; }
 };
 
-class load_state_t : public continuation_t {
+class load_process_t : public stepped_process_t {
 	friend class file_buffer_t;
 
-	private:
+	protected:
 		enum {
+			SELECT_FILE,
 			INITIAL,
 			READING
 		} state;
 
-		sigc::slot<void, file_buffer_t *> callback;
 		file_buffer_t *file;
 		file_read_wrapper_t *wrapper;
+		std::string encoding;
 		int fd;
 
+		load_process_t(const callback_t &cb);
+		virtual bool step(void);
+		virtual void file_selected(const std::string *name);
+		virtual void encoding_selected(const std::string *_encoding);
+		virtual ~load_process_t(void);
+
 	public:
-		load_state_t(const char *name, const char *encoding, const sigc::slot<void, file_buffer_t *> &_callback);
-		virtual result_t operator()(void);
-		virtual ~load_state_t(void);
+		virtual file_buffer_t *get_file_buffer(void);
+		static void execute(const callback_t &cb);
 };
 
-class save_state_t : public continuation_t {
+class save_as_process_t : public stepped_process_t {
 	friend class file_buffer_t;
 
-	private:
+	protected:
 		enum {
+			SELECT_FILE,
 			INITIAL,
 			ALLOW_OVERWRITE,
 			WRITING
 		} state;
 
 		file_buffer_t *file;
-		const char *name;
-		const char *encoding;
-		char *new_name;
+		std::string name;
+		std::string encoding;
 
 		// State for save file_buffer_t::save function
 		char *real_name;
@@ -96,10 +102,21 @@ class save_state_t : public continuation_t {
 		file_write_wrapper_t *wrapper;
 		struct stat file_info;
 
+		save_as_process_t(const callback_t &cb, file_buffer_t *_file);
+		virtual bool step(void);
+		virtual void file_selected(const std::string *_name);
+		virtual void encoding_selected(const std::string *_encoding);
+		virtual ~save_as_process_t(void);
+
 	public:
-		save_state_t(file_buffer_t *_file, const char *_encoding = NULL, const char *_name = NULL);
-		virtual result_t operator()(void);
-		virtual ~save_state_t(void);
+		static void execute(const callback_t &cb, file_buffer_t *_file);
+};
+
+class save_process_t : public save_as_process_t {
+	protected:
+		save_process_t(const callback_t &cb, file_buffer_t *_file);
+	public:
+		static void execute(const callback_t &cb, file_buffer_t *_file);
 };
 
 #endif

@@ -29,6 +29,39 @@ using namespace t3_widget;
 static char debug_buffer[1024];
 static const char *executable;
 
+
+stepped_process_t::stepped_process_t(void) : result(true) {}
+stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(false) {}
+
+void stepped_process_t::run(void) {
+	if (step())
+		done(result);
+}
+
+void stepped_process_t::abort(void) { done(false); }
+
+void stepped_process_t::disconnect(void) {
+	for (list<sigc::connection>::iterator iter = connections.begin();
+			iter != connections.end(); iter++)
+		(*iter).disconnect();
+	connections.clear();
+}
+
+void stepped_process_t::done(bool _result) {
+	result = _result;
+	done_cb(this);
+	delete this;
+}
+
+stepped_process_t::~stepped_process_t() {
+	disconnect();
+}
+
+bool stepped_process_t::get_result(void) { return result; }
+
+void stepped_process_t::ignore_result(stepped_process_t *process) { (void) process; }
+
+
 static void start_debugger_on_segfault(int sig) {
 	struct rlimit vm_limit;
 	(void) sig;
