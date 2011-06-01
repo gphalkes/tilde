@@ -136,14 +136,14 @@ main_t::main_t(void) {
 	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	open_file_dialog->center_over(this);
 	open_file_dialog->change_dir(&wd);
-	encoding_button = new button_t("Encoding;eE");
+	encoding_button = new button_t("_Encoding;eE");
 	encoding_button->connect_activate(sigc::mem_fun(encoding_dialog, &encoding_dialog_t::show));
 	open_file_dialog->set_options_widget(encoding_button);
 
 	save_as_dialog = new save_as_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	save_as_dialog->center_over(this);
 	save_as_dialog->change_dir(&wd);
-	encoding_button = new button_t("Encoding;eE");
+	encoding_button = new button_t("_Encoding;eE");
 	encoding_button->connect_activate(sigc::mem_fun(encoding_dialog, &encoding_dialog_t::show));
 	save_as_dialog->set_options_widget(encoding_button);
 
