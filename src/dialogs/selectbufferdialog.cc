@@ -24,14 +24,14 @@ select_buffer_dialog_t::select_buffer_dialog_t(int height, int width) :
 	list->set_position(1, 1);
 	list->connect_activate(sigc::mem_fun(this, &select_buffer_dialog_t::ok_activated));
 
-	cancel_button = new button_t("_Cancel;cC", false);
+	cancel_button = new button_t("_Cancel", false);
 	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
 	cancel_button->set_position(-1, -2);
 	cancel_button->connect_activate(sigc::mem_fun(this, &select_buffer_dialog_t::close));
 	cancel_button->connect_move_focus_left(sigc::mem_fun(this, &select_buffer_dialog_t::focus_previous));
 	cancel_button->connect_move_focus_up(
 		sigc::bind(sigc::mem_fun(this, &select_buffer_dialog_t::focus_set), list));
-	ok_button = new button_t("_OK;oO", true);
+	ok_button = new button_t("_OK", true);
 	ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	ok_button->set_position(0, -2);
 	ok_button->connect_activate(sigc::mem_fun(this, &select_buffer_dialog_t::ok_activated));

@@ -68,53 +68,53 @@ main_t::main_t(void) {
 	push_back(menu);
 	menu->connect_activate(sigc::mem_fun(this, &main_t::menu_activated));
 
-	panel = new menu_panel_t(menu, "_File;Ff");
-	panel->add_item("_New;nN", "^N", action_id_t::FILE_NEW);
-	panel->add_item("_Open...;oO", "^O", action_id_t::FILE_OPEN);
-	panel->add_item("Open _Recent...;rR", NULL, action_id_t::FILE_OPEN_RECENT);
-	panel->add_item("_Close;cC", "^W", action_id_t::FILE_CLOSE);
-	panel->add_item("_Save;sS", "^S", action_id_t::FILE_SAVE);
-	panel->add_item("Save _As...;aA", NULL, action_id_t::FILE_SAVE_AS);
+	panel = new menu_panel_t(menu, "_File");
+	panel->add_item("_New", "^N", action_id_t::FILE_NEW);
+	panel->add_item("_Open...", "^O", action_id_t::FILE_OPEN);
+	panel->add_item("Open _Recent...", NULL, action_id_t::FILE_OPEN_RECENT);
+	panel->add_item("_Close", "^W", action_id_t::FILE_CLOSE);
+	panel->add_item("_Save", "^S", action_id_t::FILE_SAVE);
+	panel->add_item("Save _As...", NULL, action_id_t::FILE_SAVE_AS);
 	panel->add_separator();
-	panel->add_item("Re_draw Screen;dD", NULL, action_id_t::FILE_REPAINT);
-	panel->add_item("S_uspend;uU", NULL, action_id_t::FILE_SUSPEND);
-	panel->add_item("E_xit;xX", "^Q", action_id_t::FILE_EXIT);
+	panel->add_item("Re_draw Screen", NULL, action_id_t::FILE_REPAINT);
+	panel->add_item("S_uspend", NULL, action_id_t::FILE_SUSPEND);
+	panel->add_item("E_xit", "^Q", action_id_t::FILE_EXIT);
 
-	panel = new menu_panel_t(menu, "_Edit;Ee");
-	panel->add_item("_Undo;uU", "^Z", action_id_t::EDIT_UNDO);
-	panel->add_item("_Redo;rR", "^Y", action_id_t::EDIT_REDO);
+	panel = new menu_panel_t(menu, "_Edit");
+	panel->add_item("_Undo", "^Z", action_id_t::EDIT_UNDO);
+	panel->add_item("_Redo", "^Y", action_id_t::EDIT_REDO);
 	panel->add_separator();
-	panel->add_item("_Copy;cC", "^C", action_id_t::EDIT_COPY);
-	panel->add_item("Cu_t;tT", "^X", action_id_t::EDIT_CUT);
-	panel->add_item("_Paste;pP", "^V", action_id_t::EDIT_PASTE);
-	panel->add_item("Select _All;aA", "^A", action_id_t::EDIT_SELECT_ALL);
-	panel->add_item("_Insert Character...;iI", "F9", action_id_t::EDIT_INSERT_CHAR);
+	panel->add_item("_Copy", "^C", action_id_t::EDIT_COPY);
+	panel->add_item("Cu_t", "^X", action_id_t::EDIT_CUT);
+	panel->add_item("_Paste", "^V", action_id_t::EDIT_PASTE);
+	panel->add_item("Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
+	panel->add_item("_Insert Character...", "F9", action_id_t::EDIT_INSERT_CHAR);
 
-	panel = new menu_panel_t(menu, "_Search;sS");
-	panel->add_item("_Find...;fF", "^F", action_id_t::SEARCH_SEARCH);
-	panel->add_item("Find _Next;nN", "F3", action_id_t::SEARCH_AGAIN);
-	panel->add_item("Find _Previous;pP", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
-	panel->add_item("_Replace...;rR", "^R", action_id_t::SEARCH_REPLACE);
-	panel->add_item("_Go to Line...;gG", "^G", action_id_t::SEARCH_GOTO);
+	panel = new menu_panel_t(menu, "_Search");
+	panel->add_item("_Find...", "^F", action_id_t::SEARCH_SEARCH);
+	panel->add_item("Find _Next", "F3", action_id_t::SEARCH_AGAIN);
+	panel->add_item("Find _Previous", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
+	panel->add_item("_Replace...", "^R", action_id_t::SEARCH_REPLACE);
+	panel->add_item("_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
 
-	panel = new menu_panel_t(menu, "_Windows;wW");
-	panel->add_item("_Next Buffer;nN", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
-	panel->add_item("_Previous Buffer;pP", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
-	panel->add_item("_Select Buffer...;sS", NULL, action_id_t::WINDOWS_SELECT);
+	panel = new menu_panel_t(menu, "_Windows");
+	panel->add_item("_Next Buffer", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
+	panel->add_item("_Previous Buffer", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
+	panel->add_item("_Select Buffer...", NULL, action_id_t::WINDOWS_SELECT);
 	panel->add_separator();
-	panel->add_item("Split _Horizontal;hH", NULL, action_id_t::WINDOWS_HSPLIT);
-	panel->add_item("Split _Vertical;vV", NULL, action_id_t::WINDOWS_VSPLIT);
-	panel->add_item("_Close Window;cC", NULL, action_id_t::WINDOWS_MERGE);
+	panel->add_item("Split _Horizontal", NULL, action_id_t::WINDOWS_HSPLIT);
+	panel->add_item("Split _Vertical", NULL, action_id_t::WINDOWS_VSPLIT);
+	panel->add_item("_Close Window", NULL, action_id_t::WINDOWS_MERGE);
 	panel->add_item("Next Window", "F8", action_id_t::WINDOWS_NEXT_WINDOW);
 	panel->add_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
-	panel = new menu_panel_t(menu, "_Options;oO");
-	panel->add_item("_Tabs...;tT", NULL, action_id_t::OPTIONS_TABS);
-	panel->add_item("_Keys...;kK", NULL, action_id_t::OPTIONS_KEYS);
+	panel = new menu_panel_t(menu, "_Options");
+	panel->add_item("_Tabs...", NULL, action_id_t::OPTIONS_TABS);
+	panel->add_item("_Keys...", NULL, action_id_t::OPTIONS_KEYS);
 
-	panel = new menu_panel_t(menu, "_Help;hH");
-	panel->add_item("_Help;hH", "F1", action_id_t::HELP_HELP);
-	panel->add_item("_About;aA", NULL, action_id_t::HELP_ABOUT);
+	panel = new menu_panel_t(menu, "_Help");
+	panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
+	panel->add_item("_About", NULL, action_id_t::HELP_ABOUT);
 
 	edit = new edit_window_t(new file_buffer_t());
 	split = new split_t(edit, true);
@@ -126,7 +126,7 @@ main_t::main_t(void) {
 	select_buffer_dialog->center_over(this);
 	select_buffer_dialog->connect_activate(sigc::mem_fun(this, &main_t::switch_buffer));
 
-	continue_abort_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Continue;cC", "_Abort;aA", NULL);
+	continue_abort_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Continue", "_Abort", NULL);
 	continue_abort_dialog->center_over(this);
 
 	encoding_dialog = new encoding_dialog_t(t3_win_get_height(window) - 8, t3_win_get_width(window) - 8);
@@ -136,21 +136,21 @@ main_t::main_t(void) {
 	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	open_file_dialog->center_over(this);
 	open_file_dialog->change_dir(&wd);
-	encoding_button = new button_t("_Encoding;eE");
+	encoding_button = new button_t("_Encoding");
 	encoding_button->connect_activate(sigc::mem_fun(encoding_dialog, &encoding_dialog_t::show));
 	open_file_dialog->set_options_widget(encoding_button);
 
 	save_as_dialog = new save_as_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	save_as_dialog->center_over(this);
 	save_as_dialog->change_dir(&wd);
-	encoding_button = new button_t("_Encoding;eE");
+	encoding_button = new button_t("_Encoding");
 	encoding_button->connect_activate(sigc::mem_fun(encoding_dialog, &encoding_dialog_t::show));
 	save_as_dialog->set_options_widget(encoding_button);
 
-	close_confirm_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
+	close_confirm_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", "_Yes", "_No", "_Cancel", NULL);
 	close_confirm_dialog->center_over(this);
 
-	error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Ok;oO", NULL);
+	error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Ok", NULL);
 	error_dialog->center_over(this);
 
 	open_recent_dialog = new open_recent_dialog_t(11, t3_win_get_width(window) - 4);
