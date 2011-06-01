@@ -19,6 +19,7 @@
 #include "openfiles.h"
 #include "filestate.h"
 #include "log.h"
+#include "option.h"
 
 #define BOM_STRING "\xEF\xBB\xBF"
 
@@ -34,6 +35,7 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 	if (name == NULL)
 		name_line.set_text("(Untitled)");
 	open_files.push_back(this);
+	set_tabsize(option.tabsize);
 }
 
 file_buffer_t::~file_buffer_t(void) {

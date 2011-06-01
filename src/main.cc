@@ -112,7 +112,7 @@ main_t::main_t(void) {
 	panel->add_item("_Help;hH", "F1", action_id_t::HELP_HELP);
 	panel->add_item("_About;aA", NULL, action_id_t::HELP_ABOUT);
 
-	edit_window_t *edit = new edit_window_t(new file_buffer_t()); //FIXME: load text
+	edit_window_t *edit = new edit_window_t(new file_buffer_t());
 	split = new split_t(edit, true);
 	split->set_position(!option.hide_menubar, 0);
 	split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
