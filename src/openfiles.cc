@@ -20,6 +20,8 @@
 open_files_t open_files;
 recent_files_t recent_files;
 
+size_t open_files_t::size(void) { return files.size(); }
+
 void open_files_t::push_back(file_buffer_t *text) {
 	files.push_back(text);
 	version++;

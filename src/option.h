@@ -15,20 +15,23 @@
 #define OPTIONS_H
 
 #include <cstdlib>
+#include <list>
+using namespace std;
 
 typedef struct {
 	bool wrap;
 	int tabsize;
 
-	const char *file;
 	const char *term;
+	bool hide_menubar;
+	bool color;
 #ifdef DEBUG
 	bool wait;
 	int vm_limit;
 	bool start_debugger_on_segfault;
 #endif
-	bool hide_menubar;
 
+	list<const char *> files;
 	size_t max_recent_files;
 } options_t;
 

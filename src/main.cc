@@ -47,8 +47,9 @@ class main_t : public main_window_base_t {
 
 	public:
 		main_t(void);
-		virtual bool process_key(key_t key);
+		virtual bool process_key(t3_widget::key_t key);
 		virtual bool set_size(optint height, optint width);
+		void load_cli_files_done(stepped_process_t *process);
 
 	private:
 		edit_window_t *get_current(void) { return (edit_window_t *) split->get_current(); }
@@ -143,7 +144,7 @@ main_t::main_t(void) {
 	open_recent_dialog->center_over(this);
 }
 
-bool main_t::process_key(key_t key) {
+bool main_t::process_key(t3_widget::key_t key) {
 	switch (key) {
 		case EKEY_CTRL | 'n':          menu_activated(action_id_t::FILE_NEW); break;
 		case EKEY_CTRL | 'o':          menu_activated(action_id_t::FILE_OPEN); break;
@@ -170,6 +171,16 @@ bool main_t::set_size(optint height, optint width) {
 	result &= open_recent_dialog->set_size(11, width - 4);
 
 	return true;
+}
+
+void main_t::load_cli_files_done(stepped_process_t *process) {
+	(void) process;
+	if (open_files.size() > 1) {
+		text_buffer_t *buffer = get_current()->get_text();
+		menu_activated(action_id_t::WINDOWS_NEXT_BUFFER);
+		ASSERT(buffer != get_current()->get_text());
+		delete buffer;
+	}
 }
 
 void main_t::menu_activated(int id) {
@@ -347,7 +358,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 	complex_error_t result;
-	if (!(result = init()).get_success()) {
+	if (!(result = init(option.term)).get_success()) {
 		fprintf(stderr, "Error: %s\n", result.get_string());
 		fprintf(stderr, "init failed\n");
 		exit(EXIT_FAILURE);
@@ -356,12 +367,15 @@ int main(int argc, char *argv[]) {
 	init_charsets();
 	main_t main_window;
 
-	set_color_mode(false);
-	set_attribute(attribute_t::SELECTION_CURSOR, T3_ATTR_BG_GREEN);
+	set_color_mode(option.color);
 
 	main_window.show();
 
+	//FIXME: only do this when we know it is safe!
 	set_key_timeout(100);
+
+	load_cli_file_process_t::execute(sigc::mem_fun(main_window, &main_t::load_cli_files_done));
+	//FIXME: close empty buffer if a file was loaded
 	main_loop();
 	return 0;
 }

@@ -66,7 +66,7 @@ static void start_debugger_on_segfault(int sig) {
 	struct rlimit vm_limit;
 	(void) sig;
 
-	fprintf(stderr, "Handling signal\n");
+	fprintf(stderr, "Handling signal %d\n", sig);
 
 	signal(SIGSEGV, SIG_DFL);
 	signal(SIGABRT, SIG_DFL);

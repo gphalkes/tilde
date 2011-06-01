@@ -20,11 +20,11 @@
 options_t option;
 
 static void init_options(void) {
-	memset(&option, 0, sizeof(option));
 	//FIXME: read default parameters from config file
 	option.tabsize = 8;
 	//~ option.hide_menubar = true;
 	option.max_recent_files = 10;
+	option.color = true;
 }
 
 PARSE_FUNCTION(parse_args)
@@ -34,8 +34,14 @@ PARSE_FUNCTION(parse_args)
 		OPTION('w', "wrap", NO_ARG)
 			option.wrap = true;
 		END_OPTION
-		OPTION('T', "tabsize", REQUIRED_ARG)
+		OPTION('T', "term", REQUIRED_ARG)
+			option.term = optArg;
+		END_OPTION
+		OPTION('t', "tabsize", REQUIRED_ARG)
 			PARSE_INT(option.tabsize, 1, MAX_TAB);
+		END_OPTION
+		OPTION('b', "black-white", NO_ARG)
+			option.color = false;
 		END_OPTION
 #ifdef DEBUG
 		LONG_OPTION("W", NO_ARG)
@@ -54,7 +60,6 @@ PARSE_FUNCTION(parse_args)
 
 		fatal("No such option " OPTFMT "\n", OPTPRARG);
 	NO_OPTION
-		//FIXME: do proper handling of passed file names
-		option.file = optcurrent;
+		option.files.push_back(optcurrent);
 	END_OPTIONS
 END_FUNCTION

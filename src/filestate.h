@@ -70,7 +70,7 @@ class load_process_t : public stepped_process_t {
 		int fd;
 
 		load_process_t(const callback_t &cb);
-		load_process_t(const callback_t &cb, const recent_file_info_t *info);
+		load_process_t(const callback_t &cb, const char *name);
 		virtual bool step(void);
 		virtual void file_selected(const std::string *name);
 		virtual void encoding_selected(const std::string *_encoding);
@@ -79,7 +79,7 @@ class load_process_t : public stepped_process_t {
 	public:
 		virtual file_buffer_t *get_file_buffer(void);
 		static void execute(const callback_t &cb);
-		static void execute(const callback_t &cb, const recent_file_info_t *info);
+		static void execute(const callback_t &cb, const char *name);
 };
 
 class save_as_process_t : public stepped_process_t {
@@ -143,7 +143,6 @@ class close_process_t : public save_process_t {
 class exit_process_t : public stepped_process_t {
 	protected:
 		open_files_t::iterator iter;
-		bool in_step, in_save;
 
 		exit_process_t(const callback_t &cb);
 		virtual bool step(void);
@@ -163,6 +162,19 @@ class open_recent_process_t : public load_process_t	{
 		~open_recent_process_t(void);
 		virtual void file_selected(recent_file_info_t *_info);
 		virtual bool step(void);
+	public:
+		static void execute(const callback_t &cb);
+};
+
+class load_cli_file_process_t : public stepped_process_t {
+	protected:
+		list<const char *>::const_iterator iter;
+		bool in_load, in_step;
+
+		load_cli_file_process_t(const callback_t &cb);
+		virtual bool step(void);
+		virtual void load_done(stepped_process_t *process);
+
 	public:
 		static void execute(const callback_t &cb);
 };

@@ -33,6 +33,7 @@ class open_files_t {
 
 		typedef vector<file_buffer_t *>::iterator iterator;
 		typedef vector<file_buffer_t *>::reverse_iterator reverse_iterator;
+		size_t size(void);
 		iterator erase(iterator position);
 		iterator contains(const char *name);
 		int get_version(void);

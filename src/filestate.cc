@@ -17,13 +17,13 @@
 #include "filebuffer.h"
 #include "main.h"
 #include "openfiles.h"
+#include "option.h"
 
 load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), state(SELECT_FILE), file(NULL), wrapper(NULL),
 		encoding("UTF-8"), fd(-1) {}
 
-load_process_t::load_process_t(const callback_t &cb, const recent_file_info_t *info) : stepped_process_t(cb),
-		state(INITIAL), file(new file_buffer_t(info->get_name(), info->get_encoding())), wrapper(NULL), fd(-1) {}
-
+load_process_t::load_process_t(const callback_t &cb, const char *name) : stepped_process_t(cb), state(INITIAL),
+		file(new file_buffer_t(name, "UTF-8")), wrapper(NULL), encoding("UTF-8"), fd(-1) {}
 
 bool load_process_t::step(void) {
 	string message;
@@ -44,7 +44,7 @@ bool load_process_t::step(void) {
 			result = true;
 			break;
 		case rw_result_t::ERRNO_ERROR:
-			printf_into(&message, "Could not load file: %s", strerror(rw_result.get_errno_error()));
+			printf_into(&message, "Could not load file '%s': %s", file->get_name(), strerror(rw_result.get_errno_error()));
 			error_dialog->set_message(&message);
 			error_dialog->show();
 			break;
@@ -109,10 +109,9 @@ void load_process_t::execute(const callback_t &cb) {
 	(new load_process_t(cb))->run();
 }
 
-void load_process_t::execute(const callback_t &cb, const recent_file_info_t *info) {
-	(new load_process_t(cb, info))->run();
+void load_process_t::execute(const callback_t &cb, const char *name) {
+	(new load_process_t(cb, name))->run();
 }
-
 
 save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file) : stepped_process_t(cb), state(SELECT_FILE),
 		file(_file), real_name(NULL), temp_name(NULL), fd(-1), wrapper(NULL)
@@ -264,7 +263,7 @@ const file_buffer_t *close_process_t::get_file_buffer_ptr(void) {
 	return file;
 }
 
-exit_process_t::exit_process_t(const callback_t &cb) : stepped_process_t(cb), iter(open_files.begin()), in_step(false), in_save(false) {}
+exit_process_t::exit_process_t(const callback_t &cb) : stepped_process_t(cb), iter(open_files.begin()) {}
 
 bool exit_process_t::step(void) {
 	for (; iter != open_files.end(); iter++) {
@@ -333,4 +332,34 @@ open_recent_process_t::~open_recent_process_t(void) {
 
 void open_recent_process_t::execute(const callback_t &cb) {
 	(new open_recent_process_t(cb))->run();
+}
+
+
+load_cli_file_process_t::load_cli_file_process_t(const callback_t &cb) : stepped_process_t(cb),
+		iter(option.files.begin()), in_load(false), in_step(false) {}
+
+bool load_cli_file_process_t::step(void) {
+	in_step = true;
+	while (iter != option.files.end()) {
+		in_load = true;
+		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter);
+		if (in_load) {
+			in_step = false;
+			return false;
+		}
+	}
+	result = true;
+	return true;
+}
+
+void load_cli_file_process_t::load_done(stepped_process_t *process) {
+	(void) process;
+	in_load = false;
+	iter++;
+	if (!in_step)
+		run();
+}
+
+void load_cli_file_process_t::execute(const callback_t &cb) {
+	(new load_cli_file_process_t(cb))->run();
 }
