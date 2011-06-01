@@ -4,13 +4,11 @@ BUGS
 FILE OPEN
 =========
 - set dialog starting point to directory of currently open file
-- allow encoding selection
 - check that on failure the transcript converter is properly closed
 
 SAVE (AS)
 =========
 - set dialog starting point to directory of currently open file
-- allow encoding selection
 - check that on failure the transcript converter is properly closed
 
 MISSING FUNCTIONALITY

@@ -21,9 +21,7 @@
 #include "log.h"
 #include "option.h"
 
-#define BOM_STRING "\xEF\xBB\xBF"
-
-file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name), file_has_bom(false)
+file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name)
 {
 	if (_encoding == NULL)
 		encoding = strdup("UTF-8");
@@ -66,9 +64,15 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
 			try {
-				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
-				if (handle == NULL)
-					return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
+				lprintf("Using encoding %s to read %s\n", encoding, name);
+
+				if (strcmp(encoding, "UTF-8") == 0) {
+					handle = NULL;
+				} else {
+					handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
+					if (handle == NULL)
+						return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
+				}
 				state->wrapper = new file_read_wrapper_t(state->fd, handle);
 				name_line.set_text(name);
 			} catch (bad_alloc &ba) {
@@ -79,11 +83,6 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 		case load_process_t::READING:
 			try {
 				while ((line = state->wrapper->read_line()) != NULL) {
-					if (lines.size() == 1 && line->size() >= 3 && memcmp(line->c_str(), BOM_STRING, 3) == 0) {
-						file_has_bom = true;
-						line->erase(0, 3);
-					}
-
 					/* Allocate a new text_line_t struct and initialize it with the newly read line */
 					try {
 						lines.back()->set_text(line);
@@ -187,8 +186,10 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0, &error);
 				free(encoding);
 				encoding = strdup(state->encoding.c_str());
-			} else {
+			} else if (strcmp(encoding, "UTF-8") != 0) {
 				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
+			} else {
+				handle = NULL;
 			}
 			state->wrapper = new file_write_wrapper_t(state->fd, handle);
 			state->i = 0;
@@ -196,10 +197,6 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 		}
 		case save_as_process_t::WRITING:
 			try {
-				//FIXME: only if in direct UTF-8 mode
-				if (file_has_bom && state->i == 0)
-					state->wrapper->write(BOM_STRING, 3);
-
 				for (; state->i < lines.size(); state->i++) {
 					const string *data;
 					if (state->i != 0)

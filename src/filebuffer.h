@@ -23,7 +23,6 @@ using namespace t3_widget;
 class file_buffer_t : public text_buffer_t {
 	protected:
 		char *encoding;
-		bool file_has_bom;
 
 	public:
 		file_buffer_t(const char *_name = NULL, const char *_encoding = NULL);

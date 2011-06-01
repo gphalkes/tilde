@@ -18,6 +18,7 @@
 using namespace t3_widget;
 
 #include "dialogs/openrecentdialog.h"
+#include "dialogs/encodingdialog.h"
 
 extern message_dialog_t *continue_abort_dialog;
 extern open_file_dialog_t *open_file_dialog;
@@ -25,4 +26,5 @@ extern save_as_dialog_t *save_as_dialog;
 extern message_dialog_t *close_confirm_dialog;
 extern message_dialog_t *error_dialog;
 extern open_recent_dialog_t *open_recent_dialog;
+extern encoding_dialog_t *encoding_dialog;
 #endif

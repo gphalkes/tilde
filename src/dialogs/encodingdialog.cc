@@ -68,6 +68,7 @@ static charset_desc_t friendly_charsets[] = {
 	{ "Thai (Windows-874)", "WINDOWS-874" },
 	{ "Turkish (Windows-1254)", "WINDOWS-1254" },
 	{ "Turkish (ISO-8859-9)", "ISO-8859-9" },
+	{ "Unicode (UTF-8 with BOM)", "UTF-8-BOM" },
 	{ "Unicode (UTF-16)", "UTF-16" },
 	{ "Unicode (UTF-7)", "UTF-7" },
 	{ "Vietnamese (Windows-1258)", "WINDOWS-1258" },
@@ -165,9 +166,10 @@ void encoding_dialog_t::ok_activated(void) {
 		encoding = *manual_entry->get_text();
 
 		lprintf("Testing encoding name: %s\n", encoding.c_str());
-		if (transcript_probe_converter(encoding.c_str()) != TRANSCRIPT_SUCCESS) {
+		if (!transcript_probe_converter(encoding.c_str())) {
 			string message = "Requested character set is not available";
 			message_dialog->set_message(&message);
+			message_dialog->center_over(this);
 			message_dialog->show();
 			return;
 		}

@@ -35,6 +35,7 @@ save_as_dialog_t *save_as_dialog;
 message_dialog_t *close_confirm_dialog;
 message_dialog_t *error_dialog;
 open_recent_dialog_t *open_recent_dialog;
+encoding_dialog_t *encoding_dialog;
 
 class main_t : public main_window_base_t {
 	private:
@@ -60,6 +61,9 @@ class main_t : public main_window_base_t {
 };
 
 main_t::main_t(void) {
+	button_t *encoding_button;
+	edit_window_t *edit;
+
 	menu = new menu_bar_t(option.hide_menubar);
 	push_back(menu);
 	menu->connect_activate(sigc::mem_fun(this, &main_t::menu_activated));
@@ -112,7 +116,7 @@ main_t::main_t(void) {
 	panel->add_item("_Help;hH", "F1", action_id_t::HELP_HELP);
 	panel->add_item("_About;aA", NULL, action_id_t::HELP_ABOUT);
 
-	edit_window_t *edit = new edit_window_t(new file_buffer_t());
+	edit = new edit_window_t(new file_buffer_t());
 	split = new split_t(edit, true);
 	split->set_position(!option.hide_menubar, 0);
 	split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
@@ -125,14 +129,23 @@ main_t::main_t(void) {
 	continue_abort_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Continue;cC", "_Abort;aA", NULL);
 	continue_abort_dialog->center_over(this);
 
-	string wd = get_working_directory();
+	encoding_dialog = new encoding_dialog_t(t3_win_get_height(window) - 8, t3_win_get_width(window) - 8);
+	encoding_dialog->center_over(this);
+
+	string wd(get_working_directory());
 	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	open_file_dialog->center_over(this);
 	open_file_dialog->change_dir(&wd);
+	encoding_button = new button_t("Encoding;eE");
+	encoding_button->connect_activate(sigc::mem_fun(encoding_dialog, &encoding_dialog_t::show));
+	open_file_dialog->set_options_widget(encoding_button);
 
 	save_as_dialog = new save_as_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	save_as_dialog->center_over(this);
 	save_as_dialog->change_dir(&wd);
+	encoding_button = new button_t("Encoding;eE");
+	encoding_button->connect_activate(sigc::mem_fun(encoding_dialog, &encoding_dialog_t::show));
+	save_as_dialog->set_options_widget(encoding_button);
 
 	close_confirm_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", "_Yes;yY", "_No;nN", "_Cancel;cC", NULL);
 	close_confirm_dialog->center_over(this);
@@ -169,7 +182,7 @@ bool main_t::set_size(optint height, optint width) {
 	result &= open_file_dialog->set_size(height - 4, width - 4);
 	result &= save_as_dialog->set_size(height - 4, width - 4);
 	result &= open_recent_dialog->set_size(11, width - 4);
-
+	result &= encoding_dialog->set_size(min(height - 8, 16), min(width - 8, 72));
 	return true;
 }
 
