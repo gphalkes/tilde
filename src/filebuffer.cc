@@ -36,6 +36,7 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		name_line.set_text("(Untitled)");
 	open_files.push_back(this);
 	set_tabsize(option.tabsize);
+	set_wrap(option.wrap);
 }
 
 file_buffer_t::~file_buffer_t(void) {
@@ -87,6 +88,8 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 					try {
 						lines.back()->set_text(line);
 						lines.push_back(new text_line_t());
+						if (wrap)
+							wraplines.push_back(new subtext_line_t(lines.back(), 0));
 					} catch (...) {
 						delete line;
 						return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
@@ -98,6 +101,10 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				if (lines.size() > 1) {
 					delete lines.back();
 					lines.pop_back();
+					if (wrap) {
+						delete wraplines.back();
+						wraplines.pop_back();
+					}
 				}
 			} catch (rw_result_t &result) {
 				return result;
