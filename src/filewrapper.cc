@@ -130,10 +130,7 @@ string *file_read_wrapper_t::read_line(void) {
 
 			if (!buffer->fill_buffer(used)) {
 				at_eof = true;
-				if (result->size() > 0)
-					accumulated = NULL;
-				else
-					result = NULL;
+				accumulated = NULL;
 				return result;
 			}
 		}

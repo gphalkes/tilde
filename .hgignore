@@ -1,5 +1,6 @@
 syntax: glob
-src/t3widgetlog.txt
+src/valgrind.log
+src/libt3widgetlog.txt
 src/libt3window.log
 src/.objects
 src/.deps
