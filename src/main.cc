@@ -65,6 +65,7 @@ main_t::main_t(void) {
 	edit_window_t *edit;
 
 	menu = new menu_bar_t(option.hide_menubar);
+	menu->set_size(None, t3_win_get_width(window));
 	push_back(menu);
 	menu->connect_activate(sigc::mem_fun(this, &main_t::menu_activated));
 
