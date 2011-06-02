@@ -28,8 +28,6 @@ LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs -Ltranscript/.libs -Lunic
 LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`
 
 CXXTARGETS := .objects/edit
-CXX := clang++
-
 #================================================#
 # NO RULES SHOULD BE DEFINED BEFORE THIS INCLUDE #
 #================================================#
