@@ -112,7 +112,7 @@ encoding_dialog_t::encoding_dialog_t(int height, int width) :
 	button_t *ok_button, *cancel_button;
 
 	list = new list_pane_t(true);
-	list->set_size(height - 3, width - 2);
+	list->set_size(height - 4, width - 2);
 	list->set_position(1, 1);
 	list->connect_activate(sigc::mem_fun(this, &encoding_dialog_t::ok_activated));
 	list->connect_selection_changed(sigc::mem_fun(this, &encoding_dialog_t::selection_changed));
@@ -121,6 +121,12 @@ encoding_dialog_t::encoding_dialog_t(int height, int width) :
 		label_t *label = new label_t(iter->name);
 		list->push_back(label);
 	}
+
+	horizontal_separator = new separator_t();
+	horizontal_separator->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_BOTTOMLEFT));
+	horizontal_separator->set_position(-2, 1);
+	horizontal_separator->set_size(None, width - 2);
+
 
 	manual_entry = new text_field_t();
 	manual_entry->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_BOTTOMLEFT));
@@ -139,6 +145,7 @@ encoding_dialog_t::encoding_dialog_t(int height, int width) :
 	ok_button->connect_activate(sigc::mem_fun(this, &encoding_dialog_t::ok_activated));
 
 	push_back(list);
+	push_back(horizontal_separator);
 	push_back(manual_entry);
 	push_back(ok_button);
 	push_back(cancel_button);
@@ -153,7 +160,7 @@ bool encoding_dialog_t::set_size(optint height, optint width) {
 		width = t3_win_get_width(window);
 
 	result &= dialog_t::set_size(height, width);
-	result &= list->set_size(height - 3, width - 2);
+	result &= list->set_size(height - 4, width - 2);
 	return result;
 }
 

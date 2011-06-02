@@ -24,6 +24,7 @@ void init_charsets(void);
 class encoding_dialog_t : public dialog_t {
 	protected:
 		list_pane_t *list;
+		separator_t *horizontal_separator;
 		text_field_t *manual_entry;
 		int selected;
 		char *saved_tag;
