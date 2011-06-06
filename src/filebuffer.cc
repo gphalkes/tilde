@@ -88,7 +88,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 						lines.back()->set_text(line);
 						lines.push_back(new text_line_t());
 						if (wrap)
-							wraplines.push_back(new subtext_line_t(lines.back(), 0));
+							wraplines.push_back(subtext_line_t(lines.back(), 0));
 					} catch (...) {
 						delete line;
 						return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
@@ -100,10 +100,8 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				if (lines.size() > 1) {
 					delete lines.back();
 					lines.pop_back();
-					if (wrap) {
-						delete wraplines.back();
+					if (wrap)
 						wraplines.pop_back();
-					}
 				}
 			} catch (rw_result_t &result) {
 				return result;

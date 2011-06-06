@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
 	main_window.show();
 
 	//FIXME: only do this when we know it is safe!
-	set_key_timeout(100);
+	//~ set_key_timeout(100);
 
 	load_cli_file_process_t::execute(sigc::mem_fun(main_window, &main_t::load_cli_files_done));
 	//FIXME: close empty buffer if a file was loaded
