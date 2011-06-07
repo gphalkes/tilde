@@ -354,39 +354,47 @@ void main_t::close_cb(stepped_process_t *process) {
 }
 
 int main(int argc, char *argv[]) {
+	main_t *main_window;
+	input_selection_dialog_t *inputsel;
+	complex_error_t result;
+
 	init_log();
 	setlocale(LC_ALL, "");
 	//FIXME: call this when internationalization is started. Requires #include <libintl.h>
 	// bind_textdomain_codeset("UTF-8");
 	parse_args(argc, argv);
 
-	if (option.start_debugger_on_segfault)
+#ifdef DEBUG
+	if (cli_option.start_debugger_on_segfault)
 		enable_debugger_on_segfault(argv[0]);
 
-#ifdef DEBUG
 	set_limits();
-	if (option.wait) {
+	if (cli_option.wait) {
 		printf("Debug mode: Waiting for keypress to allow debugger attach\n");
 		getchar();
 	}
 #endif
 
-	complex_error_t result;
-	if (!(result = init(option.term)).get_success()) {
+	if (!(result = init(cli_option.term)).get_success()) {
 		fprintf(stderr, "Error: %s\n", result.get_string());
 		fprintf(stderr, "init failed\n");
 		exit(EXIT_FAILURE);
 	}
 
 	init_charsets();
-	main_t main_window;
+	main_window = new main_t();
 
 	set_color_mode(option.color);
 
-	main_window.show();
+	main_window->show();
 
-	//FIXME: only do this when we know it is safe!
-	//~ set_key_timeout(100);
+	if (option.key_timeout.is_valid()) {
+		set_key_timeout(option.key_timeout);
+	} else {
+		inputsel = new input_selection_dialog_t(20, 70);
+		inputsel->center_over(main_window);
+		inputsel->show();
+	}
 
 	load_cli_file_process_t::execute(sigc::mem_fun(main_window, &main_t::load_cli_files_done));
 	//FIXME: close empty buffer if a file was loaded

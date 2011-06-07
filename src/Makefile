@@ -26,6 +26,7 @@ SOURCES..objects/edit := \
 LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode
 LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs -Ltranscript/.libs -Lunicode/.libs
 LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`
+LDFLAGS..objects/edit += -lconfig
 
 CXXTARGETS := .objects/edit
 #================================================#

@@ -86,7 +86,7 @@ void enable_debugger_on_segfault(const char *_executable) {
 
 #ifdef DEBUG
 void set_limits() {
-	int mb = option.vm_limit == 0 ? 250 : option.vm_limit;
+	int mb = cli_option.vm_limit == 0 ? 250 : cli_option.vm_limit;
 	struct rlimit vm_limit;
 	printf("Debug mode: Setting VM limit\n");
 	getrlimit(RLIMIT_AS, &vm_limit);

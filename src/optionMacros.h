@@ -100,7 +100,7 @@ END_FUNCTION
 
 /** Indicate the start of option processing.
 
-	This is separte from @a PARSE_FUNCTION so that local variables can be
+	This is separate from @a PARSE_FUNCTION so that local variables can be
 	defined.
 */
 #define OPTIONS \

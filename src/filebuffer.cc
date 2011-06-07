@@ -83,7 +83,6 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 		case load_process_t::READING:
 			try {
 				while ((line = state->wrapper->read_line()) != NULL) {
-					/* Allocate a new text_line_t struct and initialize it with the newly read line */
 					try {
 						lines.back()->set_text(line);
 						lines.push_back(new text_line_t());

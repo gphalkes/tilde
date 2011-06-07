@@ -16,26 +16,80 @@
 
 #include <cstdlib>
 #include <list>
-using namespace std;
+#include <widget.h>
+
+#include "util.h"
+
+OPT_TYPE(bool);
+OPT_TYPE(size_t);
+OPT_TYPE(t3_attr_t);
+typedef t3_widget::optint opt_int;
 
 typedef struct {
+	/* Options to override config file. */
 	bool wrap;
-	int tabsize;
+	opt_bool color;
 
 	const char *term;
-	bool hide_menubar;
-	bool color;
+	bool ask_input_method;
+
+	std::list<const char *> files;
+
 #ifdef DEBUG
 	bool wait;
 	int vm_limit;
 	bool start_debugger_on_segfault;
 #endif
 
-	list<const char *> files;
-	size_t max_recent_files;
+} cli_options_t;
+
+typedef struct {
+	opt_bool wrap;
+	opt_int tabsize;
+
+	opt_bool hide_menubar;
+	opt_bool color;
+
+	opt_size_t max_recent_files;
+
+	opt_int key_timeout;
+
+	opt_t3_attr_t non_print;
+	opt_t3_attr_t selection_cursor;
+	opt_t3_attr_t selection_cursor2;
+	opt_t3_attr_t bad_draw;
+	opt_t3_attr_t text_cursor;
+	opt_t3_attr_t text;
+	opt_t3_attr_t text_selected;
+	/* High-light attributes for hot keys. */
+	opt_t3_attr_t highlight;
+	opt_t3_attr_t highlight_selected;
+
+	opt_t3_attr_t dialog;
+	opt_t3_attr_t dialog_selected;
+	opt_t3_attr_t button;
+	opt_t3_attr_t button_selected;
+	opt_t3_attr_t scrollbar;
+	opt_t3_attr_t menubar;
+	opt_t3_attr_t menubar_selected;
+
+	opt_t3_attr_t shadow;
 } options_t;
 
-extern options_t option;
+typedef struct {
+	bool wrap;
+	int tabsize;
+	bool hide_menubar;
+	bool color;
+	size_t max_recent_files;
+	opt_int key_timeout;
+} runtime_options_t;
+
+extern cli_options_t cli_option;
+extern runtime_options_t option;
+
+extern options_t term_specific_option;
+extern options_t default_option;
 
 void parse_args(int argc, char **argv);
 

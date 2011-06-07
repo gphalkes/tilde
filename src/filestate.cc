@@ -336,11 +336,11 @@ void open_recent_process_t::execute(const callback_t &cb) {
 
 
 load_cli_file_process_t::load_cli_file_process_t(const callback_t &cb) : stepped_process_t(cb),
-		iter(option.files.begin()), in_load(false), in_step(false) {}
+		iter(cli_option.files.begin()), in_load(false), in_step(false) {}
 
 bool load_cli_file_process_t::step(void) {
 	in_step = true;
-	while (iter != option.files.end()) {
+	while (iter != cli_option.files.end()) {
 		in_load = true;
 		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter);
 		if (in_load) {
