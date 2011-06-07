@@ -385,6 +385,7 @@ int main(int argc, char *argv[]) {
 	main_window = new main_t();
 
 	set_color_mode(option.color);
+	set_attributes();
 
 	main_window->show();
 

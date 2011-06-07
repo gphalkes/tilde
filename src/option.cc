@@ -16,6 +16,7 @@
 #include "option.h"
 #include "util.h"
 #include "optionMacros.h"
+#include "log.h"
 
 using namespace std;
 using namespace t3_widget;
@@ -72,6 +73,7 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
 static void read_config_attribute(const config_setting_t *setting, const char *name, opt_t3_attr_t *attr) {
 	config_setting_t *list;
 	const char *value;
+	t3_attr_t accumulated_attr = 0;
 	int i;
 
 	if (config_setting_lookup_string(setting, name, &value) == CONFIG_TRUE) {
@@ -82,10 +84,10 @@ static void read_config_attribute(const config_setting_t *setting, const char *n
 	if ((list = config_setting_get_member(setting, name)) == NULL)
 		return;
 
-	for (i = 0; (value = config_setting_get_string_elem(list, i)) != NULL; i++) {
-		t3_attr_t next_attr = attribute_string_to_bin(value);
-		*attr = t3_term_combine_attrs(next_attr, *attr);
-	}
+	for (i = 0; (value = config_setting_get_string_elem(list, i)) != NULL; i++)
+		accumulated_attr = t3_term_combine_attrs(attribute_string_to_bin(value), accumulated_attr);
+
+	*attr = accumulated_attr;
 }
 
 #define GET_OPT_BOOL(name) do { \
@@ -113,14 +115,30 @@ static void read_options_per_config(const config_setting_t *setting, options_t *
 	if (attributes == NULL)
 		return;
 	read_config_attribute(attributes, "non_print", &opts->non_print);
+	read_config_attribute(attributes, "selection_cursor", &opts->selection_cursor);
+	read_config_attribute(attributes, "selection_cursor2", &opts->selection_cursor2);
+	read_config_attribute(attributes, "bad_draw", &opts->bad_draw);
+	read_config_attribute(attributes, "text_cursor", &opts->text_cursor);
+	read_config_attribute(attributes, "text", &opts->text);
+	read_config_attribute(attributes, "text_selected", &opts->text_selected);
+	read_config_attribute(attributes, "highlight", &opts->highlight);
+	read_config_attribute(attributes, "highlight_selected", &opts->highlight_selected);
+	read_config_attribute(attributes, "dialog", &opts->dialog);
+	read_config_attribute(attributes, "dialog_selected", &opts->dialog_selected);
+	read_config_attribute(attributes, "button", &opts->button);
+	read_config_attribute(attributes, "button_selected", &opts->button_selected);
+	read_config_attribute(attributes, "scrollbar", &opts->scrollbar);
+	read_config_attribute(attributes, "menubar", &opts->menubar);
+	read_config_attribute(attributes, "menubar_selected", &opts->menubar_selected);
+	read_config_attribute(attributes, "shadow", &opts->shadow);
 }
-
 
 static void read_options(void) {
 	string file = getenv("HOME");
 	FILE *config_file;
 	config_t config;
 	config_setting_t *term_specific_setting;
+	const char *term;
 
 	file += "/.tilde";
 
@@ -144,8 +162,13 @@ static void read_options(void) {
 	}
 
 	read_options_per_config(config_root_setting(&config), &default_option);
-	#warning FIXME: do not use the result of getenv directly!!! It may be NULL!
-	if ((term_specific_setting = config_setting_get_member(config_root_setting(&config), getenv("TERM"))) != NULL)
+
+	if (cli_option.term != NULL)
+		term = cli_option.term;
+	else if ((term = getenv("TERM")) == NULL)
+		return;
+
+	if ((term_specific_setting = config_setting_get_member(config_root_setting(&config), term)) != NULL)
 		read_options_per_config(term_specific_setting, &term_specific_option);
 	config_destroy(&config);
 }
@@ -185,24 +208,6 @@ static void post_process_options(void) {
 
 	if (!cli_option.ask_input_method && term_specific_option.key_timeout.is_valid())
 			option.key_timeout = term_specific_option.key_timeout;
-
-	SET_ATTR_FROM_FILE(non_print, attribute_t::NON_PRINT);
-	SET_ATTR_FROM_FILE(selection_cursor, attribute_t::SELECTION_CURSOR);
-	SET_ATTR_FROM_FILE(selection_cursor2, attribute_t::SELECTION_CURSOR2);
-	SET_ATTR_FROM_FILE(bad_draw, attribute_t::BAD_DRAW);
-	SET_ATTR_FROM_FILE(text_cursor, attribute_t::TEXT_CURSOR);
-	SET_ATTR_FROM_FILE(text, attribute_t::TEXT);
-	SET_ATTR_FROM_FILE(text_selected, attribute_t::TEXT_SELECTED);
-	SET_ATTR_FROM_FILE(highlight, attribute_t::HIGHLIGHT);
-	SET_ATTR_FROM_FILE(highlight_selected, attribute_t::HIGHLIGHT_SELECTED);
-	SET_ATTR_FROM_FILE(dialog, attribute_t::DIALOG);
-	SET_ATTR_FROM_FILE(dialog_selected, attribute_t::DIALOG_SELECTED);
-	SET_ATTR_FROM_FILE(button, attribute_t::BUTTON);
-	SET_ATTR_FROM_FILE(button_selected, attribute_t::BUTTON_SELECTED);
-	SET_ATTR_FROM_FILE(scrollbar, attribute_t::SCROLLBAR);
-	SET_ATTR_FROM_FILE(menubar, attribute_t::MENUBAR);
-	SET_ATTR_FROM_FILE(menubar_selected, attribute_t::MENUBAR_SELECTED);
-	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
 }
 
 PARSE_FUNCTION(parse_args)
@@ -248,3 +253,22 @@ PARSE_FUNCTION(parse_args)
 	post_process_options();
 END_FUNCTION
 
+void set_attributes(void) {
+	SET_ATTR_FROM_FILE(non_print, attribute_t::NON_PRINT);
+	SET_ATTR_FROM_FILE(selection_cursor, attribute_t::SELECTION_CURSOR);
+	SET_ATTR_FROM_FILE(selection_cursor2, attribute_t::SELECTION_CURSOR2);
+	SET_ATTR_FROM_FILE(bad_draw, attribute_t::BAD_DRAW);
+	SET_ATTR_FROM_FILE(text_cursor, attribute_t::TEXT_CURSOR);
+	SET_ATTR_FROM_FILE(text, attribute_t::TEXT);
+	SET_ATTR_FROM_FILE(text_selected, attribute_t::TEXT_SELECTED);
+	SET_ATTR_FROM_FILE(highlight, attribute_t::HIGHLIGHT);
+	SET_ATTR_FROM_FILE(highlight_selected, attribute_t::HIGHLIGHT_SELECTED);
+	SET_ATTR_FROM_FILE(dialog, attribute_t::DIALOG);
+	SET_ATTR_FROM_FILE(dialog_selected, attribute_t::DIALOG_SELECTED);
+	SET_ATTR_FROM_FILE(button, attribute_t::BUTTON);
+	SET_ATTR_FROM_FILE(button_selected, attribute_t::BUTTON_SELECTED);
+	SET_ATTR_FROM_FILE(scrollbar, attribute_t::SCROLLBAR);
+	SET_ATTR_FROM_FILE(menubar, attribute_t::MENUBAR);
+	SET_ATTR_FROM_FILE(menubar_selected, attribute_t::MENUBAR_SELECTED);
+	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
+}

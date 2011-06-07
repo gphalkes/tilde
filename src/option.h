@@ -92,5 +92,5 @@ extern options_t term_specific_option;
 extern options_t default_option;
 
 void parse_args(int argc, char **argv);
-
+void set_attributes(void);
 #endif
