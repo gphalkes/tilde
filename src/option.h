@@ -23,7 +23,7 @@
 OPT_TYPE(bool);
 OPT_TYPE(size_t);
 OPT_TYPE(t3_attr_t);
-typedef t3_widget::optint opt_int;
+OPT_TYPE(int);
 
 typedef struct {
 	/* Options to override config file. */
@@ -93,4 +93,5 @@ extern options_t default_option;
 
 void parse_args(int argc, char **argv);
 void set_attributes(void);
+bool write_config(void);
 #endif

@@ -37,6 +37,8 @@ message_dialog_t *error_dialog;
 open_recent_dialog_t *open_recent_dialog;
 encoding_dialog_t *encoding_dialog;
 
+static input_selection_dialog_t *inputsel;
+
 class main_t : public main_window_base_t {
 	private:
 		menu_bar_t *menu;
@@ -353,9 +355,14 @@ void main_t::close_cb(stepped_process_t *process) {
 	delete text;
 }
 
+void input_selection_complete(int timeout) {
+	delete inputsel;
+	term_specific_option.key_timeout = timeout;
+	write_config();
+}
+
 int main(int argc, char *argv[]) {
 	main_t *main_window;
-	input_selection_dialog_t *inputsel;
 	complex_error_t result;
 
 	init_log();
@@ -393,6 +400,9 @@ int main(int argc, char *argv[]) {
 		set_key_timeout(option.key_timeout);
 	} else {
 		inputsel = new input_selection_dialog_t(20, 70);
+		inputsel->connect_intuitive_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), 100));
+		inputsel->connect_compromise_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), -1000));
+		inputsel->connect_no_timeout_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), 0));
 		inputsel->center_over(main_window);
 		inputsel->show();
 	}

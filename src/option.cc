@@ -33,7 +33,7 @@ bool config_read_error;
 string config_read_error_string;
 int config_read_error_line;
 
-static struct { const char *string; t3_attr_t attr; } map[] = {
+static struct { const char *string; t3_attr_t attr; } attribute_map[] = {
 	{ "underline", T3_ATTR_UNDERLINE },
 	{ "bold", T3_ATTR_BOLD },
 	{ "reverse", T3_ATTR_REVERSE },
@@ -41,14 +41,14 @@ static struct { const char *string; t3_attr_t attr; } map[] = {
 	{ "dim", T3_ATTR_DIM },
 
 	{ "fg default", T3_ATTR_FG_DEFAULT },
-	{ "black", T3_ATTR_FG_BLACK },
-	{ "red", T3_ATTR_FG_RED },
-	{ "green", T3_ATTR_FG_GREEN },
-	{ "yellow", T3_ATTR_FG_YELLOW },
-	{ "blue", T3_ATTR_FG_BLUE },
-	{ "magenta", T3_ATTR_FG_MAGENTA },
-	{ "cyan", T3_ATTR_FG_CYAN },
-	{ "white", T3_ATTR_FG_WHITE },
+	{ "fg black", T3_ATTR_FG_BLACK },
+	{ "fg red", T3_ATTR_FG_RED },
+	{ "fg green", T3_ATTR_FG_GREEN },
+	{ "fg yellow", T3_ATTR_FG_YELLOW },
+	{ "fg blue", T3_ATTR_FG_BLUE },
+	{ "fg magenta", T3_ATTR_FG_MAGENTA },
+	{ "fg cyan", T3_ATTR_FG_CYAN },
+	{ "fg white", T3_ATTR_FG_WHITE },
 
 	{ "bg default", T3_ATTR_BG_DEFAULT },
 	{ "bg black", T3_ATTR_BG_BLACK },
@@ -63,28 +63,30 @@ static struct { const char *string; t3_attr_t attr; } map[] = {
 
 static t3_attr_t attribute_string_to_bin(const char *attr) {
 	size_t i;
-	for (i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
-		if (strcmp(attr, map[i].string) == 0)
-			return map[i].attr;
+	for (i = 0; i < sizeof(attribute_map) / sizeof(attribute_map[0]); i++) {
+		if (strcmp(attr, attribute_map[i].string) == 0)
+			return attribute_map[i].attr;
 	}
 	return 0;
 }
 
 static void read_config_attribute(const config_setting_t *setting, const char *name, opt_t3_attr_t *attr) {
-	config_setting_t *list;
+	config_setting_t *attr_setting;
 	const char *value;
 	t3_attr_t accumulated_attr = 0;
 	int i;
 
-	if (config_setting_lookup_string(setting, name, &value) == CONFIG_TRUE) {
-		*attr = attribute_string_to_bin(value);
+	if ((attr_setting = config_setting_get_member(setting, name)) == NULL)
+		return;
+
+	if (config_setting_type(attr_setting) == CONFIG_TYPE_STRING) {
+		*attr = attribute_string_to_bin(config_setting_get_string(attr_setting));
+		return;
+	} else if (!config_setting_is_list(attr_setting) && !config_setting_is_array(attr_setting)) {
 		return;
 	}
 
-	if ((list = config_setting_get_member(setting, name)) == NULL)
-		return;
-
-	for (i = 0; (value = config_setting_get_string_elem(list, i)) != NULL; i++)
+	for (i = 0; (value = config_setting_get_string_elem(attr_setting, i)) != NULL; i++)
 		accumulated_attr = t3_term_combine_attrs(attribute_string_to_bin(value), accumulated_attr);
 
 	*attr = accumulated_attr;
@@ -102,7 +104,7 @@ static void read_config_attribute(const config_setting_t *setting, const char *n
 		opts->name = tmp; \
 } while(0)
 
-static void read_options_per_config(const config_setting_t *setting, options_t *opts) {
+static void read_config_per_config(const config_setting_t *setting, options_t *opts) {
 	config_setting_t *attributes;
 	GET_OPT_BOOL(wrap);
 	GET_OPT_INT(tabsize);
@@ -133,7 +135,7 @@ static void read_options_per_config(const config_setting_t *setting, options_t *
 	read_config_attribute(attributes, "shadow", &opts->shadow);
 }
 
-static void read_options(void) {
+static void read_config(void) {
 	string file = getenv("HOME");
 	FILE *config_file;
 	config_t config;
@@ -142,35 +144,34 @@ static void read_options(void) {
 
 	file += "/.tilde";
 
-	if ((config_file = fopen(file.c_str(), "r")) == NULL) {
-		if (errno == ENOENT) {
-			if ((config_file = fopen(file.c_str(), "w+")) != NULL) {
-				fprintf(config_file, "# Default empty config file\n");
-				fclose(config_file);
-			}
-		}
+	//FIXME: also take "config_version" key into account
+	if ((config_file = fopen(file.c_str(), "r")) == NULL)
 		return;
-	}
 
 	config_init(&config);
 	if (config_read_file(&config, file.c_str()) == CONFIG_FALSE) {
 		config_read_error = true;
 		config_read_error_string = config_error_text(&config);
 		config_read_error_line = config_error_line(&config);
-		config_destroy(&config);
-		return;
+		goto end;
 	}
 
-	read_options_per_config(config_root_setting(&config), &default_option);
+	read_config_per_config(config_root_setting(&config), &default_option);
+
+	if ((term_specific_setting = config_setting_get_member(config_root_setting(&config), "terminals")) == NULL)
+		goto end;
 
 	if (cli_option.term != NULL)
 		term = cli_option.term;
 	else if ((term = getenv("TERM")) == NULL)
-		return;
+		goto end;
 
-	if ((term_specific_setting = config_setting_get_member(config_root_setting(&config), term)) != NULL)
-		read_options_per_config(term_specific_setting, &term_specific_option);
+	if ((term_specific_setting = config_setting_get_member(term_specific_setting, term)) != NULL)
+		read_config_per_config(term_specific_setting, &term_specific_option);
+
+end:
 	config_destroy(&config);
+	fclose(config_file);
 }
 
 #define SET_OPT_FROM_FILE(name, deflt) do { \
@@ -182,19 +183,11 @@ static void read_options(void) {
 		option.name = deflt; \
 } while (0)
 
-#define SET_ATTR_FROM_FILE(name, const_name) do { \
-	if (term_specific_option.name.is_valid()) \
-		set_attribute(const_name, term_specific_option.name); \
-	else if (default_option.name.is_valid()) \
-		set_attribute(const_name, default_option.name); \
-} while (0)
-
 static void post_process_options(void) {
-	//FIXME: doesn't make much sense to do this by terminal
 	if (cli_option.wrap)
 		option.wrap = true;
-	else
-		SET_OPT_FROM_FILE(wrap, false);
+	else if (default_option.wrap.is_valid())
+		option.wrap = default_option.wrap;
 
 	if (cli_option.color.is_valid())
 		option.color = cli_option.color;
@@ -203,8 +196,11 @@ static void post_process_options(void) {
 
 	SET_OPT_FROM_FILE(tabsize, 8);
 	SET_OPT_FROM_FILE(hide_menubar, false);
-	//FIXME: doesn't make much sense to do this by terminal
-	SET_OPT_FROM_FILE(max_recent_files, 16);
+
+	if (default_option.max_recent_files.is_valid())
+		option.max_recent_files = default_option.max_recent_files;
+	else
+		option.max_recent_files = 16;
 
 	if (!cli_option.ask_input_method && term_specific_option.key_timeout.is_valid())
 			option.key_timeout = term_specific_option.key_timeout;
@@ -248,10 +244,17 @@ PARSE_FUNCTION(parse_args)
 		cli_option.files.push_back(optcurrent);
 	END_OPTIONS
 
-	read_options();
+	read_config();
 
 	post_process_options();
 END_FUNCTION
+
+#define SET_ATTR_FROM_FILE(name, const_name) do { \
+	if (term_specific_option.name.is_valid()) \
+		set_attribute(const_name, term_specific_option.name); \
+	else if (default_option.name.is_valid()) \
+		set_attribute(const_name, default_option.name); \
+} while (0)
 
 void set_attributes(void) {
 	SET_ATTR_FROM_FILE(non_print, attribute_t::NON_PRINT);
@@ -271,4 +274,137 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(menubar, attribute_t::MENUBAR);
 	SET_ATTR_FROM_FILE(menubar_selected, attribute_t::MENUBAR_SELECTED);
 	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
+}
+
+static void set_config_attribute(config_setting_t *setting, const char *name, opt_t3_attr_t attr) {
+	static t3_attr_t attribute_masks[] = {
+		T3_ATTR_FG_MASK,
+		T3_ATTR_BG_MASK,
+		T3_ATTR_UNDERLINE,
+		T3_ATTR_BOLD,
+		T3_ATTR_REVERSE,
+		T3_ATTR_BLINK,
+		T3_ATTR_DIM
+	};
+
+	config_setting_t *attributes;
+	size_t i, j;
+
+	if (!attr.is_valid())
+		return;
+
+	if ((attributes = config_setting_get_member(setting, "attributes")) == NULL || !config_setting_is_group(attributes)) {
+		config_setting_remove(setting, "attributes");
+		attributes = config_setting_add(setting, "attributes", CONFIG_TYPE_GROUP);
+	}
+	setting = config_setting_add(attributes, name, CONFIG_TYPE_ARRAY);
+	for (i = 0; i < sizeof(attribute_masks) / sizeof(attribute_masks[0]); i++) {
+		t3_attr_t search = attr & attribute_masks[i];
+		for (j = 0; j < sizeof(attribute_map) / sizeof(attribute_map[0]); j++) {
+			if (attribute_map[j].attr == search) {
+				config_setting_t *attribute_string = config_setting_add(setting, NULL, CONFIG_TYPE_STRING);
+				config_setting_set_string(attribute_string, attribute_map[j].string);
+				break;
+			}
+		}
+	}
+}
+
+#define SET_OPTION(name, create_type, set_type) do { \
+	if (options->name.is_valid()) { \
+		config_setting_t *tmp = config_setting_add(setting, #name, create_type); \
+		config_setting_set_##set_type(tmp, options->name); \
+	} \
+} while (0)
+
+static void set_config_options(config_setting_t *setting, options_t *options) {
+	SET_OPTION(wrap, CONFIG_TYPE_BOOL, bool);
+	SET_OPTION(tabsize, CONFIG_TYPE_INT, int);
+	SET_OPTION(hide_menubar, CONFIG_TYPE_BOOL, bool);
+	SET_OPTION(color, CONFIG_TYPE_BOOL, bool);
+	SET_OPTION(max_recent_files, CONFIG_TYPE_INT, int);
+	SET_OPTION(key_timeout, CONFIG_TYPE_INT, int);
+
+	set_config_attribute(setting, "non_print", options->non_print);
+	set_config_attribute(setting, "selection_cursor", options->selection_cursor);
+	set_config_attribute(setting, "selection_cursor2", options->selection_cursor2);
+	set_config_attribute(setting, "bad_draw", options->bad_draw);
+	set_config_attribute(setting, "text_cursor", options->text_cursor);
+	set_config_attribute(setting, "text", options->text);
+	set_config_attribute(setting, "text_selected", options->text_selected);
+	set_config_attribute(setting, "highlight", options->highlight);
+	set_config_attribute(setting, "highlight_selected", options->highlight_selected);
+	set_config_attribute(setting, "dialog", options->dialog);
+	set_config_attribute(setting, "dialog_selected", options->dialog_selected);
+	set_config_attribute(setting, "button", options->button);
+	set_config_attribute(setting, "button_selected", options->button_selected);
+	set_config_attribute(setting, "scrollbar", options->scrollbar);
+	set_config_attribute(setting, "menubar", options->menubar);
+	set_config_attribute(setting, "menubar_selected", options->menubar_selected);
+	set_config_attribute(setting, "shadow", options->shadow);
+}
+
+bool write_config(void) {
+	string file, new_file;
+	FILE *config_file;
+	config_t config;
+	const char *term;
+	config_setting_t *root_setting, *terminal_setting, *setting;
+	int idx;
+
+	file = getenv("HOME");
+	file += "/.tilde";
+
+	config_init(&config);
+	if ((config_file = fopen(file.c_str(), "r")) != NULL) {
+		/* Start by reading the existing configuration. */
+		config_read_file(&config, file.c_str());
+		fclose(config_file);
+	} else if (errno != ENOENT) {
+		return false;
+	}
+
+	/* Remove everything that is not a terminal spec. */
+	root_setting = config_root_setting(&config);
+	idx = 0;
+	while ((setting = config_setting_get_elem(root_setting, idx)) != NULL) {
+		if (strcmp(config_setting_name(setting), "terminals") == 0)
+			idx++;
+		else
+			config_setting_remove_elem(root_setting, idx);
+	}
+
+	default_option.key_timeout.unset();
+	set_config_options(root_setting, &default_option);
+	setting = config_setting_add(root_setting, "config_version", CONFIG_TYPE_INT);
+	config_setting_set_int(setting, 1);
+
+	if (cli_option.term != NULL)
+		term = cli_option.term;
+	else
+		term = getenv("TERM");
+
+	if (term != NULL) {
+		if ((terminal_setting = config_lookup(&config, "terminals")) == NULL || !config_setting_is_group(terminal_setting)) {
+			config_setting_remove(root_setting, "terminals");
+			terminal_setting = config_setting_add(root_setting, "terminals", CONFIG_TYPE_GROUP);
+		} else {
+			config_setting_remove(terminal_setting, term);
+		}
+		terminal_setting = config_setting_add(terminal_setting, term, CONFIG_TYPE_GROUP);
+
+		term_specific_option.wrap.unset();
+		term_specific_option.max_recent_files.unset();
+
+		set_config_options(terminal_setting, &term_specific_option);
+	}
+
+	new_file = file + ".new";
+	lprintf("Writing config to %s\n", new_file.c_str());
+	if (config_write_file(&config, new_file.c_str()) == CONFIG_TRUE && rename(new_file.c_str(), file.c_str()) == 0) {
+		config_destroy(&config);
+		return true;
+	}
+	config_destroy(&config);
+	return false;
 }

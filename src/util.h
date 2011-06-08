@@ -61,6 +61,7 @@ class opt_##_type { \
 		opt_##_type(void) : value(0), initialized(false) {} \
 		opt_##_type(_type _value) : value(_value), initialized(true) {} \
 		bool is_valid(void) { return initialized; } \
+		void unset(void) { initialized = false; } \
 		operator _type (void) const { if (!initialized) throw(0); return (_type) value; } \
 		opt_##_type & operator=(const opt_##_type &other) { initialized = other.initialized; value = other.value; return *this; } \
 		opt_##_type & operator=(const _type other) { initialized = true; value = other; return *this; } \
