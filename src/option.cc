@@ -104,7 +104,7 @@ static void read_config_attribute(const config_setting_t *setting, const char *n
 		opts->name = tmp; \
 } while(0)
 
-static void read_config_per_config(const config_setting_t *setting, options_t *opts) {
+static void read_config_part(const config_setting_t *setting, options_t *opts) {
 	config_setting_t *attributes;
 	GET_OPT_BOOL(wrap);
 	GET_OPT_INT(tabsize);
@@ -141,6 +141,7 @@ static void read_config(void) {
 	config_t config;
 	config_setting_t *term_specific_setting;
 	const char *term;
+	long version;
 
 	file += "/.tilde";
 
@@ -156,7 +157,12 @@ static void read_config(void) {
 		goto end;
 	}
 
-	read_config_per_config(config_root_setting(&config), &default_option);
+	if (config_lookup_int(&config, "config_version", &version) != CONFIG_TRUE)
+		goto end;
+	if (version != 1)
+		goto end;
+
+	read_config_part(config_root_setting(&config), &default_option);
 
 	if ((term_specific_setting = config_setting_get_member(config_root_setting(&config), "terminals")) == NULL)
 		goto end;
@@ -167,7 +173,7 @@ static void read_config(void) {
 		goto end;
 
 	if ((term_specific_setting = config_setting_get_member(term_specific_setting, term)) != NULL)
-		read_config_per_config(term_specific_setting, &term_specific_option);
+		read_config_part(term_specific_setting, &term_specific_option);
 
 end:
 	config_destroy(&config);
@@ -351,6 +357,7 @@ bool write_config(void) {
 	const char *term;
 	config_setting_t *root_setting, *terminal_setting, *setting;
 	int idx;
+	long version;
 
 	file = getenv("HOME");
 	file += "/.tilde";
@@ -364,14 +371,23 @@ bool write_config(void) {
 		return false;
 	}
 
-	/* Remove everything that is not a terminal spec. */
-	root_setting = config_root_setting(&config);
-	idx = 0;
-	while ((setting = config_setting_get_elem(root_setting, idx)) != NULL) {
-		if (strcmp(config_setting_name(setting), "terminals") == 0)
-			idx++;
-		else
-			config_setting_remove_elem(root_setting, idx);
+	if (config_lookup_int(&config, "config_version", &version) != CONFIG_TRUE || version < 1) {
+		/* Clean-out config, because it is an old version. */
+		config_destroy(&config);
+		config_init(&config);
+	} else if (version > 1) {
+		/* Don't overwrite config files with newer config version. */
+		return false;
+	} else {
+		/* Remove everything that is not a terminal spec. */
+		root_setting = config_root_setting(&config);
+		idx = 0;
+		while ((setting = config_setting_get_elem(root_setting, idx)) != NULL) {
+			if (strcmp(config_setting_name(setting), "terminals") == 0)
+				idx++;
+			else
+				config_setting_remove_elem(root_setting, idx);
+		}
 	}
 
 	default_option.key_timeout.unset();
