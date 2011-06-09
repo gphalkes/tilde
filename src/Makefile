@@ -22,7 +22,8 @@ SOURCES..objects/edit := \
 	util.cc \
 	dialogs/encodingdialog.cc \
 	dialogs/openrecentdialog.cc \
-	dialogs/selectbufferdialog.cc
+	dialogs/selectbufferdialog.cc \
+	dialogs/aboutdialog.cc
 LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode
 LDFLAGS..objects/edit += -Lwidget/.libs -Lwindow/.libs -Ltranscript/.libs -Lunicode/.libs
 LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`

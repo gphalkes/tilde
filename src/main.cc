@@ -22,6 +22,7 @@
 #include "dialogs/selectbufferdialog.h"
 #include "dialogs/encodingdialog.h"
 #include "dialogs/openrecentdialog.h"
+#include "dialogs/aboutdialog.h"
 #include "log.h"
 
 using namespace std;
@@ -47,6 +48,7 @@ class main_t : public main_window_base_t {
 		split_t *split;
 
 		select_buffer_dialog_t *select_buffer_dialog;
+		about_dialog_t *about_dialog;
 
 	public:
 		main_t(void);
@@ -112,11 +114,11 @@ main_t::main_t(void) {
 	panel->add_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
 	panel = new menu_panel_t(menu, "_Options");
-	panel->add_item("_Tabs...", NULL, action_id_t::OPTIONS_TABS);
-	panel->add_item("_Keys...", NULL, action_id_t::OPTIONS_KEYS);
+/*	panel->add_item("_Tabs...", NULL, action_id_t::OPTIONS_TABS);
+	panel->add_item("_Keys...", NULL, action_id_t::OPTIONS_KEYS);*/
 
 	panel = new menu_panel_t(menu, "_Help");
-	panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
+	//~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
 	panel->add_item("_About", NULL, action_id_t::HELP_ABOUT);
 
 	edit = new edit_window_t(new file_buffer_t());
@@ -158,6 +160,9 @@ main_t::main_t(void) {
 
 	open_recent_dialog = new open_recent_dialog_t(11, t3_win_get_width(window) - 4);
 	open_recent_dialog->center_over(this);
+
+	about_dialog = new about_dialog_t(13, 45);
+	about_dialog->center_over(this);
 }
 
 bool main_t::process_key(t3_widget::key_t key) {
@@ -299,6 +304,10 @@ void main_t::menu_activated(int id) {
 		case action_id_t::WINDOWS_MERGE:
 			delete split->unsplit();
 			break;
+
+		case action_id_t::HELP_ABOUT:
+			about_dialog->show();
+			break;
 		default:
 			break;
 	}
@@ -408,7 +417,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	load_cli_file_process_t::execute(sigc::mem_fun(main_window, &main_t::load_cli_files_done));
-	//FIXME: close empty buffer if a file was loaded
 	main_loop();
 	return 0;
 }

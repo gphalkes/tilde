@@ -53,8 +53,10 @@ bool transcript_buffer_t::fill_buffer(int used) {
 	}
 
 	if (!at_eof) { // Don't try to read more bytes when we have already hit EOF
-		if (!wrapped_buffer->fill_buffer(buffer_index))
+		if (!wrapped_buffer->fill_buffer(buffer_index)) {
 			at_eof = true;
+			conversion_flags |= TRANSCRIPT_END_OF_TEXT;
+		}
 		buffer_index = 0;
 	}
 
@@ -65,7 +67,7 @@ bool transcript_buffer_t::fill_buffer(int used) {
 	outbuf = buffer + fill;
 
 	retval = transcript_to_unicode(handle, &inbuf, wrapped_buffer->get_buffer() + wrapped_buffer->get_fill(),
-		&outbuf, buffer + FILE_BUFFER_SIZE, 0);
+		&outbuf, buffer + FILE_BUFFER_SIZE, conversion_flags);
 	buffer_index = inbuf - wrapped_buffer->get_buffer();
 	fill = outbuf - buffer;
 

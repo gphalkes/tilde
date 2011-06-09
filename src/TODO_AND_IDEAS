@@ -15,13 +15,12 @@ MISSING FUNCTIONALITY
 =====================
 - options setting
 - help text
-- about dialog
 - replace with regex is only partially working
 
 GENERIC
 =======
 - FIXME's
-
+- allow users to set combining char support and other stuff from config file
 
 From the original TODO_AND_IDEAS file
 -------------------------------------

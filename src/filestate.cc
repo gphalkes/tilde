@@ -55,19 +55,30 @@ bool load_process_t::step(void) {
 			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_ERROR:
-			printf_into(&message, "Could not load file in encoding FIXME: %s", transcript_strerror(rw_result.get_transcript_error()));
+			printf_into(&message, "Could not load file in encoding %s: %s", file->get_encoding(), transcript_strerror(rw_result.get_transcript_error()));
 			error_dialog->set_message(&message);
 			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_IMPRECISE:
-			printf_into(&message, "Conversion from encoding FIXME is irreversible");
+			printf_into(&message, "Conversion from encoding %s is irreversible", file->get_encoding());
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
 		case rw_result_t::CONVERSION_ILLEGAL:
-			//FIXME: handle illegal characters in input
+			printf_into(&message, "Conversion from encoding %s encountered illegal characters", file->get_encoding());
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
+			continue_abort_dialog->set_message(&message);
+			continue_abort_dialog->show();
+			return false;
 		case rw_result_t::CONVERSION_TRUNCATED:
-			//FIXME: handle truncated input
+			printf_into(&message, "File appears to be truncated");
+			result = true;
+			error_dialog->set_message(&message);
+			error_dialog->show();
+			break;
 		default:
 			PANIC();
 	}
