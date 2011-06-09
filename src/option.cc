@@ -141,11 +141,9 @@ static void read_config(void) {
 	config_t config;
 	config_setting_t *term_specific_setting;
 	const char *term;
-	long version;
 
 	file += "/.tilde";
 
-	//FIXME: also take "config_version" key into account
 	if ((config_file = fopen(file.c_str(), "r")) == NULL)
 		return;
 
@@ -157,10 +155,11 @@ static void read_config(void) {
 		goto end;
 	}
 
-	if (config_lookup_int(&config, "config_version", &version) != CONFIG_TRUE)
-		goto end;
-	if (version != 1)
-		goto end;
+	/* Note: when supporting later versions, read the config_version key here.
+		config_lookup_int(&config, "config_version", &version)
+	   For now, we just try to make the best of it when we encouter a version
+	   that we do not know.
+	*/
 
 	read_config_part(config_root_setting(&config), &default_option);
 
