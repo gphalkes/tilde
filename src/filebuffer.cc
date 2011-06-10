@@ -74,6 +74,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 						return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
 				}
 				state->wrapper = new file_read_wrapper_t(state->fd, handle);
+				#warning FIXME: convert name from LANG codeset
 				name_line.set_text(name);
 			} catch (bad_alloc &ba) {
 				return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
@@ -216,6 +217,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			if (!state->name.empty()) {
 				free(name);
 				name = strdup(state->name.c_str());
+				#warning FIXME: convert name from LANG codeset
 				name_line.set_text(name);
 			}
 			undo_list.set_mark();

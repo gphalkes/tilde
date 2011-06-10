@@ -93,6 +93,7 @@ main_t::main_t(void) {
 	panel->add_item("Cu_t", "^X", action_id_t::EDIT_CUT);
 	panel->add_item("_Paste", "^V", action_id_t::EDIT_PASTE);
 	panel->add_item("Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
+	panel->add_item("_Mark Selection", "^Space", action_id_t::EDIT_MARK);
 	panel->add_item("_Insert Character...", "F9", action_id_t::EDIT_INSERT_CHAR);
 
 	panel = new menu_panel_t(menu, "_Search");
@@ -257,6 +258,9 @@ void main_t::menu_activated(int id) {
 			break;
 		case action_id_t::EDIT_SELECT_ALL:
 			get_current()->select_all();
+			break;
+		case action_id_t::EDIT_MARK:
+			get_current()->process_key(0);
 			break;
 		case action_id_t::EDIT_INSERT_CHAR:
 			get_current()->insert_special();
