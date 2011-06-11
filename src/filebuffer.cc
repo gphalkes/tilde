@@ -64,6 +64,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
 			try {
+				string converted_name;
 				lprintf("Using encoding %s to read %s\n", encoding, name);
 
 				if (strcmp(encoding, "UTF-8") == 0) {
@@ -74,8 +75,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 						return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
 				}
 				state->wrapper = new file_read_wrapper_t(state->fd, handle);
-				#warning FIXME: convert name from LANG codeset
-				name_line.set_text(name);
+
+				convert_lang_codeset(name, &converted_name, true);
+				name_line.set_text(&converted_name);
 			} catch (bad_alloc &ba) {
 				return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 			}
@@ -215,10 +217,11 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			}
 
 			if (!state->name.empty()) {
+				string converted_name;
 				free(name);
 				name = strdup(state->name.c_str());
-				#warning FIXME: convert name from LANG codeset
-				name_line.set_text(name);
+				convert_lang_codeset(name, &converted_name, true);
+				name_line.set_text(&converted_name);
 			}
 			undo_list.set_mark();
 			last_undo_type = UNDO_NONE;
