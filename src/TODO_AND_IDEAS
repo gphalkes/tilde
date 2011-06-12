@@ -3,12 +3,10 @@ BUGS
 
 FILE OPEN
 =========
-- set dialog starting point to directory of currently open file
 - check that on failure the transcript converter is properly closed
 
 SAVE (AS)
 =========
-- set dialog starting point to directory of currently open file
 - check that on failure the transcript converter is properly closed
 
 MISSING FUNCTIONALITY
@@ -21,6 +19,8 @@ GENERIC
 =======
 - FIXME's
 - allow users to set combining char support and other stuff from config file
+- only overwrite config file with errors if user consents
+- save config options that we don't know, instead of deleting everything
 
 From the original TODO_AND_IDEAS file
 -------------------------------------

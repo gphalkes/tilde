@@ -138,17 +138,15 @@ main_t::main_t(void) {
 	encoding_dialog = new encoding_dialog_t(t3_win_get_height(window) - 8, t3_win_get_width(window) - 8);
 	encoding_dialog->center_over(this);
 
-	string wd(get_working_directory());
 	open_file_dialog = new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	open_file_dialog->center_over(this);
-	open_file_dialog->change_dir(&wd);
+	open_file_dialog->set_file(NULL);
 	encoding_button = new button_t("_Encoding");
 	encoding_button->connect_activate(sigc::mem_fun(encoding_dialog, &encoding_dialog_t::show));
 	open_file_dialog->set_options_widget(encoding_button);
 
 	save_as_dialog = new save_as_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
 	save_as_dialog->center_over(this);
-	save_as_dialog->change_dir(&wd);
 	encoding_button = new button_t("_Encoding");
 	encoding_button->connect_activate(sigc::mem_fun(encoding_dialog, &encoding_dialog_t::show));
 	save_as_dialog->set_options_widget(encoding_button);
@@ -213,9 +211,16 @@ void main_t::menu_activated(int id) {
 			break;
 		}
 
-		case action_id_t::FILE_OPEN:
+		case action_id_t::FILE_OPEN: {
+			const char *name = get_current()->get_text()->get_name();
+			if (name != NULL) {
+				open_file_dialog->set_file(name);
+				// Because set_file also selects the named file if possible, we need to reset the dialog
+				open_file_dialog->reset();
+			}
 			load_process_t::execute(sigc::mem_fun(this, &main_t::switch_to_new_buffer));
 			break;
+		}
 
 		case action_id_t::FILE_CLOSE:
 			close_process_t::execute(sigc::mem_fun(this, &main_t::close_cb), (file_buffer_t *) get_current()->get_text());

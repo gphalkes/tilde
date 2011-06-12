@@ -133,8 +133,13 @@ bool save_as_process_t::step(void) {
 	rw_result_t rw_result;
 
 	if (state == SELECT_FILE) {
+		const char *current_name = file->get_name();
+
 		connections.push_back(save_as_dialog->connect_closed(sigc::mem_fun(this, &save_as_process_t::abort)));
 		connections.push_back(save_as_dialog->connect_file_selected(sigc::mem_fun(this, &save_as_process_t::file_selected)));
+
+		if (current_name != NULL)
+			save_as_dialog->set_file(current_name);
 		save_as_dialog->show();
 		connections.push_back(encoding_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::encoding_selected)));
 		encoding_dialog->set_encoding(file->get_encoding());
@@ -365,6 +370,10 @@ bool load_cli_file_process_t::step(void) {
 
 void load_cli_file_process_t::load_done(stepped_process_t *process) {
 	(void) process;
+
+	if (!process->get_result())
+		new file_buffer_t(*iter, "UTF-8");
+
 	in_load = false;
 	iter++;
 	if (!in_step)

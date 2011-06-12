@@ -30,8 +30,13 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 	if (encoding == NULL)
 		throw bad_alloc();
 
-	if (name == NULL)
+	if (name == NULL) {
 		name_line.set_text("(Untitled)");
+	} else {
+		string converted_name;
+		convert_lang_codeset(name, &converted_name, true);
+		name_line.set_text(&converted_name);
+	}
 	open_files.push_back(this);
 	set_tabsize(option.tabsize);
 	set_wrap(option.wrap);
