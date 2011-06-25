@@ -120,6 +120,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 	return rw_result_t(rw_result_t::SUCCESS);
 }
 
+/* FIXME: try to prevent as many race conditions as possible here. */
 rw_result_t file_buffer_t::save(save_as_process_t *state) {
 	size_t idx;
 	const char *save_name;
@@ -140,6 +141,8 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			if ((state->real_name = resolve_links(save_name)) == NULL)
 				return rw_result_t(rw_result_t::ERRNO_ERROR, ENAMETOOLONG);
 
+			/* FIXME: to avoid race conditions, it iw probably better to try open with O_CREAT|O_EXCL
+			   However, this may cause issues with NFS, which is known to have isues with this. */
 			if (stat(state->real_name, &state->file_info) < 0) {
 				if (errno == ENOENT) {
 					if ((state->fd = creat(state->real_name, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) < 0)

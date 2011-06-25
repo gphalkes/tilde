@@ -40,6 +40,18 @@ encoding_dialog_t *encoding_dialog;
 
 static input_selection_dialog_t *inputsel;
 
+/* Wrap the input_selection_dialog_t, such that pressing C-q exits the program. */
+class new_input_selection_dialog_t : public input_selection_dialog_t {
+	public:
+		new_input_selection_dialog_t(int height, int width, text_buffer_t *_text = NULL) :
+			input_selection_dialog_t(height, width, _text) {}
+		virtual bool process_key(key_t key) {
+			if ((key & ~EKEY_META) == ('q' | EKEY_CTRL))
+				exit(EXIT_SUCCESS);
+			return input_selection_dialog_t::process_key(key);
+		}
+};
+
 class main_t : public main_window_base_t {
 	private:
 		menu_bar_t *menu;
@@ -411,7 +423,7 @@ int main(int argc, char *argv[]) {
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
 	} else {
-		inputsel = new input_selection_dialog_t(20, 70);
+		inputsel = new new_input_selection_dialog_t(20, 70);
 		inputsel->connect_intuitive_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), 100));
 		inputsel->connect_compromise_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), -1000));
 		inputsel->connect_no_timeout_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), 0));
