@@ -16,7 +16,7 @@
 
 #include <cstdlib>
 #include <list>
-#include <widget.h>
+#include <t3window/window.h>
 
 #include "util.h"
 

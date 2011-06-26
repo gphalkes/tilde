@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <libconfig.h>
+#include <t3widget/widget.h>
 
 #include "option.h"
 #include "util.h"

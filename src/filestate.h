@@ -15,7 +15,7 @@
 #define FILESTATE_H
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <transcript.h>
+#include <transcript/transcript.h>
 #include <sigc++/sigc++.h>
 
 #include "util.h"

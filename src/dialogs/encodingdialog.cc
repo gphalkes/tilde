@@ -14,8 +14,8 @@
 #include <cstring>
 #include <deque>
 #include <algorithm>
-#include <widget.h>
-#include <transcript.h>
+#include <t3widget/widget.h>
+#include <transcript/transcript.h>
 #include "encodingdialog.h"
 #include "log.h"
 

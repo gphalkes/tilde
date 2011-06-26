@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <cerrno>
 #include <string>
-#include <transcript.h>
+#include <transcript/transcript.h>
 
 using namespace std;
 

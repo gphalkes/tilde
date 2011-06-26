@@ -20,7 +20,7 @@
 #include <limits.h>
 #include <string>
 
-#include <widget.h>
+#include <t3widget/widget.h>
 #include "option.h"
 
 using namespace std;

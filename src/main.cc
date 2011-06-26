@@ -13,7 +13,7 @@
 */
 
 #include <cstdlib>
-#include <widget.h>
+#include <t3widget/widget.h>
 
 #include "option.h"
 #include "action.h"

@@ -15,7 +15,7 @@
 #define ENCODINGDIALOG_H
 
 #include <string>
-#include <widget.h>
+#include <t3widget/widget.h>
 
 using namespace t3_widget;
 

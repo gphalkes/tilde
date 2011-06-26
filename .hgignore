@@ -6,6 +6,8 @@ src/.objects
 src/.deps
 src/.recordings
 src/record
-src/widget
-src/window
+src/t3widget
+src/t3window
+src/t3unicode
+src/transcript
 src/log.txt

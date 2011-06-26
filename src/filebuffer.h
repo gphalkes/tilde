@@ -14,7 +14,7 @@
 #ifndef FILE_BUFFER_H
 #define FILE_BUFFER_H
 
-#include <widget.h>
+#include <t3widget/widget.h>
 
 using namespace t3_widget;
 

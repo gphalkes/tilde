@@ -14,8 +14,8 @@
 #include <new>
 #include <cstring>
 
-#include <widget.h>
-#include <unicode.h>
+#include <t3widget/widget.h>
+#include <t3unicode/unicode.h>
 
 using namespace t3_widget;
 

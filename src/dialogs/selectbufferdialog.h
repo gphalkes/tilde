@@ -14,7 +14,7 @@
 #ifndef SELECTBUFFERDIALOG_H
 #define SELECTBUFFERDIALOG_H
 
-#include <widget.h>
+#include <t3widget/widget.h>
 using namespace t3_widget;
 
 #include "filebuffer.h"
