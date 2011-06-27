@@ -19,6 +19,6 @@ if ! [ -x "$DIR/.objects/edit" ] ; then
 	exit
 fi
 
-export LD_LIBRARY_PATH="$DIR/widget/.libs:$DIR/window/.libs:$DIR/key/.libs:$DIR/unicode/.libs:$DIR/transcript/.libs"
+export LD_LIBRARY_PATH="$DIR/t3widget/.libs:$DIR/t3window/.libs:$DIR/t3key/.libs:$DIR/t3unicode/.libs:$DIR/transcript/.libs"
 valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
 	--log-file="$DIR/valgrind.log" "$DIR/.objects/edit" --L=250 "$@"

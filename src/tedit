@@ -21,7 +21,7 @@ fi
 
 [ -d .recordings ] || mkdir .recordings
 
-export LD_LIBRARY_PATH="$DIR/widget/.libs:$DIR/window/.libs:$DIR/transcript/.libs:$DIR/unicode/.libs"
+export LD_LIBRARY_PATH="$DIR/t3widget/.libs:$DIR/t3window/.libs:$DIR/transcript/.libs:$DIR/t3unicode/.libs"
 DATE="`date +%F@%T`"
 rm "$DIR/.recordings/last" "$DIR/log.txt"
 "$DIR/record/tdrecord" -o "$DIR/.recordings/last" -eLD_LIBRARY_PATH "$DIR/.objects/edit" --D "$@"
