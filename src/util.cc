@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <string>
+#include <cstdarg>
 
 #include <t3widget/widget.h>
 #include "option.h"

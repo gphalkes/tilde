@@ -61,15 +61,15 @@ bool load_process_t::step(void) {
 			break;
 		case rw_result_t::CONVERSION_IMPRECISE:
 			printf_into(&message, "Conversion from encoding %s is irreversible", file->get_encoding());
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
 		case rw_result_t::CONVERSION_ILLEGAL:
 			printf_into(&message, "Conversion from encoding %s encountered illegal characters", file->get_encoding());
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;

@@ -45,7 +45,7 @@ class new_input_selection_dialog_t : public input_selection_dialog_t {
 	public:
 		new_input_selection_dialog_t(int height, int width, text_buffer_t *_text = NULL) :
 			input_selection_dialog_t(height, width, _text) {}
-		virtual bool process_key(key_t key) {
+		virtual bool process_key(t3_widget::key_t key) {
 			if ((key & ~EKEY_META) == ('q' | EKEY_CTRL))
 				exit(EXIT_SUCCESS);
 			return input_selection_dialog_t::process_key(key);
@@ -135,7 +135,7 @@ main_t::main_t(void) {
 	panel->add_item("_About", NULL, action_id_t::HELP_ABOUT);
 
 	edit = new edit_window_t(new file_buffer_t());
-	split = new split_t(edit, true);
+	split = new split_t(edit);
 	split->set_position(!option.hide_menubar, 0);
 	split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
 	push_back(split);
