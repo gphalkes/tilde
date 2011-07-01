@@ -85,7 +85,7 @@ main_t::main_t(void) {
 	push_back(menu);
 	menu->connect_activate(sigc::mem_fun(this, &main_t::menu_activated));
 
-	panel = new menu_panel_t(menu, "_File");
+	panel = new menu_panel_t("_File", menu);
 	panel->add_item("_New", "^N", action_id_t::FILE_NEW);
 	panel->add_item("_Open...", "^O", action_id_t::FILE_OPEN);
 	panel->add_item("Open _Recent...", NULL, action_id_t::FILE_OPEN_RECENT);
@@ -97,7 +97,7 @@ main_t::main_t(void) {
 	panel->add_item("S_uspend", NULL, action_id_t::FILE_SUSPEND);
 	panel->add_item("E_xit", "^Q", action_id_t::FILE_EXIT);
 
-	panel = new menu_panel_t(menu, "_Edit");
+	panel = new menu_panel_t("_Edit", menu);
 	panel->add_item("_Undo", "^Z", action_id_t::EDIT_UNDO);
 	panel->add_item("_Redo", "^Y", action_id_t::EDIT_REDO);
 	panel->add_separator();
@@ -108,14 +108,14 @@ main_t::main_t(void) {
 	panel->add_item("_Mark Selection", "^Space", action_id_t::EDIT_MARK);
 	panel->add_item("_Insert Character...", "F9", action_id_t::EDIT_INSERT_CHAR);
 
-	panel = new menu_panel_t(menu, "_Search");
+	panel = new menu_panel_t("_Search", menu);
 	panel->add_item("_Find...", "^F", action_id_t::SEARCH_SEARCH);
 	panel->add_item("Find _Next", "F3", action_id_t::SEARCH_AGAIN);
 	panel->add_item("Find _Previous", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
 	panel->add_item("_Replace...", "^R", action_id_t::SEARCH_REPLACE);
 	panel->add_item("_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
 
-	panel = new menu_panel_t(menu, "_Windows");
+	panel = new menu_panel_t("_Windows", menu);
 	panel->add_item("_Next Buffer", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
 	panel->add_item("_Previous Buffer", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
 	panel->add_item("_Select Buffer...", NULL, action_id_t::WINDOWS_SELECT);
@@ -126,11 +126,11 @@ main_t::main_t(void) {
 	panel->add_item("Next Window", "F8", action_id_t::WINDOWS_NEXT_WINDOW);
 	panel->add_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
-	panel = new menu_panel_t(menu, "_Options");
+	panel = new menu_panel_t("_Options", menu);
 /*	panel->add_item("_Tabs...", NULL, action_id_t::OPTIONS_TABS);
 	panel->add_item("_Keys...", NULL, action_id_t::OPTIONS_KEYS);*/
 
-	panel = new menu_panel_t(menu, "_Help");
+	panel = new menu_panel_t("_Help", menu);
 	//~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
 	panel->add_item("_About", NULL, action_id_t::HELP_ABOUT);
 
