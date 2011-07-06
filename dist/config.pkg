@@ -106,9 +106,9 @@ EOF
 	clean_cxx
 	cat > .configcxx.cc <<EOF
 #include <t3widget/widget.h>
-
+using namespace t3_widget;
 int main(int argc, char *argv[]) {
-	t3_widget_get_version();
+	get_version();
 	return 0;
 }
 EOF
@@ -124,11 +124,12 @@ EOF
 int main(int argc, char *argv[]) {
 	config_t config;
 	config_setting_t *setting;
+	long l;
 	int i;
 	config_destroy(&config);
 	config_init(&config);
 	setting = config_lookup(&config, "path");
-	config_lookup_int(&config, "path", &i);
+	config_lookup_int(&config, "path", &l);
 	config_read_file(&config, "name");
 	config_setting_add(setting, "name", CONFIG_TYPE_INT);
 	config_setting_get_elem(setting, 0);
@@ -136,7 +137,7 @@ int main(int argc, char *argv[]) {
 	config_setting_get_string(setting);
 	config_setting_get_string_elem(setting, 0);
 	config_setting_lookup_bool(setting, "name", &i);
-	config_setting_lookup_int(setting, "name", &i);
+	config_setting_lookup_int(setting, "name", &l);
 	config_setting_remove(setting, "name");
 	config_setting_remove_elem(setting, 0);
 	config_setting_set_bool(setting, 0);
@@ -183,12 +184,6 @@ EOF
 		test_and_set test_link_cxx "libpcre" LIBPCRE "" "-lpcre" || \
 		test_and_set test_link_cxx "libpcre" LIBPCRE "-I/usr/local/include" "-L/usr/local/lib -lpcre" || \
 		error "!! Can not find libpcre. libpcre is required to compile libt3widget."
-
-	if test_select "select in <sys/select.h>" "sys/select.h" ; then
-		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_SELECT_H"
-	else
-		test_select "select in <unistd.h>" "sys/time.h" "sys/types.h" "unistd.h" || error "!! Can not find required select function."
-	fi
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF

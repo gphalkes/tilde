@@ -32,9 +32,6 @@ GETTEXTLIBS=
 LOCALEDIR=$(prefix)/share/locale
 LINGUAS=
 
-# The libtool executable
-LIBTOOL=libtool
-
 # Installation prefix
 prefix=/usr/local
 
@@ -44,7 +41,6 @@ INSTALL=install
 # Miscelaneous install paths
 bindir=$(prefix)/bin
 
-SILENCELT=--silent
 SILENTCXX=@echo '[CXX]' $< ;
 SILENTLD=@echo '[LD]' $@ ;
 
