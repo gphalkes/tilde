@@ -18,7 +18,8 @@ Prerequisites and installation
 
 Tilde requires a C++ compiler, the libraries of the Tilde Terminal Toolkit
 (libt3unicode, libt3window, libt3key and libt3widget), libtranscript and
-libconfig (http://www.hyperrealm.com/libconfig/, known as libconfig-hr in Mac)
+libconfig (http://www.hyperrealm.com/libconfig/, known as libconfig-hr in
+MacPorts/DarwinPorts)
 
 There are two ways in which to compile Tilde:
 

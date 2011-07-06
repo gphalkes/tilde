@@ -71,7 +71,7 @@ dist-clean: clean
 src/tilde: $(OBJECTS)
 	$(SILENTLD) $(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS) $(CONFIGLIBS) $(GETTEXTLIBS)
 
-install: all libt3widget.pc
+install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) src/tilde $(bindir)
 	$(INSTALL) -d $(docdir)
