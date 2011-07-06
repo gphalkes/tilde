@@ -15,7 +15,13 @@
 # C++-compiler flags
 CXXFLAGS=-O2
 
-CONFIGFLAGS=
+# CONFIGFLAGS should contain all the flags to compile against the required
+# libraries (libt3unicode, libt3window, libt3key, libt3widget, libtranscript,
+# libpcre and libconfig)
+# If your system does not provide strdup, remove -DHAS_STRDUP
+# CONFIGLIBS should contain all the flags to link against the required
+# libraries
+CONFIGFLAGS=-DHAS_STRDUP
 CONFIGLIBS=
 
 # Gettext configuration
@@ -40,6 +46,7 @@ INSTALL=install
 
 # Miscelaneous install paths
 bindir=$(prefix)/bin
+docdir=$(prefix)/doc/tilde
 
 SILENTCXX=@echo '[CXX]' $< ;
 SILENTLD=@echo '[LD]' $@ ;
@@ -67,6 +74,9 @@ src/tilde: $(OBJECTS)
 install: all libt3widget.pc
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) src/tilde $(bindir)
+	$(INSTALL) -d $(docdir)
+	$(INSTALL) -m0644 COPYING $(docdir)
 
 uninstall:
 	rm -f $(bindir)/tilde
+	rm -rf $(docdir)
