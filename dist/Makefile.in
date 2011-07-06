@@ -1,0 +1,76 @@
+# Copyright (C) 2011 G.P. Halkes
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3, as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.POSIX:
+
+# C++-compiler flags
+CXXFLAGS=-O2
+
+CONFIGFLAGS=
+CONFIGLIBS=
+
+# Gettext configuration
+# GETTEXTFLAGS should contain -DUSE_GETTEXT to enable gettext translations
+# GETTEXTLIBS should contain all link flags to allow linking with gettext, if
+# it has been enabled. The GNU libc already contains the gettext library, so
+# there is no need to add any flags. Otherwise, -lintl is usually required, and
+# sometimes -liconv as well.
+# LOCALEDIR: the directory where the locale dependant files should be installed.
+# LINGUAS: translations to be installed. Look in po directory for available
+#  translations.
+GETTEXTFLAGS=
+GETTEXTLIBS=
+LOCALEDIR=$(prefix)/share/locale
+LINGUAS=
+
+# The libtool executable
+LIBTOOL=libtool
+
+# Installation prefix
+prefix=/usr/local
+
+# Install program to use (should be BSD install compatible)
+INSTALL=install
+
+# Miscelaneous install paths
+bindir=$(prefix)/bin
+
+SILENCELT=--silent
+SILENTCXX=@echo '[CXX]' $< ;
+SILENTLD=@echo '[LD]' $@ ;
+
+OBJECTS=<OBJECTS>
+
+all: src/tilde
+
+.PHONY: all clean dist-clean install uninstall
+.SUFFIXES: .cc .o .mo .po
+.IGNORE: uninstall
+
+clean:
+	rm -rf src/*.lo src/.libs src/libt3widget.la
+
+dist-clean: clean
+	rm -rf Makefile config.log libt3widget.pc
+
+.cc.o:
+	$(SILENTCXX) $(CXX) $(CFLAGS) $(CONFIGFLAGS) $(GETTEXTFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" -Isrc -c -o $@ $<
+
+src/tilde: $(OBJECTS)
+	$(SILENTLD) $(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS) $(CONFIGLIBS) $(GETTEXTLIBS)
+
+install: all libt3widget.pc
+	$(INSTALL) -d $(bindir)
+	$(INSTALL) src/tilde $(bindir)
+
+uninstall:
+	rm -f $(bindir)/tilde

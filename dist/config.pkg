@@ -1,0 +1,259 @@
+# Copyright (C) 2011 G.P. Halkes
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3, as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+EXTENSIONS="cxx verbose_compile pkgconfig_dep gettext"
+DEFAULT_LINGUAS=nl
+
+checkfunction_internal() {
+	clean_cxx
+
+	FUNC="$1"
+	CHECKFOR="$2"
+	CODE="$3"
+	shift 3
+	{
+		for INCLUDE
+		do
+			echo "#include ${INCLUDE}"
+		done
+		cat <<EOF
+int main(int argc, char *argv[]) {
+	${CODE}
+	return 0;
+}
+EOF
+	} > .configcxx.cc
+
+	"${FUNC}" "${CHECKFOR}"
+}
+
+checkfunction() {
+	checkfunction_internal test_link_cxx "$@"
+}
+checkfunction_compile() {
+	checkfunction_internal test_compile_cxx "$@"
+}
+
+# Make these functions available for the gettext extension
+test_link() {
+	mv .config.c .configcxx.cc
+	test_link_cxx "$@"
+}
+
+test_compile() {
+	test_compile_cxx "$@"
+}
+
+clean_c() {
+	clean .config.c
+	clean_cxx
+}
+
+config() {
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <transcript/transcript.h>
+
+int main(int argc, char *argv[]) {
+	transcript_get_version();
+	return 0;
+}
+EOF
+	pkgconfig libtranscript LIBTRANSCRIPT test_link_cxx || \
+		test_and_set test_link_cxx "libtranscript" LIBTRANSCRIPT "-I/usr/include/transcript" "-ltranscript" || \
+		test_and_set test_link_cxx "libtranscript" LIBTRANSCRIPT "-I/usr/local/include/transcript" "-L/usr/local/lib -ltranscript" || \
+		error "!! Can not find libtranscript. libtranscript is required to compile tilde."
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <t3unicode/unicode.h>
+
+int main(int argc, char *argv[]) {
+	t3_unicode_get_version();
+	return 0;
+}
+EOF
+	pkgconfig libt3unicode LIBT3UNICODE test_link_cxx || \
+		test_and_set test_link_cxx "libt3unicode" LIBT3UNICODE "-I/usr/include/t3/unicode" "-lt3unicode" || \
+		test_and_set test_link_cxx "libt3unicode" LIBT3UNICODE "-I/usr/local/include/t3/unicode" "-L/usr/local/lib -lt3unicode" || \
+		error "!! Can not find libt3unicode. libt3unicode is required to compile tilde."
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <t3window/window.h>
+#include <t3window/terminal.h>
+
+int main(int argc, char *argv[]) {
+	t3_window_get_version();
+	return 0;
+}
+EOF
+	pkgconfig libt3window LIBT3WINDOW test_link_cxx || \
+		test_and_set test_link_cxx "libt3window" LIBT3WINDOW "-I/usr/include/t3/window" "-lt3window" || \
+		test_and_set test_link_cxx "libt3window" LIBT3WINDOW "-I/usr/local/include/t3/window" "-L/usr/local/lib -lt3window" || \
+		error "!! Can not find libt3window. libt3window is required to compile tilde."
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <t3widget/widget.h>
+
+int main(int argc, char *argv[]) {
+	t3_widget_get_version();
+	return 0;
+}
+EOF
+	pkgconfig libt3widget LIBT3WIDGET test_link_cxx || \
+		test_and_set test_link_cxx "libt3widget" LIBT3WIDGET "-I/usr/include/t3/widget" "-lt3widget" || \
+		test_and_set test_link_cxx "libt3widget" LIBT3WIDGET "-I/usr/local/include/t3/widget" "-L/usr/local/lib -lt3widget" || \
+		error "!! Can not find libt3widget. libt3widget is required to compile tilde."
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <libconfig.h>
+
+int main(int argc, char *argv[]) {
+	config_t config;
+	config_setting_t *setting;
+	int i;
+	config_destroy(&config);
+	config_init(&config);
+	setting = config_lookup(&config, "path");
+	config_lookup_int(&config, "path", &i);
+	config_read_file(&config, "name");
+	config_setting_add(setting, "name", CONFIG_TYPE_INT);
+	config_setting_get_elem(setting, 0);
+	config_setting_get_member(setting, "name");
+	config_setting_get_string(setting);
+	config_setting_get_string_elem(setting, 0);
+	config_setting_lookup_bool(setting, "name", &i);
+	config_setting_lookup_int(setting, "name", &i);
+	config_setting_remove(setting, "name");
+	config_setting_remove_elem(setting, 0);
+	config_setting_set_bool(setting, 0);
+	config_setting_set_int(setting, 0);
+	config_setting_set_string(setting, "value");
+	config_write_file(&config, "name");
+	return 0;
+}
+EOF
+	pkgconfig libconfig LIBCONFIG test_link_cxx || \
+		test_and_set test_link_cxx "libconfig" LIBT3WIDGET "" "-lconfig" || \
+		error "!! Can not find libconfig. libconfig is required to compile tilde."
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <pcre.h>
+
+int callout(pcre_callout_block *block) { (void) block; return 0; }
+
+int main(int argc, char *argv[]) {
+	const char *err;
+	int err_offset;
+	pcre *pcre = pcre_compile("pattern", PCRE_UTF8 | PCRE_CASELESS, &err, &err_offset, NULL);
+	pcre_callout = callout;
+	return 0;
+}
+EOF
+
+	pkgconfig libpcre LIBPCRE test_link_cxx || {
+			check_message "Checking for pcre-config..."
+			echo "Running: pcre-config --cflags" >> config.log
+			if pcre-config --cflags >> config.log 2>&1 ; then
+				check_message_result "yes"
+				if test_link_cxx "libpcre compile" "TESTFLAGS=`pcre-config --cflags`" "TESTLIBS=`pcre-config --libs`" ; then
+					LIBPCRE_FLAGS="`pcre-config --cflags`"
+					LIBPCRE_LIBS="`pcre-config --libs`"
+					true
+				fi
+			else
+				check_message_result "no"
+				false
+			fi
+		} || \
+		test_and_set test_link_cxx "libpcre" LIBPCRE "" "-lpcre" || \
+		test_and_set test_link_cxx "libpcre" LIBPCRE "-I/usr/local/include" "-L/usr/local/lib -lpcre" || \
+		error "!! Can not find libpcre. libpcre is required to compile libt3widget."
+
+	if test_select "select in <sys/select.h>" "sys/select.h" ; then
+		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_SELECT_H"
+	else
+		test_select "select in <unistd.h>" "sys/time.h" "sys/types.h" "unistd.h" || error "!! Can not find required select function."
+	fi
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+#include <stdio.h>
+#include <signal.h>
+#include <fnmatch.h>
+#include <dirent.h>
+int main(int argc, char *argv[]) {
+	int fd;
+	struct stat statbuf;
+	char buf[1024];
+	size_t bufsiz;
+	va_list ap;
+
+	close(fd);
+	fd = creat("path", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+	stat("path", &statbuf);
+	fchmod(fd, 0644);
+	fchown(fd, 0, 0);
+	fsync(fd);
+	fd = open("name", O_RDONLY);
+	unlink("name");
+	bufsiz = readlink("path", buf, sizeof(buf));
+	fd = mkstemp("pathXXXXXX");
+	vsnprintf(buf, sizeof(buf), "fmt", ap);
+	pathconf("/", _PC_PATH_MAX);
+	return 0;
+}
+EOF
+	test_link_cxx "other required common Un*x functions" || {
+		check_message_result "Testing required functions seperatly for debugging purposes"
+
+		checkfunction "close" 'int fd; close(fd);' "<unistd.h>"
+		checkfunction "creat" 'int fd = creat("path", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);' "<sys/types.h>" "<sys/stat.h>" "<fcntl.h>"
+		checkfunction "stat" 'struct stat statbuf; stat("path", &statbuf);' "<sys/types.h>" "<sys/stat.h>" "<unistd.h>"
+		checkfunction "fchmod" 'int fd; fchmod(fd, 0);' "<sys/stat.h>"
+		checkfunction "fchown" 'int fd; fchown(fd, 0, 0);' "<unistd.h>"
+		checkfunction "fsync" 'int fd; fsync(fd);' "<unistd.h>"
+		checkfunction "open" 'int fd = open("name", O_RDONLY);' "<fcntl.h>" "<sys/stat.h>" "<sys/types.h>"
+		checkfunction "unlink" 'unlink("name");' "<unistd.h>"
+		checkfunction "readlink" 'char buf[1024]; size_t bufsiz; bufsiz = readlink("path", buf, sizeof(buf));' "<unistd.h>"
+		checkfunction "mkstemp" 'mkstemp("pathXXXXXX");' "<stdlib.h>"
+		checkfunction "vsnprintf" 'char buf[1024]; va_list ap; vsnprintf(buf, sizeof(buf), "fmt", ap);' "<stdio.h>" "<stdarg.h>"
+		checkfunction "pathconf" 'pathconf("/", _PC_PATH_MAX);' "<unistd.h>"
+		error "!! A required Un*x function was not found. See config.log for details."
+	}
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+	strdup(argv[0]);
+	return 0;
+}
+EOF
+	test_link_cxx "strdup" && CONFIGFLAGS="${CONFIGFLAGS} -DHAS_STRDUP"
+
+	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3UNICODE_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3WINDOW_FLAGS} ${LIBPCRE_FLAGS} ${LIBCONFIG_FLAGS}" \
+		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} ${LIBT3UNICODE_LIBS} ${LIBT3WIDGET_LIBS} ${LIBT3WINDOW_LIBS} ${LIBPCRE_LIBS} ${LIBCONFIG_LIBS}"
+}

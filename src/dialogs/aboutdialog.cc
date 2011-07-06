@@ -16,7 +16,7 @@
 about_dialog_t::about_dialog_t(int height, int width) : dialog_t(height, width, "About") {
 	text = new text_buffer_t();
 
-	text->append_text("Tilde - The intuitive text editor\n\nVersion 0.1\nCopyright (c) 2011 G.P. Halkes\n\n"
+	text->append_text("Tilde - The intuitive text editor\n\nVersion <VERSION>\nCopyright (c) 2011 G.P. Halkes\n\n"
 		"The Tilde text editor is licensed under the GNU General Public License version 3. "
 		"You should have received a copy of the GNU General Public License along with this program. "
 		"If not, see <http://www.gnu.org/licenses/>.");

@@ -63,6 +63,7 @@ bool stepped_process_t::get_result(void) { return result; }
 void stepped_process_t::ignore_result(stepped_process_t *process) { (void) process; }
 
 
+#ifdef DEBUG
 static void start_debugger_on_segfault(int sig) {
 	struct rlimit vm_limit;
 	(void) sig;
@@ -85,7 +86,6 @@ void enable_debugger_on_segfault(const char *_executable) {
 	signal(SIGABRT, start_debugger_on_segfault);
 }
 
-#ifdef DEBUG
 void set_limits() {
 	int mb = cli_option.vm_limit == 0 ? 250 : cli_option.vm_limit;
 	struct rlimit vm_limit;

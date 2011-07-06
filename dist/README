@@ -1,0 +1,63 @@
+Introduction
+============
+
+Tilde is designed to be a text editor for terminals/consoles, which has the
+most intuitive UI as possible. Most of the shortcuts you can use in GUI
+environments are usable in Tilde as well. That means for example that to copy
+selected text, you can press Control-C, and to paste that text you can press
+Control-V.
+
+However, being a terminal based programs there are limitations. Not all
+terminals provide sufficient information to the client programs to make Tilde
+behave in the most intuitive way. When this is the case, Tilde provides
+work-arounds which should be easy to work with.
+
+
+Prerequisites and installation
+==============================
+
+Tilde requires a C++ compiler, the libraries of the Tilde Terminal Toolkit
+(libt3unicode, libt3window, libt3key and libt3widget), libtranscript and
+libconfig (http://www.hyperrealm.com/libconfig/, known as libconfig-hr in Mac)
+
+There are two ways in which to compile Tilde:
+
+Using the configure script:
+---
+
+$ ./configure
+or
+$ ./configure --prefix=/usr
+(see ./configure --help for more tuning options)
+$ make all
+$ make install
+(assumes working install program)
+
+Manually editing the Makefile to suit your computer:
+---
+
+$ cp Makefile.in Makefile
+
+Edit the values for the different variables, using the comments in the
+Makefile for guidance, to suit your environment.
+
+$ make all
+$ make install
+(assumes working install program)
+
+The Makefile in the distribution should work on all POSIX compatible make's.
+It has been tested using both GNU make and BSD make.
+
+
+Reporting bugs
+==============
+
+If you think you have found a bug, please check that you are using the latest
+version of Tilde [http://os.ghalkes.nl/tilde]. When reporting bugs, please
+include a minimal example that demonstrates the problem.
+
+
+Author
+======
+
+Gertjan Halkes <tilde@ghalkes.nl>
