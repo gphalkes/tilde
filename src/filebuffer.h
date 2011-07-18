@@ -23,11 +23,13 @@ using namespace t3_widget;
 class file_edit_window_t;
 
 class file_buffer_t : public text_buffer_t {
-	friend class file_edit_window_t; // Required to access view_parameters
+	friend class file_edit_window_t; // Required to access view_parameters and set_has_window
 	protected:
 		char *encoding;
 		edit_window_t::view_parameters_t view_parameters;
 		bool has_window;
+
+		void set_has_window(bool _has_window);
 
 	public:
 		file_buffer_t(const char *_name = NULL, const char *_encoding = NULL);
@@ -38,7 +40,6 @@ class file_buffer_t : public text_buffer_t {
 		const char *get_encoding(void) const;
 		const edit_window_t::view_parameters_t *get_view_parameters(void) const;
 
-		void set_has_window(bool _has_window);
 		bool get_has_window(void) const;
 };
 
