@@ -391,6 +391,7 @@ bool write_config(void) {
 	}
 
 	default_option.key_timeout.unset();
+	root_setting = config_root_setting(&config);
 	set_config_options(root_setting, &default_option);
 	setting = config_setting_add(root_setting, "config_version", CONFIG_TYPE_INT);
 	config_setting_set_int(setting, 1);
