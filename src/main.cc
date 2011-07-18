@@ -18,6 +18,7 @@
 #include "option.h"
 #include "action.h"
 #include "filebuffer.h"
+#include "fileeditwindow.h"
 #include "openfiles.h"
 #include "dialogs/selectbufferdialog.h"
 #include "dialogs/encodingdialog.h"
@@ -69,7 +70,7 @@ class main_t : public main_window_base_t {
 		void load_cli_files_done(stepped_process_t *process);
 
 	private:
-		edit_window_t *get_current(void) { return (edit_window_t *) split->get_current(); }
+		file_edit_window_t *get_current(void) { return (file_edit_window_t *) split->get_current(); }
 		void menu_activated(int id);
 		void switch_buffer(file_buffer_t *buffer);
 		void switch_to_new_buffer(stepped_process_t *process);
@@ -78,7 +79,7 @@ class main_t : public main_window_base_t {
 
 main_t::main_t(void) {
 	button_t *encoding_button;
-	edit_window_t *edit;
+	file_edit_window_t *edit;
 
 	menu = new menu_bar_t(option.hide_menubar);
 	menu->set_size(None, t3_win_get_width(window));
@@ -134,7 +135,7 @@ main_t::main_t(void) {
 	//~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
 	panel->add_item("_About", NULL, action_id_t::HELP_ABOUT);
 
-	edit = new edit_window_t(new file_buffer_t());
+	edit = new file_edit_window_t();
 	split = new split_t(edit);
 	split->set_position(!option.hide_menubar, 0);
 	split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
@@ -208,7 +209,7 @@ bool main_t::set_size(optint height, optint width) {
 void main_t::load_cli_files_done(stepped_process_t *process) {
 	(void) process;
 	if (open_files.size() > 1) {
-		text_buffer_t *buffer = get_current()->get_text();
+		file_buffer_t *buffer = get_current()->get_text();
 		menu_activated(action_id_t::WINDOWS_NEXT_BUFFER);
 		ASSERT(buffer != get_current()->get_text());
 		delete buffer;
@@ -235,13 +236,13 @@ void main_t::menu_activated(int id) {
 		}
 
 		case action_id_t::FILE_CLOSE:
-			close_process_t::execute(sigc::mem_fun(this, &main_t::close_cb), (file_buffer_t *) get_current()->get_text());
+			close_process_t::execute(sigc::mem_fun(this, &main_t::close_cb), get_current()->get_text());
 			break;
 		case action_id_t::FILE_SAVE:
-			save_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), (file_buffer_t *) get_current()->get_text());
+			save_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), get_current()->get_text());
 			break;
 		case action_id_t::FILE_SAVE_AS:
-			save_as_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), (file_buffer_t *) get_current()->get_text());
+			save_as_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), get_current()->get_text());
 			break;
 		case action_id_t::FILE_OPEN_RECENT:
 			open_recent_process_t::execute(sigc::mem_fun(this, &main_t::switch_to_new_buffer));
@@ -296,13 +297,13 @@ void main_t::menu_activated(int id) {
 			break;
 
 		case action_id_t::WINDOWS_NEXT_BUFFER: {
-			edit_window_t *current = (edit_window_t *) split->get_current();
-			current->set_text(open_files.next_buffer((file_buffer_t *) current->get_text()));
+			file_edit_window_t *current = (file_edit_window_t *) split->get_current();
+			current->set_text(open_files.next_buffer(current->get_text()));
 			break;
 		}
 		case action_id_t::WINDOWS_PREV_BUFFER: {
-			edit_window_t *current = (edit_window_t *) split->get_current();
-			current->set_text(open_files.previous_buffer((file_buffer_t *) current->get_text()));
+			file_edit_window_t *current = (file_edit_window_t *) split->get_current();
+			current->set_text(open_files.previous_buffer(current->get_text()));
 			break;
 		}
 		case action_id_t::WINDOWS_SELECT:
@@ -311,9 +312,8 @@ void main_t::menu_activated(int id) {
 		case action_id_t::WINDOWS_HSPLIT:
 		case action_id_t::WINDOWS_VSPLIT: {
 			file_buffer_t *new_file = open_files.next_buffer(NULL);
-			if (new_file == NULL)
-				new_file = new file_buffer_t();
-			split->split(new edit_window_t(new_file), id == action_id_t::WINDOWS_HSPLIT);
+			// If new_file is NULL, a new file_buffer_t will be created
+			split->split(new file_edit_window_t(new_file), id == action_id_t::WINDOWS_HSPLIT);
 			break;
 		}
 		case action_id_t::WINDOWS_NEXT_WINDOW:
@@ -335,9 +335,9 @@ void main_t::menu_activated(int id) {
 }
 
 void main_t::switch_buffer(file_buffer_t *buffer) {
-	/* If the buffer is already opened in another edit_window_t, switch to that
+	/* If the buffer is already opened in another file_edit_window_t, switch to that
 	   window. */
-	if (buffer->has_window()) {
+	if (buffer->get_has_window()) {
 		while (get_current()->get_text() != buffer)
 			split->next();
 	} else {
@@ -346,14 +346,14 @@ void main_t::switch_buffer(file_buffer_t *buffer) {
 }
 
 void main_t::switch_to_new_buffer(stepped_process_t *process) {
-	const text_buffer_t *text;
+	const file_buffer_t *text;
 	file_buffer_t *buffer;
 
 	if (!process->get_result())
 		return;
 
 	buffer = ((load_process_t *) process)->get_file_buffer();
-	if (buffer->has_window())
+	if (buffer->get_has_window())
 		return;
 
 	text = get_current()->get_text();
@@ -364,7 +364,7 @@ void main_t::switch_to_new_buffer(stepped_process_t *process) {
 }
 
 void main_t::close_cb(stepped_process_t *process) {
-	text_buffer_t *text;
+	file_buffer_t *text;
 
 	if (!process->get_result())
 		return;

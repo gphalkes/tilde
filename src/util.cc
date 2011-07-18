@@ -27,9 +27,10 @@
 using namespace std;
 using namespace t3_widget;
 
+#ifdef DEBUG
 static char debug_buffer[1024];
 static const char *executable;
-
+#endif
 
 stepped_process_t::stepped_process_t(void) : result(true) {}
 stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(false) {}

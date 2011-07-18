@@ -21,7 +21,8 @@
 #include "log.h"
 #include "option.h"
 
-file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name)
+file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name),
+	view_parameters(option.tabsize, option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE), has_window(false)
 {
 	if (_encoding == NULL)
 		encoding = strdup("UTF-8");
@@ -38,8 +39,6 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		name_line.set_text(&converted_name);
 	}
 	open_files.push_back(this);
-	set_tabsize(option.tabsize);
-	set_wrap(option.wrap);
 }
 
 file_buffer_t::~file_buffer_t(void) {
@@ -90,12 +89,11 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 		}
 		case load_process_t::READING:
 			try {
+				#warning FIXME: use append_text instead, and reset cursor afterwards
 				while ((line = state->wrapper->read_line()) != NULL) {
 					try {
 						lines.back()->set_text(line);
 						lines.push_back(new text_line_t());
-						if (wrap)
-							wraplines.push_back(subtext_line_t(lines.back(), 0));
 					} catch (...) {
 						delete line;
 						return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
@@ -107,8 +105,6 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				if (lines.size() > 1) {
 					delete lines.back();
 					lines.pop_back();
-					if (wrap)
-						wraplines.pop_back();
 				}
 			} catch (rw_result_t &result) {
 				return result;
@@ -244,3 +240,14 @@ const char *file_buffer_t::get_encoding(void) const {
 	return encoding;
 }
 
+const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters(void) const {
+	return &view_parameters;
+}
+
+void file_buffer_t::set_has_window(bool _has_window) {
+	has_window = _has_window;
+}
+
+bool file_buffer_t::get_has_window(void) const {
+	return has_window;
+}

@@ -79,7 +79,7 @@ void select_buffer_dialog_t::show(void) {
 			multi_widget = new multi_widget_t();
 			multi_widget->set_size(None, width - 5);
 			multi_widget->show();
-			bullet = new bullet_t(sigc::mem_fun((*iter), &file_buffer_t::has_window));
+			bullet = new bullet_t(sigc::mem_fun((*iter), &file_buffer_t::get_has_window));
 			multi_widget->push_back(bullet, -1, true, false);
 			name = (*iter)->get_name();
 			if (name == NULL)

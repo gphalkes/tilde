@@ -13,6 +13,7 @@
 
 SOURCES..objects/edit := \
 	filebuffer.cc \
+	fileeditwindow.cc \
 	filestate.cc \
 	filewrapper.cc \
 	log.cc \

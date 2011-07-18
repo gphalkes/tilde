@@ -20,9 +20,14 @@ using namespace t3_widget;
 
 #include "filestate.h"
 
+class file_edit_window_t;
+
 class file_buffer_t : public text_buffer_t {
+	friend class file_edit_window_t; // Required to access view_parameters
 	protected:
 		char *encoding;
+		edit_window_t::view_parameters_t view_parameters;
+		bool has_window;
 
 	public:
 		file_buffer_t(const char *_name = NULL, const char *_encoding = NULL);
@@ -31,6 +36,10 @@ class file_buffer_t : public text_buffer_t {
 		rw_result_t save(save_as_process_t *state);
 
 		const char *get_encoding(void) const;
+		const edit_window_t::view_parameters_t *get_view_parameters(void) const;
+
+		void set_has_window(bool _has_window);
+		bool get_has_window(void) const;
 };
 
 #endif
