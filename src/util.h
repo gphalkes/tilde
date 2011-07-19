@@ -25,6 +25,8 @@ void fatal(const char *fmt, ...) __attribute__((format (printf, 1, 2))) __attrib
 /*@noreturn@*/ void fatal(const char *fmt, ...);
 #endif
 
+#define _(x) x
+
 #include <stdlib.h>
 //FIXME: once gettext is up and running, use localized error message
 //~ #define PANIC() fatal(_("Program logic error at %s:%d\n"), __FILE__, __LINE__)

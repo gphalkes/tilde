@@ -39,7 +39,7 @@ message_dialog_t *error_dialog;
 open_recent_dialog_t *open_recent_dialog;
 encoding_dialog_t *encoding_dialog;
 
-static input_selection_dialog_t *inputsel;
+static dialog_t *input_selection_dialog;
 
 /* Wrap the input_selection_dialog_t, such that pressing C-q exits the program. */
 class new_input_selection_dialog_t : public input_selection_dialog_t {
@@ -76,6 +76,9 @@ class main_t : public main_window_base_t {
 		void switch_to_new_buffer(stepped_process_t *process);
 		void close_cb(stepped_process_t *process);
 };
+
+static main_t *main_window;
+
 
 main_t::main_t(void) {
 	button_t *encoding_button;
@@ -379,14 +382,29 @@ void main_t::close_cb(stepped_process_t *process) {
 	delete text;
 }
 
-void input_selection_complete(int timeout) {
-	delete inputsel;
-	term_specific_option.key_timeout = timeout;
-	write_config();
+void input_selection_complete(bool selection_made) {
+	delete input_selection_dialog;
+	if (selection_made) {
+		term_specific_option.key_timeout = get_key_timeout();
+		write_config();
+	}
+}
+
+void configure_input(void) {
+	input_selection_dialog_t *input_selection;
+	delete input_selection_dialog;
+
+	input_selection = new new_input_selection_dialog_t(20, 70);
+	input_selection->connect_intuitive_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
+	input_selection->connect_compromise_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
+	input_selection->connect_no_timeout_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
+	input_selection->connect_closed(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
+	input_selection->center_over(main_window);
+	input_selection->show();
+	input_selection_dialog = input_selection;
 }
 
 int main(int argc, char *argv[]) {
-	main_t *main_window;
 	complex_error_t result;
 
 	init_log();
@@ -423,12 +441,17 @@ int main(int argc, char *argv[]) {
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
 	} else {
-		inputsel = new new_input_selection_dialog_t(20, 70);
-		inputsel->connect_intuitive_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), 100));
-		inputsel->connect_compromise_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), -1000));
-		inputsel->connect_no_timeout_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), 0));
-		inputsel->center_over(main_window);
-		inputsel->show();
+		message_dialog_t *input_message = new message_dialog_t(70, _("Input Method"), _("Default"), _("Configure"), NULL);
+		input_message->set_message("You have not configured the input handling method for this terminal type yet. "
+			"By default Tilde uses a workable compromise, which requires you to press esacpe twice to close a dialog. "
+			"Choose 'Configure' below to select a different input handling method.");
+		input_message->connect_activate(sigc::bind(sigc::ptr_fun(input_selection_complete), true), 0);
+		input_message->connect_activate(sigc::ptr_fun(configure_input), 1);
+		input_message->connect_closed(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
+		input_message->center_over(main_window);
+		input_message->show();
+		input_selection_dialog = input_message;
+		set_key_timeout(-1000);
 	}
 
 	load_cli_file_process_t::execute(sigc::mem_fun(main_window, &main_t::load_cli_files_done));
