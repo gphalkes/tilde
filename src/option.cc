@@ -19,6 +19,10 @@
 #include "optionMacros.h"
 #include "log.h"
 
+/* FIXME:
+  - verify return values of libconfig functions
+*/
+
 using namespace std;
 using namespace t3_widget;
 
@@ -212,9 +216,35 @@ static void post_process_options(void) {
 			option.key_timeout = term_specific_option.key_timeout;
 }
 
+static void print_help(void) {
+	printf("Usage: tilde [<OPTIONS>] [<FILE...>]\n"
+		"  -c,--color           Request color mode, overriding config file.\n"
+		"  -b,--black-white     Request black & white mode, overriding config file.\n"
+		"  -h,--help            Show this help message.\n"
+		"  -I,--select-input-method    Ignore configured input handling method.\n"
+		"  -T<term>,--terminal=<term>  Use <term> instead of TERM variable.\n"
+	    "  -V,--version         Show version and copyright information.\n"
+	    "  -w,--wrap            Set wrap mode (will be removed in the future.\n"
+	);
+	exit(EXIT_SUCCESS);
+}
+
+static void print_version(void) {
+	printf("Tilde version <VERSION>\n"
+		"Copyright (c) 2011 G.P. Halkes\n"
+		"Tilde is licensed under the GNU General Public License version 3\n"); // @copyright
+	exit(EXIT_SUCCESS);
+}
+
 PARSE_FUNCTION(parse_args)
 
 	OPTIONS
+		OPTION('h', "help", NO_ARG)
+			print_help();
+		END_OPTION
+		OPTION('v', "version", NO_ARG)
+			print_version();
+		END_OPTION
 		OPTION('w', "wrap", NO_ARG)
 			cli_option.wrap = true;
 		END_OPTION

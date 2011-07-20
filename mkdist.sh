@@ -20,7 +20,7 @@ else
 	VERSION_BIN="$(printf "0x%02x%02x%02x" $(echo ${VERSION} | tr '.' ' '))"
 fi
 
-sed -i "s/<VERSION>/${VERSION}/g" `find ${TOPDIR} -type f`
+sed -i "s/<VERSION>/${VERSION}/g;s/<DATE>/${DATE}/g" `find ${TOPDIR} -type f`
 
 OBJECTS="`echo \"${SOURCES} ${GENSOURCES} ${AUXSOURCES}\" | tr ' ' '\n' | sed -r 's%\.objects/%%' | egrep '^src/.*\.cc$' | sed -r 's/\.cc\>/.o/g' | tr '\n' ' '`"
 

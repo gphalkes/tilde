@@ -1,0 +1,32 @@
+This file lists the planned but as yet unfinished or unimplemented features for
+the Tilde text editor (although some features will necessarily be implemented
+in its libraries). The order in which the items appear has no bearing on their
+priority.
+
+- Search and replace features:
+  - Replace in selection
+  - Use of references (\1 .. \9) in regex replace
+- The cursor should only hit the sides of the screen when it reaches the end
+  of the text, not when in the middle of a line. This will give users a clear
+  indication of where they are in the text.
+- Semi-smart indentation:
+  - use same indentation as previous line when the user presses enter
+  - perhaps increase/decrease indentation as appropriate for languages like C,
+    where there is a clear rule to do so (opening/closing brace)
+- Indent/unindent when pressing the tab/shift-tab key and multiple lines are
+  selected
+- Indentation using spaces, or at least read-in and written-out as spaces.
+- Basic bidi support
+- Simple syntax highlighting
+- Allow users to find out which character(s) is (are) under the cursor
+- Auto save and restore on crash
+- Different kinds of line wrapping
+  - break at word or character boundary
+  - up/down go to previous/next line instead of stepping within the current
+    line (vi style)
+- fmt-like rewrapping of text to a specific width
+- X11 integration with the clipboard
+- Simple autocompletion based on words found elsewhere in the same document
+- Insertion of characters by their Unicode name instead of their codepoint
+- Decrease memory usage
+- Improve terminal capabilities detection
