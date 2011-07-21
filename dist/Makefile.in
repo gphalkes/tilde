@@ -46,7 +46,8 @@ INSTALL=install
 
 # Miscelaneous install paths
 bindir=$(prefix)/bin
-docdir=$(prefix)/doc/tilde
+docdir=$(prefix)/share/doc/tilde-<VERSION>
+mandir=$(prefix)/share/man
 
 SILENTCXX=@echo '[CXX]' $< ;
 SILENTLD=@echo '[LD]' $@ ;
@@ -76,7 +77,10 @@ install: all
 	$(INSTALL) src/tilde $(bindir)
 	$(INSTALL) -d $(docdir)
 	$(INSTALL) -m0644 COPYING $(docdir)
+	$(INSTALL) -d $(mandir)/man1
+	$(INSTALL) -m0644 $(mandir)/man1/tilde.1
 
 uninstall:
 	rm -f $(bindir)/tilde
 	rm -rf $(docdir)
+	rm -rf $(mandir)/man1/tilde.1

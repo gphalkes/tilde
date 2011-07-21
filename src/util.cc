@@ -130,6 +130,7 @@ char *resolve_links(const char *start_name) {
 
 char *canonicalize_path(const char *path) {
 	string result;
+	size_t i, last_slash;
 
 	if (path[0] != '/') {
 		result = get_working_directory();
@@ -137,6 +138,44 @@ char *canonicalize_path(const char *path) {
 	}
 
 	result += path;
+
+	for (i = 0, last_slash = 0; i < result.size(); ) {
+		if (result[i] == '/') {
+			if (i + 1 == result.size())
+				break;
+			if (result[i + 1] == '/') {
+				// found //
+				result.erase(i + 1, 1);
+				continue;
+			} else if (result[i + 1] == '.') {
+				if (i + 2 == result.size()) {
+					result.erase(i);
+					break;
+				}
+
+				if (result[i + 2] == '/') {
+					// found /./
+					result.erase(i + 1, 2);
+					continue;
+				} else if (result[i + 2] == '.' && (i + 3 == result.size() || result[i + 3] == '/')) {
+					// found /..
+					if (i == 0) {
+						/* Erase 3 characters after the '/'. If the string is /.., it will simply
+						   erase only the dots. This prevents the situation where we erase the
+						   leading '/' only to leave an empty string. */
+						result.erase(i + 1, 3);
+						continue;
+					} else {
+						result.erase(last_slash + 1, i - last_slash + 3);
+						i = last_slash;
+						continue;
+					}
+				}
+			}
+			last_slash = i;
+		}
+		i++;
+	}
 
 	/* TODO:
 		- remove all occurences of // and /./
