@@ -24,6 +24,7 @@
 #include "dialogs/encodingdialog.h"
 #include "dialogs/openrecentdialog.h"
 #include "dialogs/aboutdialog.h"
+#include "dialogs/optionsdialog.h"
 #include "log.h"
 
 using namespace std;
@@ -65,6 +66,7 @@ class main_t : public main_window_base_t {
 
 		select_buffer_dialog_t *select_buffer_dialog;
 		about_dialog_t *about_dialog;
+		options_dialog_t *options_dialog;
 
 	public:
 		main_t(void);
@@ -78,6 +80,7 @@ class main_t : public main_window_base_t {
 		void switch_buffer(file_buffer_t *buffer);
 		void switch_to_new_buffer(stepped_process_t *process);
 		void close_cb(stepped_process_t *process);
+		void set_options(void);
 };
 
 static main_t *main_window;
@@ -135,6 +138,7 @@ main_t::main_t(void) {
 
 	panel = new menu_panel_t("_Options", menu);
 	panel->add_item("_Input handling", NULL, action_id_t::OPTIONS_INPUT);
+	panel->add_item("_Buffer options", NULL, action_id_t::OPTIONS_BUFFER);
 /*	panel->add_item("_Tabs...", NULL, action_id_t::OPTIONS_TABS);
 	panel->add_item("_Keys...", NULL, action_id_t::OPTIONS_KEYS);*/
 
@@ -182,6 +186,10 @@ main_t::main_t(void) {
 
 	about_dialog = new about_dialog_t(13, 45);
 	about_dialog->center_over(this);
+
+	options_dialog = new options_dialog_t();
+	options_dialog->center_over(this);
+	options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_options));
 }
 
 bool main_t::process_key(t3_widget::key_t key) {
@@ -336,6 +344,10 @@ void main_t::menu_activated(int id) {
 		case action_id_t::OPTIONS_INPUT:
 			configure_input(false);
 			break;
+		case action_id_t::OPTIONS_BUFFER:
+			options_dialog->set_values_from_view(get_current());
+			options_dialog->show();
+			break;
 
 		case action_id_t::HELP_ABOUT:
 			about_dialog->show();
@@ -388,6 +400,10 @@ void main_t::close_cb(stepped_process_t *process) {
 	if (get_current()->get_text() == text)
 		get_current()->set_text(new file_buffer_t());
 	delete text;
+}
+
+void main_t::set_options(void) {
+	options_dialog->set_view_values(get_current());
 }
 
 static void configure_input(bool cancel_selects_default) {
@@ -453,7 +469,8 @@ int main(int argc, char *argv[]) {
 	} else {
 		message_dialog_t *input_message = new message_dialog_t(70, _("Input Handling"), _("_Default"), _("_Configure"), NULL);
 		input_message->set_message("You have not configured the input handling method for this terminal type yet. "
-			"By default Tilde uses a workable compromise, which requires you to press esacpe twice to close a dialog and allows you to access menus by pressing Escape followed by a letter. "
+			"By default Tilde uses a workable compromise, which requires you to press esacpe twice to close a menu or dialog "
+			"and allows you to access menus by pressing Escape followed by a letter. "
 			"Choose 'Configure' below to select a different input handling method.");
 		input_message->connect_activate(sigc::bind(sigc::ptr_fun(input_selection_complete), true), 0);
 		input_message->connect_activate(sigc::bind(sigc::ptr_fun(configure_input), true), 1);

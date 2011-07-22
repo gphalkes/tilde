@@ -45,6 +45,7 @@ typedef struct {
 
 typedef struct {
 	opt_bool wrap;
+	opt_bool tab_spaces;
 	opt_int tabsize;
 
 	opt_bool hide_menubar;
@@ -78,6 +79,7 @@ typedef struct {
 
 typedef struct {
 	bool wrap;
+	bool tab_spaces;
 	int tabsize;
 	bool hide_menubar;
 	bool color;
