@@ -48,9 +48,6 @@ Set the terminal type to \fBterminal\fP, overriding the TERM environment
 variable.
 .IP "\fB\-v\fP, \fB\-\-version\fP"
 Print version and copyright information.
-.IP "\fB\-w\fP, \fB\-\-wrap\fP"
-Use line wrapping. This option is provided while there is no other way to set
-the wrapping mode, and \fBwill be removed\fP in a future version.
 .PP
 To stop \fBTilde\fP from interpreting file names that start with a dash as
 options, one can specify a double dash (\-\-) after which \fBTilde\fP will

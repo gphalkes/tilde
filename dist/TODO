@@ -15,13 +15,12 @@ priority.
     where there is a clear rule to do so (opening/closing brace)
 - Indent/unindent when pressing the tab/shift-tab key and multiple lines are
   selected
-- Indentation using spaces, or at least read-in and written-out as spaces.
 - Basic bidi support
 - Simple syntax highlighting
 - Allow users to find out which character(s) is (are) under the cursor
 - Auto save and restore on crash
 - Different kinds of line wrapping
-  - break at word or character boundary
+  - break at word (done) or character boundary
   - up/down go to previous/next line instead of stepping within the current
     line (vi style)
 - fmt-like rewrapping of text to a specific width
@@ -30,3 +29,6 @@ priority.
 - Insertion of characters by their Unicode name instead of their codepoint
 - Decrease memory usage
 - Improve terminal capabilities detection
+- Dialogs for changing the settings
+- End-of-line type selection and conversion
+- Strip spaces on save option

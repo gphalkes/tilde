@@ -194,9 +194,7 @@ end:
 } while (0)
 
 static void post_process_options(void) {
-	if (cli_option.wrap)
-		option.wrap = true;
-	else if (default_option.wrap.is_valid())
+	if (default_option.wrap.is_valid())
 		option.wrap = default_option.wrap;
 
 	if (cli_option.color.is_valid())
@@ -224,7 +222,6 @@ static void print_help(void) {
 		"  -I,--select-input-method    Ignore configured input handling method.\n"
 		"  -T<term>,--terminal=<term>  Use <term> instead of TERM variable.\n"
 	    "  -V,--version         Show version and copyright information.\n"
-	    "  -w,--wrap            Set wrap mode (will be removed in the future.\n"
 	);
 	exit(EXIT_SUCCESS);
 }
@@ -244,9 +241,6 @@ PARSE_FUNCTION(parse_args)
 		END_OPTION
 		OPTION('v', "version", NO_ARG)
 			print_version();
-		END_OPTION
-		OPTION('w', "wrap", NO_ARG)
-			cli_option.wrap = true;
 		END_OPTION
 		OPTION('T', "term", REQUIRED_ARG)
 			cli_option.term = optArg;

@@ -27,7 +27,6 @@ OPT_TYPE(int);
 
 typedef struct {
 	/* Options to override config file. */
-	bool wrap;
 	opt_bool color;
 
 	const char *term;
