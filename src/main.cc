@@ -302,10 +302,10 @@ void main_t::menu_activated(int id) {
 			get_current()->insert_special();
 			break;
 		case action_id_t::EDIT_INDENT_SELECTION:
-			get_current()->get_text()->indent_selection(get_current()->get_tabsize(), get_current()->get_tab_spaces());
+			get_current()->indent_selection();
 			break;
 		case action_id_t::EDIT_UNINDENT_SELECTION:
-			get_current()->get_text()->unindent_selection(get_current()->get_tabsize());
+			get_current()->unindent_selection();
 			break;
 
 		case action_id_t::SEARCH_SEARCH:
