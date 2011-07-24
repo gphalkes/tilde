@@ -117,6 +117,9 @@ main_t::main_t(void) {
 	panel->add_item("Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
 	panel->add_item("_Mark Selection", "^Space", action_id_t::EDIT_MARK);
 	panel->add_item("_Insert Character...", "F9", action_id_t::EDIT_INSERT_CHAR);
+	panel->add_separator();
+	panel->add_item("In_dent Selection", "Tab", action_id_t::EDIT_INDENT_SELECTION);
+	panel->add_item("U_nindent Selection", "S-Tab", action_id_t::EDIT_UNINDENT_SELECTION);
 
 	panel = new menu_panel_t("_Search", menu);
 	panel->add_item("_Find...", "^F", action_id_t::SEARCH_SEARCH);
@@ -137,8 +140,8 @@ main_t::main_t(void) {
 	panel->add_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
 	panel = new menu_panel_t("_Options", menu);
-	panel->add_item("_Input handling", NULL, action_id_t::OPTIONS_INPUT);
-	panel->add_item("_Buffer options", NULL, action_id_t::OPTIONS_BUFFER);
+	panel->add_item("_Input Handling", NULL, action_id_t::OPTIONS_INPUT);
+	panel->add_item("_Buffer Options", NULL, action_id_t::OPTIONS_BUFFER);
 /*	panel->add_item("_Tabs...", NULL, action_id_t::OPTIONS_TABS);
 	panel->add_item("_Keys...", NULL, action_id_t::OPTIONS_KEYS);*/
 
@@ -297,6 +300,12 @@ void main_t::menu_activated(int id) {
 			break;
 		case action_id_t::EDIT_INSERT_CHAR:
 			get_current()->insert_special();
+			break;
+		case action_id_t::EDIT_INDENT_SELECTION:
+			get_current()->get_text()->indent_selection(get_current()->get_tabsize(), get_current()->get_tab_spaces());
+			break;
+		case action_id_t::EDIT_UNINDENT_SELECTION:
+			get_current()->get_text()->unindent_selection(get_current()->get_tabsize());
 			break;
 
 		case action_id_t::SEARCH_SEARCH:

@@ -6,15 +6,10 @@ priority.
 - Search and replace features:
   - Replace in selection
   - Use of references (\1 .. \9) in regex replace
-- The cursor should only hit the sides of the screen when it reaches the end
-  of the text, not when in the middle of a line. This will give users a clear
-  indication of where they are in the text.
 - Semi-smart indentation:
   - use same indentation as previous line when the user presses enter
   - perhaps increase/decrease indentation as appropriate for languages like C,
     where there is a clear rule to do so (opening/closing brace)
-- Indent/unindent when pressing the tab/shift-tab key and multiple lines are
-  selected
 - Basic bidi support
 - Simple syntax highlighting
 - Allow users to find out which character(s) is (are) under the cursor
@@ -30,5 +25,5 @@ priority.
 - Decrease memory usage
 - Improve terminal capabilities detection
 - Dialogs for changing the settings
-- End-of-line type selection and conversion
-- Strip spaces on save option
+- End-of-line type selection and conversion (LF, CR/LF, CR)
+- Strip space at end-of-line on save option
