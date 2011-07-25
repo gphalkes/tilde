@@ -22,7 +22,7 @@ void init_charsets(void);
 
 class options_dialog_t : public dialog_t {
 	protected:
-		checkbox_t *tab_spaces_box, *wrap_box, *hide_menu_box;
+		checkbox_t *tab_spaces_box, *wrap_box, *hide_menu_box, *auto_indent_box;
 		text_field_t *tabsize_field;
 
 	public:

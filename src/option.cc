@@ -117,6 +117,7 @@ static void read_config_part(const config_setting_t *setting, options_t *opts) {
 	GET_OPT_BOOL(color);
 	GET_OPT_INT(max_recent_files);
 	GET_OPT_INT(key_timeout);
+	GET_OPT_BOOL(auto_indent);
 
 	attributes = config_setting_get_member(setting, "attributes");
 	if (attributes == NULL)
@@ -196,6 +197,11 @@ end:
 static void post_process_options(void) {
 	if (default_option.wrap.is_valid())
 		option.wrap = default_option.wrap;
+
+	if (default_option.auto_indent.is_valid())
+		option.auto_indent = default_option.auto_indent;
+	else
+		option.auto_indent = true;
 
 	if (cli_option.color.is_valid())
 		option.color = cli_option.color;
@@ -354,6 +360,7 @@ static void set_config_options(config_setting_t *setting, options_t *options) {
 	SET_OPTION(color, CONFIG_TYPE_BOOL, bool);
 	SET_OPTION(max_recent_files, CONFIG_TYPE_INT, int);
 	SET_OPTION(key_timeout, CONFIG_TYPE_INT, int);
+	SET_OPTION(auto_indent, CONFIG_TYPE_BOOL, bool);
 
 	set_config_attribute(setting, "non_print", options->non_print);
 	set_config_attribute(setting, "selection_cursor", options->selection_cursor);

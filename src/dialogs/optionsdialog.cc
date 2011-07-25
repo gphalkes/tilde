@@ -21,7 +21,7 @@ using namespace std;
 
 static key_t number_keys[] = { '0', '1', '2', '3' ,'4', '5', '6', '7', '8', '9' };
 
-options_dialog_t::options_dialog_t(void) : dialog_t(6, 25, "Options") {
+options_dialog_t::options_dialog_t(void) : dialog_t(7, 25, "Options") {
 	smart_label_t *label;
 	int width;
 	button_t *ok_button, *cancel_button;
@@ -69,6 +69,20 @@ options_dialog_t::options_dialog_t(void) : dialog_t(6, 25, "Options") {
 
 	width = max(label->get_width() + 2 + 3, width);
 
+	label = new smart_label_t(_("_Automatic indentation"));
+	label->set_position(4, 2);
+	push_back(label);
+	auto_indent_box = new checkbox_t();
+	auto_indent_box->set_label(label);
+	auto_indent_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	auto_indent_box->set_position(4, -2);
+	auto_indent_box->connect_move_focus_up(sigc::mem_fun(this, &options_dialog_t::focus_previous));
+	auto_indent_box->connect_move_focus_down(sigc::mem_fun(this, &options_dialog_t::focus_next));
+	auto_indent_box->connect_activate(sigc::mem_fun(this, &options_dialog_t::handle_activate));
+	push_back(auto_indent_box);
+
+	width = max(label->get_width() + 2 + 3, width);
+
 	cancel_button = new button_t("_Cancel");
 	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
 	cancel_button->set_position(-1, -2);
@@ -98,6 +112,7 @@ void options_dialog_t::set_values_from_view(edit_window_t *view) {
 	tabsize_field->set_text(tabsize_text);
 	tab_spaces_box->set_state(view->get_tab_spaces());
 	wrap_box->set_state(view->get_wrap());
+	auto_indent_box->set_state(view->get_auto_indent());
 }
 
 void options_dialog_t::set_view_values(edit_window_t *view) {
@@ -106,6 +121,7 @@ void options_dialog_t::set_view_values(edit_window_t *view) {
 		view->set_tabsize(tabsize);
 	view->set_wrap(wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE);
 	view->set_tab_spaces(tab_spaces_box->get_state());
+	view->set_auto_indent(auto_indent_box->get_state());
 }
 
 void options_dialog_t::handle_activate(void) {

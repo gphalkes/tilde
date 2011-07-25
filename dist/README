@@ -16,9 +16,10 @@ The main audience for Tilde is users who normally work in GUI environments, but
 sometimes require an editor for a console/terminal environment. This may be
 because the computer in question is a server which does not provide a GUI, or
 is accessed remotely over SSH. Tilde allows these users to edit files without
-having to learn a completely new interface, such as vi or Emacs require. A
-result of this choice is that Tilde will not provide all the fancy features
-that Vim or Emacs provide, but only the most used features.
+having to learn a completely new interface, such as vi or Emacs do. A result of
+this choice is that Tilde will not provide all the fancy features that Vim or
+Emacs provide, but only the most used features.
+
 
 Features
 ========
@@ -33,9 +34,13 @@ The current version of Tilde provides the following features:
   texts
 - Regular expression search & replace (replace does not allow match references
   yet)
+- Indenting using either tabs or spaces
+- Indent/unindent selection
+- Basic automatic indentation (repeats indentation of previous line)
 
 See the file named TODO for information on which features are planned for
 future versions of Tilde.
+
 
 Prerequisites and installation
 ==============================

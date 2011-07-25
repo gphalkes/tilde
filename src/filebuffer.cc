@@ -22,7 +22,7 @@
 #include "option.h"
 
 file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name),
-	view_parameters(option.tabsize, option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE), has_window(false)
+	view_parameters(option.tabsize, option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE, option.auto_indent), has_window(false)
 {
 	if (_encoding == NULL)
 		encoding = strdup("UTF-8");
@@ -89,7 +89,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 		}
 		case load_process_t::READING:
 			try {
-				#warning FIXME: use append_text instead, and reset cursor afterwards
+				//FIXME: use append_text instead, and reset cursor afterwards
 				while ((line = state->wrapper->read_line()) != NULL) {
 					try {
 						lines.back()->set_text(line);

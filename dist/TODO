@@ -6,18 +6,9 @@ priority.
 - Search and replace features:
   - Replace in selection
   - Use of references (\1 .. \9) in regex replace
-- Semi-smart indentation:
-  - use same indentation as previous line when the user presses enter
-  - perhaps increase/decrease indentation as appropriate for languages like C,
-    where there is a clear rule to do so (opening/closing brace)
-- Basic bidi support
 - Simple syntax highlighting
 - Allow users to find out which character(s) is (are) under the cursor
 - Auto save and restore on crash
-- Different kinds of line wrapping
-  - break at word (done) or character boundary
-  - up/down go to previous/next line instead of stepping within the current
-    line (vi style)
 - fmt-like rewrapping of text to a specific width
 - X11 integration with the clipboard
 - Simple autocompletion based on words found elsewhere in the same document
@@ -27,3 +18,13 @@ priority.
 - Dialogs for changing the settings
 - End-of-line type selection and conversion (LF, CR/LF, CR)
 - Strip space at end-of-line on save option
+- Convert indentation from tabs to spaces and vice-versa
+
+Possible later features, depending on complexity and demand:
+- perhaps increase/decrease indentation as appropriate for languages like C,
+  where there is a clear rule to do so (opening/closing brace)
+- Different kinds of line wrapping
+  - break at word (done) or character boundary
+  - up/down go to previous/next line instead of stepping within the current
+    line (vi style)
+- Basic bidi support

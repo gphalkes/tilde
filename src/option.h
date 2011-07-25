@@ -49,6 +49,7 @@ typedef struct {
 
 	opt_bool hide_menubar;
 	opt_bool color;
+	opt_bool auto_indent;
 
 	opt_size_t max_recent_files;
 
@@ -82,6 +83,7 @@ typedef struct {
 	int tabsize;
 	bool hide_menubar;
 	bool color;
+	bool auto_indent;
 	size_t max_recent_files;
 	opt_int key_timeout;
 } runtime_options_t;
