@@ -17,7 +17,7 @@ CXXFLAGS=-O2
 
 # CONFIGFLAGS should contain all the flags to compile against the required
 # libraries (libt3unicode, libt3window, libt3key, libt3widget, libtranscript,
-# libpcre and libconfig)
+# and libconfig)
 # If your system does not provide strdup, remove -DHAS_STRDUP
 # CONFIGLIBS should contain all the flags to link against the required
 # libraries
@@ -38,16 +38,14 @@ GETTEXTLIBS=
 LOCALEDIR=$(prefix)/share/locale
 LINGUAS=
 
-# Installation prefix
+# Installation prefix and install paths
 prefix=/usr/local
-
-# Install program to use (should be BSD install compatible)
-INSTALL=install
-
-# Miscelaneous install paths
 bindir=$(prefix)/bin
 docdir=$(prefix)/share/doc/tilde-<VERSION>
 mandir=$(prefix)/share/man
+
+# Install program to use (should be BSD install compatible)
+INSTALL=install
 
 SILENTCXX=@echo '[CXX]' $< ;
 SILENTLD=@echo '[LD]' $@ ;
@@ -76,11 +74,11 @@ install: all
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) src/tilde $(bindir)
 	$(INSTALL) -d $(docdir)
-	$(INSTALL) -m0644 COPYING $(docdir)
+	$(INSTALL) -m0644 COPYING README Changelog $(docdir)
 	$(INSTALL) -d $(mandir)/man1
-	$(INSTALL) -m0644 $(mandir)/man1/tilde.1
+	$(INSTALL) -m0644 man/tilde.1 $(mandir)/man1
 
 uninstall:
 	rm -f $(bindir)/tilde
 	rm -rf $(docdir)
-	rm -rf $(mandir)/man1/tilde.1
+	rm -f $(mandir)/man1/tilde.1

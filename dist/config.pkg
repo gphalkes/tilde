@@ -13,6 +13,7 @@
 
 EXTENSIONS="cxx verbose_compile pkgconfig_dep gettext"
 DEFAULT_LINGUAS=nl
+INSTALLDIRS="bindir docdir mandir"
 
 checkfunction_internal() {
 	clean_cxx
@@ -151,39 +152,6 @@ EOF
 		test_and_set test_link_cxx "libconfig" LIBT3WIDGET "" "-lconfig" || \
 		error "!! Can not find libconfig. libconfig is required to compile tilde."
 
-	clean_cxx
-	cat > .configcxx.cc <<EOF
-#include <pcre.h>
-
-int callout(pcre_callout_block *block) { (void) block; return 0; }
-
-int main(int argc, char *argv[]) {
-	const char *err;
-	int err_offset;
-	pcre *pcre = pcre_compile("pattern", PCRE_UTF8 | PCRE_CASELESS, &err, &err_offset, NULL);
-	pcre_callout = callout;
-	return 0;
-}
-EOF
-
-	pkgconfig libpcre LIBPCRE test_link_cxx || {
-			check_message "Checking for pcre-config..."
-			echo "Running: pcre-config --cflags" >> config.log
-			if pcre-config --cflags >> config.log 2>&1 ; then
-				check_message_result "yes"
-				if test_link_cxx "libpcre compile" "TESTFLAGS=`pcre-config --cflags`" "TESTLIBS=`pcre-config --libs`" ; then
-					LIBPCRE_FLAGS="`pcre-config --cflags`"
-					LIBPCRE_LIBS="`pcre-config --libs`"
-					true
-				fi
-			else
-				check_message_result "no"
-				false
-			fi
-		} || \
-		test_and_set test_link_cxx "libpcre" LIBPCRE "" "-lpcre" || \
-		test_and_set test_link_cxx "libpcre" LIBPCRE "-I/usr/local/include" "-L/usr/local/lib -lpcre" || \
-		error "!! Can not find libpcre. libpcre is required to compile libt3widget."
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
@@ -249,6 +217,6 @@ int main(int argc, char *argv[]) {
 EOF
 	test_link_cxx "strdup" && CONFIGFLAGS="${CONFIGFLAGS} -DHAS_STRDUP"
 
-	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3UNICODE_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3WINDOW_FLAGS} ${LIBPCRE_FLAGS} ${LIBCONFIG_FLAGS}" \
-		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} ${LIBT3UNICODE_LIBS} ${LIBT3WIDGET_LIBS} ${LIBT3WINDOW_LIBS} ${LIBPCRE_LIBS} ${LIBCONFIG_LIBS}"
+	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3UNICODE_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3WINDOW_FLAGS} ${LIBCONFIG_FLAGS}" \
+		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} ${LIBT3UNICODE_LIBS} ${LIBT3WIDGET_LIBS} ${LIBT3WINDOW_LIBS} ${LIBCONFIG_LIBS}"
 }
