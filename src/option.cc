@@ -28,6 +28,12 @@ using namespace t3_widget;
 
 #define MAX_TAB 16
 
+#ifdef LIBCONFIG_VER_MAJOR
+#define INT_TYPE int
+#else
+#define INT_TYPE long
+#endif
+
 cli_options_t cli_option;
 runtime_options_t option; /* Merged version of all possible sources. */
 
@@ -104,7 +110,7 @@ static void read_config_attribute(const config_setting_t *setting, const char *n
 } while(0)
 
 #define GET_OPT_INT(name) do { \
-	long tmp; \
+	INT_TYPE tmp; \
 	if (config_setting_lookup_int(setting, #name, &tmp) == CONFIG_TRUE) \
 		opts->name = tmp; \
 } while(0)
@@ -148,7 +154,7 @@ static void read_config(void) {
 	config_setting_t *term_specific_setting;
 	const char *term;
 
-	file += "/.tilde";
+	file += "/.tilderc";
 
 	if ((config_file = fopen(file.c_str(), "r")) == NULL)
 		return;
@@ -388,10 +394,10 @@ bool write_config(void) {
 	const char *term;
 	config_setting_t *root_setting, *terminal_setting, *setting;
 	int idx;
-	long version;
+	INT_TYPE version;
 
 	file = getenv("HOME");
-	file += "/.tilde";
+	file += "/.tilderc";
 
 	config_init(&config);
 	if ((config_file = fopen(file.c_str(), "r")) != NULL) {

@@ -13,23 +13,23 @@
 */
 #include "fileeditwindow.h"
 
-file_edit_window_t::file_edit_window_t(file_buffer_t *text) {
+file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 	text_buffer_t *old_text = get_text();
-	if (text == NULL)
-		text = new file_buffer_t();
+	if (_text == NULL)
+		_text = new file_buffer_t();
 
-	text->set_has_window(true);
-	edit_window_t::set_text(text, text->get_view_parameters());
+	_text->set_has_window(true);
+	edit_window_t::set_text(_text, _text->get_view_parameters());
 
 	delete old_text;
 }
 
-void file_edit_window_t::set_text(file_buffer_t *text) {
+void file_edit_window_t::set_text(file_buffer_t *_text) {
 	file_buffer_t *old_text = (file_buffer_t *) edit_window_t::get_text();
 	old_text->set_has_window(false);
 	save_view_parameters(&old_text->view_parameters);
-	text->set_has_window(true);
-	edit_window_t::set_text(text, text->get_view_parameters());
+	_text->set_has_window(true);
+	edit_window_t::set_text(_text, _text->get_view_parameters());
 }
 
 file_buffer_t *file_edit_window_t::get_text(void) const {

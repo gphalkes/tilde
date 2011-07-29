@@ -122,10 +122,16 @@ EOF
 	cat > .configcxx.cc <<EOF
 #include <libconfig.h>
 
+#ifdef LIBCONFIG_VER_MAJOR
+#define INT_TYPE int
+#else
+#define INT_TYPE long
+#endif
+
 int main(int argc, char *argv[]) {
 	config_t config;
 	config_setting_t *setting;
-	long l;
+	INT_TYPE l;
 	int i;
 	config_destroy(&config);
 	config_init(&config);

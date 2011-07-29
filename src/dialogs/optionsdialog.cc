@@ -19,7 +19,7 @@
 
 using namespace std;
 
-static key_t number_keys[] = { '0', '1', '2', '3' ,'4', '5', '6', '7', '8', '9' };
+static t3_widget::key_t number_keys[] = { '0', '1', '2', '3' ,'4', '5', '6', '7', '8', '9' };
 
 options_dialog_t::options_dialog_t(void) : dialog_t(7, 25, "Options") {
 	smart_label_t *label;
