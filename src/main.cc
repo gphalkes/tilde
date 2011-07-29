@@ -45,18 +45,6 @@ static dialog_t *input_selection_dialog;
 static void input_selection_complete(bool selection_made);
 static void configure_input(bool cancel_selects_default);
 
-/* Wrap the input_selection_dialog_t, such that pressing C-q exits the program. */
-class new_input_selection_dialog_t : public input_selection_dialog_t {
-	public:
-		new_input_selection_dialog_t(int height, int width, text_buffer_t *_text = NULL) :
-			input_selection_dialog_t(height, width, _text) {}
-		virtual bool process_key(t3_widget::key_t key) {
-			if ((key & ~EKEY_META) == ('q' | EKEY_CTRL))
-				exit(EXIT_SUCCESS);
-			return input_selection_dialog_t::process_key(key);
-		}
-};
-
 class main_t : public main_window_base_t {
 	private:
 		menu_bar_t *menu;
@@ -419,7 +407,7 @@ static void configure_input(bool cancel_selects_default) {
 	input_selection_dialog_t *input_selection;
 	delete input_selection_dialog;
 
-	input_selection = new new_input_selection_dialog_t(20, 70);
+	input_selection = new input_selection_dialog_t(20, 70);
 	input_selection->connect_intuitive_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
 	input_selection->connect_compromise_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
 	input_selection->connect_no_timeout_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
