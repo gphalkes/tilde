@@ -11,7 +11,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <libconfig.h>
+#include <t3config/config.h>
 #include <t3widget/widget.h>
 
 #include "option.h"
@@ -81,51 +81,45 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
 	return 0;
 }
 
-static void read_config_attribute(const config_setting_t *setting, const char *name, opt_t3_attr_t *attr) {
-	config_setting_t *attr_setting;
-	const char *value;
+static void read_config_attribute(const t3_config_item_t *config, const char *name, opt_t3_attr_t *attr) {
+	t3_config_item_t *attr_config;
 	t3_attr_t accumulated_attr = 0;
-	int i;
 
-	if ((attr_setting = config_setting_get_member(setting, name)) == NULL)
+	if ((attr_config = t3_config_get(config, name)) == NULL)
 		return;
 
-	if (config_setting_type(attr_setting) == CONFIG_TYPE_STRING) {
-		*attr = attribute_string_to_bin(config_setting_get_string(attr_setting));
+	if (t3_config_get_type(attr_config) == T3_CONFIG_STRING) {
+		*attr = attribute_string_to_bin(t3_config_get_string(attr_config));
 		return;
-	} else if (!config_setting_is_list(attr_setting) && !config_setting_is_array(attr_setting)) {
+	} else if (t3_config_get_type(attr_config) != T3_CONFIG_LIST) {
 		return;
 	}
 
-	for (i = 0; (value = config_setting_get_string_elem(attr_setting, i)) != NULL; i++)
-		accumulated_attr = t3_term_combine_attrs(attribute_string_to_bin(value), accumulated_attr);
+	for (attr_config = t3_config_get(attr_config, NULL); attr_config != NULL; attr_config = t3_config_get_next(attr_config)) {
+		if (t3_config_get_type(attr_config) == T3_CONFIG_STRING)
+			accumulated_attr = t3_term_combine_attrs(attribute_string_to_bin(t3_config_get_string(attr_config)), accumulated_attr);
+	}
 
 	*attr = accumulated_attr;
 }
 
-#define GET_OPT_BOOL(name) do { \
-	int tmp; \
-	if (config_setting_lookup_bool(setting, #name, &tmp) == CONFIG_TRUE) \
-		opts->name = tmp; \
+#define GET_OPT(name, TYPE, type) do { \
+	t3_config_item_t *tmp; \
+	if ((tmp = t3_config_get(config, #name)) != NULL && t3_config_get_type(tmp) == T3_CONFIG_##TYPE) \
+		opts->name = t3_config_get_##type(tmp); \
 } while(0)
 
-#define GET_OPT_INT(name) do { \
-	INT_TYPE tmp; \
-	if (config_setting_lookup_int(setting, #name, &tmp) == CONFIG_TRUE) \
-		opts->name = tmp; \
-} while(0)
+static void read_config_part(const t3_config_item_t *config, options_t *opts) {
+	t3_config_item_t *attributes;
+	GET_OPT(wrap, BOOL, bool);
+	GET_OPT(tabsize, INT, int);
+	GET_OPT(hide_menubar, BOOL, bool);
+	GET_OPT(color, BOOL, bool);
+	GET_OPT(max_recent_files, INT, int);
+	GET_OPT(key_timeout, INT, int);
+	GET_OPT(auto_indent, BOOL, bool);
 
-static void read_config_part(const config_setting_t *setting, options_t *opts) {
-	config_setting_t *attributes;
-	GET_OPT_BOOL(wrap);
-	GET_OPT_INT(tabsize);
-	GET_OPT_BOOL(hide_menubar);
-	GET_OPT_BOOL(color);
-	GET_OPT_INT(max_recent_files);
-	GET_OPT_INT(key_timeout);
-	GET_OPT_BOOL(auto_indent);
-
-	attributes = config_setting_get_member(setting, "attributes");
+	attributes = t3_config_get_section(t3_config_get(config, "attributes"));
 	if (attributes == NULL)
 		return;
 	read_config_attribute(attributes, "non_print", &opts->non_print);
@@ -150,8 +144,9 @@ static void read_config_part(const config_setting_t *setting, options_t *opts) {
 static void read_config(void) {
 	string file = getenv("HOME");
 	FILE *config_file;
-	config_t config;
-	config_setting_t *term_specific_setting;
+	t3_config_error_t error;
+	t3_config_item_t *config;
+	t3_config_item_t *term_specific_config;
 	const char *term;
 
 	file += "/.tilderc";
@@ -159,11 +154,10 @@ static void read_config(void) {
 	if ((config_file = fopen(file.c_str(), "r")) == NULL)
 		return;
 
-	config_init(&config);
-	if (config_read_file(&config, file.c_str()) == CONFIG_FALSE) {
+	if ((config = t3_config_read_file(config_file, &error)) == NULL) {
 		config_read_error = true;
-		config_read_error_string = config_error_text(&config);
-		config_read_error_line = config_error_line(&config);
+		config_read_error_string = t3_config_strerror(error.error);
+		config_read_error_line = error.line_number;
 		goto end;
 	}
 
@@ -173,9 +167,9 @@ static void read_config(void) {
 	   that we do not know.
 	*/
 
-	read_config_part(config_root_setting(&config), &default_option);
+	read_config_part(config, &default_option);
 
-	if ((term_specific_setting = config_setting_get_member(config_root_setting(&config), "terminals")) == NULL)
+	if ((term_specific_config = t3_config_get(config, "terminals")) == NULL)
 		goto end;
 
 	if (cli_option.term != NULL)
@@ -183,11 +177,11 @@ static void read_config(void) {
 	else if ((term = getenv("TERM")) == NULL)
 		goto end;
 
-	if ((term_specific_setting = config_setting_get_member(term_specific_setting, term)) != NULL)
-		read_config_part(term_specific_setting, &term_specific_option);
+	if ((term_specific_config = t3_config_get(term_specific_config, term)) != NULL)
+		read_config_part(term_specific_config, &term_specific_option);
 
 end:
-	config_destroy(&config);
+	t3_config_delete(config);
 	fclose(config_file);
 }
 
@@ -318,7 +312,7 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
 }
 
-static void set_config_attribute(config_setting_t *setting, const char *name, opt_t3_attr_t attr) {
+static void set_config_attribute(t3_config_item_t *config, const char *name, opt_t3_attr_t attr) {
 	static t3_attr_t attribute_masks[] = {
 		T3_ATTR_FG_MASK,
 		T3_ATTR_BG_MASK,
@@ -329,109 +323,106 @@ static void set_config_attribute(config_setting_t *setting, const char *name, op
 		T3_ATTR_DIM
 	};
 
-	config_setting_t *attributes;
+	t3_config_item_t *attributes;
 	size_t i, j;
 
 	if (!attr.is_valid())
 		return;
 
-	if ((attributes = config_setting_get_member(setting, "attributes")) == NULL || !config_setting_is_group(attributes)) {
-		config_setting_remove(setting, "attributes");
-		attributes = config_setting_add(setting, "attributes", CONFIG_TYPE_GROUP);
+	if ((attributes = t3_config_get(config, "attributes")) == NULL || t3_config_get_type(attributes) != T3_CONFIG_SECTION) {
+		t3_config_prune(config, "attributes");
+		t3_config_add_section(config, "attributes");
+		attributes = t3_config_get(config, "attributes");
 	}
-	setting = config_setting_add(attributes, name, CONFIG_TYPE_ARRAY);
+
+	t3_config_prune(attributes, name);
+	t3_config_add_list(attributes, name);
+	config = t3_config_get(attributes, name);
+
 	for (i = 0; i < sizeof(attribute_masks) / sizeof(attribute_masks[0]); i++) {
 		t3_attr_t search = attr & attribute_masks[i];
 		for (j = 0; j < sizeof(attribute_map) / sizeof(attribute_map[0]); j++) {
 			if (attribute_map[j].attr == search) {
-				config_setting_t *attribute_string = config_setting_add(setting, NULL, CONFIG_TYPE_STRING);
-				config_setting_set_string(attribute_string, attribute_map[j].string);
+				t3_config_add_string(config, NULL, attribute_map[j].string);
 				break;
 			}
 		}
 	}
 }
 
-#define SET_OPTION(name, create_type, set_type) do { \
+#define SET_OPTION(name, type) do { \
 	if (options->name.is_valid()) { \
-		config_setting_t *tmp = config_setting_add(setting, #name, create_type); \
-		config_setting_set_##set_type(tmp, options->name); \
+		t3_config_prune(config, #name); \
+		t3_config_add_##type(config, #name, options->name); \
 	} \
 } while (0)
 
-static void set_config_options(config_setting_t *setting, options_t *options) {
-	SET_OPTION(wrap, CONFIG_TYPE_BOOL, bool);
-	SET_OPTION(tabsize, CONFIG_TYPE_INT, int);
-	SET_OPTION(hide_menubar, CONFIG_TYPE_BOOL, bool);
-	SET_OPTION(color, CONFIG_TYPE_BOOL, bool);
-	SET_OPTION(max_recent_files, CONFIG_TYPE_INT, int);
-	SET_OPTION(key_timeout, CONFIG_TYPE_INT, int);
-	SET_OPTION(auto_indent, CONFIG_TYPE_BOOL, bool);
+static void set_config_options(t3_config_item_t *config, options_t *options) {
+	SET_OPTION(wrap, bool);
+	SET_OPTION(tabsize, int);
+	SET_OPTION(hide_menubar, bool);
+	SET_OPTION(color, bool);
+	SET_OPTION(max_recent_files, int);
+	SET_OPTION(key_timeout, int);
+	SET_OPTION(auto_indent, bool);
 
-	set_config_attribute(setting, "non_print", options->non_print);
-	set_config_attribute(setting, "selection_cursor", options->selection_cursor);
-	set_config_attribute(setting, "selection_cursor2", options->selection_cursor2);
-	set_config_attribute(setting, "bad_draw", options->bad_draw);
-	set_config_attribute(setting, "text_cursor", options->text_cursor);
-	set_config_attribute(setting, "text", options->text);
-	set_config_attribute(setting, "text_selected", options->text_selected);
-	set_config_attribute(setting, "highlight", options->highlight);
-	set_config_attribute(setting, "highlight_selected", options->highlight_selected);
-	set_config_attribute(setting, "dialog", options->dialog);
-	set_config_attribute(setting, "dialog_selected", options->dialog_selected);
-	set_config_attribute(setting, "button", options->button);
-	set_config_attribute(setting, "button_selected", options->button_selected);
-	set_config_attribute(setting, "scrollbar", options->scrollbar);
-	set_config_attribute(setting, "menubar", options->menubar);
-	set_config_attribute(setting, "menubar_selected", options->menubar_selected);
-	set_config_attribute(setting, "shadow", options->shadow);
+	set_config_attribute(config, "non_print", options->non_print);
+	set_config_attribute(config, "selection_cursor", options->selection_cursor);
+	set_config_attribute(config, "selection_cursor2", options->selection_cursor2);
+	set_config_attribute(config, "bad_draw", options->bad_draw);
+	set_config_attribute(config, "text_cursor", options->text_cursor);
+	set_config_attribute(config, "text", options->text);
+	set_config_attribute(config, "text_selected", options->text_selected);
+	set_config_attribute(config, "highlight", options->highlight);
+	set_config_attribute(config, "highlight_selected", options->highlight_selected);
+	set_config_attribute(config, "dialog", options->dialog);
+	set_config_attribute(config, "dialog_selected", options->dialog_selected);
+	set_config_attribute(config, "button", options->button);
+	set_config_attribute(config, "button_selected", options->button_selected);
+	set_config_attribute(config, "scrollbar", options->scrollbar);
+	set_config_attribute(config, "menubar", options->menubar);
+	set_config_attribute(config, "menubar_selected", options->menubar_selected);
+	set_config_attribute(config, "shadow", options->shadow);
 }
 
 bool write_config(void) {
 	string file, new_file;
 	FILE *config_file;
-	config_t config;
 	const char *term;
-	config_setting_t *root_setting, *terminal_setting, *setting;
-	int idx;
-	INT_TYPE version;
+	t3_config_item_t *config, *terminal_config;
+	int version;
 
 	file = getenv("HOME");
 	file += "/.tilderc";
 
-	config_init(&config);
 	if ((config_file = fopen(file.c_str(), "r")) != NULL) {
 		/* Start by reading the existing configuration. */
-		config_read_file(&config, file.c_str());
+		t3_config_error_t error;
+		config = t3_config_read_file(config_file, &error);
 		fclose(config_file);
 	} else if (errno != ENOENT) {
 		return false;
 	}
 
-	if (config_lookup_int(&config, "config_version", &version) != CONFIG_TRUE || version < 1) {
+	if (config == NULL)
+		//FIXME: may still return NULL on out-of-memory
+		config = t3_config_new();
+
+	if ((version = t3_config_get_int(t3_config_get(config, "config_version"))) < 1) {
 		/* Clean-out config, because it is an old version. */
-		config_destroy(&config);
-		config_init(&config);
+		t3_config_delete(config);
+		config = t3_config_new();
 	} else if (version > 1) {
 		/* Don't overwrite config files with newer config version. */
 		return false;
 	} else {
-		/* Remove everything that is not a terminal spec. */
-		root_setting = config_root_setting(&config);
-		idx = 0;
-		while ((setting = config_setting_get_elem(root_setting, idx)) != NULL) {
-			if (strcmp(config_setting_name(setting), "terminals") == 0)
-				idx++;
-			else
-				config_setting_remove_elem(root_setting, idx);
-		}
+		//FIXME: validate
 	}
 
 	default_option.key_timeout.unset();
-	root_setting = config_root_setting(&config);
-	set_config_options(root_setting, &default_option);
-	setting = config_setting_add(root_setting, "config_version", CONFIG_TYPE_INT);
-	config_setting_set_int(setting, 1);
+	set_config_options(config, &default_option);
+	t3_config_prune(config, "config_version");
+	t3_config_add_int(config, "config_version", 1);
 
 	if (cli_option.term != NULL)
 		term = cli_option.term;
@@ -439,26 +430,37 @@ bool write_config(void) {
 		term = getenv("TERM");
 
 	if (term != NULL) {
-		if ((terminal_setting = config_lookup(&config, "terminals")) == NULL || !config_setting_is_group(terminal_setting)) {
-			config_setting_remove(root_setting, "terminals");
-			terminal_setting = config_setting_add(root_setting, "terminals", CONFIG_TYPE_GROUP);
+		if ((terminal_config = t3_config_get(config, "terminals")) == NULL || t3_config_get_type(terminal_config) != T3_CONFIG_SECTION) {
+			t3_config_prune(config, "terminals");
+			t3_config_add_section(config, "terminals");
+			terminal_config = t3_config_get(config, "terminals");
 		} else {
-			config_setting_remove(terminal_setting, term);
+			t3_config_prune(terminal_config, term);
 		}
-		terminal_setting = config_setting_add(terminal_setting, term, CONFIG_TYPE_GROUP);
+		t3_config_add_section(terminal_config, term);
+		terminal_config = t3_config_get(terminal_config, term);
 
 		term_specific_option.wrap.unset();
 		term_specific_option.max_recent_files.unset();
 
-		set_config_options(terminal_setting, &term_specific_option);
+		set_config_options(terminal_config, &term_specific_option);
 	}
 
+	//FIXME: use mkstemp to make new file
 	new_file = file + ".new";
 	lprintf("Writing config to %s\n", new_file.c_str());
-	if (config_write_file(&config, new_file.c_str()) == CONFIG_TRUE && rename(new_file.c_str(), file.c_str()) == 0) {
-		config_destroy(&config);
-		return true;
+	if ((config_file = fopen(new_file.c_str(), "w")) == NULL) {
+		t3_config_delete(config);
+		return false;
 	}
-	config_destroy(&config);
+
+	if (t3_config_write_file(config, config_file) == T3_ERR_SUCCESS) {
+		//FIXME: fflush and fsync before closing
+		fclose(config_file);
+		t3_config_delete(config);
+		return rename(new_file.c_str(), file.c_str()) == 0;
+	}
+	fclose(config_file);
+	t3_config_delete(config);
 	return false;
 }

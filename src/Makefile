@@ -27,10 +27,9 @@ SOURCES..objects/edit := \
 	dialogs/aboutdialog.cc \
 	dialogs/optionsdialog.cc
 
-LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode
-LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3unicode/.libs
+LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode -lt3config
+LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3unicode/.libs -Lt3config/.libs
 LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`
-LDFLAGS..objects/edit += -lconfig
 
 CXXTARGETS := .objects/edit
 #================================================#
@@ -62,6 +61,7 @@ links:
 	@[ -L t3unicode ] || ln -s ../../unicode/src t3unicode
 	@[ -L t3window ] || ln -s ../../window/src t3window
 	@[ -L t3widget ] || ln -s ../../widget/src t3widget
+	@[ -L t3config ] || ln -s ../../config/src t3config
 	@[ -L transcript ] || ln -s ../../../transcript/src transcript
 
 .PHONY: links xgettext linecount
