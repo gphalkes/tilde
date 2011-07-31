@@ -119,7 +119,7 @@ static void read_config_part(const t3_config_item_t *config, options_t *opts) {
 	GET_OPT(key_timeout, INT, int);
 	GET_OPT(auto_indent, BOOL, bool);
 
-	attributes = t3_config_get_section(t3_config_get(config, "attributes"));
+	attributes = t3_config_get(config, "attributes");
 	if (attributes == NULL)
 		return;
 	read_config_attribute(attributes, "non_print", &opts->non_print);
@@ -329,15 +329,10 @@ static void set_config_attribute(t3_config_item_t *config, const char *name, opt
 	if (!attr.is_valid())
 		return;
 
-	if ((attributes = t3_config_get(config, "attributes")) == NULL || t3_config_get_type(attributes) != T3_CONFIG_SECTION) {
-		t3_config_prune(config, "attributes");
-		t3_config_add_section(config, "attributes");
-		attributes = t3_config_get(config, "attributes");
-	}
+	if ((attributes = t3_config_get(config, "attributes")) == NULL || t3_config_get_type(attributes) != T3_CONFIG_SECTION)
+		attributes = t3_config_add_section(config, "attributes", NULL);
 
-	t3_config_prune(attributes, name);
-	t3_config_add_list(attributes, name);
-	config = t3_config_get(attributes, name);
+	config = t3_config_add_list(attributes, name, NULL);
 
 	for (i = 0; i < sizeof(attribute_masks) / sizeof(attribute_masks[0]); i++) {
 		t3_attr_t search = attr & attribute_masks[i];
@@ -351,10 +346,8 @@ static void set_config_attribute(t3_config_item_t *config, const char *name, opt
 }
 
 #define SET_OPTION(name, type) do { \
-	if (options->name.is_valid()) { \
-		t3_config_prune(config, #name); \
+	if (options->name.is_valid()) \
 		t3_config_add_##type(config, #name, options->name); \
-	} \
 } while (0)
 
 static void set_config_options(t3_config_item_t *config, options_t *options) {
@@ -389,7 +382,7 @@ bool write_config(void) {
 	string file, new_file;
 	FILE *config_file;
 	const char *term;
-	t3_config_item_t *config, *terminal_config;
+	t3_config_item_t *config = NULL, *terminal_config;
 	int version;
 
 	file = getenv("HOME");
@@ -404,11 +397,7 @@ bool write_config(void) {
 		return false;
 	}
 
-	if (config == NULL)
-		//FIXME: may still return NULL on out-of-memory
-		config = t3_config_new();
-
-	if ((version = t3_config_get_int(t3_config_get(config, "config_version"))) < 1) {
+	if (config == NULL || (version = t3_config_get_int(t3_config_get(config, "config_version"))) < 1) {
 		/* Clean-out config, because it is an old version. */
 		t3_config_delete(config);
 		config = t3_config_new();
@@ -421,7 +410,6 @@ bool write_config(void) {
 
 	default_option.key_timeout.unset();
 	set_config_options(config, &default_option);
-	t3_config_prune(config, "config_version");
 	t3_config_add_int(config, "config_version", 1);
 
 	if (cli_option.term != NULL)
@@ -430,15 +418,10 @@ bool write_config(void) {
 		term = getenv("TERM");
 
 	if (term != NULL) {
-		if ((terminal_config = t3_config_get(config, "terminals")) == NULL || t3_config_get_type(terminal_config) != T3_CONFIG_SECTION) {
-			t3_config_prune(config, "terminals");
-			t3_config_add_section(config, "terminals");
-			terminal_config = t3_config_get(config, "terminals");
-		} else {
-			t3_config_prune(terminal_config, term);
-		}
-		t3_config_add_section(terminal_config, term);
-		terminal_config = t3_config_get(terminal_config, term);
+		if ((terminal_config = t3_config_get(config, "terminals")) == NULL || t3_config_get_type(terminal_config) != T3_CONFIG_SECTION)
+			terminal_config = t3_config_add_section(config, "terminals", NULL);
+
+		terminal_config = t3_config_add_section(terminal_config, term, NULL);
 
 		term_specific_option.wrap.unset();
 		term_specific_option.max_recent_files.unset();
