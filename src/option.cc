@@ -154,7 +154,7 @@ static void read_config(void) {
 	if ((config_file = fopen(file.c_str(), "r")) == NULL)
 		return;
 
-	if ((config = t3_config_read_file(config_file, &error)) == NULL) {
+	if ((config = t3_config_read_file(config_file, &error, NULL)) == NULL) {
 		config_read_error = true;
 		config_read_error_string = t3_config_strerror(error.error);
 		config_read_error_line = error.line_number;
@@ -391,7 +391,7 @@ bool write_config(void) {
 	if ((config_file = fopen(file.c_str(), "r")) != NULL) {
 		/* Start by reading the existing configuration. */
 		t3_config_error_t error;
-		config = t3_config_read_file(config_file, &error);
+		config = t3_config_read_file(config_file, &error, NULL);
 		fclose(config_file);
 	} else if (errno != ENOENT) {
 		return false;
