@@ -32,6 +32,7 @@ bool load_process_t::step(void) {
 	if (state == SELECT_FILE) {
 		connections.push_back(open_file_dialog->connect_closed(sigc::mem_fun(this, &load_process_t::abort)));
 		connections.push_back(open_file_dialog->connect_file_selected(sigc::mem_fun(this, &load_process_t::file_selected)));
+		open_file_dialog->reset();
 		open_file_dialog->show();
 		connections.push_back(encoding_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::encoding_selected)));
 		encoding_dialog->set_encoding(encoding.c_str());
