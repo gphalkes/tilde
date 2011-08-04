@@ -117,9 +117,9 @@ main_t::main_t(void) {
 	panel->add_item("_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
 
 	panel = new menu_panel_t("_Window", menu);
-	panel->add_item("_Next Open File", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
-	panel->add_item("_Previous Open File", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
-	panel->add_item("_Select Open File...", NULL, action_id_t::WINDOWS_SELECT);
+	panel->add_item("_Next Buffer", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
+	panel->add_item("_Previous Buffer", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
+	panel->add_item("_Select Buffer...", NULL, action_id_t::WINDOWS_SELECT);
 	panel->add_separator();
 	panel->add_item("Split _Horizontal", NULL, action_id_t::WINDOWS_HSPLIT);
 	panel->add_item("Split _Vertical", NULL, action_id_t::WINDOWS_VSPLIT);
@@ -129,7 +129,7 @@ main_t::main_t(void) {
 
 	panel = new menu_panel_t("_Options", menu);
 	panel->add_item("_Input Handling", NULL, action_id_t::OPTIONS_INPUT);
-	panel->add_item("_Open File Options", NULL, action_id_t::OPTIONS_BUFFER);
+	panel->add_item("_Buffer Options", NULL, action_id_t::OPTIONS_BUFFER);
 
 	panel = new menu_panel_t("_Help", menu);
 	//~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
