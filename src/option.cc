@@ -72,6 +72,19 @@ static struct { const char *string; t3_attr_t attr; } attribute_map[] = {
 	{ "bg white", T3_ATTR_BG_WHITE }
 };
 
+
+static t3_bool find_term_config(t3_config_t *config, void *data) {
+	t3_config_t *name;
+
+	if (t3_config_get_type(config) != T3_CONFIG_SECTION)
+		return t3_false;
+	if ((name = t3_config_get(config, "name")) == NULL)
+		return t3_false;
+	if (t3_config_get_type(name) != T3_CONFIG_STRING)
+		return t3_false;
+	return strcmp((const char *) data, t3_config_get_string(name)) == 0;
+}
+
 static t3_attr_t attribute_string_to_bin(const char *attr) {
 	size_t i;
 	for (i = 0; i < sizeof(attribute_map) / sizeof(attribute_map[0]); i++) {
@@ -81,8 +94,8 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
 	return 0;
 }
 
-static void read_config_attribute(const t3_config_item_t *config, const char *name, opt_t3_attr_t *attr) {
-	t3_config_item_t *attr_config;
+static void read_config_attribute(const t3_config_t *config, const char *name, opt_t3_attr_t *attr) {
+	t3_config_t *attr_config;
 	t3_attr_t accumulated_attr = 0;
 
 	if ((attr_config = t3_config_get(config, name)) == NULL)
@@ -104,13 +117,13 @@ static void read_config_attribute(const t3_config_item_t *config, const char *na
 }
 
 #define GET_OPT(name, TYPE, type) do { \
-	t3_config_item_t *tmp; \
+	t3_config_t *tmp; \
 	if ((tmp = t3_config_get(config, #name)) != NULL && t3_config_get_type(tmp) == T3_CONFIG_##TYPE) \
 		opts->name = t3_config_get_##type(tmp); \
 } while(0)
 
-static void read_config_part(const t3_config_item_t *config, options_t *opts) {
-	t3_config_item_t *attributes;
+static void read_config_part(const t3_config_t *config, options_t *opts) {
+	t3_config_t *attributes;
 	GET_OPT(wrap, BOOL, bool);
 	GET_OPT(tabsize, INT, int);
 	GET_OPT(hide_menubar, BOOL, bool);
@@ -145,8 +158,8 @@ static void read_config(void) {
 	string file = getenv("HOME");
 	FILE *config_file;
 	t3_config_error_t error;
-	t3_config_item_t *config;
-	t3_config_item_t *term_specific_config;
+	t3_config_t *config;
+	t3_config_t *term_specific_config;
 	const char *term;
 
 	file += "/.tilderc";
@@ -177,7 +190,10 @@ static void read_config(void) {
 	else if ((term = getenv("TERM")) == NULL)
 		goto end;
 
-	if ((term_specific_config = t3_config_get(term_specific_config, term)) != NULL)
+	if (t3_config_get_type(term_specific_config) != T3_CONFIG_LIST)
+		goto end;
+
+	if ((term_specific_config = t3_config_find(term_specific_config, find_term_config, (void *) term, NULL)) != NULL)
 		read_config_part(term_specific_config, &term_specific_option);
 
 end:
@@ -312,7 +328,7 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
 }
 
-static void set_config_attribute(t3_config_item_t *config, const char *name, opt_t3_attr_t attr) {
+static void set_config_attribute(t3_config_t *config, const char *name, opt_t3_attr_t attr) {
 	static t3_attr_t attribute_masks[] = {
 		T3_ATTR_FG_MASK,
 		T3_ATTR_BG_MASK,
@@ -323,7 +339,7 @@ static void set_config_attribute(t3_config_item_t *config, const char *name, opt
 		T3_ATTR_DIM
 	};
 
-	t3_config_item_t *attributes;
+	t3_config_t *attributes;
 	size_t i, j;
 
 	if (!attr.is_valid())
@@ -350,7 +366,7 @@ static void set_config_attribute(t3_config_item_t *config, const char *name, opt
 		t3_config_add_##type(config, #name, options->name); \
 } while (0)
 
-static void set_config_options(t3_config_item_t *config, options_t *options) {
+static void set_config_options(t3_config_t *config, options_t *options) {
 	SET_OPTION(wrap, bool);
 	SET_OPTION(tabsize, int);
 	SET_OPTION(hide_menubar, bool);
@@ -382,7 +398,7 @@ bool write_config(void) {
 	string file, new_file;
 	FILE *config_file;
 	const char *term;
-	t3_config_item_t *config = NULL, *terminal_config;
+	t3_config_t *config = NULL, *terminals, *terminal_config;
 	int version;
 
 	file = getenv("HOME");
@@ -418,10 +434,14 @@ bool write_config(void) {
 		term = getenv("TERM");
 
 	if (term != NULL) {
-		if ((terminal_config = t3_config_get(config, "terminals")) == NULL || t3_config_get_type(terminal_config) != T3_CONFIG_SECTION)
-			terminal_config = t3_config_add_section(config, "terminals", NULL);
+		if ((terminals = t3_config_get(config, "terminals")) == NULL || t3_config_get_type(terminals) != T3_CONFIG_LIST)
+			terminals = t3_config_add_list(config, "terminals", NULL);
 
-		terminal_config = t3_config_add_section(terminal_config, term, NULL);
+		terminal_config = t3_config_find(terminals, find_term_config, (void *) term, NULL);
+		if (terminal_config == NULL) {
+			terminal_config = t3_config_add_section(terminals, NULL, NULL);
+			t3_config_add_string(terminal_config, "name", term);
+		}
 
 		term_specific_option.wrap.unset();
 		term_specific_option.max_recent_files.unset();
