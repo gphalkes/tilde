@@ -129,9 +129,7 @@ main_t::main_t(void) {
 
 	panel = new menu_panel_t("_Options", menu);
 	panel->add_item("_Input Handling", NULL, action_id_t::OPTIONS_INPUT);
-	panel->add_item("_Buffer Options", NULL, action_id_t::OPTIONS_BUFFER);
-/*	panel->add_item("_Tabs...", NULL, action_id_t::OPTIONS_TABS);
-	panel->add_item("_Keys...", NULL, action_id_t::OPTIONS_KEYS);*/
+	panel->add_item("_Open File Options", NULL, action_id_t::OPTIONS_BUFFER);
 
 	panel = new menu_panel_t("_Help", menu);
 	//~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
