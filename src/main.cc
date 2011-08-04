@@ -117,9 +117,9 @@ main_t::main_t(void) {
 	panel->add_item("_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
 
 	panel = new menu_panel_t("_Window", menu);
-	panel->add_item("_Next Buffer", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
-	panel->add_item("_Previous Buffer", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
-	panel->add_item("_Select Buffer...", NULL, action_id_t::WINDOWS_SELECT);
+	panel->add_item("_Next Open File", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
+	panel->add_item("_Previous Open File", "S-F6" , action_id_t::WINDOWS_PREV_BUFFER);
+	panel->add_item("_Select Open File...", NULL, action_id_t::WINDOWS_SELECT);
 	panel->add_separator();
 	panel->add_item("Split _Horizontal", NULL, action_id_t::WINDOWS_HSPLIT);
 	panel->add_item("Split _Vertical", NULL, action_id_t::WINDOWS_VSPLIT);
