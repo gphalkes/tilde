@@ -22,6 +22,7 @@ using namespace t3_widget;
 class file_edit_window_t : public edit_window_t {
 	public:
 		file_edit_window_t(file_buffer_t *_text = NULL);
+		virtual ~file_edit_window_t(void);
 		void set_text(file_buffer_t *_text);
 		file_buffer_t *get_text(void) const;
 };

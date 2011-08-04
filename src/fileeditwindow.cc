@@ -24,6 +24,12 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 	delete old_text;
 }
 
+file_edit_window_t::~file_edit_window_t(void) {
+	file_buffer_t *_text = (file_buffer_t *) text;
+	_text->set_has_window(false);
+	save_view_parameters(&_text->view_parameters);
+}
+
 void file_edit_window_t::set_text(file_buffer_t *_text) {
 	file_buffer_t *old_text = (file_buffer_t *) edit_window_t::get_text();
 	old_text->set_has_window(false);
