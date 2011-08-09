@@ -53,7 +53,8 @@ class main_t : public main_window_base_t {
 
 		select_buffer_dialog_t *select_buffer_dialog;
 		message_dialog_t *about_dialog;
-		options_dialog_t *options_dialog;
+		buffer_options_dialog_t *buffer_options_dialog, *default_options_dialog;
+		interface_options_dialog_t *interface_options_dialog;
 
 	public:
 		main_t(void);
@@ -67,7 +68,9 @@ class main_t : public main_window_base_t {
 		void switch_buffer(file_buffer_t *buffer);
 		void switch_to_new_buffer(stepped_process_t *process);
 		void close_cb(stepped_process_t *process);
-		void set_options(void);
+		void set_buffer_options(void);
+		void set_default_options(void);
+		void set_interface_options(void);
 };
 
 static main_t *main_window;
@@ -127,8 +130,10 @@ main_t::main_t(void) {
 	panel->add_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
 	panel = new menu_panel_t("_Options", menu);
-	panel->add_item("_Input Handling", NULL, action_id_t::OPTIONS_INPUT);
-	panel->add_item("_Buffer Options", NULL, action_id_t::OPTIONS_BUFFER);
+	panel->add_item("Input _Handling...", NULL, action_id_t::OPTIONS_INPUT);
+	panel->add_item("_Current Buffer...", NULL, action_id_t::OPTIONS_BUFFER);
+	panel->add_item("Buffer _Defaults...", NULL, action_id_t::OPTIONS_DEFAULTS);
+	panel->add_item("_Interface...", NULL, action_id_t::OPTIONS_INTERFACE);
 
 	panel = new menu_panel_t("_Help", menu);
 	//~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
@@ -180,9 +185,17 @@ main_t::main_t(void) {
 		"You should have received a copy of the GNU General Public License along with this program. "
 		"If not, see <http://www.gnu.org/licenses/>.");
 
-	options_dialog = new options_dialog_t();
-	options_dialog->center_over(this);
-	options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_options));
+	buffer_options_dialog = new buffer_options_dialog_t("Current Buffer");
+	buffer_options_dialog->center_over(this);
+	buffer_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_buffer_options));
+
+	default_options_dialog = new buffer_options_dialog_t("Buffer Defaults");
+	default_options_dialog->center_over(this);
+	default_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_default_options));
+
+	interface_options_dialog = new interface_options_dialog_t("Interface");
+	interface_options_dialog->center_over(this);
+	interface_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_interface_options));
 }
 
 bool main_t::process_key(t3_widget::key_t key) {
@@ -202,7 +215,6 @@ bool main_t::process_key(t3_widget::key_t key) {
 
 bool main_t::set_size(optint height, optint width) {
 	bool result;
-	(void) height;
 
 	result = menu->set_size(None, width);
 	result &= split->set_size(height - !option.hide_menubar, width);
@@ -345,12 +357,21 @@ void main_t::menu_activated(int id) {
 			}
 			break;
 		}
+
 		case action_id_t::OPTIONS_INPUT:
 			configure_input(false);
 			break;
 		case action_id_t::OPTIONS_BUFFER:
-			options_dialog->set_values_from_view(get_current());
-			options_dialog->show();
+			buffer_options_dialog->set_values_from_view(get_current());
+			buffer_options_dialog->show();
+			break;
+		case action_id_t::OPTIONS_DEFAULTS:
+			default_options_dialog->set_values_from_options();
+			default_options_dialog->show();
+			break;
+		case action_id_t::OPTIONS_INTERFACE:
+			interface_options_dialog->set_values_from_options();
+			interface_options_dialog->show();
 			break;
 
 		case action_id_t::HELP_ABOUT:
@@ -406,8 +427,22 @@ void main_t::close_cb(stepped_process_t *process) {
 	delete text;
 }
 
-void main_t::set_options(void) {
-	options_dialog->set_view_values(get_current());
+void main_t::set_buffer_options(void) {
+	buffer_options_dialog->set_view_values(get_current());
+}
+
+void main_t::set_default_options(void) {
+	default_options_dialog->set_options_values();
+	write_config();
+}
+
+void main_t::set_interface_options(void) {
+	interface_options_dialog->set_options_values();
+	split->set_size(t3_win_get_height(window) - !option.hide_menubar, None);
+	split->set_position(!option.hide_menubar, 0);
+	menu->set_hidden(option.hide_menubar);
+	set_color_mode(option.color);
+	write_config();
 }
 
 static void configure_input(bool cancel_selects_default) {
@@ -474,19 +509,20 @@ int main(int argc, char *argv[]) {
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
 	} else {
+		set_key_timeout(-1000);
 		message_dialog_t *input_message = new message_dialog_t(70, _("Input Handling"), _("Close"), _("Configure"), NULL);
 		input_message->set_message("You have not configured the input handling for this terminal type yet. "
-			"By default Tilde activates the 'Escape <letter>' simulates Meta+<letter> work-around, which allows "
-			"you to access menus by pressing Escape followed by a letter. However, it also requires you to press "
-			"esacpe twice to close a menu or dialog. You can change the input handling by selecting the Options "
-			"Menu and choosing \"Input Handling\", or by choosing \"Configure\" below.");
+			"This means you:\n"
+			"- can access menus by both Meta+<letter> and Esc <letter>\n"
+			"- must press escape twice to close a menu or dialog\n\n"
+			"You can change the input handling by selecting the Options Menu "
+			"and choosing \"Input Handling\", or by choosing \"Configure\" below.");
 		input_message->connect_activate(sigc::bind(sigc::ptr_fun(input_selection_complete), true), 0);
 		input_message->connect_activate(sigc::bind(sigc::ptr_fun(configure_input), true), 1);
 		input_message->connect_closed(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
 		input_message->center_over(main_window);
 		input_message->show();
 		input_selection_dialog = input_message;
-		set_key_timeout(-1000);
 	}
 
 	load_cli_file_process_t::execute(sigc::mem_fun(main_window, &main_t::load_cli_files_done));

@@ -131,6 +131,7 @@ static void read_config_part(const t3_config_t *config, options_t *opts) {
 	GET_OPT(max_recent_files, INT, int);
 	GET_OPT(key_timeout, INT, int);
 	GET_OPT(auto_indent, BOOL, bool);
+	GET_OPT(tab_spaces, BOOL, bool);
 
 	attributes = t3_config_get(config, "attributes");
 	if (attributes == NULL)
@@ -374,6 +375,7 @@ static void set_config_options(t3_config_t *config, options_t *options) {
 	SET_OPTION(max_recent_files, int);
 	SET_OPTION(key_timeout, int);
 	SET_OPTION(auto_indent, bool);
+	SET_OPTION(tab_spaces, bool);
 
 	set_config_attribute(config, "non_print", options->non_print);
 	set_config_attribute(config, "selection_cursor", options->selection_cursor);

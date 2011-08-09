@@ -20,15 +20,32 @@ using namespace t3_widget;
 
 void init_charsets(void);
 
-class options_dialog_t : public dialog_t {
+class buffer_options_dialog_t : public dialog_t {
 	protected:
 		checkbox_t *tab_spaces_box, *wrap_box, *hide_menu_box, *auto_indent_box;
 		text_field_t *tabsize_field;
 
 	public:
-		options_dialog_t(void);
+		buffer_options_dialog_t(const char *_title);
+
 		void set_values_from_view(edit_window_t *view);
 		void set_view_values(edit_window_t *view);
+		void set_values_from_options(void);
+		void set_options_values(void);
+		void handle_activate(void);
+
+	T3_WIDGET_SIGNAL(activate, void);
+};
+
+class interface_options_dialog_t : public dialog_t {
+	protected:
+		checkbox_t *hide_menu_box, *color_box;
+
+	public:
+		interface_options_dialog_t(const char *_title);
+
+		void set_values_from_options(void);
+		void set_options_values(void);
 		void handle_activate(void);
 
 	T3_WIDGET_SIGNAL(activate, void);
