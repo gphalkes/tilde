@@ -13,8 +13,6 @@ SAVE (AS)
 
 MISSING FUNCTIONALITY
 =====================
-- tab indents/unindents when selection crosses a line ending
-- options setting
 - help text
 - replace with regex is only partially working
 

@@ -101,15 +101,18 @@ main_t::main_t(void) {
 	panel->add_item("_Undo", "^Z", action_id_t::EDIT_UNDO);
 	panel->add_item("_Redo", "^Y", action_id_t::EDIT_REDO);
 	panel->add_separator();
-	panel->add_item("_Copy", "^C", action_id_t::EDIT_COPY);
 	panel->add_item("Cu_t", "^X", action_id_t::EDIT_CUT);
+	panel->add_item("_Copy", "^C", action_id_t::EDIT_COPY);
 	panel->add_item("_Paste", "^V", action_id_t::EDIT_PASTE);
+	panel->add_separator();
 	panel->add_item("Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
 	panel->add_item("_Mark Selection", "^Space", action_id_t::EDIT_MARK);
-	panel->add_item("_Insert Character...", "F9", action_id_t::EDIT_INSERT_CHAR);
 	panel->add_separator();
-	panel->add_item("In_dent Selection", "Tab", action_id_t::EDIT_INDENT_SELECTION);
+	panel->add_item("_Indent Selection", "Tab", action_id_t::EDIT_INDENT_SELECTION);
 	panel->add_item("U_nindent Selection", "S-Tab", action_id_t::EDIT_UNINDENT_SELECTION);
+	panel->add_separator();
+	panel->add_item("Insert C_haracter...", "F9", action_id_t::EDIT_INSERT_CHAR);
+	panel->add_item("T_oggle INS/OVR", "Ins", action_id_t::EDIT_TOGGLE_INSERT);
 
 	panel = new menu_panel_t("_Search", menu);
 	panel->add_item("_Find...", "^F", action_id_t::SEARCH_SEARCH);
@@ -308,6 +311,9 @@ void main_t::menu_activated(int id) {
 			break;
 		case action_id_t::EDIT_UNINDENT_SELECTION:
 			get_current()->unindent_selection();
+			break;
+		case action_id_t::EDIT_TOGGLE_INSERT:
+			get_current()->process_key(EKEY_INS);
 			break;
 
 		case action_id_t::SEARCH_SEARCH:

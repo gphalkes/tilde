@@ -11,6 +11,7 @@ priority.
 - Auto save and restore on crash
 - fmt-like rewrapping of text to a specific width
 - X11 integration with the clipboard
+- Mouse selection, with X11 PRIMARY integration
 - Simple autocompletion based on words found elsewhere in the same document
 - Insertion of characters by their Unicode name instead of their codepoint
 - Decrease memory usage
