@@ -415,9 +415,7 @@ static void configure_input(bool cancel_selects_default) {
 	delete input_selection_dialog;
 
 	input_selection = new input_selection_dialog_t(20, 70);
-	input_selection->connect_intuitive_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
-	input_selection->connect_compromise_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
-	input_selection->connect_no_timeout_activated(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
+	input_selection->connect_activate(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
 	input_selection->connect_closed(sigc::bind(sigc::ptr_fun(input_selection_complete), cancel_selects_default));
 	input_selection->center_over(main_window);
 	input_selection->show();
@@ -471,11 +469,12 @@ int main(int argc, char *argv[]) {
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
 	} else {
-		message_dialog_t *input_message = new message_dialog_t(70, _("Input Handling"), _("_Default"), _("_Configure"), NULL);
-		input_message->set_message("You have not configured the input handling method for this terminal type yet. "
-			"By default Tilde uses a workable compromise, which requires you to press esacpe twice to close a menu or dialog "
-			"and allows you to access menus by pressing Escape followed by a letter. "
-			"Choose 'Configure' below to select a different input handling method.");
+		message_dialog_t *input_message = new message_dialog_t(70, _("Input Handling"), _("Close"), _("Configure"), NULL);
+		input_message->set_message("You have not configured the input handling for this terminal type yet. "
+			"By default Tilde activates the 'Escape <letter>' simulates Meta+<letter> work-around, which allows "
+			"you to access menus by pressing Escape followed by a letter. However, it also requires you to press "
+			"esacpe twice to close a menu or dialog. You can change the input handling by selecting the Options "
+			"Menu and choosing \"Input Handling\", or by choosing \"Configure\" below.");
 		input_message->connect_activate(sigc::bind(sigc::ptr_fun(input_selection_complete), true), 0);
 		input_message->connect_activate(sigc::bind(sigc::ptr_fun(configure_input), true), 1);
 		input_message->connect_closed(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
