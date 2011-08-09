@@ -434,6 +434,7 @@ static void input_selection_complete(bool selection_made) {
 
 int main(int argc, char *argv[]) {
 	complex_error_t result;
+	init_parameters_t *params = new init_parameters_t();
 
 	init_log();
 	setlocale(LC_ALL, "");
@@ -451,12 +452,16 @@ int main(int argc, char *argv[]) {
 		getchar();
 	}
 #endif
+	params->term = cli_option.term;
+	params->program_name = "Tilde";
 
-	if (!(result = init(cli_option.term)).get_success()) {
+	if (!(result = init(params)).get_success()) {
 		fprintf(stderr, "Error: %s\n", result.get_string());
 		fprintf(stderr, "init failed\n");
 		exit(EXIT_FAILURE);
 	}
+
+	delete params;
 
 	init_charsets();
 	main_window = new main_t();
