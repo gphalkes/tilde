@@ -23,7 +23,6 @@
 #include "dialogs/selectbufferdialog.h"
 #include "dialogs/encodingdialog.h"
 #include "dialogs/openrecentdialog.h"
-#include "dialogs/aboutdialog.h"
 #include "dialogs/optionsdialog.h"
 #include "log.h"
 
@@ -53,7 +52,7 @@ class main_t : public main_window_base_t {
 		split_t *split;
 
 		select_buffer_dialog_t *select_buffer_dialog;
-		about_dialog_t *about_dialog;
+		message_dialog_t *about_dialog;
 		options_dialog_t *options_dialog;
 
 	public:
@@ -173,8 +172,13 @@ main_t::main_t(void) {
 	open_recent_dialog = new open_recent_dialog_t(11, t3_win_get_width(window) - 4);
 	open_recent_dialog->center_over(this);
 
-	about_dialog = new about_dialog_t(15, 45);
+	about_dialog = new message_dialog_t(45, "About", "Close", NULL);
 	about_dialog->center_over(this);
+	about_dialog->set_max_text_height(13);
+	about_dialog->set_message("Tilde - The intuitive text editor\n\nVersion <VERSION>\nCopyright (c) 2011 G.P. Halkes\n\n"
+		"The Tilde text editor is licensed under the GNU General Public License version 3. "
+		"You should have received a copy of the GNU General Public License along with this program. "
+		"If not, see <http://www.gnu.org/licenses/>.");
 
 	options_dialog = new options_dialog_t();
 	options_dialog->center_over(this);
