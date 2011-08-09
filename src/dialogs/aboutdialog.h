@@ -20,7 +20,6 @@ using namespace t3_widget;
 class about_dialog_t : public dialog_t {
 	private:
 		text_buffer_t *text;
-		text_window_t *text_window;
 
 	public:
 		about_dialog_t(int height, int width);

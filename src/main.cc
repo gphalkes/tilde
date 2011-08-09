@@ -167,13 +167,13 @@ main_t::main_t(void) {
 	close_confirm_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", "_Yes", "_No", "_Cancel", NULL);
 	close_confirm_dialog->center_over(this);
 
-	error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Ok", NULL);
+	error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Close", NULL);
 	error_dialog->center_over(this);
 
 	open_recent_dialog = new open_recent_dialog_t(11, t3_win_get_width(window) - 4);
 	open_recent_dialog->center_over(this);
 
-	about_dialog = new about_dialog_t(13, 45);
+	about_dialog = new about_dialog_t(15, 45);
 	about_dialog->center_over(this);
 
 	options_dialog = new options_dialog_t();
@@ -332,10 +332,15 @@ void main_t::menu_activated(int id) {
 		case action_id_t::WINDOWS_PREV_WINDOW:
 			split->previous();
 			break;
-		case action_id_t::WINDOWS_MERGE:
-			delete split->unsplit();
+		case action_id_t::WINDOWS_MERGE: {
+			widget_t *widget = split->unsplit();
+			if (widget == NULL) {
+				message_dialog->set_message("Can not close the last window.");
+				message_dialog->center_over(this);
+				message_dialog->show();
+			}
 			break;
-
+		}
 		case action_id_t::OPTIONS_INPUT:
 			configure_input(false);
 			break;
