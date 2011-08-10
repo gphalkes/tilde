@@ -22,7 +22,7 @@
 #include "option.h"
 
 file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(_name),
-	view_parameters(option.tabsize, option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE, option.auto_indent), has_window(false)
+	view_parameters(new edit_window_t::view_parameters_t()), has_window(false)
 {
 	if (_encoding == NULL)
 		encoding = strdup("UTF-8");
@@ -38,11 +38,18 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		convert_lang_codeset(name, &converted_name, true);
 		name_line.set_text(&converted_name);
 	}
+
+	view_parameters->set_tabsize(option.tabsize);
+	view_parameters->set_wrap(option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE);
+	view_parameters->set_auto_indent(option.auto_indent);
+	view_parameters->set_tab_spaces(option.tab_spaces);
+	#warning FIXME: add indent_aware_home
 	open_files.push_back(this);
 }
 
 file_buffer_t::~file_buffer_t(void) {
 	free(encoding);
+	delete view_parameters;
 	open_files.erase(this);
 }
 
@@ -241,7 +248,7 @@ const char *file_buffer_t::get_encoding(void) const {
 }
 
 const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters(void) const {
-	return &view_parameters;
+	return view_parameters;
 }
 
 void file_buffer_t::set_has_window(bool _has_window) {

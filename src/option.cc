@@ -22,6 +22,7 @@
 /* FIXME:
   - verify return values of libconfig functions
 */
+#warning FIXME: add config options for indent aware home key
 
 using namespace std;
 using namespace t3_widget;

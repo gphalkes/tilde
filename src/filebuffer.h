@@ -26,7 +26,7 @@ class file_buffer_t : public text_buffer_t {
 	friend class file_edit_window_t; // Required to access view_parameters and set_has_window
 	protected:
 		char *encoding;
-		edit_window_t::view_parameters_t view_parameters;
+		edit_window_t::view_parameters_t *view_parameters;
 		bool has_window;
 
 		void set_has_window(bool _has_window);
