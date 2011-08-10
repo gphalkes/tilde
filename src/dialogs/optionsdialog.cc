@@ -159,7 +159,7 @@ void buffer_options_dialog_t::handle_activate(void) {
 
 interface_options_dialog_t::interface_options_dialog_t(const char *_title) : dialog_t(5, 25, _title) {
 	smart_label_t *label;
-	int width;
+	int width = 0;
 	button_t *ok_button, *cancel_button;
 
 	//FIXME: implement attribute setting

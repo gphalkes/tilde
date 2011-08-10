@@ -1,7 +1,7 @@
 Introduction
 ============
 
-Tilde is a text editor for the console/terminal, which tries to be as intuitive
+Tilde is a text editor for the console/terminal, which aims to be as intuitive
 as possible for users who are accustomed to GUI environments such as Gnome, KDE
 and Windows. For example, the short-cut to copy the current selection is
 Control-C, and to paste the previously copied text the short-cut Control-V can
