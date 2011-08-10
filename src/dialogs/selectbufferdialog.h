@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 G.P. Halkes
+/* Copyright (C) 2011 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -22,7 +22,7 @@ using namespace t3_widget;
 class select_buffer_dialog_t : public dialog_t {
 	private:
 		list_pane_t *list;
-		int known_version_t;
+		int known_version;
 
 	public:
 		select_buffer_dialog_t(int height, int width);

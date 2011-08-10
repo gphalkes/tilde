@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 G.P. Halkes
+/* Copyright (C) 2011 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -15,7 +15,7 @@
 #include "openfiles.h"
 
 select_buffer_dialog_t::select_buffer_dialog_t(int height, int width) :
-	dialog_t(height, width, "Select Buffer"), known_version_t(INT_MIN)
+	dialog_t(height, width, "Select Buffer"), known_version(INT_MIN)
 {
 	button_t *ok_button, *cancel_button;
 
@@ -58,9 +58,9 @@ bool select_buffer_dialog_t::set_size(optint height, optint width) {
 }
 
 void select_buffer_dialog_t::show(void) {
-	if (open_files.get_version() != known_version_t) {
+	if (open_files.get_version() != known_version) {
 		multi_widget_t *multi_widget;
-		known_version_t = open_files.get_version();
+		known_version = open_files.get_version();
 		int width = t3_win_get_width(window);
 
 		while (!list->empty()) {

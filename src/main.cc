@@ -226,6 +226,11 @@ bool main_t::set_size(optint height, optint width) {
 	result &= save_as_dialog->set_size(height - 4, width - 4);
 	result &= open_recent_dialog->set_size(11, width - 4);
 	result &= encoding_dialog->set_size(min(height - 8, 16), min(width - 8, 72));
+	if (input_selection_dialog != NULL && dynamic_cast<input_selection_dialog_t *>(input_selection_dialog) != NULL) {
+		int is_width = min(max(width - 16, 40), 100);
+		int is_height = min(max(height - 3, 15), 3200 / is_width);
+		input_selection_dialog->set_size(is_height, is_width);
+	}
 	return true;
 }
 
@@ -355,11 +360,16 @@ void main_t::menu_activated(int id) {
 			split->previous();
 			break;
 		case action_id_t::WINDOWS_MERGE: {
-			widget_t *widget = split->unsplit();
+			file_edit_window_t *widget = (file_edit_window_t *) split->unsplit();
 			if (widget == NULL) {
 				message_dialog->set_message("Can not close the last window.");
 				message_dialog->center_over(this);
 				message_dialog->show();
+			} else {
+				file_buffer_t *text = widget->get_text();
+				if (text->get_name() == NULL && !text->is_modified())
+					delete text;
+				delete widget;
 			}
 			break;
 		}
@@ -453,9 +463,15 @@ void main_t::set_interface_options(void) {
 
 static void configure_input(bool cancel_selects_default) {
 	input_selection_dialog_t *input_selection;
+	int height, width, is_width, is_height;
+
 	delete input_selection_dialog;
 
-	input_selection = new input_selection_dialog_t(20, 70);
+	t3_term_get_size(&height, &width);
+	is_width = min(max(width - 16, 40), 100);
+	is_height = min(max(height - 3, 15), 3200 / is_width);
+
+	input_selection = new input_selection_dialog_t(is_height, is_width);
 	input_selection->connect_activate(sigc::bind(sigc::ptr_fun(input_selection_complete), true));
 	input_selection->connect_closed(sigc::bind(sigc::ptr_fun(input_selection_complete), cancel_selects_default));
 	input_selection->center_over(main_window);
@@ -521,7 +537,7 @@ int main(int argc, char *argv[]) {
 			"This means you:\n"
 			"- can access menus by both Meta+<letter> and Esc <letter>\n"
 			"- must press escape twice to close a menu or dialog\n\n"
-			"You can change the input handling by selecting the Options Menu "
+			"You can change the input handling by selecting the \"Options\" menu "
 			"and choosing \"Input Handling\", or by choosing \"Configure\" below.");
 		input_message->connect_activate(sigc::bind(sigc::ptr_fun(input_selection_complete), true), 0);
 		input_message->connect_activate(sigc::bind(sigc::ptr_fun(configure_input), true), 1);
