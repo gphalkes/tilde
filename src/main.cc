@@ -208,7 +208,8 @@ bool main_t::process_key(t3_widget::key_t key) {
 		case EKEY_CTRL | 'w':          menu_activated(action_id_t::FILE_CLOSE); break;
 		case EKEY_CTRL | 's':          menu_activated(action_id_t::FILE_SAVE); break;
 		case EKEY_CTRL | 'q':          menu_activated(action_id_t::FILE_EXIT); break;
-		case EKEY_F6:                  menu_activated(action_id_t::WINDOWS_NEXT_BUFFER); break;
+		case EKEY_F6:
+		case EKEY_META | '6':          menu_activated(action_id_t::WINDOWS_NEXT_BUFFER); break;
 		case EKEY_F6 | EKEY_SHIFT:     menu_activated(action_id_t::WINDOWS_PREV_BUFFER); break;
 		default:
 			return main_window_base_t::process_key(key);

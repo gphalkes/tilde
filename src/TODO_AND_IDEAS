@@ -22,7 +22,6 @@ GENERIC
 - allow users to set combining char support and other stuff from config file
 - only overwrite config file with errors if user consents
 - save config options that we don't know, instead of deleting everything
-- close empty buffer when unsplitting window and the buffer shown was empty
 
 
 From the original TODO_AND_IDEAS file
