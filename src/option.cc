@@ -22,7 +22,6 @@
 /* FIXME:
   - verify return values of libconfig functions
 */
-#warning FIXME: add config options for indent aware home key
 
 using namespace std;
 using namespace t3_widget;
@@ -125,14 +124,18 @@ static void read_config_attribute(const t3_config_t *config, const char *name, o
 
 static void read_config_part(const t3_config_t *config, options_t *opts) {
 	t3_config_t *attributes;
-	GET_OPT(wrap, BOOL, bool);
+
 	GET_OPT(tabsize, INT, int);
+
+	GET_OPT(wrap, BOOL, bool);
 	GET_OPT(hide_menubar, BOOL, bool);
 	GET_OPT(color, BOOL, bool);
-	GET_OPT(max_recent_files, INT, int);
-	GET_OPT(key_timeout, INT, int);
 	GET_OPT(auto_indent, BOOL, bool);
 	GET_OPT(tab_spaces, BOOL, bool);
+	GET_OPT(indent_aware_home, BOOL, bool);
+
+	GET_OPT(max_recent_files, INT, int);
+	GET_OPT(key_timeout, INT, int);
 
 	attributes = t3_config_get(config, "attributes");
 	if (attributes == NULL)
@@ -213,21 +216,26 @@ end:
 } while (0)
 
 static void post_process_options(void) {
+	SET_OPT_FROM_FILE(tabsize, 8);
+
 	if (default_option.wrap.is_valid())
 		option.wrap = default_option.wrap;
 
-	if (default_option.auto_indent.is_valid())
-		option.auto_indent = default_option.auto_indent;
-	else
-		option.auto_indent = true;
+	SET_OPT_FROM_FILE(hide_menubar, false);
 
 	if (cli_option.color.is_valid())
 		option.color = cli_option.color;
 	else
 		SET_OPT_FROM_FILE(color, true);
 
-	SET_OPT_FROM_FILE(tabsize, 8);
-	SET_OPT_FROM_FILE(hide_menubar, false);
+	SET_OPT_FROM_FILE(tab_spaces, false);
+
+	if (default_option.auto_indent.is_valid())
+		option.auto_indent = default_option.auto_indent;
+	else
+		option.auto_indent = true;
+
+	SET_OPT_FROM_FILE(indent_aware_home, true);
 
 	if (default_option.max_recent_files.is_valid())
 		option.max_recent_files = default_option.max_recent_files;
@@ -369,14 +377,17 @@ static void set_config_attribute(t3_config_t *config, const char *name, opt_t3_a
 } while (0)
 
 static void set_config_options(t3_config_t *config, options_t *options) {
-	SET_OPTION(wrap, bool);
 	SET_OPTION(tabsize, int);
+
+	SET_OPTION(wrap, bool);
 	SET_OPTION(hide_menubar, bool);
 	SET_OPTION(color, bool);
+	SET_OPTION(tab_spaces, bool);
+	SET_OPTION(auto_indent, bool);
+	SET_OPTION(indent_aware_home, bool);
+
 	SET_OPTION(max_recent_files, int);
 	SET_OPTION(key_timeout, int);
-	SET_OPTION(auto_indent, bool);
-	SET_OPTION(tab_spaces, bool);
 
 	set_config_attribute(config, "non_print", options->non_print);
 	set_config_attribute(config, "selection_cursor", options->selection_cursor);

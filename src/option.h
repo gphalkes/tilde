@@ -43,13 +43,14 @@ typedef struct {
 } cli_options_t;
 
 typedef struct {
-	opt_bool wrap;
-	opt_bool tab_spaces;
 	opt_int tabsize;
 
+	opt_bool wrap;
 	opt_bool hide_menubar;
 	opt_bool color;
+	opt_bool tab_spaces;
 	opt_bool auto_indent;
+	opt_bool indent_aware_home;
 
 	opt_size_t max_recent_files;
 
@@ -78,12 +79,13 @@ typedef struct {
 } options_t;
 
 typedef struct {
-	bool wrap;
-	bool tab_spaces;
 	int tabsize;
+	bool wrap;
 	bool hide_menubar;
 	bool color;
+	bool tab_spaces;
 	bool auto_indent;
+	bool indent_aware_home;
 	size_t max_recent_files;
 	opt_int key_timeout;
 } runtime_options_t;
