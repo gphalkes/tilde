@@ -5,7 +5,6 @@ priority.
 
 - Search and replace features:
   - Replace in selection
-  - Use of references (\1 .. \9) in regex replace
 - Simple syntax highlighting
 - Allow users to find out which character(s) is (are) under the cursor
 - Auto save and restore on crash
