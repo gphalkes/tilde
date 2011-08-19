@@ -195,7 +195,7 @@ static void read_config(void) {
 	else if ((term = getenv("TERM")) == NULL)
 		goto end;
 
-	if (t3_config_get_type(term_specific_config) != T3_CONFIG_LIST)
+	if (!t3_config_is_list(term_specific_config))
 		goto end;
 
 	if ((term_specific_config = t3_config_find(term_specific_config, find_term_config, (void *) term, NULL)) != NULL)
@@ -448,8 +448,8 @@ bool write_config(void) {
 		term = getenv("TERM");
 
 	if (term != NULL) {
-		if ((terminals = t3_config_get(config, "terminals")) == NULL || t3_config_get_type(terminals) != T3_CONFIG_LIST)
-			terminals = t3_config_add_list(config, "terminals", NULL);
+		if ((terminals = t3_config_get(config, "terminals")) == NULL || !t3_config_is_list(terminals))
+			terminals = t3_config_add_plist(config, "terminals", NULL);
 
 		terminal_config = t3_config_find(terminals, find_term_config, (void *) term, NULL);
 		if (terminal_config == NULL) {
