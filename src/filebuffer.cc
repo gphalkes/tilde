@@ -21,8 +21,8 @@
 #include "log.h"
 #include "option.h"
 
-file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(), name(NULL),
-	encoding(NULL), view_parameters(new edit_window_t::view_parameters_t()), has_window(false)
+file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(),
+		view_parameters(new edit_window_t::view_parameters_t()), has_window(false)
 {
 	if (_encoding == NULL)
 		encoding = strdup("UTF-8");
@@ -34,10 +34,9 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 	if (_name == NULL) {
 		name_line.set_text("(Untitled)");
 	} else {
-		if ((name = strdup(_name)) == NULL) {
-			free(encoding);
+		if ((name = strdup(_name)) == NULL)
 			throw bad_alloc();
-		}
+
 		string converted_name;
 		convert_lang_codeset(name, &converted_name, true);
 		name_line.set_text(&converted_name);
@@ -52,8 +51,6 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 }
 
 file_buffer_t::~file_buffer_t(void) {
-	free(encoding);
-	delete view_parameters;
 	open_files.erase(this);
 }
 
@@ -80,7 +77,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 
 			try {
 				string converted_name;
-				lprintf("Using encoding %s to read %s\n", encoding, name);
+				lprintf("Using encoding %s to read %s\n", encoding(), name());
 
 				#warning FIXME: even UTF-8 must go through transcript for error detection
 
@@ -250,11 +247,11 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 }
 
 const char *file_buffer_t::get_name(void) const {
-	return name;
+	return name();
 }
 
 const char *file_buffer_t::get_encoding(void) const {
-	return encoding;
+	return encoding();
 }
 
 text_line_t *file_buffer_t::get_name_line(void) {
@@ -262,7 +259,7 @@ text_line_t *file_buffer_t::get_name_line(void) {
 }
 
 const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters(void) const {
-	return view_parameters;
+	return view_parameters();
 }
 
 void file_buffer_t::set_has_window(bool _has_window) {
