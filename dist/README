@@ -7,7 +7,7 @@ and Windows. For example, the short-cut to copy the current selection is
 Control-C, and to paste the previously copied text the short-cut Control-V can
 be used. As another example, the File menu can be accessed by pressing Meta-F.
 
-However, being a terminal based program there are limitations. Not all
+However, being a terminal-based program there are limitations. Not all
 terminals provide sufficient information to the client programs to make Tilde
 behave in the most intuitive way. When this is the case, Tilde provides
 work-arounds which should be easy to work with.

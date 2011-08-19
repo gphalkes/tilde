@@ -25,7 +25,8 @@ class file_edit_window_t;
 class file_buffer_t : public text_buffer_t {
 	friend class file_edit_window_t; // Required to access view_parameters and set_has_window
 	protected:
-		char *encoding;
+		char *name, *encoding;
+		text_line_t name_line;
 		edit_window_t::view_parameters_t *view_parameters;
 		bool has_window;
 
@@ -37,8 +38,10 @@ class file_buffer_t : public text_buffer_t {
 		rw_result_t load(load_process_t *state);
 		rw_result_t save(save_as_process_t *state);
 
+		const char *get_name(void) const;
 		const char *get_encoding(void) const;
 		const edit_window_t::view_parameters_t *get_view_parameters(void) const;
+		text_line_t *get_name_line(void);
 
 		bool get_has_window(void) const;
 };
