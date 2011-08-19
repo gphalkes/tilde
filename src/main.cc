@@ -492,7 +492,7 @@ static void input_selection_complete(bool selection_made) {
 
 int main(int argc, char *argv[]) {
 	complex_error_t result;
-	init_parameters_t *params = new init_parameters_t();
+	init_parameters_t *params = init_parameters_t::create();
 
 	init_log();
 	setlocale(LC_ALL, "");
