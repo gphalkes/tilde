@@ -76,7 +76,7 @@ static struct { const char *string; t3_attr_t attr; } attribute_map[] = {
 };
 
 
-static t3_bool find_term_config(t3_config_t *config, void *data) {
+static t3_bool find_term_config(const t3_config_t *config, void *data) {
 	t3_config_t *name;
 
 	if (t3_config_get_type(config) != T3_CONFIG_SECTION)
