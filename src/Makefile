@@ -14,6 +14,7 @@
 SOURCES..objects/edit := \
 	filebuffer.cc \
 	fileeditwindow.cc \
+	fileline.cc \
 	filestate.cc \
 	filewrapper.cc \
 	log.cc \
@@ -26,8 +27,8 @@ SOURCES..objects/edit := \
 	dialogs/selectbufferdialog.cc \
 	dialogs/optionsdialog.cc
 
-LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode -lt3config
-LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3unicode/.libs -Lt3config/.libs
+LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode -lt3config -lt3highlight
+LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3unicode/.libs -Lt3config/.libs -Lt3highlight/.libs
 LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`
 
 CXXTARGETS := .objects/edit
@@ -61,6 +62,7 @@ links:
 	@[ -L t3window ] || ln -s ../../window/src t3window
 	@[ -L t3widget ] || ln -s ../../widget/src t3widget
 	@[ -L t3config ] || ln -s ../../config/src t3config
+	@[ -L t3highlight ] || ln -s ../../highlight/src t3highlight
 	@[ -L transcript ] || ln -s ../../../transcript/src transcript
 
 .PHONY: links xgettext linecount

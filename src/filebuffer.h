@@ -15,6 +15,7 @@
 #define FILE_BUFFER_H
 
 #include <t3widget/widget.h>
+#include <t3highlight/highlight.h>
 
 using namespace t3_widget;
 
@@ -44,6 +45,12 @@ class file_buffer_t : public text_buffer_t {
 		text_line_t *get_name_line(void);
 
 		bool get_has_window(void) const;
+
+	public:
+		t3_highlight_t *highlight_info;
+		text_line_t *match_line;
+		t3_highlight_match_t *last_match;
+		int match_start;
 };
 
 #endif

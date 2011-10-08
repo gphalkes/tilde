@@ -19,6 +19,6 @@ if ! [ -x "$DIR/.objects/edit" ] ; then
 	exit
 fi
 
-export LD_LIBRARY_PATH="$DIR/t3widget/.libs:$DIR/t3window/.libs:$DIR/t3key/.libs:$DIR/t3unicode/.libs:$DIR/transcript/.libs:$DIR/t3config/.libs"
+export LD_LIBRARY_PATH="`sed 's/#.*//' Makefile | egrep -o -- '-L[^[:space:]]+' | sed -r \"s%-L%$DIR/%g\" | tr '\n' ':' | sed -r 's/:$//'`"
 valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
 	--log-file="$DIR/valgrind.log" "$DIR/.objects/edit" --L=250 "$@"

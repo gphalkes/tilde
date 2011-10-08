@@ -23,7 +23,7 @@ fi
 
 [ -d .recordings ] || mkdir .recordings
 
-export LD_LIBRARY_PATH="$DIR/t3widget/.libs:$DIR/t3window/.libs:$DIR/transcript/.libs:$DIR/t3unicode/.libs:$DIR/t3config/.libs"
+export LD_LIBRARY_PATH="`sed 's/#.*//' Makefile | egrep -o -- '-L[^[:space:]]+' | sed -r \"s%-L%$DIR/%g\" | tr '\n' ':' | sed -r 's/:$//'`"
 DATE="`date +%F@%T`"
 rm "$DIR/.recordings/last" "$DIR/log.txt"
 "$DIR/record/tdrecord" -o "$DIR/.recordings/last" -eLD_LIBRARY_PATH "$DIR/.objects/edit" --D "$@"

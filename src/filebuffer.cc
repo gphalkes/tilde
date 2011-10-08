@@ -16,13 +16,15 @@
 #include <cstring>
 
 #include "filebuffer.h"
+#include "fileline.h"
 #include "openfiles.h"
 #include "filestate.h"
 #include "log.h"
 #include "option.h"
 
-file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(),
-		view_parameters(new edit_window_t::view_parameters_t()), has_window(false)
+file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(new file_line_factory_t(this)),
+		view_parameters(new edit_window_t::view_parameters_t()), has_window(false),
+		highlight_info(NULL), match_line(NULL), last_match(NULL)
 {
 	if (_encoding == NULL)
 		encoding = strdup("UTF-8");
@@ -52,6 +54,8 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 
 file_buffer_t::~file_buffer_t(void) {
 	open_files.erase(this);
+	t3_highlight_free(highlight_info);
+	t3_highlight_free_match(last_match);
 }
 
 rw_result_t file_buffer_t::load(load_process_t *state) {
