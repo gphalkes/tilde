@@ -91,6 +91,7 @@ void init_charsets(void) {
 	charset_desc_t utf8 = { "Unicode (UTF-8)", "UTF-8" };
 	charset_desc_t other = { "Other (use text field below)", "<OTHER>" };
 
+	transcript_init();
 	available_charsets.push_back(utf8);
 	for (charset_desc_t *ptr = &friendly_charsets[0]; ptr->name != NULL; ptr++) {
 		if (!transcript_probe_converter(ptr->tag)) {
