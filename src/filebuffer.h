@@ -25,12 +25,17 @@ class file_edit_window_t;
 
 class file_buffer_t : public text_buffer_t {
 	friend class file_edit_window_t; // Required to access view_parameters and set_has_window
-	protected:
+	private:
 		cleanup_ptr<char> name, encoding;
 		text_line_t name_line;
 		cleanup_obj_ptr<edit_window_t::view_parameters_t> view_parameters;
 		bool has_window;
+		int highlight_valid;
 
+		static int map_style(void *map_style_data, const char *style_name);
+
+	protected:
+		virtual void prepare_paint_line(int line);
 		void set_has_window(bool _has_window);
 
 	public:

@@ -24,7 +24,7 @@
 
 file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(new file_line_factory_t(this)),
 		view_parameters(new edit_window_t::view_parameters_t()), has_window(false),
-		highlight_info(NULL), match_line(NULL), last_match(NULL)
+		highlight_valid(0), highlight_info(NULL), match_line(NULL), last_match(NULL)
 {
 	if (_encoding == NULL)
 		encoding = strdup("UTF-8");
@@ -42,6 +42,10 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		string converted_name;
 		convert_lang_codeset(name, &converted_name, true);
 		name_line.set_text(&converted_name);
+
+		#warning FIXME: this is a temporary hack for testing purposes!!
+		highlight_info = t3_highlight_load_by_filename(name, map_style, NULL, NULL);
+		last_match = t3_highlight_new_match();
 	}
 
 	view_parameters->set_tabsize(option.tabsize);
@@ -107,7 +111,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				while ((line = state->wrapper->read_line()) != NULL) {
 					try {
 						lines.back()->set_text(line);
-						lines.push_back(new text_line_t());
+						lines.push_back(line_factory->new_text_line_t());
 					} catch (...) {
 						delete line;
 						return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
@@ -266,10 +270,31 @@ const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters(void)
 	return view_parameters();
 }
 
+void file_buffer_t::prepare_paint_line(int line) {
+	int i;
+
+	if (highlight_valid >= line)
+		return;
+
+	for (i = highlight_valid + 1; i <= line; i++) {
+		int state = ((file_line_t *) lines[i - 1])->get_highlight_end();
+		((file_line_t *) lines[i])->set_highlight_start(state);
+	}
+	highlight_valid = line;
+	match_line = NULL;
+}
+
 void file_buffer_t::set_has_window(bool _has_window) {
 	has_window = _has_window;
 }
 
 bool file_buffer_t::get_has_window(void) const {
 	return has_window;
+}
+
+int file_buffer_t::map_style(void *map_style_data, const char *style_name) {
+	(void) map_style_data;
+	if (strcmp(style_name, "normal") == 0)
+		return 0;
+	return 1;
 }
