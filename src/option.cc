@@ -247,6 +247,17 @@ static void post_process_options(void) {
 
 	if (!cli_option.ask_input_method && term_specific_option.key_timeout.is_valid())
 			option.key_timeout = term_specific_option.key_timeout;
+
+	option.highlights[0] = 0;
+
+	#warning FIXME: temporary hack to show syntax highlighting
+	option.highlights[1] = T3_ATTR_FG_YELLOW;
+	option.highlights[2] = T3_ATTR_FG_YELLOW | T3_ATTR_BOLD;
+	option.highlights[3] = T3_ATTR_FG_YELLOW | T3_ATTR_BOLD;
+	option.highlights[4] = T3_ATTR_FG_CYAN | T3_ATTR_BOLD;
+	option.highlights[5] = T3_ATTR_FG_GREEN;
+	option.highlights[6] = T3_ATTR_FG_GREEN | T3_ATTR_BOLD;
+	option.highlights[7] = T3_ATTR_FG_RED | T3_ATTR_BOLD;
 }
 
 static void print_help(void) {
@@ -273,7 +284,7 @@ static void print_version(void) {
 		t3_window_get_version() >> 16, (t3_window_get_version() >> 8) & 0xff, t3_window_get_version() & 0xff,
 		t3_widget::get_version() >> 16, (t3_widget::get_version() >> 8) & 0xff, t3_widget::get_version() & 0xff,
 		transcript_get_version() >> 16, (transcript_get_version() >> 8) & 0xff, transcript_get_version() & 0xff);
-//FIXME: add libpcre and libsigc++ versions (from libt3widget)
+//FIXME: add libpcre and libsigc++ versions (from libt3widget); libt3highlight version
 	exit(EXIT_SUCCESS);
 }
 

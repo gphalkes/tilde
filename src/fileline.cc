@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "fileline.h"
+#include "option.h"
 
 static file_line_factory_t default_file_line_factory(NULL);
 
@@ -60,10 +61,7 @@ t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
 		t3_highlight_get_begin_attr(buffer->last_match) :
 		t3_highlight_get_match_attr(buffer->last_match);
 
-	if (attribute_idx == 0)
-		return info->normal_attr;
-	else
-		return t3_term_combine_attrs(T3_ATTR_BOLD, info->normal_attr);
+	return option.highlights[attribute_idx];
 }
 
 void file_line_t::set_highlight_start(int state) {

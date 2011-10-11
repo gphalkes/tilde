@@ -25,7 +25,7 @@ OPT_TYPE(size_t);
 OPT_TYPE(t3_attr_t);
 OPT_TYPE(int);
 
-typedef struct {
+struct cli_options_t {
 	/* Options to override config file. */
 	opt_bool color;
 
@@ -40,9 +40,9 @@ typedef struct {
 	bool start_debugger_on_segfault;
 #endif
 
-} cli_options_t;
+};
 
-typedef struct {
+struct options_t {
 	opt_int tabsize;
 
 	opt_bool wrap;
@@ -76,9 +76,21 @@ typedef struct {
 	opt_t3_attr_t menubar_selected;
 
 	opt_t3_attr_t shadow;
-} options_t;
 
-typedef struct {
+	t3_attr_t highlights[MAX_HIGHLIGHTS];
+};
+
+struct highlight_attrs_t {
+	t3_attr_t comment;
+	t3_attr_t comment_keyword;
+	t3_attr_t keyword;
+	t3_attr_t string;
+	t3_attr_t string_escape;
+	t3_attr_t number;
+	t3_attr_t misc;
+};
+
+struct runtime_options_t {
 	int tabsize;
 	bool wrap;
 	bool hide_menubar;
@@ -88,7 +100,8 @@ typedef struct {
 	bool indent_aware_home;
 	size_t max_recent_files;
 	opt_int key_timeout;
-} runtime_options_t;
+	t3_attr_t highlights[MAX_HIGHLIGHTS];
+};
 
 extern cli_options_t cli_option;
 extern runtime_options_t option;

@@ -113,4 +113,8 @@ void set_limits();
 char *resolve_links(const char *start_name);
 char *canonicalize_path(const char *path);
 void printf_into(std::string *message, const char *format, ...);
+
+#define MAX_HIGHLIGHTS 20
+
+int map_highlight(void *data, const char *name);
 #endif

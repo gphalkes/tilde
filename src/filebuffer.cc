@@ -44,9 +44,11 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		name_line.set_text(&converted_name);
 
 		#warning FIXME: this is a temporary hack for testing purposes!!
-		highlight_info = t3_highlight_load_by_filename(name, map_style, NULL, NULL);
+		highlight_info = t3_highlight_load_by_filename(name, map_highlight, NULL, NULL);
 		last_match = t3_highlight_new_match();
 	}
+
+	connect_rewrap_required(sigc::mem_fun(this, &file_buffer_t::invalidate_highlight));
 
 	view_parameters->set_tabsize(option.tabsize);
 	view_parameters->set_wrap(option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE);
@@ -292,9 +294,9 @@ bool file_buffer_t::get_has_window(void) const {
 	return has_window;
 }
 
-int file_buffer_t::map_style(void *map_style_data, const char *style_name) {
-	(void) map_style_data;
-	if (strcmp(style_name, "normal") == 0)
-		return 0;
-	return 1;
+void file_buffer_t::invalidate_highlight(rewrap_type_t type, int line, int pos) {
+	(void) type;
+	(void) pos;
+	if (line < highlight_valid)
+		highlight_valid = line;
 }

@@ -32,11 +32,9 @@ class file_buffer_t : public text_buffer_t {
 		bool has_window;
 		int highlight_valid;
 
-		static int map_style(void *map_style_data, const char *style_name);
-
-	protected:
 		virtual void prepare_paint_line(int line);
 		void set_has_window(bool _has_window);
+		void invalidate_highlight(rewrap_type_t type, int line, int pos);
 
 	public:
 		file_buffer_t(const char *_name = NULL, const char *_encoding = NULL);

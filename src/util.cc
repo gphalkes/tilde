@@ -24,6 +24,8 @@
 #include <t3widget/widget.h>
 #include "option.h"
 
+#include "static_assert.h"
+
 using namespace std;
 using namespace t3_widget;
 
@@ -31,6 +33,13 @@ using namespace t3_widget;
 static char debug_buffer[1024];
 static const char *executable;
 #endif
+
+static const char *highlight_names[] = {
+	"normal", "comment", "comment-keyword", "keyword", "number", "string",
+	"string-escape", "misc" };
+
+static_assert(sizeof(highlight_names) / sizeof(highlight_names[0]) <= MAX_HIGHLIGHTS);
+
 
 stepped_process_t::stepped_process_t(void) : result(true) {}
 stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(false) {}
@@ -228,4 +237,16 @@ void printf_into(string *message, const char *format, ...) {
 
 	*message = message_buffer;
 	return;
+}
+
+int map_highlight(void *data, const char *name) {
+	int i;
+
+	(void) data;
+
+	for (i = 0; (size_t) i < sizeof(highlight_names) / sizeof(highlight_names[0]); i++) {
+		if (strcmp(name, highlight_names[i]) == 0)
+			return i;
+	}
+	return 0;
 }
