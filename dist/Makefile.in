@@ -59,10 +59,10 @@ all: src/tilde
 .IGNORE: uninstall
 
 clean:
-	rm -rf src/*.lo src/.libs src/libt3widget.la
+	rm -rf src/*.o src/dialogs/*.o src/tilde
 
 dist-clean: clean
-	rm -rf Makefile config.log libt3widget.pc
+	rm -rf Makefile config.log
 
 .cc.o:
 	$(SILENTCXX) $(CXX) $(CFLAGS) $(CONFIGFLAGS) $(GETTEXTFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" -Isrc -c -o $@ $<
