@@ -15,16 +15,13 @@
 #include <t3unicode/unicode.h>
 #include <t3window/window.h>
 #include <t3widget/widget.h>
+#include <t3highlight/highlight.h>
 #include <transcript/transcript.h>
 
 #include "option.h"
 #include "util.h"
 #include "optionMacros.h"
 #include "log.h"
-
-/* FIXME:
-  - verify return values of libconfig functions
-*/
 
 using namespace std;
 using namespace t3_widget;
@@ -75,17 +72,14 @@ static struct { const char *string; t3_attr_t attr; } attribute_map[] = {
 	{ "bg white", T3_ATTR_BG_WHITE }
 };
 
+static const char config_schema[] = {
+#include "config.bytes"
+};
 
 static t3_bool find_term_config(const t3_config_t *config, void *data) {
-	t3_config_t *name;
-
 	if (t3_config_get_type(config) != T3_CONFIG_SECTION)
 		return t3_false;
-	if ((name = t3_config_get(config, "name")) == NULL)
-		return t3_false;
-	if (t3_config_get_type(name) != T3_CONFIG_STRING)
-		return t3_false;
-	return strcmp((const char *) data, t3_config_get_string(name)) == 0;
+	return strcmp((const char *) data, t3_config_get_string(t3_config_get(config, "name"))) == 0;
 }
 
 static t3_attr_t attribute_string_to_bin(const char *attr) {
@@ -104,13 +98,6 @@ static void read_config_attribute(const t3_config_t *config, const char *name, o
 	if ((attr_config = t3_config_get(config, name)) == NULL)
 		return;
 
-	if (t3_config_get_type(attr_config) == T3_CONFIG_STRING) {
-		*attr = attribute_string_to_bin(t3_config_get_string(attr_config));
-		return;
-	} else if (t3_config_get_type(attr_config) != T3_CONFIG_LIST) {
-		return;
-	}
-
 	for (attr_config = t3_config_get(attr_config, NULL); attr_config != NULL; attr_config = t3_config_get_next(attr_config)) {
 		if (t3_config_get_type(attr_config) == T3_CONFIG_STRING)
 			accumulated_attr = t3_term_combine_attrs(attribute_string_to_bin(t3_config_get_string(attr_config)), accumulated_attr);
@@ -121,9 +108,11 @@ static void read_config_attribute(const t3_config_t *config, const char *name, o
 
 #define GET_OPT(name, TYPE, type) do { \
 	t3_config_t *tmp; \
-	if ((tmp = t3_config_get(config, #name)) != NULL && t3_config_get_type(tmp) == T3_CONFIG_##TYPE) \
+	if ((tmp = t3_config_get(config, #name)) != NULL) \
 		opts->name = t3_config_get_##type(tmp); \
 } while(0)
+#define GET_ATTRIBUTE(name) read_config_attribute(attributes, #name, &opts->name)
+#define GET_HL_ATTRIBUTE(name) read_config_attribute(attributes, name, &opts->highlights[map_highlight(NULL, name)])
 
 static void read_config_part(const t3_config_t *config, options_t *opts) {
 	t3_config_t *attributes;
@@ -141,25 +130,39 @@ static void read_config_part(const t3_config_t *config, options_t *opts) {
 	GET_OPT(key_timeout, INT, int);
 
 	attributes = t3_config_get(config, "attributes");
-	if (attributes == NULL)
-		return;
-	read_config_attribute(attributes, "non_print", &opts->non_print);
-	read_config_attribute(attributes, "selection_cursor", &opts->selection_cursor);
-	read_config_attribute(attributes, "selection_cursor2", &opts->selection_cursor2);
-	read_config_attribute(attributes, "bad_draw", &opts->bad_draw);
-	read_config_attribute(attributes, "text_cursor", &opts->text_cursor);
-	read_config_attribute(attributes, "text", &opts->text);
-	read_config_attribute(attributes, "text_selected", &opts->text_selected);
-	read_config_attribute(attributes, "highlight", &opts->highlight);
-	read_config_attribute(attributes, "highlight_selected", &opts->highlight_selected);
-	read_config_attribute(attributes, "dialog", &opts->dialog);
-	read_config_attribute(attributes, "dialog_selected", &opts->dialog_selected);
-	read_config_attribute(attributes, "button", &opts->button);
-	read_config_attribute(attributes, "button_selected", &opts->button_selected);
-	read_config_attribute(attributes, "scrollbar", &opts->scrollbar);
-	read_config_attribute(attributes, "menubar", &opts->menubar);
-	read_config_attribute(attributes, "menubar_selected", &opts->menubar_selected);
-	read_config_attribute(attributes, "shadow", &opts->shadow);
+	if (attributes != NULL) {
+		GET_ATTRIBUTE(non_print);
+		GET_ATTRIBUTE(selection_cursor);
+		GET_ATTRIBUTE(selection_cursor2);
+		GET_ATTRIBUTE(bad_draw);
+		GET_ATTRIBUTE(text_cursor);
+		GET_ATTRIBUTE(text);
+		GET_ATTRIBUTE(text_selected);
+		GET_ATTRIBUTE(highlight);
+		GET_ATTRIBUTE(highlight_selected);
+		GET_ATTRIBUTE(dialog);
+		GET_ATTRIBUTE(dialog_selected);
+		GET_ATTRIBUTE(button);
+		GET_ATTRIBUTE(button_selected);
+		GET_ATTRIBUTE(scrollbar);
+		GET_ATTRIBUTE(menubar);
+		GET_ATTRIBUTE(menubar_selected);
+		GET_ATTRIBUTE(shadow);
+	}
+	attributes = t3_config_get(config, "highlight_attributes");
+	if (attributes != NULL) {
+		GET_HL_ATTRIBUTE("comment");
+		GET_HL_ATTRIBUTE("comment-keyword");
+		GET_HL_ATTRIBUTE("keyword");
+		GET_HL_ATTRIBUTE("number");
+		GET_HL_ATTRIBUTE("string");
+		GET_HL_ATTRIBUTE("string-escape");
+		GET_HL_ATTRIBUTE("misc");
+		/* NOTE: normal must always be reset, because unknown attributes get mapped to
+		   the same index as normal. Therefore, they would overwrite the correct
+		   attribute for normal. */
+		opts->highlights[0] = 0;
+	}
 }
 
 static void read_config(void) {
@@ -167,6 +170,7 @@ static void read_config(void) {
 	FILE *config_file;
 	t3_config_error_t error;
 	t3_config_t *config;
+	t3_config_schema_t *schema = NULL;
 	t3_config_t *term_specific_config;
 	const char *term;
 
@@ -182,11 +186,24 @@ static void read_config(void) {
 		goto end;
 	}
 
+	if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), &error, NULL)) == NULL) {
+		config_read_error = true;
+		lprintf("Error loading schema: %d: %s\n", error.line_number, t3_config_strerror(error.error));
+		config_read_error_string = t3_config_strerror(error.error == T3_ERR_OUT_OF_MEMORY ? T3_ERR_OUT_OF_MEMORY : T3_ERR_INTERNAL);
+		config_read_error_line = 0;
+		goto end;
+	}
+
 	/* Note: when supporting later versions, read the config_version key here.
-		config_lookup_int(&config, "config_version", &version)
-	   For now, we just try to make the best of it when we encouter a version
-	   that we do not know.
+	      t3_config_get_int(t3_config_get(config, "config_version"))
 	*/
+
+	if (!t3_config_validate(config, schema, &error, 0)) {
+		config_read_error = true;
+		config_read_error_string = t3_config_strerror(error.error);
+		config_read_error_line = error.line_number;
+		goto end;
+	}
 
 	read_config_part(config, &default_option);
 
@@ -196,9 +213,6 @@ static void read_config(void) {
 	if (cli_option.term != NULL)
 		term = cli_option.term;
 	else if ((term = getenv("TERM")) == NULL)
-		goto end;
-
-	if (!t3_config_is_list(term_specific_config))
 		goto end;
 
 	if ((term_specific_config = t3_config_find(term_specific_config, find_term_config, (void *) term, NULL)) != NULL)
@@ -249,15 +263,13 @@ static void post_process_options(void) {
 			option.key_timeout = term_specific_option.key_timeout;
 
 	option.highlights[0] = 0;
-
-	#warning FIXME: temporary hack to show syntax highlighting
-	option.highlights[1] = T3_ATTR_FG_YELLOW;
-	option.highlights[2] = T3_ATTR_FG_YELLOW | T3_ATTR_BOLD;
-	option.highlights[3] = T3_ATTR_FG_YELLOW | T3_ATTR_BOLD;
-	option.highlights[4] = T3_ATTR_FG_CYAN | T3_ATTR_BOLD;
-	option.highlights[5] = T3_ATTR_FG_GREEN;
-	option.highlights[6] = T3_ATTR_FG_GREEN | T3_ATTR_BOLD;
-	option.highlights[7] = T3_ATTR_FG_RED | T3_ATTR_BOLD;
+	SET_OPT_FROM_FILE(highlights[1], T3_ATTR_FG_YELLOW);
+	SET_OPT_FROM_FILE(highlights[2], T3_ATTR_FG_YELLOW | T3_ATTR_BOLD);
+	SET_OPT_FROM_FILE(highlights[3], T3_ATTR_FG_YELLOW | T3_ATTR_BOLD);
+	SET_OPT_FROM_FILE(highlights[4], T3_ATTR_FG_CYAN | T3_ATTR_BOLD);
+	SET_OPT_FROM_FILE(highlights[5], T3_ATTR_FG_GREEN);
+	SET_OPT_FROM_FILE(highlights[6], T3_ATTR_FG_GREEN | T3_ATTR_BOLD);
+	SET_OPT_FROM_FILE(highlights[7], T3_ATTR_FG_RED | T3_ATTR_BOLD);
 }
 
 static void print_help(void) {
@@ -276,15 +288,18 @@ static void print_version(void) {
 	printf("Tilde version <VERSION>\n"
 		"Copyright (c) 2011 G.P. Halkes\n"
 		"Tilde is licensed under the GNU General Public License version 3\n"); // @copyright
-	printf("Library versions:\n  libt3config %ld.%ld.%ld\n  libt3key (through libt3widget) %ld.%ld.%ld\n  libt3unicode %ld.%ld.%ld\n  libt3window %ld.%ld.%ld\n"
+	printf("Library versions:\n"
+		"  libt3config %ld.%ld.%ld\n  libt3highlight %ld.%ld.%ld\n  libt3key (through libt3widget) %ld.%ld.%ld\n"
+		"  libt3unicode %ld.%ld.%ld\n  libt3window %ld.%ld.%ld\n"
 		"  libt3widget %ld.%ld.%ld\n  libtranscript %ld.%ld.%ld\n",
 		t3_config_get_version() >> 16, (t3_config_get_version() >> 8) & 0xff, t3_config_get_version() & 0xff,
+		t3_highlight_get_version() >> 16, (t3_highlight_get_version() >> 8) & 0xff, t3_highlight_get_version() & 0xff,
 		t3_widget::get_libt3key_version() >> 16, (t3_widget::get_libt3key_version() >> 8) & 0xff, t3_widget::get_libt3key_version() & 0xff,
 		t3_unicode_get_version() >> 16, (t3_unicode_get_version() >> 8) & 0xff, t3_unicode_get_version() & 0xff,
 		t3_window_get_version() >> 16, (t3_window_get_version() >> 8) & 0xff, t3_window_get_version() & 0xff,
 		t3_widget::get_version() >> 16, (t3_widget::get_version() >> 8) & 0xff, t3_widget::get_version() & 0xff,
 		transcript_get_version() >> 16, (transcript_get_version() >> 8) & 0xff, transcript_get_version() & 0xff);
-//FIXME: add libpcre and libsigc++ versions (from libt3widget); libt3highlight version
+//FIXME: add libpcre and libsigc++ versions (from libt3widget)
 	exit(EXIT_SUCCESS);
 }
 
@@ -361,7 +376,7 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
 }
 
-static void set_config_attribute(t3_config_t *config, const char *name, opt_t3_attr_t attr) {
+static void set_config_attribute(t3_config_t *config, const char *section_name, const char *name, opt_t3_attr_t attr) {
 	static t3_attr_t attribute_masks[] = {
 		T3_ATTR_FG_MASK,
 		T3_ATTR_BG_MASK,
@@ -378,8 +393,8 @@ static void set_config_attribute(t3_config_t *config, const char *name, opt_t3_a
 	if (!attr.is_valid())
 		return;
 
-	if ((attributes = t3_config_get(config, "attributes")) == NULL || t3_config_get_type(attributes) != T3_CONFIG_SECTION)
-		attributes = t3_config_add_section(config, "attributes", NULL);
+	if ((attributes = t3_config_get(config, section_name)) == NULL || t3_config_get_type(attributes) != T3_CONFIG_SECTION)
+		attributes = t3_config_add_section(config, section_name, NULL);
 
 	config = t3_config_add_list(attributes, name, NULL);
 
@@ -398,6 +413,8 @@ static void set_config_attribute(t3_config_t *config, const char *name, opt_t3_a
 	if (options->name.is_valid()) \
 		t3_config_add_##type(config, #name, options->name); \
 } while (0)
+#define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, options->name)
+#define SET_HL_ATTRIBUTE(x, name) set_config_attribute(config, "highlight_attributes", name, options->highlights[x])
 
 static void set_config_options(t3_config_t *config, options_t *options) {
 	SET_OPTION(tabsize, int);
@@ -412,23 +429,28 @@ static void set_config_options(t3_config_t *config, options_t *options) {
 	SET_OPTION(max_recent_files, int);
 	SET_OPTION(key_timeout, int);
 
-	set_config_attribute(config, "non_print", options->non_print);
-	set_config_attribute(config, "selection_cursor", options->selection_cursor);
-	set_config_attribute(config, "selection_cursor2", options->selection_cursor2);
-	set_config_attribute(config, "bad_draw", options->bad_draw);
-	set_config_attribute(config, "text_cursor", options->text_cursor);
-	set_config_attribute(config, "text", options->text);
-	set_config_attribute(config, "text_selected", options->text_selected);
-	set_config_attribute(config, "highlight", options->highlight);
-	set_config_attribute(config, "highlight_selected", options->highlight_selected);
-	set_config_attribute(config, "dialog", options->dialog);
-	set_config_attribute(config, "dialog_selected", options->dialog_selected);
-	set_config_attribute(config, "button", options->button);
-	set_config_attribute(config, "button_selected", options->button_selected);
-	set_config_attribute(config, "scrollbar", options->scrollbar);
-	set_config_attribute(config, "menubar", options->menubar);
-	set_config_attribute(config, "menubar_selected", options->menubar_selected);
-	set_config_attribute(config, "shadow", options->shadow);
+	SET_ATTRIBUTE(non_print);
+	SET_ATTRIBUTE(selection_cursor);
+	SET_ATTRIBUTE(selection_cursor2);
+	SET_ATTRIBUTE(bad_draw);
+	SET_ATTRIBUTE(text_cursor);
+	SET_ATTRIBUTE(text);
+	SET_ATTRIBUTE(text_selected);
+	SET_ATTRIBUTE(highlight);
+	SET_ATTRIBUTE(highlight_selected);
+	SET_ATTRIBUTE(dialog);
+	SET_ATTRIBUTE(dialog_selected);
+	SET_ATTRIBUTE(button);
+	SET_ATTRIBUTE(button_selected);
+	SET_ATTRIBUTE(scrollbar);
+	SET_ATTRIBUTE(menubar);
+	SET_ATTRIBUTE(menubar_selected);
+	SET_ATTRIBUTE(shadow);
+
+	int i;
+	const char *highlight_name;
+	for (i = 1; (highlight_name = reverse_map_highlight(i)) != NULL; i++)
+		SET_HL_ATTRIBUTE(i, highlight_name);
 }
 
 bool write_config(void) {
@@ -436,10 +458,16 @@ bool write_config(void) {
 	FILE *config_file;
 	const char *term;
 	t3_config_t *config = NULL, *terminals, *terminal_config;
+	t3_config_schema_t *schema;
 	int version;
 
 	file = getenv("HOME");
 	file += "/.tilderc";
+
+	//FIXME: verify return values
+
+	if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), NULL, NULL)) == NULL)
+		return false;
 
 	if ((config_file = fopen(file.c_str(), "r")) != NULL) {
 		/* Start by reading the existing configuration. */
@@ -456,9 +484,13 @@ bool write_config(void) {
 		config = t3_config_new();
 	} else if (version > 1) {
 		/* Don't overwrite config files with newer config version. */
+		t3_config_delete_schema(schema);
 		return false;
 	} else {
-		//FIXME: validate
+		if (!t3_config_validate(config, schema, NULL, 0)) {
+			t3_config_delete_schema(schema);
+			return false;
+		}
 	}
 
 	default_option.key_timeout.unset();
@@ -485,6 +517,16 @@ bool write_config(void) {
 
 		set_config_options(terminal_config, &term_specific_option);
 	}
+
+	/* Validate config using schema, such that we can be sure that we won't
+	   say it is invalid when reading. That would fit nicely into the
+	   "bad things" category. */
+	if (!t3_config_validate(config, schema, NULL, 0)) {
+		t3_config_delete_schema(schema);
+		t3_config_delete(config);
+		return false;
+	}
+	t3_config_delete_schema(schema);
 
 	//FIXME: use mkstemp to make new file
 	new_file = file + ".new";

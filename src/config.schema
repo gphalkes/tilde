@@ -1,0 +1,89 @@
+# Copyright (C) 2011 G.P. Halkes
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3, as
+# published by the Free Software Foundation.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+types {
+	attributes {
+		type = "section"
+		#~ allowed-keys {
+			#~ non_print { type = "attribute" }
+			#~ selection_cursor { type = "attribute" }
+			#~ selection_cursor2 { type = "attribute" }
+			#~ bad_draw { type = "attribute" }
+			#~ text_cursor { type = "attribute" }
+			#~ text { type = "attribute" }
+			#~ text_selected { type = "attribute" }
+			#~ highlight { type = "attribute" }
+			#~ highlight_selected { type = "attribute" }
+			#~ dialog { type = "attribute" }
+			#~ dialog_selected { type = "attribute" }
+			#~ button { type = "attribute" }
+			#~ button_selected { type = "attribute" }
+			#~ scrollbar { type = "attribute" }
+			#~ menubar { type = "attribute" }
+			#~ menubar_selected { type = "attribute" }
+			#~ shadow { type = "attribute" }
+		#~ }
+		item-type = "attribute"
+	}
+	highlight_attributes {
+		type = "section"
+		item-type = "attribute"
+	}
+	attribute {
+		type = "list"
+		item-type = "string"
+	}
+	terminal {
+		type = "section"
+		allowed-keys {
+			name { type = "string" }
+			tabsize { type = "int" }
+			hide_menubar { type = "bool" }
+			color { type = "bool" }
+			tab_spaces { type = "bool" }
+			auto_indent { type = "bool" }
+			indent_aware_home { type = "bool" }
+			key_timeout { type = "int" }
+			attributes { type = "attributes" }
+			highlight_attributes { type = "highlight_attributes" }
+		}
+		item-type = "any"
+		%constraint = "name"
+	}
+}
+
+allowed-keys {
+	config_version {
+		type = "int"
+	}
+
+	terminals {
+		type = "list"
+		item-type = "terminal"
+	}
+
+	wrap { type = "bool" }
+	tabsize { type = "int" }
+	hide_menubar { type = "bool" }
+	color { type = "bool" }
+	tab_spaces { type = "bool" }
+	auto_indent { type = "bool" }
+	indent_aware_home { type = "bool" }
+	max_recent_files { type = "int" }
+	key_timeout { type = "int" }
+	attributes { type = "attributes" }
+	highlight_attributes { type = "highlight_attributes" }
+}
+item-type = "any"
+
+%constraint = "config_version = 1"

@@ -250,3 +250,9 @@ int map_highlight(void *data, const char *name) {
 	}
 	return 0;
 }
+
+const char *reverse_map_highlight(int idx) {
+	if (idx < 0 || (size_t) idx >= sizeof(highlight_names) / sizeof(highlight_names[0]))
+		return NULL;
+	return highlight_names[idx];
+}

@@ -531,6 +531,29 @@ int main(int argc, char *argv[]) {
 
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
+	} else if (config_read_error) {
+		string message = "Error loading config: ";
+		message += config_read_error_string;
+		if (config_read_error_line != 0) {
+			char line_number_buffer[100];
+			sprintf(line_number_buffer, " at line %d", config_read_error_line);
+			message += line_number_buffer;
+		}
+		set_key_timeout(-1000);
+
+		#warning FIXME: finish this section to do something useful
+		/* FIXME: for parse errors, duplicate keys, invalid keys, constraint violations, etc., load the
+		   config file in the text editor and jump to the correct line. Make sure this is the file the
+		   user sees.
+
+		   Furthermore, the message in the dialog should contain the error message and line
+		   number, in as far as they are useful.
+
+		   The message dialog should also mention that it did a fallback to defaults.
+		*/
+		message_dialog->set_message(&message);
+		message_dialog->center_over(main_window);
+		message_dialog->show();
 	} else {
 		set_key_timeout(-1000);
 		message_dialog_t *input_message = new message_dialog_t(70, _("Input Handling"), _("Close"), _("Configure"), NULL);

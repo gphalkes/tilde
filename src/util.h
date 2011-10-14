@@ -117,4 +117,5 @@ void printf_into(std::string *message, const char *format, ...);
 #define MAX_HIGHLIGHTS 20
 
 int map_highlight(void *data, const char *name);
+const char *reverse_map_highlight(int idx);
 #endif

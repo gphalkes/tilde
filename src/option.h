@@ -77,7 +77,7 @@ struct options_t {
 
 	opt_t3_attr_t shadow;
 
-	t3_attr_t highlights[MAX_HIGHLIGHTS];
+	opt_t3_attr_t highlights[MAX_HIGHLIGHTS];
 };
 
 struct highlight_attrs_t {
@@ -102,6 +102,10 @@ struct runtime_options_t {
 	opt_int key_timeout;
 	t3_attr_t highlights[MAX_HIGHLIGHTS];
 };
+
+extern bool config_read_error;
+extern std::string config_read_error_string;
+extern int config_read_error_line;
 
 extern cli_options_t cli_option;
 extern runtime_options_t option;
