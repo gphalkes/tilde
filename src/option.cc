@@ -158,6 +158,8 @@ static void read_config_part(const t3_config_t *config, options_t *opts) {
 		GET_HL_ATTRIBUTE("string");
 		GET_HL_ATTRIBUTE("string-escape");
 		GET_HL_ATTRIBUTE("misc");
+		GET_HL_ATTRIBUTE("variable");
+		GET_HL_ATTRIBUTE("error");
 		/* NOTE: normal must always be reset, because unknown attributes get mapped to
 		   the same index as normal. Therefore, they would overwrite the correct
 		   attribute for normal. */
@@ -263,13 +265,15 @@ static void post_process_options(void) {
 			option.key_timeout = term_specific_option.key_timeout;
 
 	option.highlights[0] = 0;
-	SET_OPT_FROM_FILE(highlights[1], T3_ATTR_FG_YELLOW);
-	SET_OPT_FROM_FILE(highlights[2], T3_ATTR_FG_YELLOW | T3_ATTR_BOLD);
-	SET_OPT_FROM_FILE(highlights[3], T3_ATTR_FG_YELLOW | T3_ATTR_BOLD);
-	SET_OPT_FROM_FILE(highlights[4], T3_ATTR_FG_CYAN | T3_ATTR_BOLD);
-	SET_OPT_FROM_FILE(highlights[5], T3_ATTR_FG_GREEN);
-	SET_OPT_FROM_FILE(highlights[6], T3_ATTR_FG_GREEN | T3_ATTR_BOLD);
-	SET_OPT_FROM_FILE(highlights[7], T3_ATTR_FG_RED | T3_ATTR_BOLD);
+	SET_OPT_FROM_FILE(highlights[1], T3_ATTR_FG_GREEN); // comment
+	SET_OPT_FROM_FILE(highlights[2], T3_ATTR_FG_YELLOW); // comment-keyword
+	SET_OPT_FROM_FILE(highlights[3], T3_ATTR_FG_CYAN | T3_ATTR_BOLD); // keyword
+	SET_OPT_FROM_FILE(highlights[4], T3_ATTR_FG_WHITE | T3_ATTR_BOLD); // number
+	SET_OPT_FROM_FILE(highlights[5], T3_ATTR_FG_MAGENTA | T3_ATTR_BOLD); // string
+	SET_OPT_FROM_FILE(highlights[6], T3_ATTR_FG_MAGENTA); // string escape
+	SET_OPT_FROM_FILE(highlights[7], T3_ATTR_FG_YELLOW | T3_ATTR_BOLD); // misc
+	SET_OPT_FROM_FILE(highlights[8], T3_ATTR_FG_GREEN | T3_ATTR_BOLD); // variable
+	SET_OPT_FROM_FILE(highlights[9], T3_ATTR_FG_RED | T3_ATTR_BOLD); // error
 }
 
 static void print_help(void) {

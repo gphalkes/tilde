@@ -53,7 +53,6 @@ class file_buffer_t : public text_buffer_t {
 		t3_highlight_t *highlight_info;
 		text_line_t *match_line;
 		t3_highlight_match_t *last_match;
-		int match_start;
 };
 
 #endif

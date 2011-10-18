@@ -36,7 +36,7 @@ static const char *executable;
 
 static const char *highlight_names[] = {
 	"normal", "comment", "comment-keyword", "keyword", "number", "string",
-	"string-escape", "misc" };
+	"string-escape", "misc", "variable", "error" };
 
 static_assert(sizeof(highlight_names) / sizeof(highlight_names[0]) <= MAX_HIGHLIGHTS);
 
@@ -139,7 +139,7 @@ char *resolve_links(const char *start_name) {
 
 char *canonicalize_path(const char *path) {
 	string result;
-	size_t i, last_slash;
+	size_t i;
 
 	if (path[0] != '/') {
 		result = get_working_directory();
@@ -148,7 +148,7 @@ char *canonicalize_path(const char *path) {
 
 	result += path;
 
-	for (i = 0, last_slash = 0; i < result.size(); ) {
+	for (i = 0; i < result.size(); ) {
 		if (result[i] == '/') {
 			if (i + 1 == result.size())
 				break;
@@ -175,13 +175,13 @@ char *canonicalize_path(const char *path) {
 						result.erase(i + 1, 3);
 						continue;
 					} else {
+						size_t last_slash = result.rfind('/', i - 1);
 						result.erase(last_slash + 1, i - last_slash + 3);
 						i = last_slash;
 						continue;
 					}
 				}
 			}
-			last_slash = i;
 		}
 		i++;
 	}

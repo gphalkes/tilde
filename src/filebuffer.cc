@@ -44,7 +44,10 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		name_line.set_text(&converted_name);
 
 		#warning FIXME: this is a temporary hack for testing purposes!!
-		highlight_info = t3_highlight_load_by_filename(name, map_highlight, NULL, NULL);
+		int error;
+		highlight_info = t3_highlight_load_by_filename(name, map_highlight, NULL, &error);
+		if (highlight_info == NULL)
+			lprintf("t3_highlight_load_by_filename: %s\n", t3_highlight_strerror(error));
 		last_match = t3_highlight_new_match();
 	}
 

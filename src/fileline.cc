@@ -47,17 +47,15 @@ t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
 	if ((size_t) i >= str->size())
 		return info->normal_attr;
 
-	if (buffer->match_line != this || i < buffer->match_start) {
+	if (buffer->match_line != this || (size_t) i < t3_highlight_get_start(buffer->last_match)) {
 		buffer->match_line = this;
 		t3_highlight_reset(buffer->last_match, highlight_start_state);
 	}
 
-	while (t3_highlight_get_end(buffer->last_match) <= (size_t) i) {
-		buffer->match_start = t3_highlight_get_end(buffer->last_match);
+	while (t3_highlight_get_end(buffer->last_match) <= (size_t) i)
 		t3_highlight_match(buffer->highlight_info, str->data(), str->size(), buffer->last_match);
-	}
 
-	int attribute_idx = (size_t) i < t3_highlight_get_start(buffer->last_match) ?
+	int attribute_idx = (size_t) i < t3_highlight_get_match_start(buffer->last_match) ?
 		t3_highlight_get_begin_attr(buffer->last_match) :
 		t3_highlight_get_match_attr(buffer->last_match);
 
