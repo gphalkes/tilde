@@ -17,7 +17,7 @@ CXXFLAGS=-O2
 
 # CONFIGFLAGS should contain all the flags to compile against the required
 # libraries (libt3unicode, libt3window, libt3key, libt3widget, libt3config,
-# and libtranscript)
+# libt3highlight and libtranscript)
 # If your system does not provide strdup, remove -DHAS_STRDUP
 # CONFIGLIBS should contain all the flags to link against the required
 # libraries
