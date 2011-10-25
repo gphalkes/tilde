@@ -178,8 +178,14 @@ static void read_config(void) {
 
 	file += "/.tilderc";
 
-	if ((config_file = fopen(file.c_str(), "r")) == NULL)
+	if ((config_file = fopen(file.c_str(), "r")) == NULL) {
+		if (errno != ENOENT) {
+			config_read_error = true;
+			config_read_error_string = strerror(errno);
+			config_read_error_line = 0;
+		}
 		return;
+	}
 
 	if ((config = t3_config_read_file(config_file, &error, NULL)) == NULL) {
 		config_read_error = true;

@@ -255,6 +255,12 @@ void main_t::load_cli_files_done(stepped_process_t *process) {
 		ASSERT(buffer != get_current()->get_text());
 		delete buffer;
 	}
+	/* FIXME: we should really come up with a better way, then just assuming that
+	   when an error_line is present that we should jump there. */
+	if (config_read_error_line != 0) {
+		get_current()->goto_line(config_read_error_line);
+		config_read_error_line = 0;
+	}
 }
 
 void main_t::menu_activated(int id) {
@@ -515,6 +521,7 @@ static void input_selection_complete(bool selection_made) {
 int main(int argc, char *argv[]) {
 	complex_error_t result;
 	init_parameters_t *params = init_parameters_t::create();
+	string config_file_name;
 
 	init_log();
 	setlocale(LC_ALL, "");
@@ -554,25 +561,27 @@ int main(int argc, char *argv[]) {
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
 	} else if (config_read_error) {
-		string message = "Error loading config: ";
+		string message = "Error loading configuration file ~/.tilderc: ";
 		message += config_read_error_string;
 		if (config_read_error_line != 0) {
 			char line_number_buffer[100];
 			sprintf(line_number_buffer, " at line %d", config_read_error_line);
 			message += line_number_buffer;
 		}
+		message += ".\nInput handling and all other settings have been set to their defaults.";
 		set_key_timeout(-1000);
 
-		#warning FIXME: finish this section to do something useful
-		/* FIXME: for parse errors, duplicate keys, invalid keys, constraint violations, etc., load the
-		   config file in the text editor and jump to the correct line. Make sure this is the file the
-		   user sees.
-
-		   Furthermore, the message in the dialog should contain the error message and line
-		   number, in as far as they are useful.
-
-		   The message dialog should also mention that it did a fallback to defaults.
+		/* For parse errors, duplicate keys, invalid keys, constraint violations,
+		   etc., load the config file in the text editor and jump to the correct
+		   line. We won't load any other files in this case.
 		*/
+		if (config_read_error_line != 0) {
+			config_file_name = getenv("HOME");
+			config_file_name += "/.tilderc";
+			cli_option.files.clear();
+			cli_option.files.push_back(config_file_name.c_str());
+		}
+
 		message_dialog->set_message(&message);
 		message_dialog->center_over(main_window);
 		message_dialog->show();

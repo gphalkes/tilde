@@ -34,6 +34,7 @@ LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`
 CXXFLAGS.option = -I.objects
 
 CXXTARGETS := .objects/edit
+EXTRATARGETS := clean-logs
 #================================================#
 # NO RULES SHOULD BE DEFINED BEFORE THIS INCLUDE #
 #================================================#
@@ -46,6 +47,8 @@ CXXFLAGS += -I.
 CXXFLAGS += `pkg-config --cflags sigc++-2.0`
 
 all: | links
+
+clean-logs:
 	@find .recordings/ -name "record-*" -mtime +7 | xargs -r rm
 	@find .recordings/ -name "record-*" -mtime +1 | egrep -v '\.bz2$$' | xargs -r bzip2 -9 || true
 
