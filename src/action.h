@@ -58,6 +58,7 @@ ENUM(action_id_t,
 	WINDOWS_PREV_WINDOW,
 	HELP_HELP,
 	HELP_ABOUT,
+	TOOLS_HIGHLIGHTING,
 );
 
 #endif

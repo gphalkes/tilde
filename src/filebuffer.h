@@ -49,6 +49,9 @@ class file_buffer_t : public text_buffer_t {
 
 		bool get_has_window(void) const;
 
+		t3_highlight_t *get_highlight(void);
+		void set_highlight(t3_highlight_t *highlight);
+
 	public:
 		t3_highlight_t *highlight_info;
 		text_line_t *match_line;

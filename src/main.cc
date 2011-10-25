@@ -22,6 +22,7 @@
 #include "openfiles.h"
 #include "dialogs/selectbufferdialog.h"
 #include "dialogs/encodingdialog.h"
+#include "dialogs/highlightdialog.h"
 #include "dialogs/openrecentdialog.h"
 #include "dialogs/optionsdialog.h"
 #include "log.h"
@@ -55,6 +56,7 @@ class main_t : public main_window_base_t {
 		message_dialog_t *about_dialog;
 		buffer_options_dialog_t *buffer_options_dialog, *default_options_dialog;
 		interface_options_dialog_t *interface_options_dialog;
+		highlight_dialog_t *highlight_dialog;
 
 	public:
 		main_t(void);
@@ -71,6 +73,7 @@ class main_t : public main_window_base_t {
 		void set_buffer_options(void);
 		void set_default_options(void);
 		void set_interface_options(void);
+		void set_highlight(t3_highlight_t *highlight);
 };
 
 static main_t *main_window;
@@ -132,6 +135,9 @@ main_t::main_t(void) {
 	panel->add_item("Next Window", "F8", action_id_t::WINDOWS_NEXT_WINDOW);
 	panel->add_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
+	panel = new menu_panel_t("_Tools", menu);
+	panel->add_item("_Highlighting...", NULL, action_id_t::TOOLS_HIGHLIGHTING);
+
 	panel = new menu_panel_t("_Options", menu);
 	panel->add_item("Input _Handling...", NULL, action_id_t::OPTIONS_INPUT);
 	panel->add_item("_Current Buffer...", NULL, action_id_t::OPTIONS_BUFFER);
@@ -139,6 +145,7 @@ main_t::main_t(void) {
 	panel->add_item("_Interface...", NULL, action_id_t::OPTIONS_INTERFACE);
 
 	panel = new menu_panel_t("_Help", menu);
+	//FIXME: reinstate when help is actuall available.
 	//~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
 	panel->add_item("_About", NULL, action_id_t::HELP_ABOUT);
 
@@ -199,6 +206,10 @@ main_t::main_t(void) {
 	interface_options_dialog = new interface_options_dialog_t("Interface");
 	interface_options_dialog->center_over(this);
 	interface_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_interface_options));
+
+	highlight_dialog = new highlight_dialog_t(t3_win_get_height(window) - 4, 40);
+	highlight_dialog->center_over(this);
+	highlight_dialog->connect_language_selected(sigc::mem_fun(this, &main_t::set_highlight));
 }
 
 bool main_t::process_key(t3_widget::key_t key) {
@@ -227,6 +238,7 @@ bool main_t::set_size(optint height, optint width) {
 	result &= save_as_dialog->set_size(height - 4, width - 4);
 	result &= open_recent_dialog->set_size(11, width - 4);
 	result &= encoding_dialog->set_size(min(height - 8, 16), min(width - 8, 72));
+	result &= highlight_dialog->set_size(height - 4, None);
 	if (input_selection_dialog != NULL && dynamic_cast<input_selection_dialog_t *>(input_selection_dialog) != NULL) {
 		int is_width = min(max(width - 16, 40), 100);
 		int is_height = min(max(height - 3, 15), 3200 / is_width);
@@ -375,6 +387,11 @@ void main_t::menu_activated(int id) {
 			break;
 		}
 
+		case action_id_t::TOOLS_HIGHLIGHTING:
+			highlight_dialog->set_selected(t3_highlight_get_langfile(get_current()->get_text()->get_highlight()));
+			highlight_dialog->show();
+			break;
+
 		case action_id_t::OPTIONS_INPUT:
 			configure_input(false);
 			break;
@@ -460,6 +477,11 @@ void main_t::set_interface_options(void) {
 	menu->set_hidden(option.hide_menubar);
 	set_color_mode(option.color);
 	write_config();
+}
+
+void main_t::set_highlight(t3_highlight_t *highlight) {
+	get_current()->get_text()->set_highlight(highlight);
+	get_current()->force_redraw();
 }
 
 static void configure_input(bool cancel_selects_default) {

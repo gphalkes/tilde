@@ -13,9 +13,8 @@ priority.
 - Mouse selection, with X11 PRIMARY integration
 - Simple autocompletion based on words found elsewhere in the same document
 - Insertion of characters by their Unicode name instead of their codepoint
-- Decrease memory usage
 - Improve terminal capabilities detection
-- Dialogs for changing the settings
+- Dialogs for changing the settings [partially done]
 - End-of-line type selection and conversion (LF, CR/LF, CR)
 - Strip space at end-of-line on save option
 - Convert indentation from tabs to spaces and vice-versa
@@ -24,7 +23,7 @@ Possible later features, depending on complexity and demand:
 - perhaps increase/decrease indentation as appropriate for languages like C,
   where there is a clear rule to do so (opening/closing brace)
 - Different kinds of line wrapping
-  - break at word (done) or character boundary
+  - break at word [done] or character boundary
   - up/down go to previous/next line instead of stepping within the current
     line (vi style)
 - Basic bidi support

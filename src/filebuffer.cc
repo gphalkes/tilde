@@ -43,11 +43,8 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		convert_lang_codeset(name, &converted_name, true);
 		name_line.set_text(&converted_name);
 
-		#warning FIXME: this is a temporary hack for testing purposes!!
-		int error;
-		highlight_info = t3_highlight_load_by_filename(name, map_highlight, NULL, &error);
-		if (highlight_info == NULL)
-			lprintf("t3_highlight_load_by_filename: %s\n", t3_highlight_strerror(error));
+		/* Automatically load appropriate highlighting patterns if available. */
+		highlight_info = t3_highlight_load_by_filename(name, map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
 		last_match = t3_highlight_new_match();
 	}
 
@@ -92,15 +89,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				string converted_name;
 				lprintf("Using encoding %s to read %s\n", encoding(), name());
 
-				#warning FIXME: even UTF-8 must go through transcript for error detection
-
-				if (strcmp(encoding, "UTF-8") == 0) {
-					handle = NULL;
-				} else {
-					handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
-					if (handle == NULL)
-						return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
-				}
+				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
+				if (handle == NULL)
+					return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
 				state->wrapper = new file_read_wrapper_t(state->fd, handle);
 
 				convert_lang_codeset(name, &converted_name, true);
@@ -140,6 +131,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 }
 
 /* FIXME: try to prevent as many race conditions as possible here. */
+#warning FIXME: if no filename has been set previously, and no highlighting has been set either, automatically load highlighting
 rw_result_t file_buffer_t::save(save_as_process_t *state) {
 	size_t idx;
 	const char *save_name;
@@ -278,7 +270,7 @@ const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters(void)
 void file_buffer_t::prepare_paint_line(int line) {
 	int i;
 
-	if (highlight_valid >= line)
+	if (highlight_info == NULL || highlight_valid >= line)
 		return;
 
 	for (i = highlight_valid + 1; i <= line; i++) {
@@ -302,4 +294,19 @@ void file_buffer_t::invalidate_highlight(rewrap_type_t type, int line, int pos) 
 	(void) pos;
 	if (line < highlight_valid)
 		highlight_valid = line;
+}
+
+t3_highlight_t *file_buffer_t::get_highlight(void) {
+	return highlight_info;
+}
+
+void file_buffer_t::set_highlight(t3_highlight_t *highlight) {
+	if (highlight_info != NULL)
+		t3_highlight_free(highlight_info);
+	highlight_info = highlight;
+	match_line = NULL;
+	highlight_valid = 0;
+
+	if (highlight_info != NULL && last_match == NULL)
+		last_match = t3_highlight_new_match();
 }
