@@ -74,6 +74,7 @@ class main_t : public main_window_base_t {
 		void set_default_options(void);
 		void set_interface_options(void);
 		void set_highlight(t3_highlight_t *highlight);
+		void save_as_done(stepped_process_t *process);
 };
 
 static main_t *main_window;
@@ -289,7 +290,7 @@ void main_t::menu_activated(int id) {
 			save_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), get_current()->get_text());
 			break;
 		case action_id_t::FILE_SAVE_AS:
-			save_as_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), get_current()->get_text());
+			save_as_process_t::execute(sigc::mem_fun(this, &main_t::save_as_done), get_current()->get_text());
 			break;
 		case action_id_t::FILE_OPEN_RECENT:
 			open_recent_process_t::execute(sigc::mem_fun(this, &main_t::switch_to_new_buffer));
@@ -488,6 +489,11 @@ void main_t::set_interface_options(void) {
 void main_t::set_highlight(t3_highlight_t *highlight) {
 	get_current()->get_text()->set_highlight(highlight);
 	get_current()->force_redraw();
+}
+
+void main_t::save_as_done(stepped_process_t *process) {
+	(void) process;
+	get_current()->draw_info_window();
 }
 
 static void configure_input(bool cancel_selects_default) {
