@@ -185,6 +185,8 @@ bool save_as_process_t::step(void) {
 void save_as_process_t::file_selected(const std::string *_name) {
 	name = *_name;
 	state = INITIAL;
+	if (file->get_highlight() == NULL && file->get_name() == NULL)
+		file->set_highlight(t3_highlight_load_by_filename(name.c_str(), map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL));
 	run();
 }
 

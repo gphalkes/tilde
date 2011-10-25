@@ -131,7 +131,6 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 }
 
 /* FIXME: try to prevent as many race conditions as possible here. */
-#warning FIXME: if no filename has been set previously, and no highlighting has been set either, automatically load highlighting
 rw_result_t file_buffer_t::save(save_as_process_t *state) {
 	size_t idx;
 	const char *save_name;
