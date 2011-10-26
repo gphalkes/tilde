@@ -1,2 +1,6 @@
+Version 0.1.2:
+	New features:
+	- Syntax highlighting implemented (using libt3highlight)
+
 Version 0.1.1:
 	Initial release

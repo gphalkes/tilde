@@ -1,5 +1,4 @@
 syntax: glob
-src/t3highlight
 src/valgrind.log
 src/libt3widgetlog.txt
 src/libt3window.log
@@ -10,5 +9,7 @@ src/record
 src/t3widget
 src/t3window
 src/t3unicode
+src/t3config
+src/t3highlight
 src/transcript
 src/log.txt
