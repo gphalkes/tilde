@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libtranscript/0.2 LIBTRANSCRIPT test_link_cxx || \
+	pkgconfig libtranscript/0.2.0 LIBTRANSCRIPT test_link_cxx || \
 		error "!! Can not find libtranscript. libtranscript is required to compile tilde."
 
 	clean_cxx
@@ -120,9 +120,20 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libt3config/0.2 LIBT3CONFIG test_link_cxx || \
+	pkgconfig libt3config/0.2.0 LIBT3CONFIG test_link_cxx || \
 		error "!! Can not find libt3config. libt3config is required to compile tilde."
 
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <t3highlight/highlight.h>
+
+int main(int argc, char *argv[]) {
+	t3_highlight_get_version();
+	return 0;
+}
+EOF
+	pkgconfig libt3highlight LIBT3HIGHLIGHT test_link_cxx || \
+		error "!! Can not find libt3highlight. libt3highlight is required to compile tilde."
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
@@ -188,6 +199,6 @@ int main(int argc, char *argv[]) {
 EOF
 	test_link_cxx "strdup" && CONFIGFLAGS="${CONFIGFLAGS} -DHAS_STRDUP"
 
-	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3UNICODE_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3WINDOW_FLAGS} ${LIBT3CONFIG_FLAGS}" \
-		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} ${LIBT3UNICODE_LIBS} ${LIBT3WIDGET_LIBS} ${LIBT3WINDOW_LIBS} ${LIBT3CONFIG_LIBS}"
+	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3UNICODE_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3WINDOW_FLAGS} ${LIBT3CONFIG_FLAGS} ${LIBT3HIGHLIGHT_FLAGS}" \
+		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} ${LIBT3UNICODE_LIBS} ${LIBT3WIDGET_LIBS} ${LIBT3WINDOW_LIBS} ${LIBT3CONFIG_LIBS} ${LIBT3HIGHLIGHT_LIBS}"
 }

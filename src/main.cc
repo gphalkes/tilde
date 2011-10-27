@@ -287,7 +287,7 @@ void main_t::menu_activated(int id) {
 			close_process_t::execute(sigc::mem_fun(this, &main_t::close_cb), get_current()->get_text());
 			break;
 		case action_id_t::FILE_SAVE:
-			save_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result), get_current()->get_text());
+			save_process_t::execute(sigc::mem_fun(this, &main_t::save_as_done), get_current()->get_text());
 			break;
 		case action_id_t::FILE_SAVE_AS:
 			save_as_process_t::execute(sigc::mem_fun(this, &main_t::save_as_done), get_current()->get_text());
@@ -304,9 +304,6 @@ void main_t::menu_activated(int id) {
 
 		case action_id_t::FILE_EXIT:
 			exit_process_t::execute(sigc::ptr_fun(stepped_process_t::ignore_result));
-			//~ #ifdef DEBUG
-			//~ delete editwin;
-			//~ #endif
 			break;
 
 		case action_id_t::EDIT_UNDO:
