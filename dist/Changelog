@@ -1,2 +1,10 @@
+Version 0.1.2:
+	New features:
+	- syntax highlighting using the libt3highlight library
+
+	Bug fixes:
+	- file names were not correctly canonicalized if they contained multiple
+	  instances of .. in a row
+
 Version 0.1.1:
 	Initial release
