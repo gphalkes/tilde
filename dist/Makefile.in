@@ -41,7 +41,7 @@ LINGUAS=
 # Installation prefix and install paths
 prefix=/usr/local
 bindir=$(prefix)/bin
-docdir=$(prefix)/share/doc/tilde-<VERSION>
+docdir=$(prefix)/share/doc/tilde
 mandir=$(prefix)/share/man
 
 # Install program to use (should be BSD install compatible)
@@ -70,15 +70,22 @@ dist-clean: clean
 src/tilde: $(OBJECTS)
 	$(SILENTLD) $(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS) $(CONFIGLIBS) $(GETTEXTLIBS)
 
+# Installation prefix and install paths
+prefix=/usr/local
+_bindir=$(DESTDIR)$(bindir)
+_docdir=$(DESTDIR)$(docdir)
+_mandir=$(DESTDIR)$(mandir)
+_LOCALEDIR=$(DESTDIR)$(LOCALEDIR)
+
 install: all
-	$(INSTALL) -d $(bindir)
-	$(INSTALL) src/tilde $(bindir)
-	$(INSTALL) -d $(docdir)
-	$(INSTALL) -m0644 COPYING README Changelog $(docdir)
-	$(INSTALL) -d $(mandir)/man1
-	$(INSTALL) -m0644 man/tilde.1 $(mandir)/man1
+	$(INSTALL) -d $(_bindir)
+	$(INSTALL) src/tilde $(_bindir)
+	$(INSTALL) -d $(_docdir)
+	$(INSTALL) -m0644 COPYING README Changelog $(_docdir)
+	$(INSTALL) -d $(_mandir)/man1
+	$(INSTALL) -m0644 man/tilde.1 $(_mandir)/man1
 
 uninstall:
-	rm -f $(bindir)/tilde
-	rm -rf $(docdir)
-	rm -f $(mandir)/man1/tilde.1
+	rm -f $(_bindir)/tilde
+	rm -rf $(_docdir)
+	rm -f $(_mandir)/man1/tilde.1
