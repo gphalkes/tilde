@@ -45,7 +45,7 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 
 		/* Automatically load appropriate highlighting patterns if available. */
 		highlight_info = t3_highlight_load_by_filename(name, map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
-		last_match = t3_highlight_new_match();
+		last_match = t3_highlight_new_match(highlight_info);
 	}
 
 	connect_rewrap_required(sigc::mem_fun(this, &file_buffer_t::invalidate_highlight));
@@ -307,5 +307,5 @@ void file_buffer_t::set_highlight(t3_highlight_t *highlight) {
 	highlight_valid = 0;
 
 	if (highlight_info != NULL && last_match == NULL)
-		last_match = t3_highlight_new_match();
+		last_match = t3_highlight_new_match(highlight_info);
 }

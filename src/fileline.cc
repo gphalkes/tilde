@@ -53,7 +53,7 @@ t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
 	}
 
 	while (t3_highlight_get_end(buffer->last_match) <= (size_t) i)
-		t3_highlight_match(buffer->highlight_info, str->data(), str->size(), buffer->last_match);
+		t3_highlight_match(buffer->last_match, str->data(), str->size());
 
 	int attribute_idx = (size_t) i < t3_highlight_get_match_start(buffer->last_match) ?
 		t3_highlight_get_begin_attr(buffer->last_match) :
@@ -79,7 +79,7 @@ int file_line_t::get_highlight_end(void) {
 	}
 
 	str = get_data();
-	while (t3_highlight_match(buffer->highlight_info, str->data(), str->size(), buffer->last_match)) {}
+	while (t3_highlight_match(buffer->last_match, str->data(), str->size())) {}
 
 	return t3_highlight_get_state(buffer->last_match);
 }

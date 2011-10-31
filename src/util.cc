@@ -36,7 +36,7 @@ static const char *executable;
 
 static const char *highlight_names[] = {
 	"normal", "comment", "comment-keyword", "keyword", "number", "string",
-	"string-escape", "misc", "variable", "error" };
+	"string-escape", "misc", "variable", "error", "addition", "deletion" };
 
 static_assert(sizeof(highlight_names) / sizeof(highlight_names[0]) <= MAX_HIGHLIGHTS);
 

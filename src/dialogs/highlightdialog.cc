@@ -36,13 +36,6 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 	label_t *label;
 	int error;
 
-	if ((allocated_names = t3_highlight_list(&error)) == NULL) {
-		if (error == T3_ERR_OUT_OF_MEMORY)
-			throw bad_alloc();
-	}
-	for (ptr = allocated_names; ptr->name != NULL; ptr++) {}
-	sort((t3_highlight_lang_t *) allocated_names, ptr, cmp_lang_names);
-
 	list = new list_pane_t(true);
 	list->set_size(height - 3, width - 2);
 	list->set_position(1, 1);
@@ -50,9 +43,18 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 
 	label = new label_t("Plain Text");
 	list->push_back(label);
-	for (ptr = allocated_names; ptr->name != NULL; ptr++) {
-		label = new label_t(ptr->name);
-		list->push_back(label);
+
+	if ((allocated_names = t3_highlight_list(&error)) == NULL) {
+		if (error == T3_ERR_OUT_OF_MEMORY)
+			throw bad_alloc();
+	} else {
+		for (ptr = allocated_names; ptr->name != NULL; ptr++) {}
+		sort((t3_highlight_lang_t *) allocated_names, ptr, cmp_lang_names);
+
+		for (ptr = allocated_names; ptr->name != NULL; ptr++) {
+			label = new label_t(ptr->name);
+			list->push_back(label);
+		}
 	}
 
 	/* Resize to list size if there are fewer list items than the size of the

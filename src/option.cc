@@ -76,7 +76,7 @@ static const char config_schema[] = {
 #include "config.bytes"
 };
 
-static t3_bool find_term_config(const t3_config_t *config, void *data) {
+static t3_bool find_term_config(const t3_config_t *config, const void *data) {
 	if (t3_config_get_type(config) != T3_CONFIG_SECTION)
 		return t3_false;
 	return strcmp((const char *) data, t3_config_get_string(t3_config_get(config, "name"))) == 0;
@@ -160,6 +160,8 @@ static void read_config_part(const t3_config_t *config, options_t *opts) {
 		GET_HL_ATTRIBUTE("misc");
 		GET_HL_ATTRIBUTE("variable");
 		GET_HL_ATTRIBUTE("error");
+		GET_HL_ATTRIBUTE("addition");
+		GET_HL_ATTRIBUTE("deletion");
 		/* NOTE: normal must always be reset, because unknown attributes get mapped to
 		   the same index as normal. Therefore, they would overwrite the correct
 		   attribute for normal. */
@@ -223,7 +225,7 @@ static void read_config(void) {
 	else if ((term = getenv("TERM")) == NULL)
 		goto end;
 
-	if ((term_specific_config = t3_config_find(term_specific_config, find_term_config, (void *) term, NULL)) != NULL)
+	if ((term_specific_config = t3_config_find(term_specific_config, find_term_config, term, NULL)) != NULL)
 		read_config_part(term_specific_config, &term_specific_option);
 
 end:
@@ -280,6 +282,8 @@ static void post_process_options(void) {
 	SET_OPT_FROM_FILE(highlights[7], T3_ATTR_FG_YELLOW | T3_ATTR_BOLD); // misc
 	SET_OPT_FROM_FILE(highlights[8], T3_ATTR_FG_GREEN | T3_ATTR_BOLD); // variable
 	SET_OPT_FROM_FILE(highlights[9], T3_ATTR_FG_RED | T3_ATTR_BOLD); // error
+	SET_OPT_FROM_FILE(highlights[10], T3_ATTR_FG_GREEN | T3_ATTR_BOLD); // addition
+	SET_OPT_FROM_FILE(highlights[11], T3_ATTR_FG_RED | T3_ATTR_BOLD); // deletion
 }
 
 static void print_help(void) {
@@ -516,7 +520,7 @@ bool write_config(void) {
 		if ((terminals = t3_config_get(config, "terminals")) == NULL || !t3_config_is_list(terminals))
 			terminals = t3_config_add_plist(config, "terminals", NULL);
 
-		terminal_config = t3_config_find(terminals, find_term_config, (void *) term, NULL);
+		terminal_config = t3_config_find(terminals, find_term_config, term, NULL);
 		if (terminal_config == NULL) {
 			terminal_config = t3_config_add_section(terminals, NULL, NULL);
 			t3_config_add_string(terminal_config, "name", term);
