@@ -233,12 +233,14 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 		}
 		case save_as_process_t::WRITING:
 			try {
+				bool local_strip_spaces = strip_spaces.is_valid() ? (bool) strip_spaces : option.strip_spaces;
 				for (; state->i < lines.size(); state->i++) {
 					const string *data;
 					if (state->i != 0)
 						state->wrapper->write("\n", 1);
 					data = lines[state->i]->get_data();
-					state->wrapper->write(data->data(), option.strip_spaces ? get_stripped_size(data) : data->size());
+					state->wrapper->write(data->data(),
+						local_strip_spaces ? get_stripped_size(data) : data->size());
 				}
 			} catch (rw_result_t error) {
 				return error;
@@ -326,4 +328,14 @@ void file_buffer_t::set_highlight(t3_highlight_t *highlight) {
 
 	if (highlight_info != NULL && last_match == NULL)
 		last_match = t3_highlight_new_match(highlight_info);
+}
+
+bool file_buffer_t::get_strip_spaces(void) const {
+	if (strip_spaces.is_valid())
+		return strip_spaces;
+	return option.strip_spaces;
+}
+
+void file_buffer_t::set_strip_spaces(bool _strip_spaces) {
+	strip_spaces = _strip_spaces;
 }

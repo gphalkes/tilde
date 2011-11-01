@@ -21,7 +21,7 @@ using namespace std;
 
 static t3_widget::key_t number_keys[] = { '0', '1', '2', '3' ,'4', '5', '6', '7', '8', '9' };
 
-buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(7, 25, _title) {
+buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(8, 25, _title) {
 	smart_label_t *label;
 	int width;
 	button_t *ok_button, *cancel_button;
@@ -83,6 +83,20 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 
 	width = max(label->get_width() + 2 + 3, width);
 
+	label = new smart_label_t(_("St_rip spaces on save"));
+	label->set_position(5, 2);
+	push_back(label);
+	strip_spaces_box = new checkbox_t();
+	strip_spaces_box->set_label(label);
+	strip_spaces_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	strip_spaces_box->set_position(5, -2);
+	strip_spaces_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	strip_spaces_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	strip_spaces_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	push_back(strip_spaces_box);
+
+	width = max(label->get_width() + 2 + 3, width);
+
 	cancel_button = new button_t("_Cancel");
 	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
 	cancel_button->set_position(-1, -2);
@@ -106,7 +120,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	set_size(None, width + 4);
 }
 
-void buffer_options_dialog_t::set_values_from_view(edit_window_t *view) {
+void buffer_options_dialog_t::set_values_from_view(file_edit_window_t *view) {
 	char tabsize_text[20];
 	sprintf(tabsize_text, "%d", view->get_tabsize());
 	tabsize_field->set_text(tabsize_text);
@@ -114,15 +128,17 @@ void buffer_options_dialog_t::set_values_from_view(edit_window_t *view) {
 	tab_spaces_box->set_state(view->get_tab_spaces());
 	wrap_box->set_state(view->get_wrap());
 	auto_indent_box->set_state(view->get_auto_indent());
+	strip_spaces_box->set_state(view->get_text()->get_strip_spaces());
 }
 
-void buffer_options_dialog_t::set_view_values(edit_window_t *view) {
+void buffer_options_dialog_t::set_view_values(file_edit_window_t *view) {
 	int tabsize = atoi(tabsize_field->get_text()->c_str());
 	if (tabsize > 0 || tabsize < 17)
 		view->set_tabsize(tabsize);
 	view->set_wrap(wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE);
 	view->set_tab_spaces(tab_spaces_box->get_state());
 	view->set_auto_indent(auto_indent_box->get_state());
+	view->get_text()->set_strip_spaces(strip_spaces_box->get_state());
 }
 
 void buffer_options_dialog_t::set_values_from_options(void) {
@@ -133,6 +149,7 @@ void buffer_options_dialog_t::set_values_from_options(void) {
 	tab_spaces_box->set_state(option.tab_spaces);
 	wrap_box->set_state(option.wrap);
 	auto_indent_box->set_state(option.auto_indent);
+	strip_spaces_box->set_state(option.strip_spaces);
 }
 
 void buffer_options_dialog_t::set_options_values(void) {
@@ -142,6 +159,7 @@ void buffer_options_dialog_t::set_options_values(void) {
 	option.wrap = default_option.wrap = wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE;
 	option.tab_spaces = default_option.tab_spaces = tab_spaces_box->get_state();
 	option.auto_indent = default_option.auto_indent = auto_indent_box->get_state();
+	option.strip_spaces = default_option.strip_spaces = strip_spaces_box->get_state();
 }
 
 void buffer_options_dialog_t::handle_activate(void) {

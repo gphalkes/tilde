@@ -18,6 +18,7 @@
 #include <string>
 #include <list>
 #include <sigc++/sigc++.h>
+#include <t3window/window.h>
 
 #ifdef __GNUC__
 void fatal(const char *fmt, ...) __attribute__((format (printf, 1, 2))) __attribute__((noreturn));
@@ -62,13 +63,18 @@ class opt_##_type { \
 	public: \
 		opt_##_type(void) : value(0), initialized(false) {} \
 		opt_##_type(_type _value) : value(_value), initialized(true) {} \
-		bool is_valid(void) { return initialized; } \
+		bool is_valid(void) const { return initialized; } \
 		void unset(void) { initialized = false; } \
 		operator _type (void) const { if (!initialized) throw(0); return (_type) value; } \
 		_type operator()(void) const  { if (!initialized) throw(0); return (_type) value; } \
 		opt_##_type & operator=(const opt_##_type &other) { initialized = other.initialized; value = other.value; return *this; } \
 		opt_##_type & operator=(const _type other) { initialized = true; value = other; return *this; } \
 }
+
+OPT_TYPE(bool);
+OPT_TYPE(size_t);
+OPT_TYPE(t3_attr_t);
+OPT_TYPE(int);
 
 class version_t {
 	private:

@@ -31,7 +31,14 @@ class file_buffer_t : public text_buffer_t {
 		cleanup_obj_ptr<edit_window_t::view_parameters_t> view_parameters;
 		bool has_window;
 		int highlight_valid;
+		opt_bool strip_spaces;
 
+	public:
+		t3_highlight_t *highlight_info;
+		text_line_t *match_line;
+		t3_highlight_match_t *last_match;
+
+	private:
 		virtual void prepare_paint_line(int line);
 		void set_has_window(bool _has_window);
 		void invalidate_highlight(rewrap_type_t type, int line, int pos);
@@ -52,10 +59,8 @@ class file_buffer_t : public text_buffer_t {
 		t3_highlight_t *get_highlight(void);
 		void set_highlight(t3_highlight_t *highlight);
 
-	public:
-		t3_highlight_t *highlight_info;
-		text_line_t *match_line;
-		t3_highlight_match_t *last_match;
+		bool get_strip_spaces(void) const;
+		void set_strip_spaces(bool _strip_spaces);
 };
 
 #endif

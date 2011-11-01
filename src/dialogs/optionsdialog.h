@@ -15,6 +15,7 @@
 #define OPTIONSDIALOG_H
 
 #include <t3widget/widget.h>
+#include "fileeditwindow.h"
 
 using namespace t3_widget;
 
@@ -22,14 +23,18 @@ void init_charsets(void);
 
 class buffer_options_dialog_t : public dialog_t {
 	protected:
-		checkbox_t *tab_spaces_box, *wrap_box, *hide_menu_box, *auto_indent_box;
+		checkbox_t *tab_spaces_box,
+			*wrap_box,
+			*hide_menu_box,
+			*auto_indent_box,
+			*strip_spaces_box;
 		text_field_t *tabsize_field;
 
 	public:
 		buffer_options_dialog_t(const char *_title);
 
-		void set_values_from_view(edit_window_t *view);
-		void set_view_values(edit_window_t *view);
+		void set_values_from_view(file_edit_window_t *view);
+		void set_view_values(file_edit_window_t *view);
 		void set_values_from_options(void);
 		void set_options_values(void);
 		void handle_activate(void);

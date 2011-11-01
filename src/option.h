@@ -20,11 +20,6 @@
 
 #include "util.h"
 
-OPT_TYPE(bool);
-OPT_TYPE(size_t);
-OPT_TYPE(t3_attr_t);
-OPT_TYPE(int);
-
 struct cli_options_t {
 	/* Options to override config file. */
 	opt_bool color;
