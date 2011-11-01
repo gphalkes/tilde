@@ -5,7 +5,6 @@ priority.
 
 - Search and replace features:
   - Replace in selection
-- Simple syntax highlighting
 - Allow users to find out which character(s) is (are) under the cursor
 - Auto save and restore on crash
 - fmt-like rewrapping of text to a specific width
@@ -18,10 +17,12 @@ priority.
 - End-of-line type selection and conversion (LF, CR/LF, CR)
 - Strip space at end-of-line on save option
 - Convert indentation from tabs to spaces and vice-versa
+- Optionally create a backup file (file.name~) on save
+- Recognize vi/emacs modelines, and use sensible information
 
 Possible later features, depending on complexity and demand:
-- perhaps increase/decrease indentation as appropriate for languages like C,
-  where there is a clear rule to do so (opening/closing brace)
+- Increase/decrease indentation as appropriate for languages like C, where
+  there is a clear rule to do so (opening/closing brace)
 - Different kinds of line wrapping
   - break at word [done] or character boundary
   - up/down go to previous/next line instead of stepping within the current

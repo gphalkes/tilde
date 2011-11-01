@@ -51,6 +51,7 @@ struct options_t {
 	opt_bool tab_spaces;
 	opt_bool auto_indent;
 	opt_bool indent_aware_home;
+	opt_bool strip_spaces;
 
 	opt_size_t max_recent_files;
 
@@ -98,6 +99,7 @@ struct runtime_options_t {
 	bool tab_spaces;
 	bool auto_indent;
 	bool indent_aware_home;
+	bool strip_spaces;
 	size_t max_recent_files;
 	opt_int key_timeout;
 	t3_attr_t highlights[MAX_HIGHLIGHTS];

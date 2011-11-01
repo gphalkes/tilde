@@ -79,6 +79,7 @@ allowed-keys {
 	tab_spaces { type = "bool" }
 	auto_indent { type = "bool" }
 	indent_aware_home { type = "bool" }
+	strip_spaces { type = "bool" }
 	max_recent_files { type = "int" }
 	key_timeout { type = "int" }
 	attributes { type = "attributes" }

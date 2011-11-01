@@ -125,6 +125,7 @@ static void read_config_part(const t3_config_t *config, options_t *opts) {
 	GET_OPT(auto_indent, BOOL, bool);
 	GET_OPT(tab_spaces, BOOL, bool);
 	GET_OPT(indent_aware_home, BOOL, bool);
+	GET_OPT(strip_spaces, BOOL, bool);
 
 	GET_OPT(max_recent_files, INT, int);
 	GET_OPT(key_timeout, INT, int);
@@ -242,32 +243,30 @@ end:
 		option.name = deflt; \
 } while (0)
 
+#define SET_OPT_FROM_DFLT(name, deflt) do { \
+	if (default_option.name.is_valid()) \
+		option.name = default_option.name; \
+	else \
+		option.name = deflt; \
+} while (0)
+
 static void post_process_options(void) {
 	SET_OPT_FROM_FILE(tabsize, 8);
-
-	if (default_option.wrap.is_valid())
-		option.wrap = default_option.wrap;
-
 	SET_OPT_FROM_FILE(hide_menubar, false);
+
+	SET_OPT_FROM_DFLT(wrap, false);
 
 	if (cli_option.color.is_valid())
 		option.color = cli_option.color;
 	else
 		SET_OPT_FROM_FILE(color, true);
 
-	SET_OPT_FROM_FILE(tab_spaces, false);
+	SET_OPT_FROM_DFLT(tab_spaces, false);
+	SET_OPT_FROM_DFLT(auto_indent, true);
+	SET_OPT_FROM_DFLT(indent_aware_home, true);
 
-	if (default_option.auto_indent.is_valid())
-		option.auto_indent = default_option.auto_indent;
-	else
-		option.auto_indent = true;
-
-	SET_OPT_FROM_FILE(indent_aware_home, true);
-
-	if (default_option.max_recent_files.is_valid())
-		option.max_recent_files = default_option.max_recent_files;
-	else
-		option.max_recent_files = 16;
+	SET_OPT_FROM_DFLT(max_recent_files, 16);
+	SET_OPT_FROM_DFLT(strip_spaces, false);
 
 	if (!cli_option.ask_input_method && term_specific_option.key_timeout.is_valid())
 			option.key_timeout = term_specific_option.key_timeout;
@@ -439,6 +438,7 @@ static void set_config_options(t3_config_t *config, options_t *options) {
 	SET_OPTION(tab_spaces, bool);
 	SET_OPTION(auto_indent, bool);
 	SET_OPTION(indent_aware_home, bool);
+	SET_OPTION(strip_spaces, bool);
 
 	SET_OPTION(max_recent_files, int);
 	SET_OPTION(key_timeout, int);
