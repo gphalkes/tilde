@@ -104,7 +104,8 @@ void highlight_dialog_t::ok_activated(void) {
 		return;
 	}
 
-	if ((highlight = t3_highlight_load(names[idx - 1].lang_file, map_highlight, NULL, T3_HIGHLIGHT_UTF8, &error)) == NULL) {
+	if ((highlight = t3_highlight_load(names[idx - 1].lang_file, map_highlight, NULL,
+			T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, &error)) == NULL) {
 		string message(_("Error loading highlighting patterns: "));
 		message += t3_highlight_strerror(error);
 		error_dialog->set_message(&message);
