@@ -19,6 +19,7 @@ priority.
 - Convert indentation from tabs to spaces and vice-versa
 - Optionally create a backup file (file.name~) on save
 - Recognize vi/emacs modelines, and use sensible information
+- Show spaces option
 
 Possible later features, depending on complexity and demand:
 - Increase/decrease indentation as appropriate for languages like C, where

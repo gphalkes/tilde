@@ -217,7 +217,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 		}
 		case save_as_process_t::WRITING:
 			if (strip_spaces.is_valid() ? (bool) strip_spaces : option.strip_spaces)
-				text_buffer_t::strip_spaces();
+				do_strip_spaces();
 			try {
 				for (; state->i < lines.size(); state->i++) {
 					const string *data;
@@ -322,4 +322,47 @@ bool file_buffer_t::get_strip_spaces(void) const {
 
 void file_buffer_t::set_strip_spaces(bool _strip_spaces) {
 	strip_spaces = _strip_spaces;
+}
+
+void file_buffer_t::do_strip_spaces(void) {
+	size_t i, idx, char_len, size;
+	bool undo_started = false;
+
+	for (i = 0; i < lines.size() ; i++) {
+		const string *str = lines[i]->get_data();
+		const char *data = str->data();
+		size = str->size();
+		for (idx = size; idx > 0; idx--) {
+			if ((data[idx - 1] & 0xC0) == 0x80)
+				continue;
+
+			char_len = size - idx + 1;
+			if (!(t3_unicode_get_info(t3_unicode_get(data + idx - 1, &char_len), INT_MAX) &
+					T3_UNICODE_SPACE_BIT) && data[idx - 1] != '\t') /* Tab is a control character! */
+				break;
+
+			size = idx - 1;
+		}
+
+		if (size != str->size()) {
+			text_coordinate_t start, end;
+			if (!undo_started) {
+				start_undo_block();
+				undo_started = true;
+			}
+			start.line = end.line = i;
+			start.pos = size;
+			end.pos = str->size();
+			last_undo = new undo_single_text_double_coord_t(UNDO_DELETE_BLOCK, start, end);
+			undo_list.add(last_undo);
+			last_undo_type = UNDO_NONE;
+			delete_block_internal(start, end, last_undo);
+
+			if ((size_t) cursor.line == i && (size_t) cursor.pos > size)
+				cursor.pos = size;
+		}
+	}
+
+	if (undo_started)
+		end_undo_block();
 }
