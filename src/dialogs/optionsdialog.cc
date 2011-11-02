@@ -83,7 +83,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 
 	width = max(label->get_width() + 2 + 3, width);
 
-	label = new smart_label_t(_("St_rip spaces on save"));
+	label = new smart_label_t(_("St_rip trailing spaces on save"));
 	label->set_position(5, 2);
 	push_back(label);
 	strip_spaces_box = new checkbox_t();

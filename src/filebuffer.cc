@@ -132,22 +132,6 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 	return rw_result_t(rw_result_t::SUCCESS);
 }
 
-static size_t get_stripped_size(const string *str) {
-	const char *data = str->data();
-	size_t idx, size = str->size();
-
-	for (idx = size; idx > 0; idx--) {
-		size_t char_len = size - idx + 1;
-		if ((data[idx - 1] & 0xC0) == 0x80)
-			continue;
-		if (!(t3_unicode_get_info(t3_unicode_get(data + idx - 1, &char_len), INT_MAX) &
-				T3_UNICODE_SPACE_BIT) && data[idx - 1] != '\t') /* Tab is a control character! */
-			break;
-		size = idx - 1;
-	}
-	return size;
-}
-
 /* FIXME: try to prevent as many race conditions as possible here. */
 rw_result_t file_buffer_t::save(save_as_process_t *state) {
 	size_t idx;
@@ -232,15 +216,15 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			state->state = save_as_process_t::WRITING;
 		}
 		case save_as_process_t::WRITING:
+			if (strip_spaces.is_valid() ? (bool) strip_spaces : option.strip_spaces)
+				text_buffer_t::strip_spaces();
 			try {
-				bool local_strip_spaces = strip_spaces.is_valid() ? (bool) strip_spaces : option.strip_spaces;
 				for (; state->i < lines.size(); state->i++) {
 					const string *data;
 					if (state->i != 0)
 						state->wrapper->write("\n", 1);
 					data = lines[state->i]->get_data();
-					state->wrapper->write(data->data(),
-						local_strip_spaces ? get_stripped_size(data) : data->size());
+					state->wrapper->write(data->data(), data->size());
 				}
 			} catch (rw_result_t error) {
 				return error;
