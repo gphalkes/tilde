@@ -42,7 +42,6 @@ class file_buffer_t : public text_buffer_t {
 		virtual void prepare_paint_line(int line);
 		void set_has_window(bool _has_window);
 		void invalidate_highlight(rewrap_type_t type, int line, int pos);
-		void do_strip_spaces(void);
 
 	public:
 		file_buffer_t(const char *_name = NULL, const char *_encoding = NULL);
@@ -62,6 +61,8 @@ class file_buffer_t : public text_buffer_t {
 
 		bool get_strip_spaces(void) const;
 		void set_strip_spaces(bool _strip_spaces);
+
+		void do_strip_spaces(void);
 };
 
 #endif

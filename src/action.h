@@ -59,6 +59,7 @@ ENUM(action_id_t,
 	HELP_HELP,
 	HELP_ABOUT,
 	TOOLS_HIGHLIGHTING,
+	TOOLS_STRIP_SPACES,
 );
 
 #endif
