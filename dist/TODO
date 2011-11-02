@@ -3,8 +3,6 @@ the Tilde text editor (although some features will necessarily be implemented
 in its libraries). The order in which the items appear has no bearing on their
 priority.
 
-- Search and replace features:
-  - Replace in selection
 - Allow users to find out which character(s) is (are) under the cursor
 - Auto save and restore on crash
 - fmt-like rewrapping of text to a specific width

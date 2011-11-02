@@ -1,13 +1,18 @@
+Version 0.1.4:
+	New features:
+	- Added a "strip trailing spaces on save" option, and a "strip trailing
+	  spaces" entry in the Tools menu
+
 Version 0.1.3:
 	Bug fixes:
-	- load highlighting file from path, instead of from local directory
+	- Load highlighting file from path, instead of from local directory
 
 Version 0.1.2:
 	New features:
-	- syntax highlighting using the libt3highlight library
+	- Syntax highlighting using the libt3highlight library
 
 	Bug fixes:
-	- file names were not correctly canonicalized if they contained multiple
+	- File names were not correctly canonicalized if they contained multiple
 	  instances of .. in a row
 
 Version 0.1.1:
