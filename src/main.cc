@@ -110,7 +110,7 @@ main_t::main_t(void) {
 	panel->add_item("_Paste", "^V", action_id_t::EDIT_PASTE);
 	panel->add_separator();
 	panel->add_item("Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
-	panel->add_item("_Mark Selection", "^Space", action_id_t::EDIT_MARK);
+	panel->add_item("_Mark Selection", "^T", action_id_t::EDIT_MARK);
 	panel->add_separator();
 	panel->add_item("_Indent Selection", "Tab", action_id_t::EDIT_INDENT_SELECTION);
 	panel->add_item("U_nindent Selection", "S-Tab", action_id_t::EDIT_UNINDENT_SELECTION);

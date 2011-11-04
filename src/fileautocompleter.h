@@ -20,8 +20,7 @@ using namespace t3_widget;
 
 class file_autocompleter_t : public autocompleter_t {
 	public:
-		string_list_t *build_autocomplete_list(const text_buffer_t *text);
-		string_list_t *update_autocomplete_list(const text_buffer_t *text);
+		string_list_t *build_autocomplete_list(const text_buffer_t *text, int *position);
 		void autocomplete(text_buffer_t *text, size_t idx);
 };
 
