@@ -12,6 +12,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SOURCES..objects/edit := \
+	fileautocompleter.cc \
 	filebuffer.cc \
 	fileeditwindow.cc \
 	fileline.cc \

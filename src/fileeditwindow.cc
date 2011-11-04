@@ -12,6 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "fileeditwindow.h"
+#include "fileautocompleter.h"
 
 file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 	text_buffer_t *old_text = get_text();
@@ -20,6 +21,7 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 
 	_text->set_has_window(true);
 	edit_window_t::set_text(_text, _text->get_view_parameters());
+	edit_window_t::set_autocompleter(new file_autocompleter_t());
 
 	delete old_text;
 }
@@ -71,3 +73,4 @@ void file_edit_window_t::set_text(file_buffer_t *_text) {
 file_buffer_t *file_edit_window_t::get_text(void) const {
 	return (file_buffer_t *) edit_window_t::get_text();
 }
+
