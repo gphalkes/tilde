@@ -2,6 +2,7 @@ Version 0.1.4:
 	New features:
 	- Added a "strip trailing spaces on save" option, and a "strip trailing
 	  spaces" entry in the Tools menu
+	- Autocomplete from existing text
 
 Version 0.1.3:
 	Bug fixes:
