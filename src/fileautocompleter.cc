@@ -91,10 +91,13 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 }
 
 void file_autocompleter_t::autocomplete(text_buffer_t *text, size_t idx) {
-	#warning FIXME: need to change this to use direct replacement iso replacement via selection
+	//FIXME: need to change this to use direct replacement iso replacement via selection
+	text_coordinate_t saved_cursor = text->cursor;
+
 	text->set_selection_mode(selection_mode_t::NONE);
-	text->set_selection_mode(selection_mode_t::SHIFT);
 	text->cursor.pos = completion_start;
+	text->set_selection_mode(selection_mode_t::SHIFT);
+	text->cursor = saved_cursor;
 	text->set_selection_end();
 	text->replace_selection((*current_list)[idx]);
 	text->set_selection_mode(selection_mode_t::NONE);
