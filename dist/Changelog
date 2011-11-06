@@ -1,3 +1,7 @@
+Version 0.1.5:
+	Bug fixes:
+	- Choosing a new highlighting language would cause a segmentation fault
+
 Version 0.1.4:
 	New features:
 	- Added a "strip trailing spaces on save" option, and a "strip trailing

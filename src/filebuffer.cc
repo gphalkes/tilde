@@ -307,10 +307,16 @@ void file_buffer_t::set_highlight(t3_highlight_t *highlight) {
 	if (highlight_info != NULL)
 		t3_highlight_free(highlight_info);
 	highlight_info = highlight;
+
+	if (last_match != NULL) {
+		t3_highlight_free_match(last_match);
+		last_match = NULL;
+	}
+
 	match_line = NULL;
 	highlight_valid = 0;
 
-	if (highlight_info != NULL && last_match == NULL)
+	if (highlight_info != NULL)
 		last_match = t3_highlight_new_match(highlight_info);
 }
 
