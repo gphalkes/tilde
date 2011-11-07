@@ -47,8 +47,6 @@ CXXFLAGS += -I.
 #~ CXXFLAGS += -DUSE_NL_LANGINFO
 CXXFLAGS += `pkg-config --cflags sigc++-2.0`
 
-all: | links
-
 clean-logs:
 	@find .recordings/ -name "record-*" -mtime +7 | xargs -r rm
 	@find .recordings/ -name "record-*" -mtime +1 | egrep -v '\.bz2$$' | xargs -r bzip2 -9 || true
