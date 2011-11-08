@@ -139,6 +139,7 @@ main_t::main_t(void) {
 	panel = new menu_panel_t("_Tools", menu);
 	panel->add_item("_Highlighting...", NULL, action_id_t::TOOLS_HIGHLIGHTING);
 	panel->add_item("_Strip trailing spaces", NULL, action_id_t::TOOLS_STRIP_SPACES);
+	panel->add_item("_Autocomplete", "C-Space", action_id_t::TOOLS_AUTOCOMPLETE);
 
 	panel = new menu_panel_t("_Options", menu);
 	panel->add_item("Input _Handling...", NULL, action_id_t::OPTIONS_INPUT);
@@ -398,6 +399,9 @@ void main_t::menu_activated(int id) {
 			break;
 		case action_id_t::TOOLS_STRIP_SPACES:
 			get_current()->get_text()->do_strip_spaces();
+			break;
+		case action_id_t::TOOLS_AUTOCOMPLETE:
+			get_current()->autocomplete();
 			break;
 
 		case action_id_t::OPTIONS_INPUT:
