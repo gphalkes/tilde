@@ -37,18 +37,11 @@ struct cli_options_t {
 
 };
 
-struct options_t {
+struct term_options_t {
 	opt_int tabsize;
 
-	opt_bool wrap;
 	opt_bool hide_menubar;
 	opt_bool color;
-	opt_bool tab_spaces;
-	opt_bool auto_indent;
-	opt_bool indent_aware_home;
-	opt_bool strip_spaces;
-
-	opt_size_t max_recent_files;
 
 	opt_int key_timeout;
 
@@ -76,6 +69,18 @@ struct options_t {
 	opt_t3_attr_t highlights[MAX_HIGHLIGHTS];
 };
 
+struct options_t {
+	term_options_t term_options;
+	opt_bool wrap;
+	opt_bool tab_spaces;
+	opt_bool auto_indent;
+	opt_bool indent_aware_home;
+	opt_bool strip_spaces;
+	opt_bool make_backup;
+
+	opt_size_t max_recent_files;
+};
+
 struct highlight_attrs_t {
 	t3_attr_t comment;
 	t3_attr_t comment_keyword;
@@ -95,6 +100,7 @@ struct runtime_options_t {
 	bool auto_indent;
 	bool indent_aware_home;
 	bool strip_spaces;
+	bool make_backup;
 	size_t max_recent_files;
 	opt_int key_timeout;
 	t3_attr_t highlights[MAX_HIGHLIGHTS];
@@ -107,7 +113,7 @@ extern int config_read_error_line;
 extern cli_options_t cli_option;
 extern runtime_options_t option;
 
-extern options_t term_specific_option;
+extern term_options_t term_specific_option;
 extern options_t default_option;
 
 void parse_args(int argc, char **argv);

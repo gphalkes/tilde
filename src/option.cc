@@ -37,7 +37,7 @@ using namespace t3_widget;
 cli_options_t cli_option;
 runtime_options_t option; /* Merged version of all possible sources. */
 
-options_t term_specific_option;
+term_options_t term_specific_option;
 options_t default_option;
 
 bool config_read_error;
@@ -114,20 +114,14 @@ static void read_config_attribute(const t3_config_t *config, const char *name, o
 #define GET_ATTRIBUTE(name) read_config_attribute(attributes, #name, &opts->name)
 #define GET_HL_ATTRIBUTE(name) read_config_attribute(attributes, name, &opts->highlights[map_highlight(NULL, name)])
 
-static void read_config_part(const t3_config_t *config, options_t *opts) {
+static void read_term_config_part(const t3_config_t *config, term_options_t *opts) {
 	t3_config_t *attributes;
 
 	GET_OPT(tabsize, INT, int);
 
-	GET_OPT(wrap, BOOL, bool);
 	GET_OPT(hide_menubar, BOOL, bool);
 	GET_OPT(color, BOOL, bool);
-	GET_OPT(auto_indent, BOOL, bool);
-	GET_OPT(tab_spaces, BOOL, bool);
-	GET_OPT(indent_aware_home, BOOL, bool);
-	GET_OPT(strip_spaces, BOOL, bool);
 
-	GET_OPT(max_recent_files, INT, int);
 	GET_OPT(key_timeout, INT, int);
 
 	attributes = t3_config_get(config, "attributes");
@@ -216,7 +210,18 @@ static void read_config(void) {
 		goto end;
 	}
 
-	read_config_part(config, &default_option);
+	read_term_config_part(config, &default_option.term_options);
+
+	#define opts (&default_option)
+	GET_OPT(wrap, BOOL, bool);
+	GET_OPT(auto_indent, BOOL, bool);
+	GET_OPT(tab_spaces, BOOL, bool);
+	GET_OPT(indent_aware_home, BOOL, bool);
+	GET_OPT(strip_spaces, BOOL, bool);
+	GET_OPT(make_backup, BOOL, bool);
+
+	GET_OPT(max_recent_files, INT, int);
+	#undef opts
 
 	if ((term_specific_config = t3_config_get(config, "terminals")) == NULL)
 		goto end;
@@ -227,7 +232,7 @@ static void read_config(void) {
 		goto end;
 
 	if ((term_specific_config = t3_config_find(term_specific_config, find_term_config, term, NULL)) != NULL)
-		read_config_part(term_specific_config, &term_specific_option);
+		read_term_config_part(term_specific_config, &term_specific_option);
 
 end:
 	t3_config_delete(config);
@@ -237,8 +242,8 @@ end:
 #define SET_OPT_FROM_FILE(name, deflt) do { \
 	if (term_specific_option.name.is_valid()) \
 		option.name = term_specific_option.name; \
-	else if (default_option.name.is_valid()) \
-		option.name = default_option.name; \
+	else if (default_option.term_options.name.is_valid()) \
+		option.name = default_option.term_options.name; \
 	else \
 		option.name = deflt; \
 } while (0)
@@ -264,6 +269,7 @@ static void post_process_options(void) {
 	SET_OPT_FROM_DFLT(tab_spaces, false);
 	SET_OPT_FROM_DFLT(auto_indent, true);
 	SET_OPT_FROM_DFLT(indent_aware_home, true);
+	SET_OPT_FROM_DFLT(make_backup, false);
 
 	SET_OPT_FROM_DFLT(max_recent_files, 16);
 	SET_OPT_FROM_DFLT(strip_spaces, false);
@@ -365,8 +371,8 @@ END_FUNCTION
 #define SET_ATTR_FROM_FILE(name, const_name) do { \
 	if (term_specific_option.name.is_valid()) \
 		set_attribute(const_name, term_specific_option.name); \
-	else if (default_option.name.is_valid()) \
-		set_attribute(const_name, default_option.name); \
+	else if (default_option.term_options.name.is_valid()) \
+		set_attribute(const_name, default_option.term_options.name); \
 } while (0)
 
 void set_attributes(void) {
@@ -423,24 +429,18 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 }
 
 #define SET_OPTION(name, type) do { \
-	if (options->name.is_valid()) \
-		t3_config_add_##type(config, #name, options->name); \
+	if (opts->name.is_valid()) \
+		t3_config_add_##type(config, #name, opts->name); \
 } while (0)
-#define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, options->name)
-#define SET_HL_ATTRIBUTE(x, name) set_config_attribute(config, "highlight_attributes", name, options->highlights[x])
+#define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, opts->name)
+#define SET_HL_ATTRIBUTE(x, name) set_config_attribute(config, "highlight_attributes", name, opts->highlights[x])
 
-static void set_config_options(t3_config_t *config, options_t *options) {
+static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 	SET_OPTION(tabsize, int);
 
-	SET_OPTION(wrap, bool);
 	SET_OPTION(hide_menubar, bool);
 	SET_OPTION(color, bool);
-	SET_OPTION(tab_spaces, bool);
-	SET_OPTION(auto_indent, bool);
-	SET_OPTION(indent_aware_home, bool);
-	SET_OPTION(strip_spaces, bool);
 
-	SET_OPTION(max_recent_files, int);
 	SET_OPTION(key_timeout, int);
 
 	SET_ATTRIBUTE(non_print);
@@ -507,8 +507,20 @@ bool write_config(void) {
 		}
 	}
 
-	default_option.key_timeout.unset();
-	set_config_options(config, &default_option);
+	default_option.term_options.key_timeout.unset();
+	set_term_config_options(config, &default_option.term_options);
+
+	#define opts (&default_option)
+	SET_OPTION(wrap, bool);
+	SET_OPTION(tab_spaces, bool);
+	SET_OPTION(auto_indent, bool);
+	SET_OPTION(indent_aware_home, bool);
+	SET_OPTION(strip_spaces, bool);
+	SET_OPTION(make_backup, bool);
+
+	SET_OPTION(max_recent_files, int);
+	#undef opts
+
 	t3_config_add_int(config, "config_version", 1);
 
 	if (cli_option.term != NULL)
@@ -526,10 +538,7 @@ bool write_config(void) {
 			t3_config_add_string(terminal_config, "name", term);
 		}
 
-		term_specific_option.wrap.unset();
-		term_specific_option.max_recent_files.unset();
-
-		set_config_options(terminal_config, &term_specific_option);
+		set_term_config_options(terminal_config, &term_specific_option);
 	}
 
 	/* Validate config using schema, such that we can be sure that we won't

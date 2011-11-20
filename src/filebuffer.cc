@@ -153,7 +153,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			if ((state->real_name = resolve_links(save_name)) == NULL)
 				return rw_result_t(rw_result_t::ERRNO_ERROR, ENAMETOOLONG);
 
-			/* FIXME: to avoid race conditions, it iw probably better to try open with O_CREAT|O_EXCL
+			/* FIXME: to avoid race conditions, it is probably better to try open with O_CREAT|O_EXCL
 			   However, this may cause issues with NFS, which is known to have isues with this. */
 			if (stat(state->real_name, &state->file_info) < 0) {
 				if (errno == ENOENT) {
@@ -234,6 +234,12 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			close(state->fd);
 			state->fd = -1;
 			if (state->temp_name != NULL) {
+				if (option.make_backup) {
+					string backup_name = state->real_name;
+					backup_name += '~';
+					unlink(backup_name.c_str());
+					link(state->real_name, backup_name.c_str());
+				}
 				if (rename(state->temp_name, state->real_name) < 0)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 			}
@@ -333,6 +339,12 @@ void file_buffer_t::set_strip_spaces(bool _strip_spaces) {
 void file_buffer_t::do_strip_spaces(void) {
 	size_t i, idx, char_len, size;
 	bool undo_started = false;
+
+	/*FIXME: a better way to do this would be to store the stripped spaces for
+	   all lines in a single string, delimited by single non-space bytes. If the
+	   length of the string equals the number of lines, then just don't store
+	   it. Care has to be taken to maintain the correct cursor position, and
+	   we have to implement undo/redo separately. */
 
 	for (i = 0; i < lines.size() ; i++) {
 		const string *str = lines[i]->get_data();

@@ -56,6 +56,7 @@ class main_t : public main_window_base_t {
 		message_dialog_t *about_dialog;
 		buffer_options_dialog_t *buffer_options_dialog, *default_options_dialog;
 		interface_options_dialog_t *interface_options_dialog;
+		misc_options_dialog_t *misc_options_dialog;
 		highlight_dialog_t *highlight_dialog;
 
 	public:
@@ -73,6 +74,7 @@ class main_t : public main_window_base_t {
 		void set_buffer_options(void);
 		void set_default_options(void);
 		void set_interface_options(void);
+		void set_misc_options(void);
 		void set_highlight(t3_highlight_t *highlight);
 		void save_as_done(stepped_process_t *process);
 };
@@ -146,6 +148,7 @@ main_t::main_t(void) {
 	panel->add_item("_Current Buffer...", NULL, action_id_t::OPTIONS_BUFFER);
 	panel->add_item("Buffer _Defaults...", NULL, action_id_t::OPTIONS_DEFAULTS);
 	panel->add_item("_Interface...", NULL, action_id_t::OPTIONS_INTERFACE);
+	panel->add_item("_Miscellaneous...", NULL, action_id_t::OPTIONS_MISC);
 
 	panel = new menu_panel_t("_Help", menu);
 	//FIXME: reinstate when help is actuall available.
@@ -209,6 +212,10 @@ main_t::main_t(void) {
 	interface_options_dialog = new interface_options_dialog_t("Interface");
 	interface_options_dialog->center_over(this);
 	interface_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_interface_options));
+
+	misc_options_dialog = new misc_options_dialog_t("Miscellaneous");
+	misc_options_dialog->center_over(this);
+	misc_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_misc_options));
 
 	highlight_dialog = new highlight_dialog_t(t3_win_get_height(window) - 4, 40);
 	highlight_dialog->center_over(this);
@@ -419,6 +426,10 @@ void main_t::menu_activated(int id) {
 			interface_options_dialog->set_values_from_options();
 			interface_options_dialog->show();
 			break;
+		case action_id_t::OPTIONS_MISC:
+			misc_options_dialog->set_values_from_options();
+			misc_options_dialog->show();
+			break;
 
 		case action_id_t::HELP_ABOUT:
 			about_dialog->show();
@@ -488,6 +499,11 @@ void main_t::set_interface_options(void) {
 	split->set_position(!option.hide_menubar, 0);
 	menu->set_hidden(option.hide_menubar);
 	set_color_mode(option.color);
+	write_config();
+}
+
+void main_t::set_misc_options(void) {
+	misc_options_dialog->set_options_values();
 	write_config();
 }
 

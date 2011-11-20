@@ -56,4 +56,18 @@ class interface_options_dialog_t : public dialog_t {
 	T3_WIDGET_SIGNAL(activate, void);
 };
 
+class misc_options_dialog_t : public dialog_t {
+	protected:
+		checkbox_t *save_backup_box;
+
+	public:
+		misc_options_dialog_t(const char *_title);
+
+		void set_values_from_options(void);
+		void set_options_values(void);
+		void handle_activate(void);
+
+	T3_WIDGET_SIGNAL(activate, void);
+};
+
 #endif
