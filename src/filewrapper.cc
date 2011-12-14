@@ -15,7 +15,7 @@
 #include <cstring>
 
 #include <t3widget/widget.h>
-#include <t3unicode/unicode.h>
+#include <uninorm.h>
 
 using namespace t3_widget;
 
@@ -158,8 +158,8 @@ string *file_read_wrapper_t::read_line(void) {
 }
 
 void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
-	char *nfc_output = NULL;
-	size_t nfc_output_size = 0, nfc_output_len;
+	cleanup_ptr<char> nfc_output;
+	size_t nfc_output_len;
 
 	char transcript_buffer[FILE_BUFFER_SIZE], *transcript_buffer_ptr;
 	const char *buffer_end, *transcript_buffer_end;
@@ -167,13 +167,11 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
 
 	// Convert to NFC before writing
 	//FIXME: check return value
-	nfc_output_len = t3_unicode_to_nfc(buffer, bytes, &nfc_output, &nfc_output_size);
+	nfc_output = (char *) u8_normalize(UNINORM_NFC, (const uint8_t *) buffer, bytes, NULL, &nfc_output_len);
 	if (handle == NULL) {
 		if (nosig_write(fd, nfc_output, nfc_output_len) < 0) {
-			free(nfc_output);
 			throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 		}
-		free(nfc_output);
 		return;
 	}
 
@@ -197,18 +195,15 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
 				break;
 			case TRANSCRIPT_INCOMPLETE:
 			default:
-				free(nfc_output);
 				throw rw_result_t(rw_result_t::CONVERSION_ERROR);
 		}
 		if (transcript_buffer_ptr > transcript_buffer &&
 				nosig_write(fd, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0)
 		{
-			free(nfc_output);
 			throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 		}
 	}
 
-	free(nfc_output);
 	if (imprecise)
 		throw rw_result_t(rw_result_t::CONVERSION_IMPRECISE);
 	return;

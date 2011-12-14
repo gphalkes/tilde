@@ -15,8 +15,6 @@
 #include <fcntl.h>
 #include <cstring>
 
-#include <t3unicode/unicode.h>
-
 #include "filebuffer.h"
 #include "fileline.h"
 #include "openfiles.h"
@@ -355,8 +353,7 @@ void file_buffer_t::do_strip_spaces(void) {
 				continue;
 
 			char_len = strip_start - idx + 1;
-			if (!(t3_unicode_get_info(t3_unicode_get(data + idx - 1, &char_len), INT_MAX) &
-					T3_UNICODE_SPACE_BIT) && data[idx - 1] != '\t') /* Tab is a control character! */
+			if (!lines[i]->is_space(idx))
 				break;
 
 			strip_start = idx - 1;

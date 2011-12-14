@@ -29,9 +29,9 @@ SOURCES..objects/edit := \
 	dialogs/selectbufferdialog.cc \
 	dialogs/optionsdialog.cc
 
-LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode -lt3config -lt3highlight
-LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3unicode/.libs -Lt3config/.libs -Lt3highlight/.libs
-LDLIBS..objects/edit += `pkg-config --libs sigc++-2.0`
+LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
+LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3config/.libs -Lt3highlight/.libs
+LDLIBS..objects/edit += `pkg-config --libs sigc++-2.0` -lunistring
 CXXFLAGS.option = -I.objects
 
 CXXTARGETS := .objects/edit
@@ -62,7 +62,6 @@ xgettext: all
 
 links:
 	@[ -L record ] || ln -s ../../../record/src record
-	@[ -L t3unicode ] || ln -s ../../unicode/src t3unicode
 	@[ -L t3window ] || ln -s ../../window/src t3window
 	@[ -L t3widget ] || ln -s ../../widget/src t3widget
 	@[ -L t3config ] || ln -s ../../config/src t3config
