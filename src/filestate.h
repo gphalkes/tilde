@@ -160,7 +160,7 @@ class open_recent_process_t : public load_process_t	{
 
 		open_recent_process_t(const callback_t &cb);
 		~open_recent_process_t(void);
-		virtual void file_selected(recent_file_info_t *_info);
+		virtual void recent_file_selected(recent_file_info_t *_info);
 		virtual bool step(void);
 	public:
 		static void execute(const callback_t &cb);

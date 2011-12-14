@@ -38,26 +38,26 @@ file_line_t::file_line_t(const std::string *str, file_line_factory_t *_factory) 
 
 t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
 	const string *str;
-	file_buffer_t *buffer = ((file_line_factory_t *) factory)->get_file_buffer();
+	file_buffer_t *file = ((file_line_factory_t *) factory)->get_file_buffer();
 
-	if (buffer == NULL || buffer->highlight_info == NULL)
+	if (file == NULL || file->highlight_info == NULL)
 		return info->normal_attr;
 
 	str = get_data();
 	if ((size_t) i >= str->size())
 		return info->normal_attr;
 
-	if (buffer->match_line != this || (size_t) i < t3_highlight_get_start(buffer->last_match)) {
-		buffer->match_line = this;
-		t3_highlight_reset(buffer->last_match, highlight_start_state);
+	if (file->match_line != this || (size_t) i < t3_highlight_get_start(file->last_match)) {
+		file->match_line = this;
+		t3_highlight_reset(file->last_match, highlight_start_state);
 	}
 
-	while (t3_highlight_get_end(buffer->last_match) <= (size_t) i)
-		t3_highlight_match(buffer->last_match, str->data(), str->size());
+	while (t3_highlight_get_end(file->last_match) <= (size_t) i)
+		t3_highlight_match(file->last_match, str->data(), str->size());
 
-	int attribute_idx = (size_t) i < t3_highlight_get_match_start(buffer->last_match) ?
-		t3_highlight_get_begin_attr(buffer->last_match) :
-		t3_highlight_get_match_attr(buffer->last_match);
+	int attribute_idx = (size_t) i < t3_highlight_get_match_start(file->last_match) ?
+		t3_highlight_get_begin_attr(file->last_match) :
+		t3_highlight_get_match_attr(file->last_match);
 
 	return option.highlights[attribute_idx];
 }
@@ -69,19 +69,19 @@ void file_line_t::set_highlight_start(int state) {
 int file_line_t::get_highlight_end(void) {
 	const string *str;
 
-	file_buffer_t *buffer = ((file_line_factory_t *) factory)->get_file_buffer();
-	if (buffer == NULL || buffer->highlight_info == NULL)
+	file_buffer_t *file = ((file_line_factory_t *) factory)->get_file_buffer();
+	if (file == NULL || file->highlight_info == NULL)
 		return 0;
 
-	if (buffer->match_line != this) {
-		buffer->match_line = this;
-		t3_highlight_reset(buffer->last_match, highlight_start_state);
+	if (file->match_line != this) {
+		file->match_line = this;
+		t3_highlight_reset(file->last_match, highlight_start_state);
 	}
 
 	str = get_data();
-	while (t3_highlight_match(buffer->last_match, str->data(), str->size())) {}
+	while (t3_highlight_match(file->last_match, str->data(), str->size())) {}
 
-	return t3_highlight_get_state(buffer->last_match);
+	return t3_highlight_get_state(file->last_match);
 }
 
 //====================== file_line_factory_t ========================

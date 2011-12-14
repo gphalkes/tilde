@@ -328,7 +328,8 @@ open_recent_process_t::open_recent_process_t(const callback_t &cb) : load_proces
 
 bool open_recent_process_t::step(void) {
 	if (state == SELECT_FILE) {
-		connections.push_back(open_recent_dialog->connect_file_selected(sigc::mem_fun(this, &open_recent_process_t::file_selected)));
+		connections.push_back(open_recent_dialog->connect_file_selected(sigc::mem_fun(this,
+			&open_recent_process_t::recent_file_selected)));
 		connections.push_back(open_recent_dialog->connect_closed(sigc::mem_fun(this, &open_recent_process_t::abort)));
 		open_recent_dialog->show();
 		return false;
@@ -336,7 +337,7 @@ bool open_recent_process_t::step(void) {
 	return load_process_t::step();
 }
 
-void open_recent_process_t::file_selected(recent_file_info_t *_info) {
+void open_recent_process_t::recent_file_selected(recent_file_info_t *_info) {
 	info = _info;
 	file = new file_buffer_t(info->get_name(), info->get_encoding());
 	state = INITIAL;

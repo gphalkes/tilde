@@ -31,7 +31,7 @@ SOURCES..objects/edit := \
 
 LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3unicode -lt3config -lt3highlight
 LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3unicode/.libs -Lt3config/.libs -Lt3highlight/.libs
-LDFLAGS..objects/edit += `pkg-config --libs sigc++-2.0`
+LDLIBS..objects/edit += `pkg-config --libs sigc++-2.0`
 CXXFLAGS.option = -I.objects
 
 CXXTARGETS := .objects/edit
