@@ -49,7 +49,7 @@ Prerequisites and installation
 ==============================
 
 Tilde requires a C++ compiler, the libraries of the Tilde Terminal Toolkit
-(libt3unicode, libt3window, libt3key, libt3widget and libt3config), and
+(libt3window, libt3key, libt3widget and libt3config), libunistring and
 libtranscript.
 
 There are two ways in which to compile Tilde:

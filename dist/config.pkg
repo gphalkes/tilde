@@ -75,6 +75,21 @@ EOF
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
+#include <uninorm.h>
+
+int main(int argc, char *argv[]) {
+	uint8_t buffer[10];
+	size_t buffer_size = sizeof(buffer);
+	size_t out_size;
+	u8_normalize(UNINORM_NFC, buffer, buffer_size, NULL, &out_size);
+	return 0;
+}
+EOF
+	test_link_cxx "libunistring" "TESTLIBS=-lunistring" || \
+		error "!! Can not find libunistring library. Libunistring is required to compile libt3window."
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
 #include <t3unicode/unicode.h>
 
 int main(int argc, char *argv[]) {
@@ -199,6 +214,6 @@ int main(int argc, char *argv[]) {
 EOF
 	test_link_cxx "strdup" && CONFIGFLAGS="${CONFIGFLAGS} -DHAS_STRDUP"
 
-	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3UNICODE_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3WINDOW_FLAGS} ${LIBT3CONFIG_FLAGS} ${LIBT3HIGHLIGHT_FLAGS}" \
-		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} ${LIBT3UNICODE_LIBS} ${LIBT3WIDGET_LIBS} ${LIBT3WINDOW_LIBS} ${LIBT3CONFIG_LIBS} ${LIBT3HIGHLIGHT_LIBS}"
+	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3WINDOW_FLAGS} ${LIBT3CONFIG_FLAGS} ${LIBT3HIGHLIGHT_FLAGS}" \
+		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} -lunistring ${LIBT3WIDGET_LIBS} ${LIBT3WINDOW_LIBS} ${LIBT3CONFIG_LIBS} ${LIBT3HIGHLIGHT_LIBS}"
 }

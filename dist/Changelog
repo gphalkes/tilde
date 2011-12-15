@@ -1,3 +1,7 @@
+Version 0.1.6:
+	Miscelaneous changes:
+	- Use libunistring instead of libt3unicode.
+
 Version 0.1.5:
 	Bug fixes:
 	- Choosing a new highlighting language would cause a segmentation fault
