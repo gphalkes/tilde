@@ -26,6 +26,6 @@ fi
 export LD_LIBRARY_PATH="`sed 's/#.*//' $DIR/Makefile | egrep -o -- '-L[^[:space:]]+' | sed -r \"s%-L%$DIR/%g\" | tr '\n' ':' | sed -r 's/:$//'`"
 DATE="`date +%F@%T`"
 rm "$DIR/.recordings/last" "$DIR/log.txt" "$DIR/libt3widgetlog.txt"
-"$DIR/record/tdrecord" -o "$DIR/.recordings/last" -eLD_LIBRARY_PATH "$DIR/.objects/edit" --D "$@"
+"$DIR/record/tdrecord" -o "$DIR/.recordings/last" -eLD_LIBRARY_PATH -X "$DIR/.objects/edit" --D "$@"
 
 ln "$DIR/.recordings/last" "$DIR/.recordings/record-$DATE"

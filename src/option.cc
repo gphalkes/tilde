@@ -12,7 +12,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <t3config/config.h>
-#include <t3unicode/unicode.h>
 #include <t3window/window.h>
 #include <t3widget/widget.h>
 #include <t3highlight/highlight.h>

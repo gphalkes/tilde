@@ -6,9 +6,8 @@ priority.
 - Allow users to find out which character(s) is (are) under the cursor
 - Auto save and restore on crash
 - fmt-like rewrapping of text to a specific width
-- X11 integration with the clipboard
-- Mouse selection, with X11 PRIMARY integration
-- Mouse support for clicking buttons, scrollbars etc.
+- improved mouse handling (double in text should select a word, triple click a
+    line)
 - Insertion of characters by their Unicode name instead of their codepoint
 - Improve terminal capabilities detection
 - Dialogs for changing the settings [partially done]
