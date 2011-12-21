@@ -90,18 +90,6 @@ EOF
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
-#include <t3unicode/unicode.h>
-
-int main(int argc, char *argv[]) {
-	t3_unicode_get_version();
-	return 0;
-}
-EOF
-	pkgconfig libt3unicode LIBT3UNICODE test_link_cxx || \
-		error "!! Can not find libt3unicode. libt3unicode is required to compile tilde."
-
-	clean_cxx
-	cat > .configcxx.cc <<EOF
 #include <t3window/window.h>
 #include <t3window/terminal.h>
 
@@ -122,9 +110,8 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libt3widget/0.1.5 LIBT3WIDGET test_link_cxx || \
+	pkgconfig libt3widget/0.1.6 LIBT3WIDGET test_link_cxx || \
 		error "!! Can not find libt3widget. libt3widget is required to compile tilde."
-#FIXME: need to add libsigc++ flags as well, because otherwise it won't compile!!
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF

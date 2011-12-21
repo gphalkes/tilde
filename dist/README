@@ -31,15 +31,17 @@ The current version of Tilde provides the following features:
 - Intuitive interface for users accustomed to GUI environments
 - All actions available through menu items
 - Multiple files can be open at the same time
-- The window can be split to show multiple buffers simultaneously
+- The window can be split to show multiple files simultaneously
 - Line wrapping at word boundaries
 - Detection of terminal capabilities for optimal display of complex Unicode
   texts
-- Regular expression search & replace (replace does not allow match references
-  yet)
+- Regular expression search & replace
 - Indenting using either tabs or spaces
 - Indent/unindent selection
 - Basic automatic indentation (repeats indentation of previous line)
+- Mouse support
+- X11 clipboard and primary selection integration
+- Optional saving of backup file
 
 See the file named TODO for information on which features are planned for
 future versions of Tilde.

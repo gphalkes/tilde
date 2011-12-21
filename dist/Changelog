@@ -1,28 +1,36 @@
 Version 0.1.6:
+	New features:
+	- Optional saving of backup files.
+
 	Miscelaneous changes:
 	- Use libunistring instead of libt3unicode.
 
+	Bug fixes:
+	- Fix highlighting for single line files
+	- Fix crash on loading files from command line when load fails on the first
+	  of those files.
+
 Version 0.1.5:
 	Bug fixes:
-	- Choosing a new highlighting language would cause a segmentation fault
+	- Choosing a new highlighting language would cause a segmentation fault.
 
 Version 0.1.4:
 	New features:
 	- Added a "strip trailing spaces on save" option, and a "strip trailing
-	  spaces" entry in the Tools menu
-	- Autocomplete from existing text
+	  spaces" entry in the Tools menu.
+	- Autocomplete from existing text.
 
 Version 0.1.3:
 	Bug fixes:
-	- Load highlighting file from path, instead of from local directory
+	- Load highlighting file from path, instead of from local directory.
 
 Version 0.1.2:
 	New features:
-	- Syntax highlighting using the libt3highlight library
+	- Syntax highlighting using the libt3highlight library.
 
 	Bug fixes:
 	- File names were not correctly canonicalized if they contained multiple
-	  instances of .. in a row
+	  instances of .. in a row.
 
 Version 0.1.1:
 	Initial release
