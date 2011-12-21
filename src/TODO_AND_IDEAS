@@ -1,5 +1,6 @@
 BUGS
 ====
+- select buffer dialog should open with currently active buffer selected
 - config file overwriting
 - no message on error reading or writing config file
 

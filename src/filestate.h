@@ -71,6 +71,7 @@ class load_process_t : public stepped_process_t {
 
 		load_process_t(const callback_t &cb);
 		load_process_t(const callback_t &cb, const char *name);
+		void abort(void);
 		virtual bool step(void);
 		virtual void file_selected(const std::string *name);
 		virtual void encoding_selected(const std::string *_encoding);

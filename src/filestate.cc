@@ -25,6 +25,12 @@ load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), st
 load_process_t::load_process_t(const callback_t &cb, const char *name) : stepped_process_t(cb), state(INITIAL),
 		file(new file_buffer_t(name, "UTF-8")), wrapper(NULL), encoding("UTF-8"), fd(-1) {}
 
+void load_process_t::abort(void) {
+	delete file;
+	file = NULL;
+	stepped_process_t::abort();
+}
+
 bool load_process_t::step(void) {
 	string message;
 	rw_result_t rw_result;
@@ -48,6 +54,7 @@ bool load_process_t::step(void) {
 			printf_into(&message, "Could not load file '%s': %s", file->get_name(), strerror(rw_result.get_errno_error()));
 			error_dialog->set_message(&message);
 			error_dialog->show();
+			result = true;
 			break;
 		case rw_result_t::CONVERSION_OPEN_ERROR:
 			printf_into(&message, "Could not find a converter for selected encoding: %s",
@@ -110,7 +117,7 @@ file_buffer_t *load_process_t::get_file_buffer(void) {
 }
 
 load_process_t::~load_process_t(void) {
-	if (!result)
+	if (!result && file != NULL)
 		delete file;
 	delete wrapper;
 	if (fd >= 0)
@@ -373,9 +380,6 @@ bool load_cli_file_process_t::step(void) {
 
 void load_cli_file_process_t::load_done(stepped_process_t *process) {
 	(void) process;
-
-	if (!process->get_result())
-		new file_buffer_t(*iter, "UTF-8");
 
 	in_load = false;
 	iter++;
