@@ -79,7 +79,7 @@ _LOCALEDIR=$(DESTDIR)$(LOCALEDIR)
 
 install: all
 	$(INSTALL) -d $(_bindir)
-	$(INSTALL) src/tilde $(_bindir)
+	$(INSTALL) -s src/tilde $(_bindir)
 	$(INSTALL) -d $(_docdir)
 	$(INSTALL) -m0644 COPYING README Changelog $(_docdir)
 	$(INSTALL) -d $(_mandir)/man1
