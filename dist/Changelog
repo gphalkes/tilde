@@ -1,3 +1,7 @@
+Version 0.1.7:
+	Bug fixes:
+	- Removed reference to pcre_version, which was inadvertently left in code.
+
 Version 0.1.6:
 	New features:
 	- Optional saving of backup files.
