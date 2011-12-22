@@ -309,10 +309,8 @@ static void print_version(void) {
 		"Copyright (c) 2011 G.P. Halkes\n"
 		"Tilde is licensed under the GNU General Public License version 3\n"); // @copyright
 	printf("Library versions:\n"
-		"  libpcre %s\n"
 		"  libt3config %ld.%ld.%ld\n  libt3highlight %ld.%ld.%ld\n  libt3key (through libt3widget) %ld.%ld.%ld\n"
 		"  libt3widget %ld.%ld.%ld\n  libt3window %ld.%ld.%ld\n  libtranscript %ld.%ld.%ld\n  libunistring %d.%d.?\n",
-		pcre_version(),
 		t3_config_get_version() >> 16, (t3_config_get_version() >> 8) & 0xff, t3_config_get_version() & 0xff,
 		t3_highlight_get_version() >> 16, (t3_highlight_get_version() >> 8) & 0xff, t3_highlight_get_version() & 0xff,
 		t3_widget::get_libt3key_version() >> 16, (t3_widget::get_libt3key_version() >> 8) & 0xff, t3_widget::get_libt3key_version() & 0xff,
