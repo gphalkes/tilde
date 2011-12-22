@@ -568,6 +568,7 @@ int main(int argc, char *argv[]) {
 #endif
 	params->term = cli_option.term;
 	params->program_name = "Tilde";
+	params->disable_external_clipboard = cli_option.disable_external_clipboard;
 
 	if (!(result = init(params)).get_success()) {
 		fprintf(stderr, "Error: %s\n", result.get_string());

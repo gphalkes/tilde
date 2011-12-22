@@ -28,6 +28,7 @@ struct cli_options_t {
 	bool ask_input_method;
 
 	std::list<const char *> files;
+	bool disable_external_clipboard;
 
 #ifdef DEBUG
 	bool wait;

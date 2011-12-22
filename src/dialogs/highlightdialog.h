@@ -19,7 +19,7 @@
 
 using namespace t3_widget;
 
-typedef cleanup_ptr<t3_highlight_lang_t, t3_highlight_lang_t, t3_highlight_free_list> auto_lang_t;
+typedef cleanup_ptr<t3_highlight_lang_t, free_func<t3_highlight_lang_t, t3_highlight_free_list> > auto_lang_t;
 
 class highlight_dialog_t : public dialog_t {
 	private:

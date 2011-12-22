@@ -26,9 +26,9 @@ class file_edit_window_t;
 class file_buffer_t : public text_buffer_t {
 	friend class file_edit_window_t; // Required to access view_parameters and set_has_window
 	private:
-		cleanup_ptr<char> name, encoding;
+		cleanup_ptr_char name, encoding;
 		text_line_t name_line;
-		cleanup_obj_ptr<edit_window_t::view_parameters_t> view_parameters;
+		cleanup_ptr<edit_window_t::view_parameters_t> view_parameters;
 		bool has_window;
 		int highlight_valid;
 		opt_bool strip_spaces;

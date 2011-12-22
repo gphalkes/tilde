@@ -293,12 +293,13 @@ static void post_process_options(void) {
 
 static void print_help(void) {
 	printf("Usage: tilde [<OPTIONS>] [<FILE...>]\n"
-		"  -c,--color           Request color mode, overriding config file.\n"
 		"  -b,--black-white     Request black & white mode, overriding config file.\n"
+		"  -c,--color           Request color mode, overriding config file.\n"
 		"  -h,--help            Show this help message.\n"
 		"  -I,--select-input-method    Ignore configured input handling method.\n"
 		"  -T<term>,--terminal=<term>  Use <term> instead of TERM variable.\n"
 	    "  -V,--version         Show version and copyright information.\n"
+		"  -x,--no-ext-clipboard       Disable the external (X11) clipboard interface\n"
 	);
 	exit(EXIT_SUCCESS);
 }
@@ -343,6 +344,9 @@ PARSE_FUNCTION(parse_args)
 		END_OPTION
 		OPTION('I', "select-input-method", NO_ARG)
 			cli_option.ask_input_method = true;
+		END_OPTION
+		OPTION('x', "no-ext-clipboard", NO_ARG)
+			cli_option.disable_external_clipboard = true;
 		END_OPTION
 #ifdef DEBUG
 		LONG_OPTION("W", NO_ARG)
