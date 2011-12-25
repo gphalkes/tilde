@@ -31,7 +31,7 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 		dialog_t(height, width, "Highlighting Language")
 {
 	button_t *ok_button, *cancel_button;
-	auto_lang_t allocated_names;
+	cleanup_lang_t allocated_names;
 	t3_highlight_lang_t *ptr;
 	label_t *label;
 	int error;
@@ -74,7 +74,7 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 	push_back(ok_button);
 	push_back(cancel_button);
 
-	names = (t3_highlight_lang_t *) allocated_names;
+	names = allocated_names.get();
 	allocated_names = NULL;
 }
 

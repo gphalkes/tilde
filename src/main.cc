@@ -61,6 +61,7 @@ class main_t : public main_window_base_t {
 
 	public:
 		main_t(void);
+		~main_t(void);
 		virtual bool process_key(t3_widget::key_t key);
 		virtual bool set_size(optint height, optint width);
 		void load_cli_files_done(stepped_process_t *process);
@@ -151,7 +152,7 @@ main_t::main_t(void) {
 	panel->add_item("_Miscellaneous...", NULL, action_id_t::OPTIONS_MISC);
 
 	panel = new menu_panel_t("_Help", menu);
-	//FIXME: reinstate when help is actuall available.
+	//FIXME: reinstate when help is actually available.
 	//~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
 	panel->add_item("_About", NULL, action_id_t::HELP_ABOUT);
 
@@ -220,6 +221,17 @@ main_t::main_t(void) {
 	highlight_dialog = new highlight_dialog_t(t3_win_get_height(window) - 4, 40);
 	highlight_dialog->center_over(this);
 	highlight_dialog->connect_language_selected(sigc::mem_fun(this, &main_t::set_highlight));
+}
+
+main_t::~main_t(void) {
+#ifdef TILDE_DEBUG
+	delete select_buffer_dialog;
+	delete about_dialog;
+	delete default_options_dialog;
+	delete interface_options_dialog;
+	delete misc_options_dialog;
+	delete highlight_dialog;
+#endif
 }
 
 bool main_t::process_key(t3_widget::key_t key) {
@@ -631,6 +643,17 @@ int main(int argc, char *argv[]) {
 	}
 
 	load_cli_file_process_t::execute(sigc::mem_fun(main_window, &main_t::load_cli_files_done));
-	main_loop();
-	return 0;
+	int retval = main_loop();
+#ifdef TILDE_DEBUG
+	delete main_window;
+	delete continue_abort_dialog;
+	delete open_file_dialog;
+	delete save_as_dialog;
+	delete close_confirm_dialog;
+	delete error_dialog;
+	delete open_recent_dialog;
+	delete encoding_dialog;
+	delete input_selection_dialog;
+#endif
+	return retval;
 }

@@ -303,8 +303,7 @@ bool exit_process_t::step(void) {
 			return false;
 		}
 	}
-	//FIXME: do we really want to call exit here, or do we need to do some clean-up elsewhere
-	exit(EXIT_SUCCESS);
+	exit_main_loop(EXIT_SUCCESS);
 /*	in_step = false;
 	return true;*/
 }

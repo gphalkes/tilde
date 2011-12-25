@@ -42,6 +42,7 @@ EXTRATARGETS := clean-logs
 include ../../makesys/rules.mk
 #================================================#
 CXXFLAGS += -I.
+CXXFLAGS += -DTILDE_DEBUG
 #~ CXXFLAGS += -DUSE_GETTEXT -DLOCALEDIR=\"locales\"
 #~ CXXFLAGS += -DUSE_UNICODE
 #~ CXXFLAGS += -DUSE_NL_LANGINFO

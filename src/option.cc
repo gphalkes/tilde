@@ -164,12 +164,17 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 	}
 }
 
+//FIXME: figure out if we can somehow pass fclose
+void close_file(FILE *file) {
+	fclose(file);
+}
+
 static void read_config(void) {
 	string file = getenv("HOME");
-	FILE *config_file;
+	cleanup_func_ptr<FILE, close_file> config_file;
 	t3_config_error_t error;
-	t3_config_t *config;
-	t3_config_schema_t *schema = NULL;
+	cleanup_func_ptr<t3_config_t, t3_config_delete> config;
+	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema> schema;
 	t3_config_t *term_specific_config;
 	const char *term;
 
@@ -188,7 +193,7 @@ static void read_config(void) {
 		config_read_error = true;
 		config_read_error_string = t3_config_strerror(error.error);
 		config_read_error_line = error.line_number;
-		goto end;
+		return;
 	}
 
 	if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), &error, NULL)) == NULL) {
@@ -196,7 +201,7 @@ static void read_config(void) {
 		lprintf("Error loading schema: %d: %s\n", error.line_number, t3_config_strerror(error.error));
 		config_read_error_string = t3_config_strerror(error.error == T3_ERR_OUT_OF_MEMORY ? T3_ERR_OUT_OF_MEMORY : T3_ERR_INTERNAL);
 		config_read_error_line = 0;
-		goto end;
+		return;
 	}
 
 	/* Note: when supporting later versions, read the config_version key here.
@@ -207,7 +212,7 @@ static void read_config(void) {
 		config_read_error = true;
 		config_read_error_string = t3_config_strerror(error.error);
 		config_read_error_line = error.line_number;
-		goto end;
+		return;
 	}
 
 	read_term_config_part(config, &default_option.term_options);
@@ -224,19 +229,16 @@ static void read_config(void) {
 	#undef opts
 
 	if ((term_specific_config = t3_config_get(config, "terminals")) == NULL)
-		goto end;
+		return;
 
 	if (cli_option.term != NULL)
 		term = cli_option.term;
 	else if ((term = getenv("TERM")) == NULL)
-		goto end;
+		return;
 
 	if ((term_specific_config = t3_config_find(term_specific_config, find_term_config, term, NULL)) != NULL)
 		read_term_config_part(term_specific_config, &term_specific_option);
 
-end:
-	t3_config_delete(config);
-	fclose(config_file);
 }
 
 #define SET_OPT_FROM_FILE(name, deflt) do { \
@@ -474,8 +476,9 @@ bool write_config(void) {
 	string file, new_file;
 	FILE *config_file;
 	const char *term;
-	t3_config_t *config = NULL, *terminals, *terminal_config;
-	t3_config_schema_t *schema;
+	cleanup_func_ptr<t3_config_t, t3_config_delete> config;
+	t3_config_t *terminals, *terminal_config;
+	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema> schema;
 	int version;
 
 	file = getenv("HOME");
@@ -501,13 +504,10 @@ bool write_config(void) {
 		config = t3_config_new();
 	} else if (version > 1) {
 		/* Don't overwrite config files with newer config version. */
-		t3_config_delete_schema(schema);
 		return false;
 	} else {
-		if (!t3_config_validate(config, schema, NULL, 0)) {
-			t3_config_delete_schema(schema);
+		if (!t3_config_validate(config, schema, NULL, 0))
 			return false;
-		}
 	}
 
 	default_option.term_options.key_timeout.unset();
@@ -564,11 +564,11 @@ bool write_config(void) {
 
 	if (t3_config_write_file(config, config_file) == T3_ERR_SUCCESS) {
 		//FIXME: fflush and fsync before closing
+		fflush(config_file);
+		fsync(fileno(config_file));
 		fclose(config_file);
-		t3_config_delete(config);
 		return rename(new_file.c_str(), file.c_str()) == 0;
 	}
 	fclose(config_file);
-	t3_config_delete(config);
 	return false;
 }

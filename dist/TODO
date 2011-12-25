@@ -19,6 +19,7 @@ priority.
 Possible later features, depending on complexity and demand:
 - Increase/decrease indentation as appropriate for languages like C, where
   there is a clear rule to do so (opening/closing brace)
+- Matching parenthesis/brace highlighting
 - Different kinds of line wrapping
   - break at word [done] or character boundary
   - up/down go to previous/next line instead of stepping within the current
