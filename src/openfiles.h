@@ -46,6 +46,8 @@ class open_files_t {
 		void erase(file_buffer_t *buffer);
 		file_buffer_t *next_buffer(file_buffer_t *start);
 		file_buffer_t *previous_buffer(file_buffer_t *start);
+
+		void cleanup(void);
 };
 
 class recent_file_info_t {
@@ -74,6 +76,8 @@ class recent_files_t {
 		typedef deque<recent_file_info_t *>::iterator iterator;
 		iterator begin(void);
 		iterator end(void);
+
+		void cleanup(void);
 };
 
 extern open_files_t open_files;

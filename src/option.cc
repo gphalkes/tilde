@@ -164,14 +164,9 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 	}
 }
 
-//FIXME: figure out if we can somehow pass fclose
-void close_file(FILE *file) {
-	fclose(file);
-}
-
 static void read_config(void) {
 	string file = getenv("HOME");
-	cleanup_func_ptr<FILE, close_file> config_file;
+	cleanup_func2_ptr<FILE, int, fclose> config_file;
 	t3_config_error_t error;
 	cleanup_func_ptr<t3_config_t, t3_config_delete> config;
 	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema> schema;

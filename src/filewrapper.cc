@@ -158,7 +158,7 @@ string *file_read_wrapper_t::read_line(void) {
 }
 
 void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
-	cleanup_ptr_char nfc_output;
+	cleanup_free_ptr<char> nfc_output;
 	size_t nfc_output_len;
 
 	char transcript_buffer[FILE_BUFFER_SIZE], *transcript_buffer_ptr;

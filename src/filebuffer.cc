@@ -62,6 +62,7 @@ file_buffer_t::~file_buffer_t(void) {
 	open_files.erase(this);
 	t3_highlight_free(highlight_info);
 	t3_highlight_free_match(last_match);
+	delete line_factory;
 }
 
 rw_result_t file_buffer_t::load(load_process_t *state) {

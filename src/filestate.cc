@@ -303,6 +303,7 @@ bool exit_process_t::step(void) {
 			return false;
 		}
 	}
+	delete this;
 	exit_main_loop(EXIT_SUCCESS);
 /*	in_step = false;
 	return true;*/

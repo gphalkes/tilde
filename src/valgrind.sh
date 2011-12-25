@@ -14,6 +14,8 @@
 
 DIR="`dirname \"$0\"`"
 
+make -q -C "$DIR" || make -C "$DIR" || exit 1
+
 if ! [ -x "$DIR/.objects/edit" ] ; then
 	echo "Could not find edit executable"
 	exit

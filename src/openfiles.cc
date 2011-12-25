@@ -96,6 +96,11 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
 	return start;
 }
 
+void open_files_t::cleanup(void) {
+	while (!files.empty())
+		delete files.front();
+}
+
 
 recent_file_info_t::recent_file_info_t(file_buffer_t *file) {
 	if ((name = strdup(file->get_name())) == NULL)
@@ -160,3 +165,10 @@ void recent_files_t::erase(recent_file_info_t *info) {
 int recent_files_t::get_version(void) { return version; }
 recent_files_t::iterator recent_files_t::begin(void) { return names.begin(); }
 recent_files_t::iterator recent_files_t::end(void) { return names.end(); }
+
+void recent_files_t::cleanup(void) {
+	while (!names.empty()) {
+		delete names.back();
+		names.pop_back();
+	}
+}
