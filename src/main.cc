@@ -225,6 +225,13 @@ main_t::main_t(void) {
 
 main_t::~main_t(void) {
 #ifdef TILDE_DEBUG
+	delete select_buffer_dialog;
+	delete about_dialog;
+	delete buffer_options_dialog,
+	delete default_options_dialog;
+	delete interface_options_dialog;
+	delete misc_options_dialog;
+	delete highlight_dialog;
 #endif
 }
 
@@ -639,9 +646,18 @@ int main(int argc, char *argv[]) {
 	load_cli_file_process_t::execute(sigc::mem_fun(main_window, &main_t::load_cli_files_done));
 	int retval = main_loop();
 #ifdef TILDE_DEBUG
-	cleanup();
+	delete continue_abort_dialog;
+	delete open_file_dialog;
+	delete save_as_dialog;
+	delete close_confirm_dialog;
+	delete error_dialog;
+	delete open_recent_dialog;
+	delete encoding_dialog;
+	delete main_window;
 	recent_files.cleanup();
 	open_files.cleanup();
+	cleanup();
+	transcript_finalize();
 #endif
 	return retval;
 }

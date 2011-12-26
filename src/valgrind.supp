@@ -1,0 +1,45 @@
+{
+   lt_dladvise not properly cleaned up
+   Memcheck:Leak
+   fun:malloc
+   fun:lt__malloc
+   fun:lt__zalloc
+   fun:lt_dladvise_init
+}
+{
+   ncurses leaks
+   Memcheck:Leak
+   fun:*alloc
+   ...
+   fun:_nc_*
+}
+{
+   lt_dlopenadvise error leak
+   Memcheck:Leak
+   fun:calloc
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   obj:/usr/lib/libltdl.so.7.3.0
+   obj:/usr/lib/libltdl.so.7.3.0
+   obj:/usr/lib/libltdl.so.7.3.0
+   fun:lt_dlopenadvise
+}
+{
+   pthread_cancel leak
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:pthread_cancel
+}
+{
+   XOpenDisplay leak
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:_ZN9t3_widgetL23init_external_clipboardEb
+}

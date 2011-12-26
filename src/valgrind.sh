@@ -22,5 +22,5 @@ if ! [ -x "$DIR/.objects/edit" ] ; then
 fi
 
 export LD_LIBRARY_PATH="`sed 's/#.*//' $DIR/Makefile | egrep -o -- '-L[^[:space:]]+' | sed -r \"s%-L%$DIR/%g\" | tr '\n' ':' | sed -r 's/:$//'`"
-valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
+valgrind --tool=memcheck --leak-check=full --show-reachable=yes --num-callers=32 --suppressions=valgrind.supp \
 	--log-file="$DIR/valgrind.log" "$DIR/.objects/edit" --L=250 "$@"
