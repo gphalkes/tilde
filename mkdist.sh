@@ -28,4 +28,5 @@ OBJECTS="`echo \"${SOURCES} ${GENSOURCES} ${AUXSOURCES}\" | tr ' ' '\n' | sed -r
 sed -r -i "s%<OBJECTS>%${OBJECTS}%g;
 s%<VERSIONINFO>%${VERSIONINFO}%g" ${TOPDIR}/Makefile.in
 
+update_pkgconfig_versions
 create_tar

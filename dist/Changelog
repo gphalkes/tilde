@@ -1,3 +1,7 @@
+Version 0.1.8:
+	New features:
+	- Follow libt3widget API changes for libt3widget 0.1.7.
+
 Version 0.1.7:
 	Bug fixes:
 	- Removed reference to pcre_version, which was inadvertently left in code.

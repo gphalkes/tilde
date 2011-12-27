@@ -14,17 +14,6 @@
    fun:_nc_*
 }
 {
-   lt_dlopenadvise error leak
-   Memcheck:Leak
-   fun:calloc
-   fun:_dlerror_run
-   fun:dlopen@@GLIBC_2.2.5
-   obj:/usr/lib/libltdl.so.7.3.0
-   obj:/usr/lib/libltdl.so.7.3.0
-   obj:/usr/lib/libltdl.so.7.3.0
-   fun:lt_dlopenadvise
-}
-{
    pthread_cancel leak
    Memcheck:Leak
    fun:malloc
