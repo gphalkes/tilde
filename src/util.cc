@@ -197,7 +197,7 @@ char *canonicalize_path(const char *path) {
 #define BUFFER_START_SIZE 256
 #define BUFFER_MAX 4096
 void printf_into(string *message, const char *format, ...) {
-	static char *message_buffer = NULL;
+	static cleanup_free_ptr<char>::t message_buffer;
 	static int message_buffer_size;
 
 	char *new_message_buffer;

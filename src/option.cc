@@ -166,10 +166,10 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 
 static void read_config(void) {
 	string file = getenv("HOME");
-	cleanup_func2_ptr<FILE, int, fclose> config_file;
+	cleanup_func2_ptr<FILE, int, fclose>::t config_file;
 	t3_config_error_t error;
-	cleanup_func_ptr<t3_config_t, t3_config_delete> config;
-	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema> schema;
+	cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
+	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema>::t schema;
 	t3_config_t *term_specific_config;
 	const char *term;
 
@@ -471,9 +471,9 @@ bool write_config(void) {
 	string file, new_file;
 	FILE *config_file;
 	const char *term;
-	cleanup_func_ptr<t3_config_t, t3_config_delete> config;
+	cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
 	t3_config_t *terminals, *terminal_config;
-	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema> schema;
+	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema>::t schema;
 	int version;
 
 	file = getenv("HOME");

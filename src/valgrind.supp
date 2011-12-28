@@ -1,5 +1,5 @@
 {
-   lt_dladvise not properly cleaned up
+   lt_dladvise leak
    Memcheck:Leak
    fun:malloc
    fun:lt__malloc
@@ -31,4 +31,13 @@
    obj:*
    obj:*
    fun:_ZN9t3_widgetL23init_external_clipboardEb
+}
+{
+   dlopen error leak
+   Memcheck:Leak
+   fun:calloc
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:do_dlopen
+   fun:db_open
 }
