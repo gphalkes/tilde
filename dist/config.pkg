@@ -90,19 +90,6 @@ EOF
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
-#include <t3window/window.h>
-#include <t3window/terminal.h>
-
-int main(int argc, char *argv[]) {
-	t3_window_get_version();
-	return 0;
-}
-EOF
-	pkgconfig libt3window LIBT3WINDOW test_link_cxx || \
-		error "!! Can not find libt3window. libt3window is required to compile tilde."
-
-	clean_cxx
-	cat > .configcxx.cc <<EOF
 #include <t3widget/widget.h>
 using namespace t3_widget;
 int main(int argc, char *argv[]) {
@@ -201,6 +188,6 @@ int main(int argc, char *argv[]) {
 EOF
 	test_link_cxx "strdup" && CONFIGFLAGS="${CONFIGFLAGS} -DHAS_STRDUP"
 
-	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3WINDOW_FLAGS} ${LIBT3CONFIG_FLAGS} ${LIBT3HIGHLIGHT_FLAGS}" \
-		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} -lunistring ${LIBT3WIDGET_LIBS} ${LIBT3WINDOW_LIBS} ${LIBT3CONFIG_LIBS} ${LIBT3HIGHLIGHT_LIBS}"
+	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3CONFIG_FLAGS} ${LIBT3HIGHLIGHT_FLAGS}" \
+		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} -lunistring ${LIBT3WIDGET_LIBS} ${LIBT3CONFIG_LIBS} ${LIBT3HIGHLIGHT_LIBS}"
 }
