@@ -11,6 +11,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#FIXME: remove, only here for memory debuggin
+COMPILER := gcc
+
 SOURCES..objects/edit := \
 	fileautocompleter.cc \
 	filebuffer.cc \

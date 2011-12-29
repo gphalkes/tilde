@@ -31,7 +31,6 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 		dialog_t(height, width, "Highlighting Language")
 {
 	button_t *ok_button, *cancel_button;
-	cleanup_lang_t allocated_names;
 	t3_highlight_lang_t *ptr;
 	label_t *label;
 	int error;
@@ -44,14 +43,14 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 	label = new label_t("Plain Text");
 	list->push_back(label);
 
-	if ((allocated_names = t3_highlight_list(&error)) == NULL) {
+	if ((names = t3_highlight_list(&error)) == NULL) {
 		if (error == T3_ERR_OUT_OF_MEMORY)
 			throw bad_alloc();
 	} else {
-		for (ptr = allocated_names; ptr->name != NULL; ptr++) {}
-		sort((t3_highlight_lang_t *) allocated_names, ptr, cmp_lang_names);
+		for (ptr = names; ptr->name != NULL; ptr++) {}
+		sort((t3_highlight_lang_t *) names, ptr, cmp_lang_names);
 
-		for (ptr = allocated_names; ptr->name != NULL; ptr++) {
+		for (ptr = names; ptr->name != NULL; ptr++) {
 			label = new label_t(ptr->name);
 			list->push_back(label);
 		}
@@ -73,9 +72,6 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 	push_back(list);
 	push_back(ok_button);
 	push_back(cancel_button);
-
-	names = allocated_names.get();
-	allocated_names = NULL;
 }
 
 bool highlight_dialog_t::set_size(optint height, optint width) {
