@@ -81,7 +81,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 			if ((_name = canonicalize_path(name)) == NULL)
 				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
-			free(name);
+			/* name is a cleanup ptr. */
 			name = _name;
 
 			if ((state->fd = open(name, O_RDONLY)) < 0)
@@ -204,7 +204,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			//FIXME: bail out on error
 			if (!state->encoding.empty()) {
 				handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0, &error);
-				free(encoding);
+				/* encoding is a cleanup ptr. */
 				encoding = strdup(state->encoding.c_str());
 			} else if (strcmp(encoding, "UTF-8") != 0) {
 				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
@@ -246,7 +246,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 
 			if (!state->name.empty()) {
 				string converted_name;
-				free(name);
+				/* name is a cleanup ptr. */
 				name = strdup(state->name.c_str());
 				convert_lang_codeset(name, &converted_name, true);
 				name_line.set_text(&converted_name);
