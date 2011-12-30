@@ -20,9 +20,11 @@
 
 #include "util.h"
 
+using namespace t3_widget;
+
 struct cli_options_t {
 	/* Options to override config file. */
-	opt_bool color;
+	optional<bool> color;
 
 	const char *term;
 	bool ask_input_method;
@@ -39,47 +41,47 @@ struct cli_options_t {
 };
 
 struct term_options_t {
-	opt_int tabsize;
+	optional<int> tabsize;
 
-	opt_bool hide_menubar;
-	opt_bool color;
+	optional<bool> hide_menubar;
+	optional<bool> color;
 
-	opt_int key_timeout;
+	optional<int> key_timeout;
 
-	opt_t3_attr_t non_print;
-	opt_t3_attr_t selection_cursor;
-	opt_t3_attr_t selection_cursor2;
-	opt_t3_attr_t bad_draw;
-	opt_t3_attr_t text_cursor;
-	opt_t3_attr_t text;
-	opt_t3_attr_t text_selected;
+	optional<t3_attr_t> non_print;
+	optional<t3_attr_t> selection_cursor;
+	optional<t3_attr_t> selection_cursor2;
+	optional<t3_attr_t> bad_draw;
+	optional<t3_attr_t> text_cursor;
+	optional<t3_attr_t> text;
+	optional<t3_attr_t> text_selected;
 	/* High-light attributes for hot keys. */
-	opt_t3_attr_t highlight;
-	opt_t3_attr_t highlight_selected;
+	optional<t3_attr_t> highlight;
+	optional<t3_attr_t> highlight_selected;
 
-	opt_t3_attr_t dialog;
-	opt_t3_attr_t dialog_selected;
-	opt_t3_attr_t button;
-	opt_t3_attr_t button_selected;
-	opt_t3_attr_t scrollbar;
-	opt_t3_attr_t menubar;
-	opt_t3_attr_t menubar_selected;
+	optional<t3_attr_t> dialog;
+	optional<t3_attr_t> dialog_selected;
+	optional<t3_attr_t> button;
+	optional<t3_attr_t> button_selected;
+	optional<t3_attr_t> scrollbar;
+	optional<t3_attr_t> menubar;
+	optional<t3_attr_t> menubar_selected;
 
-	opt_t3_attr_t shadow;
+	optional<t3_attr_t> shadow;
 
-	opt_t3_attr_t highlights[MAX_HIGHLIGHTS];
+	optional<t3_attr_t> highlights[MAX_HIGHLIGHTS];
 };
 
 struct options_t {
 	term_options_t term_options;
-	opt_bool wrap;
-	opt_bool tab_spaces;
-	opt_bool auto_indent;
-	opt_bool indent_aware_home;
-	opt_bool strip_spaces;
-	opt_bool make_backup;
+	optional<bool> wrap;
+	optional<bool> tab_spaces;
+	optional<bool> auto_indent;
+	optional<bool> indent_aware_home;
+	optional<bool> strip_spaces;
+	optional<bool> make_backup;
 
-	opt_size_t max_recent_files;
+	optional<size_t> max_recent_files;
 };
 
 struct highlight_attrs_t {
@@ -103,7 +105,7 @@ struct runtime_options_t {
 	bool strip_spaces;
 	bool make_backup;
 	size_t max_recent_files;
-	opt_int key_timeout;
+	optional<int> key_timeout;
 	t3_attr_t highlights[MAX_HIGHLIGHTS];
 };
 

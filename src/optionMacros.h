@@ -57,7 +57,7 @@ END_FUNCTION
 
 #ifndef OPTION_STRDUP
 #define OPTION_STRDUP(_x) (_x)
-#define OPTION_FREE(_x) (void) 0
+#define OPTION_FREE(_x) (void) optptr
 #else
 #define OPTION_FREE(_x) free(_x)
 #endif

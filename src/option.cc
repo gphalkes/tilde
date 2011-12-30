@@ -91,7 +91,7 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
 	return 0;
 }
 
-static void read_config_attribute(const t3_config_t *config, const char *name, opt_t3_attr_t *attr) {
+static void read_config_attribute(const t3_config_t *config, const char *name, optional<t3_attr_t> *attr) {
 	t3_config_t *attr_config;
 	t3_attr_t accumulated_attr = 0;
 
@@ -320,7 +320,6 @@ static void print_version(void) {
 }
 
 PARSE_FUNCTION(parse_args)
-
 	OPTIONS
 		OPTION('h', "help", NO_ARG)
 			print_help();
@@ -395,7 +394,7 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
 }
 
-static void set_config_attribute(t3_config_t *config, const char *section_name, const char *name, opt_t3_attr_t attr) {
+static void set_config_attribute(t3_config_t *config, const char *section_name, const char *name, optional<t3_attr_t> attr) {
 	static t3_attr_t attribute_masks[] = {
 		T3_ATTR_FG_MASK,
 		T3_ATTR_BG_MASK,
