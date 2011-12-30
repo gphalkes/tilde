@@ -337,7 +337,7 @@ void file_buffer_t::set_strip_spaces(bool _strip_spaces) {
 }
 
 void file_buffer_t::do_strip_spaces(void) {
-	size_t i, idx, char_len, strip_start;
+	size_t i, idx, strip_start;
 	bool undo_started = false;
 
 	/*FIXME: a better way to do this would be to store the stripped spaces for
@@ -354,8 +354,7 @@ void file_buffer_t::do_strip_spaces(void) {
 			if ((data[idx - 1] & 0xC0) == 0x80)
 				continue;
 
-			char_len = strip_start - idx + 1;
-			if (!lines[i]->is_space(idx))
+			if (!lines[i]->is_space(idx - 1))
 				break;
 
 			strip_start = idx - 1;

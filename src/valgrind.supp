@@ -41,3 +41,14 @@
    fun:do_dlopen
    fun:db_open
 }
+
+{
+   xcb_connect leak
+   Memcheck:Leak
+   fun:malloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:_ZN9t3_widgetL23init_external_clipboardEb
+}
