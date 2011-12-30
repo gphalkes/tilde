@@ -31,7 +31,7 @@ class file_buffer_t : public text_buffer_t {
 		cleanup_ptr<edit_window_t::view_parameters_t>::t view_parameters;
 		bool has_window;
 		int highlight_valid;
-		opt_bool strip_spaces;
+		optional<bool> strip_spaces;
 
 	public:
 		t3_highlight_t *highlight_info;

@@ -32,8 +32,8 @@ class buffer_t {
 	public:
 		buffer_t(void) : fill(0) {}
 		virtual ~buffer_t(void) {}
+		const char *get_buffer(void) { return buffer; }
 		virtual int get_fill(void) const { return fill; }
-		virtual char *get_buffer(void) { return buffer; }
 		virtual char operator[](int idx) const { return buffer[idx]; }
 		virtual bool fill_buffer(int used) = 0;
 };
@@ -71,7 +71,9 @@ class file_read_wrapper_t {
 	public:
 		file_read_wrapper_t(int fd, transcript_t *handle = NULL);
 		~file_read_wrapper_t(void);
-		string *read_line(void);
+		const char *get_buffer(void);
+		int get_fill(void);
+		bool fill_buffer(int used);
 };
 
 class file_write_wrapper_t {

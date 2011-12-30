@@ -103,7 +103,7 @@ class save_as_process_t : public stepped_process_t {
 		char *real_name;
 		char *temp_name;
 		int fd;
-		size_t i;
+		int i;
 		file_write_wrapper_t *wrapper;
 		struct stat file_info;
 

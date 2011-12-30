@@ -62,12 +62,10 @@ file_buffer_t::~file_buffer_t(void) {
 	open_files.erase(this);
 	t3_highlight_free(highlight_info);
 	t3_highlight_free_match(last_match);
-	delete line_factory;
+	delete get_line_factory();
 }
 
 rw_result_t file_buffer_t::load(load_process_t *state) {
-	string *line;
-
 	if (state->file != this)
 		PANIC();
 
@@ -105,23 +103,15 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 		}
 		case load_process_t::READING:
 			try {
-				//FIXME: use append_text instead, and reset cursor afterwards
-				while ((line = state->wrapper->read_line()) != NULL) {
+				while (state->wrapper->fill_buffer(state->wrapper->get_fill())) {
 					try {
-						lines.back()->set_text(line);
-						lines.push_back(line_factory->new_text_line_t());
+						append_text(state->wrapper->get_buffer(), state->wrapper->get_fill());
 					} catch (...) {
-						delete line;
 						return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 					}
-					delete line;
 				}
-				/* If the file is not empty, remove the last added line, because
-				   it is not actually part of the file. */
-				if (lines.size() > 1) {
-					delete lines.back();
-					lines.pop_back();
-				}
+				cursor.pos = 0;
+				cursor.line = 0;
 			} catch (rw_result_t &result) {
 				return result;
 			}
@@ -219,11 +209,11 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			if (strip_spaces.is_valid() ? (bool) strip_spaces : option.strip_spaces)
 				do_strip_spaces();
 			try {
-				for (; state->i < lines.size(); state->i++) {
+				for (; state->i < size(); state->i++) {
 					const string *data;
 					if (state->i != 0)
 						state->wrapper->write("\n", 1);
-					data = lines[state->i]->get_data();
+					data = get_line_data(state->i)->get_data();
 					state->wrapper->write(data->data(), data->size());
 				}
 			} catch (rw_result_t error) {
@@ -251,8 +241,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				convert_lang_codeset(name, &converted_name, true);
 				name_line.set_text(&converted_name);
 			}
-			undo_list.set_mark();
-			last_undo_type = UNDO_NONE;
+			set_undo_mark();
 			break;
 		default:
 			PANIC();
@@ -283,8 +272,8 @@ void file_buffer_t::prepare_paint_line(int line) {
 		return;
 
 	for (i = highlight_valid + 1; i <= line; i++) {
-		int state = ((file_line_t *) lines[i - 1])->get_highlight_end();
-		((file_line_t *) lines[i])->set_highlight_start(state);
+		int state = ((file_line_t *) get_line_data_nonconst(i - 1))->get_highlight_end();
+		((file_line_t *) get_line_data_nonconst(i))->set_highlight_start(state);
 	}
 	highlight_valid = line;
 	match_line = NULL;
@@ -337,7 +326,8 @@ void file_buffer_t::set_strip_spaces(bool _strip_spaces) {
 }
 
 void file_buffer_t::do_strip_spaces(void) {
-	size_t i, idx, strip_start;
+	size_t idx, strip_start;
+	int i;
 	bool undo_started = false;
 
 	/*FIXME: a better way to do this would be to store the stripped spaces for
@@ -346,15 +336,16 @@ void file_buffer_t::do_strip_spaces(void) {
 	   it. Care has to be taken to maintain the correct cursor position, and
 	   we have to implement undo/redo separately. */
 
-	for (i = 0; i < lines.size() ; i++) {
-		const string *str = lines[i]->get_data();
+	for (i = 0; i < size() ; i++) {
+		const text_line_t *line = get_line_data(i);
+		const string *str = line->get_data();
 		const char *data = str->data();
 		strip_start = str->size();
 		for (idx = strip_start; idx > 0; idx--) {
 			if ((data[idx - 1] & 0xC0) == 0x80)
 				continue;
 
-			if (!lines[i]->is_space(idx - 1))
+			if (!line->is_space(idx - 1))
 				break;
 
 			strip_start = idx - 1;
@@ -369,12 +360,9 @@ void file_buffer_t::do_strip_spaces(void) {
 			start.line = end.line = i;
 			start.pos = strip_start;
 			end.pos = str->size();
-			last_undo = new undo_single_text_double_coord_t(UNDO_DELETE_BLOCK, start, end);
-			undo_list.add(last_undo);
-			last_undo_type = UNDO_NONE;
-			delete_block_internal(start, end, last_undo);
+			delete_block_internal(start, end, get_undo(UNDO_DELETE_BLOCK, start, end));
 
-			if ((size_t) cursor.line == i && (size_t) cursor.pos > strip_start)
+			if (cursor.line == i && (size_t) cursor.pos > strip_start)
 				cursor.pos = strip_start;
 		}
 	}

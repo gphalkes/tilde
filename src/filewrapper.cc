@@ -114,47 +114,16 @@ file_read_wrapper_t::~file_read_wrapper_t(void) {
 	delete buffer;
 }
 
-string *file_read_wrapper_t::read_line(void) {
-	string *result;
-	int buffer_start;
+const char *file_read_wrapper_t::get_buffer(void) {
+	return buffer->get_buffer();
+}
 
-	if (at_eof)
-		return NULL;
+int file_read_wrapper_t::get_fill(void) {
+	return buffer->get_fill();
+}
 
-	if (accumulated == NULL)
-		accumulated = new string();
-	result = accumulated;
-
-	while (true) {
-		if (buffer_index >= buffer->get_fill()) {
-			int used = buffer_index;
-			buffer_index = 0;
-
-			if (!buffer->fill_buffer(used)) {
-				at_eof = true;
-				accumulated = NULL;
-				return result;
-			}
-		}
-
-		buffer_start = buffer_index;
-		try {
-			for (; buffer_index < buffer->get_fill(); buffer_index++) {
-				if ((*buffer)[buffer_index] == '\n') {
-					result->append(buffer->get_buffer() + buffer_start, buffer_index - buffer_start);
-					buffer_index++;
-					accumulated = NULL;
-					return result;
-				}
-			}
-			result->append(buffer->get_buffer() + buffer_start, buffer_index - buffer_start);
-		} catch (bad_alloc &ba) {
-			throw rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
-		}
-	}
-
-	accumulated = NULL;
-	return result;
+bool file_read_wrapper_t::fill_buffer(int used) {
+	return buffer->fill_buffer(used);
 }
 
 void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
