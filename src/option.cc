@@ -542,11 +542,9 @@ bool write_config(void) {
 	   say it is invalid when reading. That would fit nicely into the
 	   "bad things" category. */
 	if (!t3_config_validate(config, schema, NULL, 0)) {
-		t3_config_delete_schema(schema);
 		t3_config_delete(config);
 		return false;
 	}
-	t3_config_delete_schema(schema);
 
 	//FIXME: use mkstemp to make new file
 	new_file = file + ".new";
