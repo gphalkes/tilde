@@ -33,7 +33,7 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 	button_t *ok_button, *cancel_button;
 	t3_highlight_lang_t *ptr;
 	label_t *label;
-	int error;
+	t3_highlight_error_t error;
 
 	list = new list_pane_t(true);
 	list->set_size(height - 3, width - 2);
@@ -43,8 +43,8 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 	label = new label_t("Plain Text");
 	list->push_back(label);
 
-	if ((names = t3_highlight_list(&error)) == NULL) {
-		if (error == T3_ERR_OUT_OF_MEMORY)
+	if ((names = t3_highlight_list(0, &error)) == NULL) {
+		if (error.error == T3_ERR_OUT_OF_MEMORY)
 			throw bad_alloc();
 	} else {
 		for (ptr = names; ptr->name != NULL; ptr++) {}
@@ -92,7 +92,7 @@ bool highlight_dialog_t::set_size(optint height, optint width) {
 void highlight_dialog_t::ok_activated(void) {
 	size_t idx = list->get_current();
 	t3_highlight_t *highlight;
-	int error;
+	t3_highlight_error_t error;
 
 	if (idx == 0) {
 		hide();
@@ -103,7 +103,7 @@ void highlight_dialog_t::ok_activated(void) {
 	if ((highlight = t3_highlight_load(names[idx - 1].lang_file, map_highlight, NULL,
 			T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, &error)) == NULL) {
 		string message(_("Error loading highlighting patterns: "));
-		message += t3_highlight_strerror(error);
+		message += t3_highlight_strerror(error.error);
 		error_dialog->set_message(&message);
 		error_dialog->center_over(this);
 		error_dialog->show();
