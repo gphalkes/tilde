@@ -1,3 +1,7 @@
+Version 0.1.9:
+	New features:
+	- Follow libt3highlight API changes for libt3highlight 0.2.0.
+
 Version 0.1.8:
 	New features:
 	- Follow libt3widget API changes for libt3widget 0.1.7.

@@ -303,8 +303,8 @@ static void print_help(void) {
 
 static void print_version(void) {
 	printf("Tilde version <VERSION>\n"
-		"Copyright (c) 2011 G.P. Halkes\n"
-		"Tilde is licensed under the GNU General Public License version 3\n"); // @copyright
+		"Copyright (c) 2011 G.P. Halkes\n" // @copyright
+		"Tilde is licensed under the GNU General Public License version 3\n");
 	printf("Library versions:\n"
 		"  libt3config %ld.%ld.%ld\n  libt3highlight %ld.%ld.%ld\n  libt3key (through libt3widget) %ld.%ld.%ld\n"
 		"  libt3widget %ld.%ld.%ld\n  libt3window %ld.%ld.%ld\n  libtranscript %ld.%ld.%ld\n  libunistring %d.%d.?\n",
