@@ -42,10 +42,6 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		string converted_name;
 		convert_lang_codeset(name, &converted_name, true);
 		name_line.set_text(&converted_name);
-
-		/* Automatically load appropriate highlighting patterns if available. */
-		highlight_info = t3_highlight_load_by_filename(name, map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
-		last_match = t3_highlight_new_match(highlight_info);
 	}
 
 	connect_rewrap_required(sigc::mem_fun(this, &file_buffer_t::invalidate_highlight));
@@ -66,6 +62,10 @@ file_buffer_t::~file_buffer_t(void) {
 }
 
 rw_result_t file_buffer_t::load(load_process_t *state) {
+	const string *line;
+	t3_highlight_t *highlight = NULL;
+	int i;
+
 	if (state->file != this)
 		PANIC();
 
@@ -119,6 +119,39 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 		default:
 			PANIC();
 	}
+
+	/* Automatically load appropriate highlighting patterns if available.
+	   Try the following in order:
+	   - a vi(m) modeline/Emacs major mode spec in the first five lines
+	   - a vi(m) modeline/Emacs major mode spec in the last five lines
+	   - a first-line-regex
+	   - the file name
+	   We use this order, because the file name may be deceptive. For example,
+	   a .txt extension may have been added by a web browser. If the user
+	   specified the language by hand, that is more likely to be correct than
+	   any autodetection based on the first line or the file name.
+	*/
+	for (i = 0; i < size() && i < 5 && highlight == NULL; i++) {
+		line = get_line_data(i)->get_data();
+		highlight = t3_highlight_load_by_detect(line->data(), line->size(), false,
+			map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
+	}
+	for (i = size() - 1; i >= 5 && highlight == NULL; i--) {
+		line = get_line_data(i)->get_data();
+		highlight = t3_highlight_load_by_detect(line->data(), line->size(), false,
+			map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
+	}
+	if (highlight == NULL) {
+		line = get_line_data(0)->get_data();
+		highlight = t3_highlight_load_by_detect(line->data(), line->size(), true,
+			map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
+	}
+	if (highlight == NULL) {
+		highlight = t3_highlight_load_by_filename(name, map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
+		last_match = t3_highlight_new_match(highlight);
+	}
+	if (highlight != NULL)
+		set_highlight(highlight);
 	return rw_result_t(rw_result_t::SUCCESS);
 }
 
