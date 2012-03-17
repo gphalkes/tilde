@@ -360,8 +360,9 @@ void file_buffer_t::set_strip_spaces(bool _strip_spaces) {
 
 void file_buffer_t::do_strip_spaces(void) {
 	size_t idx, strip_start;
-	int i;
 	bool undo_started = false;
+	text_coordinate_t saved_cursor = cursor;
+	int i;
 
 	/*FIXME: a better way to do this would be to store the stripped spaces for
 	   all lines in a single string, delimited by single non-space bytes. If the
@@ -402,4 +403,8 @@ void file_buffer_t::do_strip_spaces(void) {
 
 	if (undo_started)
 		end_undo_block();
+
+	cursor = saved_cursor;
+	if (cursor.pos > get_line_max(cursor.line))
+		cursor.pos = get_line_max(cursor.line);
 }
