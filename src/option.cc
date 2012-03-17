@@ -165,7 +165,6 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 }
 
 static void read_config(void) {
-	string file = getenv("HOME");
 	cleanup_func2_ptr<FILE, int, fclose>::t config_file;
 	t3_config_error_t error;
 	cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
@@ -173,9 +172,7 @@ static void read_config(void) {
 	t3_config_t *term_specific_config;
 	const char *term;
 
-	file += "/.tilderc";
-
-	if ((config_file = fopen(file.c_str(), "r")) == NULL) {
+	if ((config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config")) == NULL) {
 		if (errno != ENOENT) {
 			config_read_error = true;
 			config_read_error_string = strerror(errno);
@@ -467,23 +464,20 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 }
 
 bool write_config(void) {
-	string file, new_file;
 	FILE *config_file;
+	t3_config_write_file_t *new_config_file;
 	const char *term;
 	cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
 	t3_config_t *terminals, *terminal_config;
 	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema>::t schema;
 	int version;
 
-	file = getenv("HOME");
-	file += "/.tilderc";
-
 	//FIXME: verify return values
 
 	if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), NULL, NULL)) == NULL)
 		return false;
 
-	if ((config_file = fopen(file.c_str(), "r")) != NULL) {
+	if ((config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config")) != NULL) {
 		/* Start by reading the existing configuration. */
 		t3_config_error_t error;
 		config = t3_config_read_file(config_file, &error, NULL);
@@ -546,21 +540,16 @@ bool write_config(void) {
 		return false;
 	}
 
-	//FIXME: use mkstemp to make new file
-	new_file = file + ".new";
-	lprintf("Writing config to %s\n", new_file.c_str());
-	if ((config_file = fopen(new_file.c_str(), "w")) == NULL) {
+	//FIXME: should write to different file and rename, but t3config needs to have a function for that!
+	if ((new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config")) == NULL) {
 		t3_config_delete(config);
 		return false;
 	}
 
-	if (t3_config_write_file(config, config_file) == T3_ERR_SUCCESS) {
-		//FIXME: fflush and fsync before closing
-		fflush(config_file);
-		fsync(fileno(config_file));
-		fclose(config_file);
-		return rename(new_file.c_str(), file.c_str()) == 0;
-	}
-	fclose(config_file);
+	if (t3_config_write_file(config, t3_config_xdg_get_file(new_config_file)) == T3_ERR_SUCCESS)
+		return t3_config_xdg_close_write(new_config_file, t3_false, t3_true);
+
+	t3_config_xdg_close_write(new_config_file, t3_true, t3_true);
+
 	return false;
 }
