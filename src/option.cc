@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 G.P. Halkes
+/* Copyright (C) 2011-2012 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -300,7 +300,7 @@ static void print_help(void) {
 
 static void print_version(void) {
 	printf("Tilde version <VERSION>\n"
-		"Copyright (c) 2011 G.P. Halkes\n" // @copyright
+		"Copyright (c) 2011-2012 G.P. Halkes\n" // @copyright
 		"Tilde is licensed under the GNU General Public License version 3\n");
 	printf("Library versions:\n"
 		"  libt3config %ld.%ld.%ld\n  libt3highlight %ld.%ld.%ld\n  libt3key (through libt3widget) %ld.%ld.%ld\n"

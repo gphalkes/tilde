@@ -1,3 +1,9 @@
+Version 0.1.10:
+	New features:
+	- Use the new XDG Base Directory Specification support functions in
+	  libt3config to use configuration file in the correct directory.
+	- Use the new libt3highlight language-detection features.
+
 Version 0.1.9:
 	New features:
 	- Follow libt3highlight API changes for libt3highlight 0.2.0.

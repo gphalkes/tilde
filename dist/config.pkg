@@ -1,4 +1,4 @@
-# Copyright (C) 2011 G.P. Halkes
+# Copyright (C) 2011-2012 G.P. Halkes
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 3, as
 # published by the Free Software Foundation.
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libt3config/0.2.0 LIBT3CONFIG test_link_cxx || \
+	pkgconfig libt3config/0.2.5 LIBT3CONFIG test_link_cxx || \
 		error "!! Can not find libt3config. libt3config is required to compile tilde."
 
 	clean_cxx
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libt3highlight/0.2.0 LIBT3HIGHLIGHT test_link_cxx || \
+	pkgconfig libt3highlight/0.2.1 LIBT3HIGHLIGHT test_link_cxx || \
 		error "!! Can not find libt3highlight. libt3highlight is required to compile tilde."
 
 	clean_cxx
