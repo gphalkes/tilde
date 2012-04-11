@@ -1,8 +1,6 @@
 BUGS
 ====
-- select buffer dialog should open with currently active buffer selected
-- config file overwriting
-- no message on error reading or writing config file
+- no message on error writing config file
 
 FILE OPEN
 =========
@@ -15,44 +13,24 @@ SAVE (AS)
 MISSING FUNCTIONALITY
 =====================
 - help text
-- replace with regex is only partially working
 
 GENERIC
 =======
 - FIXME's
 - allow users to set combining char support and other stuff from config file
 - only overwrite config file with errors if user consents
-- save config options that we don't know, instead of deleting everything
 - add an indication that multiple files are open
+- when opening find dialog, it should use the word under the cursor as its
+	initial search value
 
 From the original TODO_AND_IDEAS file
 -------------------------------------
-
-MILESTONE M1 (FIRST ALPHA RELEASE) REQUIREMENTS
-===============================================
-- search/replace fully working
-- all menus except options and help fully working, although basic help view
-  should be available
-- keys available for all common terminal emulators
-	[ xterm, rxvt, rxvt-unicode, aterm, Eterm, kterm ]
-- rudimentery manual page
-- more comments for the code?
-- TODO list for features
-
-NON OPERATIONAL MENU ITEMS
-==========================
-Search:
-- Replace [partially done]
-
-Options:
-- All
 
 Help:
 - All
 
 HIGH PRIORITY
 =============
-- convert filenames from locale to UTF-8 internally
 - line and column numbers may be larger than space reserved!
 - add exception handling for all modifications of vectors and strings which
   can cause the object to grow (and therefore throw bad_alloc)
@@ -65,7 +43,6 @@ MEDIUM PRIORITY
 - create our own "convertor" for ISO-8859-1. This is easy, as the values of the
   bytes are the same as the corresponding Unicode codepoints. This way we can
   always use ISO-8859-1, which is also useful for reading "raw" files.
-- allow discarding/adding of BOM in UTF-*
 - detection of which files are already opened in another window/buffer should
   be done by inode number (or some other unique characteristic) because names
   can be obfuscated through symlinks. WARNING hardlinks may have same inode
@@ -80,22 +57,12 @@ MEDIUM PRIORITY
   account that certain terminals use less wide representation. Similar issue
   exists for some indic spacing combining character which may combine with
   each other, resulting in a less wide representation
-- regex replace with \1 etc
-- transform backslash in search/replace
 - add an indication that the current display is not at the left margin (right
   margin too?)
 - add a scrollbar in the status bar to show where you are in the text. There may
   not be enough screen columns to do this if the user splits the screen...
 - right to left language support? or even bidi?
 - check return values for all functions and handle cleanly
-- don't create the metadata buffers until actually needed, and clean them when
-  no longer necessary. This exchanges CPU power for memory, and is usefull for
-  large files. Note that this should only be done for editWindow lines.
-- if we find a text that contains invalid UTF-8 characters, we should ask the
-  user if (s)he wants to try a different encoding. We should then convert it
-  using iconv to UTF-8 (and convert back on input). For ASCII encoding we
-  should simply use the SBC implementation in the UTF-8 locale. On output when
-  using iconv we should replace unrepresentable characters with '?'.
 - show the value (unicode codepoint or byte value) of the character under the
   cursor in the status bar (no space because of file name; create dialog to ask
   for this info, which can then also show different combining chars and allow
@@ -114,56 +81,31 @@ LOW PRIORITY
   like zero-width non-breaking space as control characters of some sort such that
   the user can actually manipulate them and see them.
 
-- use 'kent' resource for newline/enter key [libt3key]
-- if possible we should try to use another editor's syntax highlighting
-  patterns. That could save a lot of work [http://projects.gnome.org/gtksourceview/
-  seems like a good choice because it implements the most. However, it does allow
-  for more than we may be able to match (newlines!) and is difficult to implement.
-  Perhaps we can suffice with a simpler syntax highlighting scheme given the
-  limited scope of the editor]
 - which features do we want to implement:
 	- auto save and restore
 	- "locking" such that we know another instance is working on it
-	- goto brace
-	- syntax highlighting
-	- auto indent
-	- line wrapping in all kinds of ways
-		- wrapping at any point (not just word boundary)
+	+ goto brace
+	+ line wrapping in all kinds of ways
+		+ wrapping at any point (not just word boundary)
 		- dynamic paragraph mode??
-		- down arrow skips to next real line
+		+ down arrow skips to next real line
 	- column mode (select several lines and edit text in the same column)
 	- rectangular selections
 	- reprogrammable bindings (like sylpheed)
-	- auto completion
-	- ^C ^V etc using X11 selections if possible
-	- support alternate unicode encodings such as UTF-16
-	- jumping several columns instead of just one on hitting the edge of the
+	+ jumping several columns instead of just one on hitting the edge of the
 	  screen such that you can better see what you are editing
-	- recent files list (use 1,2 etc for hot keys)
+	+ recent files list (use 1,2 etc for hot keys)
 	- dynamic wrap taking initial indent into account on subsequent lines
-	- turn of menubar while editing (optional)
 	- consider allowing opening a file to be opened twice/two different views on
 	  the same file so you can edit on one end and view another next to it. Maybe
 	  a little to advanced for what we are trying to achieve.
 - look at Common User Access (CUA) for guidance on how stuff should work, key
   bindings etc. Also look at the Windows Consistent User Interface standard
-- to find out which attributes are supported by a terminal, we can ask curses
-  for the strings to enter the different modes, such as smul. See the terminfo
-  page in the Opengroup curses document. We should also check whether the same
-  string isn't used for multiple modes. For example the linux terminal uses
-  the same string for reverse video (rev) and standout (smso). However, that is
-  not foolproof as the strings for underline (smul) and bold (bold) are not
-  equal but give the same visual result.
 - rewrite the line allocation code such that it will try to free as much memory
   as possible from the existing line structs if it runs out of memory. This way
   when long lines have been chopped into pieces we actually can reduce the
   memory used. Also, we may consider not doubling but simply adding beyond a
   certain line size.
-- try disabling 8-bit output for terminals which do this (xterm implemented)
-  [km resource and smm/rmm, but maybe we should implement this in libtewindow]
-- Combining multiple PCRE patterns should be done through '(?|' ... ')'. To
-  use a callout after a pattern, that patterns should be enclosed in '(?:' and
-  ')'
 
 
 From the Unicode standard, section 5.13, which contains a description of

@@ -93,6 +93,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
 				if (handle == NULL)
 					return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
+				//FIXME: if the new fails, the handle will remain open!
 				state->wrapper = new file_read_wrapper_t(state->fd, handle);
 
 				convert_lang_codeset(name, &converted_name, true);
@@ -235,6 +236,8 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			} else {
 				handle = NULL;
 			}
+			//FIXME: if the new fails, the handle will remain open!
+			//FIXME: if the new fails, this will abort with an exception! This should not happen!
 			state->wrapper = new file_write_wrapper_t(state->fd, handle);
 			state->i = 0;
 			state->state = save_as_process_t::WRITING;
