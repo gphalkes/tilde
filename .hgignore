@@ -1,4 +1,5 @@
 syntax: glob
+src/helgrind.log
 src/valgrind.log
 src/libt3widgetlog.txt
 src/libt3window.log

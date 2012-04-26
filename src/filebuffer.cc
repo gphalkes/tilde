@@ -51,6 +51,7 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 	view_parameters->set_auto_indent(option.auto_indent);
 	view_parameters->set_tab_spaces(option.tab_spaces);
 	view_parameters->set_indent_aware_home(option.indent_aware_home);
+	view_parameters->set_show_tabs(option.show_tabs);
 	open_files.push_back(this);
 }
 

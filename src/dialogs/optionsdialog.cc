@@ -21,7 +21,7 @@ using namespace std;
 
 static t3_widget::key_t number_keys[] = { '0', '1', '2', '3' ,'4', '5', '6', '7', '8', '9' };
 
-buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(8, 25, _title) {
+buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(10, 25, _title) {
 	smart_label_t *label;
 	int width;
 	button_t *ok_button, *cancel_button;
@@ -83,13 +83,41 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 
 	width = max(label->get_width() + 2 + 3, width);
 
-	label = new smart_label_t(_("St_rip trailing spaces on save"));
+	label = new smart_label_t(_("_Indent aware home key"));
 	label->set_position(5, 2);
+	push_back(label);
+	indent_aware_home_box = new checkbox_t();
+	indent_aware_home_box->set_label(label);
+	indent_aware_home_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	indent_aware_home_box->set_position(5, -2);
+	indent_aware_home_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	indent_aware_home_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	indent_aware_home_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	push_back(indent_aware_home_box);
+
+	width = max(label->get_width() + 2 + 3, width);
+
+	label = new smart_label_t(_("S_how tabs"));
+	label->set_position(6, 2);
+	push_back(label);
+	show_tabs_box = new checkbox_t();
+	show_tabs_box->set_label(label);
+	show_tabs_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	show_tabs_box->set_position(6, -2);
+	show_tabs_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	show_tabs_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	show_tabs_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	push_back(show_tabs_box);
+
+	width = max(label->get_width() + 2 + 3, width);
+
+	label = new smart_label_t(_("St_rip trailing spaces on save"));
+	label->set_position(7, 2);
 	push_back(label);
 	strip_spaces_box = new checkbox_t();
 	strip_spaces_box->set_label(label);
 	strip_spaces_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
-	strip_spaces_box->set_position(5, -2);
+	strip_spaces_box->set_position(7, -2);
 	strip_spaces_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
 	strip_spaces_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
 	strip_spaces_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
@@ -128,6 +156,8 @@ void buffer_options_dialog_t::set_values_from_view(file_edit_window_t *view) {
 	tab_spaces_box->set_state(view->get_tab_spaces());
 	wrap_box->set_state(view->get_wrap());
 	auto_indent_box->set_state(view->get_auto_indent());
+	indent_aware_home_box->set_state(view->get_indent_aware_home());
+	show_tabs_box->set_state(view->get_show_tabs());
 	strip_spaces_box->set_state(view->get_text()->get_strip_spaces());
 }
 
@@ -138,6 +168,8 @@ void buffer_options_dialog_t::set_view_values(file_edit_window_t *view) {
 	view->set_wrap(wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE);
 	view->set_tab_spaces(tab_spaces_box->get_state());
 	view->set_auto_indent(auto_indent_box->get_state());
+	view->set_indent_aware_home(indent_aware_home_box->get_state());
+	view->set_show_tabs(show_tabs_box->get_state());
 	view->get_text()->set_strip_spaces(strip_spaces_box->get_state());
 }
 
@@ -149,6 +181,8 @@ void buffer_options_dialog_t::set_values_from_options(void) {
 	tab_spaces_box->set_state(option.tab_spaces);
 	wrap_box->set_state(option.wrap);
 	auto_indent_box->set_state(option.auto_indent);
+	indent_aware_home_box->set_state(option.indent_aware_home);
+	show_tabs_box->set_state(option.show_tabs);
 	strip_spaces_box->set_state(option.strip_spaces);
 }
 
@@ -159,6 +193,8 @@ void buffer_options_dialog_t::set_options_values(void) {
 	option.wrap = default_option.wrap = wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE;
 	option.tab_spaces = default_option.tab_spaces = tab_spaces_box->get_state();
 	option.auto_indent = default_option.auto_indent = auto_indent_box->get_state();
+	option.indent_aware_home = default_option.indent_aware_home = indent_aware_home_box->get_state();
+	option.show_tabs = default_option.show_tabs = show_tabs_box->get_state();
 	option.strip_spaces = default_option.strip_spaces = strip_spaces_box->get_state();
 }
 

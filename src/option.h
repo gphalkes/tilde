@@ -68,6 +68,7 @@ struct term_options_t {
 	optional<t3_attr_t> menubar_selected;
 
 	optional<t3_attr_t> shadow;
+	optional<t3_attr_t> meta_text;
 
 	optional<t3_attr_t> highlights[MAX_HIGHLIGHTS];
 };
@@ -78,6 +79,7 @@ struct options_t {
 	optional<bool> tab_spaces;
 	optional<bool> auto_indent;
 	optional<bool> indent_aware_home;
+	optional<bool> show_tabs;
 	optional<bool> strip_spaces;
 	optional<bool> make_backup;
 
@@ -102,6 +104,7 @@ struct runtime_options_t {
 	bool tab_spaces;
 	bool auto_indent;
 	bool indent_aware_home;
+	bool show_tabs;
 	bool strip_spaces;
 	bool make_backup;
 	size_t max_recent_files;

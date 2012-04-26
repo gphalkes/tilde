@@ -27,6 +27,8 @@ class buffer_options_dialog_t : public dialog_t {
 			*wrap_box,
 			*hide_menu_box,
 			*auto_indent_box,
+			*indent_aware_home_box,
+			*show_tabs_box,
 			*strip_spaces_box;
 		text_field_t *tabsize_field;
 

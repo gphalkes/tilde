@@ -143,6 +143,7 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 		GET_ATTRIBUTE(menubar);
 		GET_ATTRIBUTE(menubar_selected);
 		GET_ATTRIBUTE(shadow);
+		GET_ATTRIBUTE(meta_text);
 	}
 	attributes = t3_config_get(config, "highlight_attributes");
 	if (attributes != NULL) {
@@ -214,6 +215,7 @@ static void read_config(void) {
 	GET_OPT(auto_indent, BOOL, bool);
 	GET_OPT(tab_spaces, BOOL, bool);
 	GET_OPT(indent_aware_home, BOOL, bool);
+	GET_OPT(show_tabs, BOOL, bool);
 	GET_OPT(strip_spaces, BOOL, bool);
 	GET_OPT(make_backup, BOOL, bool);
 
@@ -263,6 +265,7 @@ static void post_process_options(void) {
 	SET_OPT_FROM_DFLT(tab_spaces, false);
 	SET_OPT_FROM_DFLT(auto_indent, true);
 	SET_OPT_FROM_DFLT(indent_aware_home, true);
+	SET_OPT_FROM_DFLT(show_tabs, false);
 	SET_OPT_FROM_DFLT(make_backup, false);
 
 	SET_OPT_FROM_DFLT(max_recent_files, 16);
@@ -389,6 +392,7 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(menubar, attribute_t::MENUBAR);
 	SET_ATTR_FROM_FILE(menubar_selected, attribute_t::MENUBAR_SELECTED);
 	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
+	SET_ATTR_FROM_FILE(meta_text, attribute_t::META_TEXT);
 }
 
 static void set_config_attribute(t3_config_t *config, const char *section_name, const char *name, optional<t3_attr_t> attr) {
@@ -456,6 +460,7 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 	SET_ATTRIBUTE(menubar);
 	SET_ATTRIBUTE(menubar_selected);
 	SET_ATTRIBUTE(shadow);
+	SET_ATTRIBUTE(meta_text);
 
 	int i;
 	const char *highlight_name;
@@ -506,6 +511,7 @@ bool write_config(void) {
 	SET_OPTION(tab_spaces, bool);
 	SET_OPTION(auto_indent, bool);
 	SET_OPTION(indent_aware_home, bool);
+	SET_OPTION(show_tabs, bool);
 	SET_OPTION(strip_spaces, bool);
 	SET_OPTION(make_backup, bool);
 

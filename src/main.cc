@@ -197,7 +197,7 @@ main_t::main_t(void) {
 	about_dialog = new message_dialog_t(45, "About", "Close", NULL);
 	about_dialog->center_over(this);
 	about_dialog->set_max_text_height(13);
-	about_dialog->set_message("Tilde - The intuitive text editor\n\nVersion <VERSION>\nCopyright (c) 2011 G.P. Halkes\n\n"
+	about_dialog->set_message("Tilde - The intuitive text editor\n\nVersion <VERSION>\nCopyright (c) 2011-2012 G.P. Halkes\n\n" // @copyright
 		"The Tilde text editor is licensed under the GNU General Public License version 3. "
 		"You should have received a copy of the GNU General Public License along with this program. "
 		"If not, see <http://www.gnu.org/licenses/>.");
