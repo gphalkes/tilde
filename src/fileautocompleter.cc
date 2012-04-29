@@ -57,20 +57,20 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 	string word;
 
 	while (text->find_limited(&finder, start, eof, &find_result)) {
-		line = text->get_line_data(find_result.line);
-		for (; find_result.end < text->get_line_max(find_result.line) &&
-				line->is_alnum(find_result.end);
-				find_result.end = line->adjust_position(find_result.end, 1))
+		line = text->get_line_data(find_result.start.line);
+		for (; find_result.end.pos < text->get_line_max(find_result.end.line) &&
+				line->is_alnum(find_result.end.pos);
+				find_result.end.pos = line->adjust_position(find_result.end.pos, 1))
 		{}
 
-		if (find_result.end - find_result.start != text->cursor.pos - completion_start) {
-			word = line->get_data()->substr(find_result.start, find_result.end - find_result.start);
+		if (find_result.end.pos - find_result.start.pos != text->cursor.pos - completion_start) {
+			word = line->get_data()->substr(find_result.start.pos, find_result.end.pos - find_result.start.pos);
 			if (result_set.count(&word) == 0)
 				result_set.insert(new string(word));
 		}
 
-		start.line = find_result.line;
-		start.pos = find_result.end;
+		start.line = find_result.end.line;
+		start.pos = find_result.end.pos;
 	}
 
 	if (result_set.empty())
