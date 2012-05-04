@@ -24,7 +24,7 @@ if [ $? -eq 0 ] ; then
         mv -f testlog.txt "testlog_$LASTLOG_TIME.txt"
 fi
 
-export REPLAYOPTS=-k/8
+export REPLAYOPTS=-k1
 
 failed=0
 total=0
