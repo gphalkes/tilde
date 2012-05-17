@@ -37,7 +37,7 @@ struct cli_options_t {
 	int vm_limit;
 	bool start_debugger_on_segfault;
 #endif
-
+	const char *config_file;
 };
 
 struct term_options_t {

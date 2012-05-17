@@ -602,7 +602,16 @@ int main(int argc, char *argv[]) {
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
 	} else if (config_read_error) {
-		string message = "Error loading configuration file ~/.tilderc: ";
+		string message = "Error loading configuration file";
+		if (cli_option.config_file == NULL) {
+			char *file_name = t3_config_xdg_get_path(T3_CONFIG_XDG_CONFIG_HOME, "tilde", 5);
+			message += file_name;
+			message += "/config";
+			free(file_name);
+		} else {
+			message += cli_option.config_file;
+		}
+		message += ": ";
 		message += config_read_error_string;
 		if (config_read_error_line != 0) {
 			char line_number_buffer[100];
