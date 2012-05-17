@@ -173,7 +173,12 @@ static void read_config(void) {
 	t3_config_t *term_specific_config;
 	const char *term;
 
-	if ((config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config")) == NULL) {
+	if (cli_option.config_file == NULL)
+		config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
+	else
+		config_file = fopen(cli_option.config_file, "r");
+
+	if (config_file == NULL) {
 		if (errno != ENOENT) {
 			config_read_error = true;
 			config_read_error_string = strerror(errno);
@@ -181,6 +186,7 @@ static void read_config(void) {
 		}
 		return;
 	}
+
 
 	if ((config = t3_config_read_file(config_file, &error, NULL)) == NULL) {
 		config_read_error = true;
@@ -292,6 +298,7 @@ static void print_help(void) {
 	printf("Usage: tilde [<OPTIONS>] [<FILE...>]\n"
 		"  -b,--black-white     Request black & white mode, overriding config file.\n"
 		"  -c,--color           Request color mode, overriding config file.\n"
+		"  -C<file>,--config=<file>    Use <file> as config file.\n"
 		"  -h,--help            Show this help message.\n"
 		"  -I,--select-input-method    Ignore configured input handling method.\n"
 		"  -T<term>,--terminal=<term>  Use <term> instead of TERM variable.\n"
@@ -341,6 +348,9 @@ PARSE_FUNCTION(parse_args)
 		END_OPTION
 		OPTION('x', "no-ext-clipboard", NO_ARG)
 			cli_option.disable_external_clipboard = true;
+		END_OPTION
+		OPTION('C', "config", REQUIRED_ARG)
+			cli_option.config_file = optArg;
 		END_OPTION
 #ifdef DEBUG
 		LONG_OPTION("W", NO_ARG)
@@ -482,7 +492,12 @@ bool write_config(void) {
 	if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), NULL, NULL)) == NULL)
 		return false;
 
-	if ((config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config")) != NULL) {
+	if (cli_option.config_file == NULL)
+		config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
+	else
+		config_file = fopen(cli_option.config_file, "r");
+
+	if (config_file != NULL) {
 		/* Start by reading the existing configuration. */
 		t3_config_error_t error;
 		config = t3_config_read_file(config_file, &error, NULL);
@@ -546,16 +561,21 @@ bool write_config(void) {
 		return false;
 	}
 
-	//FIXME: should write to different file and rename, but t3config needs to have a function for that!
-	if ((new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config")) == NULL) {
+	if (cli_option.config_file == NULL)
+		new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
+	else
+		new_config_file = t3_config_open_write(cli_option.config_file);
+
+	if (new_config_file == NULL) {
+		lprintf("Could not open config file for writing: %m\n");
 		t3_config_delete(config);
 		return false;
 	}
 
-	if (t3_config_write_file(config, t3_config_xdg_get_file(new_config_file)) == T3_ERR_SUCCESS)
-		return t3_config_xdg_close_write(new_config_file, t3_false, t3_true);
+	if (t3_config_write_file(config, t3_config_get_write_file(new_config_file)) == T3_ERR_SUCCESS)
+		return t3_config_close_write(new_config_file, t3_false, t3_true);
 
-	t3_config_xdg_close_write(new_config_file, t3_true, t3_true);
+	t3_config_close_write(new_config_file, t3_true, t3_true);
 
 	return false;
 }

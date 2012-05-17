@@ -1,0 +1,8 @@
+Test structure:
+===============
+
+/
++ context/          The directory in which tilde will run
++ after/            What "context/" should look like after the replay
++ recording         The file with the recording
++ config            Configuration file to use
