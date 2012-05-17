@@ -70,8 +70,7 @@ dist-clean: clean
 src/tilde: $(OBJECTS)
 	$(SILENTLD) $(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS) $(CONFIGLIBS) $(GETTEXTLIBS)
 
-# Installation prefix and install paths
-prefix=/usr/local
+# Macros to make DESTDIR support more readable
 _bindir=$(DESTDIR)$(bindir)
 _docdir=$(DESTDIR)$(docdir)
 _mandir=$(DESTDIR)$(mandir)

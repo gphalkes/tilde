@@ -12,7 +12,6 @@ get_sources_hg
 make_tmpdir
 copy_sources ${SOURCES} ${GENSOURCES} ${AUXSOURCES}
 copy_dist_files
-copy_files `hg manifest | egrep ^man/`
 create_configure
 
 if [[ "${VERSION}" =~ [0-9]{8} ]] ; then
