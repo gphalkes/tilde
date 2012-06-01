@@ -42,8 +42,11 @@ encoding_dialog_t *encoding_dialog;
 
 static dialog_t *input_selection_dialog;
 
+static list<window_component_t *> discard_list;
+
 static void input_selection_complete(bool selection_made);
 static void configure_input(bool cancel_selects_default);
+static void sync_updates(void);
 
 class main_t : public main_window_base_t {
 	private:
@@ -534,7 +537,8 @@ static void configure_input(bool cancel_selects_default) {
 	input_selection_dialog_t *input_selection;
 	int height, width, is_width, is_height;
 
-	delete input_selection_dialog;
+	discard_list.push_back(input_selection_dialog);
+	signal_update();
 
 	t3_term_get_size(&height, &width);
 	is_width = min(max(width - 16, 40), 100);
@@ -549,7 +553,9 @@ static void configure_input(bool cancel_selects_default) {
 }
 
 static void input_selection_complete(bool selection_made) {
-	delete input_selection_dialog;
+	discard_list.push_back(input_selection_dialog);
+	signal_update();
+
 	input_selection_dialog = NULL;
 	if (selection_made) {
 		term_specific_option.key_timeout = get_key_timeout();
@@ -557,6 +563,13 @@ static void input_selection_complete(bool selection_made) {
 	}
 }
 
+static void sync_updates(void) {
+	if (!discard_list.empty()) {
+		for (list<window_component_t *>::iterator iter = discard_list.begin(); iter != discard_list.end(); iter++)
+			delete *iter;
+		discard_list.clear();
+	}
+}
 
 int main(int argc, char *argv[]) {
 	complex_error_t result;
@@ -590,6 +603,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	delete params;
+
+	connect_update_notification(sigc::ptr_fun(sync_updates));
 
 	init_charsets();
 	main_window = new main_t();
