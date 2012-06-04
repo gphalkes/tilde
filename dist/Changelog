@@ -1,3 +1,13 @@
+Version 0.1.11:
+	New features:
+	- An option has been added to show tabs.
+	- Follow libt3widget API change.
+
+	Bug fixes:
+	- Fix a segmentation fault that would occur on using the mouse in the
+	  Input Handling dialog.
+	- Added "Indent aware home key" configuration option.
+
 Version 0.1.10:
 	New features:
 	- Use the new XDG Base Directory Specification support functions in
