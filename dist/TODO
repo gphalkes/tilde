@@ -6,15 +6,13 @@ priority.
 - Allow users to find out which character(s) is (are) under the cursor
 - Auto save and restore on crash
 - fmt-like rewrapping of text to a specific width
-- improved mouse handling (double in text should select a word, triple click a
-    line)
 - Insertion of characters by their Unicode name instead of their codepoint
 - Improve terminal capabilities detection
-- Dialogs for changing the settings [partially done]
+- Dialogs for changing the settings (partially done)
 - End-of-line type selection and conversion (LF, CR/LF, CR)
 - Convert indentation from tabs to spaces and vice-versa
-- Recognize vi/emacs modelines, and use sensible information
-- Show spaces option
+- Recognize vi/emacs modelines, and use sensible information (done for
+	syntax highlighting)
 
 Possible later features, depending on complexity and demand:
 - Increase/decrease indentation as appropriate for languages like C, where

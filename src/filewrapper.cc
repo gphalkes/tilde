@@ -166,10 +166,10 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
 			default:
 				throw rw_result_t(rw_result_t::CONVERSION_ERROR);
 		}
-		if (transcript_buffer_ptr > transcript_buffer &&
-				nosig_write(fd, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0)
-		{
-			throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+		if (transcript_buffer_ptr > transcript_buffer) {
+			conversion_flags &= ~TRANSCRIPT_FILE_START;
+			if (nosig_write(fd, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0)
+				throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 		}
 	}
 

@@ -226,13 +226,14 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 		{
 			transcript_t *handle;
 			transcript_error_t error;
-			//FIXME: bail out on error
 			if (!state->encoding.empty()) {
-				handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0, &error);
+				if ((handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0, &error)) == NULL)
+					return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
 				/* encoding is a cleanup ptr. */
 				encoding = strdup(state->encoding.c_str());
 			} else if (strcmp(encoding, "UTF-8") != 0) {
-				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
+				if ((handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error)) == NULL)
+					return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
 			} else {
 				handle = NULL;
 			}

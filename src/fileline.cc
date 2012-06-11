@@ -39,6 +39,7 @@ file_line_t::file_line_t(const std::string *str, file_line_factory_t *_factory) 
 t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
 	const string *str;
 	file_buffer_t *file = ((file_line_factory_t *) factory)->get_file_buffer();
+	int attribute_idx;
 
 	if (file == NULL || file->highlight_info == NULL)
 		return info->normal_attr;
@@ -55,7 +56,7 @@ t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
 	while (t3_highlight_get_end(file->last_match) <= (size_t) i)
 		t3_highlight_match(file->last_match, str->data(), str->size());
 
-	int attribute_idx = (size_t) i < t3_highlight_get_match_start(file->last_match) ?
+	attribute_idx = (size_t) i < t3_highlight_get_match_start(file->last_match) ?
 		t3_highlight_get_begin_attr(file->last_match) :
 		t3_highlight_get_match_attr(file->last_match);
 

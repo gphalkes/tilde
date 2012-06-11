@@ -68,7 +68,7 @@ static charset_desc_t friendly_charsets[] = {
 	{ "Thai (Windows-874)", "WINDOWS-874" },
 	{ "Turkish (Windows-1254)", "WINDOWS-1254" },
 	{ "Turkish (ISO-8859-9)", "ISO-8859-9" },
-	{ "Unicode (UTF-8 with BOM)", "UTF-8-BOM" },
+	{ "Unicode (UTF-8 with BOM)", "X-UTF-8-BOM" },
 	{ "Unicode (UTF-16)", "UTF-16" },
 	{ "Unicode (UTF-7)", "UTF-7" },
 	{ "Vietnamese (Windows-1258)", "WINDOWS-1258" },

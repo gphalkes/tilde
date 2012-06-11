@@ -82,7 +82,7 @@ class file_write_wrapper_t {
 		transcript_t *handle;
 
 	public:
-		file_write_wrapper_t(int _fd, transcript_t *_handle = NULL) : fd(_fd), conversion_flags(0), handle(_handle) {}
+		file_write_wrapper_t(int _fd, transcript_t *_handle = NULL) : fd(_fd), conversion_flags(TRANSCRIPT_FILE_START), handle(_handle) {}
 		~file_write_wrapper_t(void);
 		void write(const char *buffer, size_t bytes);
 };
