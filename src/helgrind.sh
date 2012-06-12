@@ -22,5 +22,4 @@ if ! [ -x "$DIR/.objects/edit" ] ; then
 fi
 
 export LD_LIBRARY_PATH="`sed 's/#.*//' $DIR/Makefile | egrep -o -- '-L[^[:space:]]+' | sed -r \"s%-L%$DIR/%g\" | tr '\n' ':' | sed -r 's/:$//'`"
-valgrind --tool=helgrind \
-	--log-file="$DIR/helgrind.log" "$DIR/.objects/edit" --L=250 "$@"
+valgrind --tool=helgrind --log-file="$DIR/helgrind.log" "$DIR/.objects/edit" --L=500 "$@"

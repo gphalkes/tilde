@@ -1,3 +1,7 @@
+Version 0.1.12:
+	Bug fixes:
+	- Use correct name for UTF-8 with BOM converter.
+
 Version 0.1.11:
 	New features:
 	- An option has been added to show tabs.
