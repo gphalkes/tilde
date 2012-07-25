@@ -39,6 +39,7 @@ message_dialog_t *close_confirm_dialog;
 message_dialog_t *error_dialog;
 open_recent_dialog_t *open_recent_dialog;
 encoding_dialog_t *encoding_dialog;
+message_dialog_t *preserve_bom_dialog;
 
 static dialog_t *input_selection_dialog;
 
@@ -224,6 +225,12 @@ main_t::main_t(void) {
 	highlight_dialog = new highlight_dialog_t(t3_win_get_height(window) - 4, 40);
 	highlight_dialog->center_over(this);
 	highlight_dialog->connect_language_selected(sigc::mem_fun(this, &main_t::set_highlight));
+	
+	preserve_bom_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Yes", "_No", NULL);
+	preserve_bom_dialog->set_message("The file starts with a Byte Order Mark (BOM). "
+				"This is used on some platforms to recognise UTF-8 encoded files. On Unix-like systems "
+				"however, the presence of the BOM is undesirable. Do you want to preserve the BOM?");
+	preserve_bom_dialog->center_over(this);
 }
 
 main_t::~main_t(void) {
@@ -678,6 +685,7 @@ int main(int argc, char *argv[]) {
 	delete open_recent_dialog;
 	delete encoding_dialog;
 	delete main_window;
+	delete preserve_bom_dialog;
 	recent_files.cleanup();
 	open_files.cleanup();
 	cleanup();

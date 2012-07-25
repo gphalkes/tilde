@@ -101,13 +101,39 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 			} catch (bad_alloc &ba) {
 				return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 			}
-			state->state = load_process_t::READING;
+			state->state = load_process_t::READING_FIRST;
 		}
 		case load_process_t::READING:
+		case load_process_t::READING_FIRST:
 			try {
-				while (state->wrapper->fill_buffer(state->wrapper->get_fill())) {
+				while (!state->buffer_used || state->wrapper->fill_buffer(state->wrapper->get_fill())) {
+					state->buffer_used = false;
+					if (state->state == load_process_t::READING_FIRST) {
+						switch (state->bom_state) {
+							case load_process_t::UNKNOWN:
+								if (state->wrapper->get_fill() >= 3 && transcript_equal(encoding(), "utf8") && 
+										memcmp(state->wrapper->get_buffer(), "\xef\xbb\xbf", 3) == 0)
+									return rw_result_t(rw_result_t::BOM_FOUND);
+								break;
+							case load_process_t::PRESERVE_BOM:
+								encoding = strdup("X-UTF-8-BOM");
+								/* FALLTHROUGH */
+							case load_process_t::REMOVE_BOM:
+								try {
+									append_text(state->wrapper->get_buffer() + 3, state->wrapper->get_fill() - 3);
+									state->buffer_used = true;
+								} catch (...) {
+									return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
+								}
+								state->state = load_process_t::READING;
+								continue;
+						}
+						state->state = load_process_t::READING;
+					}
+
 					try {
 						append_text(state->wrapper->get_buffer(), state->wrapper->get_fill());
+						state->buffer_used = true;
 					} catch (...) {
 						return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 					}

@@ -27,4 +27,5 @@ extern message_dialog_t *close_confirm_dialog;
 extern message_dialog_t *error_dialog;
 extern open_recent_dialog_t *open_recent_dialog;
 extern encoding_dialog_t *encoding_dialog;
+extern message_dialog_t *preserve_bom_dialog;
 #endif

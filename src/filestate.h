@@ -34,7 +34,8 @@ class rw_result_t {
 			CONVERSION_IMPRECISE,
 			CONVERSION_ERROR,
 			CONVERSION_ILLEGAL,
-			CONVERSION_TRUNCATED
+			CONVERSION_TRUNCATED,
+			BOM_FOUND,
 		};
 
 	private:
@@ -61,13 +62,21 @@ class load_process_t : public stepped_process_t {
 		enum {
 			SELECT_FILE,
 			INITIAL,
+			READING_FIRST,
 			READING
 		} state;
+		
+		enum {
+			UNKNOWN,
+			REMOVE_BOM,
+			PRESERVE_BOM,
+		} bom_state;
 
 		file_buffer_t *file;
 		file_read_wrapper_t *wrapper;
 		std::string encoding;
 		int fd;
+		bool buffer_used;
 
 		load_process_t(const callback_t &cb);
 		load_process_t(const callback_t &cb, const char *name, const char *_encoding);
@@ -76,6 +85,8 @@ class load_process_t : public stepped_process_t {
 		virtual void file_selected(const std::string *name);
 		virtual void encoding_selected(const std::string *_encoding);
 		virtual ~load_process_t(void);
+		virtual void preserve_bom(void);
+		virtual void remove_bom(void);
 
 	public:
 		virtual file_buffer_t *get_file_buffer(void);

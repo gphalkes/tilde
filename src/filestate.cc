@@ -19,12 +19,12 @@
 #include "openfiles.h"
 #include "option.h"
 
-load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), state(SELECT_FILE), file(NULL), wrapper(NULL),
-		encoding("UTF-8"), fd(-1) {}
+load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), state(SELECT_FILE), bom_state(UNKNOWN), file(NULL),
+		wrapper(NULL), encoding("UTF-8"), fd(-1), buffer_used(true) {}
 
 load_process_t::load_process_t(const callback_t &cb, const char *name, const char *_encoding) : stepped_process_t(cb), state(INITIAL),
-		file(new file_buffer_t(name, _encoding == NULL ? "UTF-8" : _encoding)), wrapper(NULL),
-		encoding(_encoding == NULL ? "UTF-8" : _encoding), fd(-1) {}
+		bom_state(UNKNOWN), file(new file_buffer_t(name, _encoding == NULL ? "UTF-8" : _encoding)), wrapper(NULL),
+		encoding(_encoding == NULL ? "UTF-8" : _encoding), fd(-1), buffer_used(true) {}
 
 void load_process_t::abort(void) {
 	delete file;
@@ -88,6 +88,11 @@ bool load_process_t::step(void) {
 			error_dialog->set_message(&message);
 			error_dialog->show();
 			break;
+		case rw_result_t::BOM_FOUND:
+			connections.push_back(preserve_bom_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::preserve_bom), 0));
+			connections.push_back(preserve_bom_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::remove_bom), 1));
+			preserve_bom_dialog->show();
+			return false;
 		default:
 			PANIC();
 	}
@@ -123,6 +128,17 @@ load_process_t::~load_process_t(void) {
 	delete wrapper;
 	if (fd >= 0)
 		close(fd);
+}
+
+void load_process_t::preserve_bom(void) {
+	//FIXME: set encoding accordingly
+	bom_state = PRESERVE_BOM;
+	run();
+}
+
+void load_process_t::remove_bom(void) {
+	bom_state = REMOVE_BOM;
+	run();
 }
 
 void load_process_t::execute(const callback_t &cb) {
@@ -369,6 +385,7 @@ bool load_cli_file_process_t::step(void) {
 	in_step = true;
 	while (iter != cli_option.files.end()) {
 		in_load = true;
+		#warning FIXME: divert to choice for encoding if no value is given for -e
 		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter, cli_option.encoding.is_valid() ? cli_option.encoding : NULL);
 		if (in_load) {
 			in_step = false;
