@@ -1,3 +1,12 @@
+Version 0.1.13:
+	New features:
+	- Added an option to allow specification of the encoding on the command
+	  line.
+
+	Bug fixes:
+	- Properly handle the start of a file such that BOMs are correctly
+	  interpreted.
+
 Version 0.1.12:
 	Bug fixes:
 	- Use correct name for UTF-8 with BOM converter.

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 G.P. Halkes
+/* Copyright (C) 2011-2012 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -22,8 +22,9 @@
 load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), state(SELECT_FILE), file(NULL), wrapper(NULL),
 		encoding("UTF-8"), fd(-1) {}
 
-load_process_t::load_process_t(const callback_t &cb, const char *name) : stepped_process_t(cb), state(INITIAL),
-		file(new file_buffer_t(name, "UTF-8")), wrapper(NULL), encoding("UTF-8"), fd(-1) {}
+load_process_t::load_process_t(const callback_t &cb, const char *name, const char *_encoding) : stepped_process_t(cb), state(INITIAL),
+		file(new file_buffer_t(name, _encoding == NULL ? "UTF-8" : _encoding)), wrapper(NULL),
+		encoding(_encoding == NULL ? "UTF-8" : _encoding), fd(-1) {}
 
 void load_process_t::abort(void) {
 	delete file;
@@ -128,8 +129,8 @@ void load_process_t::execute(const callback_t &cb) {
 	(new load_process_t(cb))->run();
 }
 
-void load_process_t::execute(const callback_t &cb, const char *name) {
-	(new load_process_t(cb, name))->run();
+void load_process_t::execute(const callback_t &cb, const char *name, const char *encoding) {
+	(new load_process_t(cb, name, encoding))->run();
 }
 
 save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file) : stepped_process_t(cb), state(SELECT_FILE),
@@ -368,7 +369,7 @@ bool load_cli_file_process_t::step(void) {
 	in_step = true;
 	while (iter != cli_option.files.end()) {
 		in_load = true;
-		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter);
+		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter, cli_option.encoding.is_valid() ? cli_option.encoding : NULL);
 		if (in_load) {
 			in_step = false;
 			return false;

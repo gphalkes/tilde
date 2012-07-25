@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 G.P. Halkes
+/* Copyright (C) 2011-2012 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -70,7 +70,7 @@ class load_process_t : public stepped_process_t {
 		int fd;
 
 		load_process_t(const callback_t &cb);
-		load_process_t(const callback_t &cb, const char *name);
+		load_process_t(const callback_t &cb, const char *name, const char *_encoding);
 		void abort(void);
 		virtual bool step(void);
 		virtual void file_selected(const std::string *name);
@@ -80,7 +80,7 @@ class load_process_t : public stepped_process_t {
 	public:
 		virtual file_buffer_t *get_file_buffer(void);
 		static void execute(const callback_t &cb);
-		static void execute(const callback_t &cb, const char *name);
+		static void execute(const callback_t &cb, const char *name, const char *encoding = NULL);
 };
 
 class save_as_process_t : public stepped_process_t {

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 G.P. Halkes
+/* Copyright (C) 2011-2012 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -94,6 +94,8 @@ bool transcript_buffer_t::fill_buffer(int used) {
 		default:
 			throw rw_result_t(rw_result_t::CONVERSION_ERROR);
 	}
+	if (buffer_index > 0)
+		conversion_flags &= ~TRANSCRIPT_FILE_START;
 	return fill > 0;
 }
 

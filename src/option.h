@@ -38,6 +38,7 @@ struct cli_options_t {
 	bool start_debugger_on_segfault;
 #endif
 	const char *config_file;
+	optional<const char *> encoding;
 };
 
 struct term_options_t {

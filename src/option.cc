@@ -352,6 +352,9 @@ PARSE_FUNCTION(parse_args)
 		OPTION('C', "config", REQUIRED_ARG)
 			cli_option.config_file = optArg;
 		END_OPTION
+		OPTION('e', "encoding", OPTIONAL_ARG)
+			cli_option.encoding = optArg;
+		END_OPTION
 #ifdef DEBUG
 		LONG_OPTION("W", NO_ARG)
 			cli_option.wait = true;

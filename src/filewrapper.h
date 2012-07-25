@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 G.P. Halkes
+/* Copyright (C) 2011-2012 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -55,7 +55,7 @@ class transcript_buffer_t : public buffer_t {
 		bool at_eof;
 
 	public:
-		transcript_buffer_t(buffer_t *_buffer, transcript_t *_handle) : wrapped_buffer(_buffer), buffer_index(0), conversion_flags(0),
+		transcript_buffer_t(buffer_t *_buffer, transcript_t *_handle) : wrapped_buffer(_buffer), buffer_index(0), conversion_flags(TRANSCRIPT_FILE_START),
 			handle(_handle), at_eof(false) {}
 		virtual ~transcript_buffer_t(void);
 		virtual bool fill_buffer(int used);
