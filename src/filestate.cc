@@ -379,14 +379,28 @@ void open_recent_process_t::execute(const callback_t &cb) {
 
 
 load_cli_file_process_t::load_cli_file_process_t(const callback_t &cb) : stepped_process_t(cb),
-		iter(cli_option.files.begin()), in_load(false), in_step(false) {}
+		iter(cli_option.files.begin()), in_load(false), in_step(false), encoding_selected(false) {}
 
 bool load_cli_file_process_t::step(void) {
+	if (!encoding_selected) {
+		encoding_selected = true;
+		if (cli_option.encoding.is_valid()) {
+			if (cli_option.encoding == NULL) {
+				encoding_dialog->set_encoding("UTF-8");
+				encoding_dialog->connect_activate(sigc::mem_fun(this, &load_cli_file_process_t::encoding_selection_done));
+				encoding_dialog->connect_closed(sigc::mem_fun(this, &load_cli_file_process_t::run));
+				encoding_dialog->show();
+				return false;
+			} else {
+				encoding = strdup(cli_option.encoding);
+			}
+		}
+	}
+	
 	in_step = true;
 	while (iter != cli_option.files.end()) {
 		in_load = true;
-		#warning FIXME: divert to choice for encoding if no value is given for -e
-		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter, cli_option.encoding.is_valid() ? cli_option.encoding : NULL);
+		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter, encoding);
 		if (in_load) {
 			in_step = false;
 			return false;
@@ -407,4 +421,9 @@ void load_cli_file_process_t::load_done(stepped_process_t *process) {
 
 void load_cli_file_process_t::execute(const callback_t &cb) {
 	(new load_cli_file_process_t(cb))->run();
+}
+
+void load_cli_file_process_t::encoding_selection_done(const string *_encoding) {
+	encoding = strdup(_encoding->c_str());
+	run();
 }

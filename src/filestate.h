@@ -17,10 +17,13 @@
 #include <sys/types.h>
 #include <transcript/transcript.h>
 #include <sigc++/sigc++.h>
+#include <t3widget/widget.h>
 
 #include "util.h"
 #include "filewrapper.h"
 #include "openfiles.h"
+
+using namespace t3_widget;
 
 class file_buffer_t;
 
@@ -85,8 +88,8 @@ class load_process_t : public stepped_process_t {
 		virtual void file_selected(const std::string *name);
 		virtual void encoding_selected(const std::string *_encoding);
 		virtual ~load_process_t(void);
-		virtual void preserve_bom(void);
-		virtual void remove_bom(void);
+		void preserve_bom(void);
+		void remove_bom(void);
 
 	public:
 		virtual file_buffer_t *get_file_buffer(void);
@@ -181,12 +184,15 @@ class open_recent_process_t : public load_process_t	{
 class load_cli_file_process_t : public stepped_process_t {
 	protected:
 		list<const char *>::const_iterator iter;
-		bool in_load, in_step;
+		bool in_load, in_step, encoding_selected;
+		cleanup_free_ptr<char>::t encoding;
 
 		load_cli_file_process_t(const callback_t &cb);
 		virtual bool step(void);
 		virtual void load_done(stepped_process_t *process);
 
+		void encoding_selection_done(const std::string *);
+		void encoding_selection_canceled(void);
 	public:
 		static void execute(const callback_t &cb);
 };
