@@ -1,7 +1,8 @@
 Version 0.1.13:
 	New features:
 	- Added an option to allow specification of the encoding on the command
-	  line.
+	  line, or ask for encoding on start-up.
+	- Handle BOMs on loading of UTF-8 files.
 
 	Bug fixes:
 	- Properly handle the start of a file such that BOMs are correctly
