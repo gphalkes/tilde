@@ -103,9 +103,9 @@ void open_files_t::cleanup(void) {
 
 
 recent_file_info_t::recent_file_info_t(file_buffer_t *file) {
-	if ((name = strdup(file->get_name())) == NULL)
+	if ((name = strdup_impl(file->get_name())) == NULL)
 		throw bad_alloc();
-	if ((encoding = strdup(file->get_encoding())) == NULL) {
+	if ((encoding = strdup_impl(file->get_encoding())) == NULL) {
 		free(name);
 		throw bad_alloc();
 	}

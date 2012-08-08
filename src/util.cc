@@ -91,7 +91,7 @@ static void start_debugger_on_segfault(int sig) {
 }
 
 void enable_debugger_on_segfault(const char *_executable) {
-	executable = strdup(_executable);
+	executable = strdup_impl(_executable);
 	signal(SIGSEGV, start_debugger_on_segfault);
 	signal(SIGABRT, start_debugger_on_segfault);
 }
@@ -134,7 +134,7 @@ char *resolve_links(const char *start_name) {
 		buffer[retval] = 0;
 		start_name = buffer;
 	}
-	return strdup(start_name);
+	return strdup_impl(start_name);
 }
 
 char *canonicalize_path(const char *path) {
@@ -191,7 +191,7 @@ char *canonicalize_path(const char *path) {
 	    - remove all occurences of ^/..
 		- remove all occurences of XXX/../
 	*/
-	return strdup(result.c_str());
+	return strdup_impl(result.c_str());
 }
 
 #define BUFFER_START_SIZE 256
@@ -256,3 +256,15 @@ const char *reverse_map_highlight(int idx) {
 		return NULL;
 	return highlight_names[idx];
 }
+
+#ifndef HAS_STRDUP
+char *strdup_impl(const char *str) {
+	char *result;
+	size_t len = strlen(str) + 1;
+
+	if ((result = (char *) malloc(len)) == NULL)
+		return NULL;
+	memcpy(result, str, len);
+	return result;
+}
+#endif

@@ -103,4 +103,12 @@ void printf_into(std::string *message, const char *format, ...);
 
 int map_highlight(void *data, const char *name);
 const char *reverse_map_highlight(int idx);
+
+#ifndef HAS_STRDUP
+char *strdup_impl(const char *str);
+#else
+#include <cstring>
+#define strdup_impl strdup
+#endif
+
 #endif

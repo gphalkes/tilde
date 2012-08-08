@@ -27,16 +27,16 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 		highlight_valid(0), highlight_info(NULL), match_line(NULL), last_match(NULL)
 {
 	if (_encoding == NULL)
-		encoding = strdup("UTF-8");
+		encoding = strdup_impl("UTF-8");
 	else
-		encoding = strdup(_encoding);
+		encoding = strdup_impl(_encoding);
 	if (encoding == NULL)
 		throw bad_alloc();
 
 	if (_name == NULL) {
 		name_line.set_text("(Untitled)");
 	} else {
-		if ((name = strdup(_name)) == NULL)
+		if ((name = strdup_impl(_name)) == NULL)
 			throw bad_alloc();
 
 		string converted_name;
@@ -111,12 +111,12 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 					if (state->state == load_process_t::READING_FIRST) {
 						switch (state->bom_state) {
 							case load_process_t::UNKNOWN:
-								if (state->wrapper->get_fill() >= 3 && transcript_equal(encoding(), "utf8") && 
+								if (state->wrapper->get_fill() >= 3 && transcript_equal(encoding(), "utf8") &&
 										memcmp(state->wrapper->get_buffer(), "\xef\xbb\xbf", 3) == 0)
 									return rw_result_t(rw_result_t::BOM_FOUND);
 								break;
 							case load_process_t::PRESERVE_BOM:
-								encoding = strdup("X-UTF-8-BOM");
+								encoding = strdup_impl("X-UTF-8-BOM");
 								/* FALLTHROUGH */
 							case load_process_t::REMOVE_BOM:
 								try {
@@ -237,7 +237,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 
 				/* Unfortunately, we can't pass the c_str result to mkstemp as we are not allowed
 				   to change that string. So we'll just have to strdup it :-( */
-				if ((state->temp_name = strdup(temp_name_str.c_str())) == NULL)
+				if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == NULL)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
 				if ((state->fd = mkstemp(state->temp_name)) < 0)
@@ -256,7 +256,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				if ((handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0, &error)) == NULL)
 					return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
 				/* encoding is a cleanup ptr. */
-				encoding = strdup(state->encoding.c_str());
+				encoding = strdup_impl(state->encoding.c_str());
 			} else if (strcmp(encoding, "UTF-8") != 0) {
 				if ((handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error)) == NULL)
 					return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
@@ -301,7 +301,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			if (!state->name.empty()) {
 				string converted_name;
 				/* name is a cleanup ptr. */
-				name = strdup(state->name.c_str());
+				name = strdup_impl(state->name.c_str());
 				convert_lang_codeset(name, &converted_name, true);
 				name_line.set_text(&converted_name);
 			}

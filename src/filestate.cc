@@ -392,11 +392,11 @@ bool load_cli_file_process_t::step(void) {
 				encoding_dialog->show();
 				return false;
 			} else {
-				encoding = strdup(cli_option.encoding);
+				encoding = strdup_impl(cli_option.encoding);
 			}
 		}
 	}
-	
+
 	in_step = true;
 	while (iter != cli_option.files.end()) {
 		in_load = true;
@@ -424,6 +424,6 @@ void load_cli_file_process_t::execute(const callback_t &cb) {
 }
 
 void load_cli_file_process_t::encoding_selection_done(const string *_encoding) {
-	encoding = strdup(_encoding->c_str());
+	encoding = strdup_impl(_encoding->c_str());
 	run();
 }
