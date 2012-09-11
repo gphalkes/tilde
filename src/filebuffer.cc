@@ -539,6 +539,9 @@ start_search:
 			for (current_line--; current_line >= 0; current_line--) {
 				line = (file_line_t *) get_line_data(current_line);
 				for (i = 0, local_count = 0, open_surplus = 0; i < line->get_length(); i++) {
+					if (line->get_base_attr(i, &paint_info) != 0)
+						continue;
+
 					if ((*(line->get_data()))[i] == c) {
 						local_count--;
 						if (open_surplus > 0)
@@ -555,6 +558,8 @@ start_search:
 				}
 				count += local_count;
 			}
+			if (current_line < 0)
+				return false;
 			match_max = line->get_length();
 		} else {
 			match_max = cursor.pos;

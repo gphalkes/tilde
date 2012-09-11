@@ -130,7 +130,9 @@ main_t::main_t(void) {
 	panel->add_item("Find _Next", "F3", action_id_t::SEARCH_AGAIN);
 	panel->add_item("Find _Previous", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
 	panel->add_item("_Replace...", "^R", action_id_t::SEARCH_REPLACE);
+	panel->add_separator();
 	panel->add_item("_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
+	panel->add_item("Go to matching _brace", "^]", action_id_t::SEARCH_GOTO_MATCHING_BRACE);
 
 	panel = new menu_panel_t("_Window", menu);
 	panel->add_item("_Next Buffer", "F6" , action_id_t::WINDOWS_NEXT_BUFFER);
@@ -225,7 +227,7 @@ main_t::main_t(void) {
 	highlight_dialog = new highlight_dialog_t(t3_win_get_height(window) - 4, 40);
 	highlight_dialog->center_over(this);
 	highlight_dialog->connect_language_selected(sigc::mem_fun(this, &main_t::set_highlight));
-	
+
 	preserve_bom_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Yes", "_No", NULL);
 	preserve_bom_dialog->set_message("The file starts with a Byte Order Mark (BOM). "
 				"This is used on some platforms to recognise UTF-8 encoded files. On Unix-like systems "
@@ -380,6 +382,9 @@ void main_t::menu_activated(int id) {
 			break;
 		case action_id_t::SEARCH_GOTO:
 			get_current()->goto_line();
+			break;
+		case action_id_t::SEARCH_GOTO_MATCHING_BRACE:
+			get_current()->goto_matching_brace();
 			break;
 
 		case action_id_t::WINDOWS_NEXT_BUFFER: {
