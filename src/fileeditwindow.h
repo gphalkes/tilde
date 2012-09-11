@@ -24,6 +24,7 @@ class file_edit_window_t : public edit_window_t {
 		file_edit_window_t(file_buffer_t *_text = NULL);
 		virtual ~file_edit_window_t(void);
 		virtual void draw_info_window(void);
+		virtual bool process_key(key_t key);
 
 		void set_text(file_buffer_t *_text);
 		file_buffer_t *get_text(void) const;

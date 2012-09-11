@@ -439,3 +439,155 @@ void file_buffer_t::do_strip_spaces(void) {
 	if (cursor.pos > get_line_max(cursor.line))
 		cursor.pos = get_line_max(cursor.line);
 }
+
+bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
+	file_line_t *line = (file_line_t *) get_line_data(cursor.line);
+	char c = (*(line->get_data()))[cursor.pos];
+	char c_close = c;
+	bool forward = true;
+	text_line_t::paint_info_t paint_info = { .normal_attr = 0 };
+	int current_line, i, count;
+
+	switch (c) {
+		case '}':
+		case ']':
+			c_close--;
+			/* FALLTHROUGH */
+		case ')':
+			c_close--;
+			forward = false;
+			break;
+		case '{':
+		case '[':
+			c_close++;
+			/* FALLTHROUGH */
+		case '(':
+			c_close++;
+			break;
+		default:
+			return false;
+	}
+
+	prepare_paint_line(cursor.line);
+	/* If the current character is highlighted, it is not considered for brace matching. */
+	if (line->get_base_attr(cursor.pos, &paint_info) != 0)
+		return false;
+
+	if (forward) {
+		current_line = cursor.line;
+		i = cursor.pos;
+		count = 0;
+		/* Use goto here to jump into the loop. The reason for doing this, is
+		   because we want to start from the location of the cursor, not the
+		   first character on the line. */
+		goto start_search;
+
+		for (; current_line < size(); current_line++) {
+			line = (file_line_t *) get_line_data(current_line);
+			for (i = 0; i < line->get_length(); i = line->adjust_position(i, 1)) {
+start_search:
+				if (line->get_base_attr(i, &paint_info) != 0)
+					continue;
+				if ((*(line->get_data()))[i] == c) {
+					count++;
+				} else if ((*(line->get_data()))[i] == c_close) {
+					if (--count == 0) {
+						match_location.pos = i;
+						match_location.line = current_line;
+						return true;
+					}
+				}
+
+			}
+		}
+	} else {
+		int open_surplus = 0;
+		int match_max, marked_pos = -1;
+		current_line = cursor.line;
+		count = -1;
+
+		/* To find the correct opening brace, we keep two separate counts:
+		   - the count of opening vs. closing braces
+		   - the surplus of opening braces before the closing brace
+		   If the open surplus at the closing brace is greater than 0, the
+		   opening brace is on this line (because we count up to, but not
+		   including, the closing brace here).
+		*/
+		for (i = 0; i < cursor.pos; i = line->adjust_position(i, 1)) {
+			if (line->get_base_attr(i, &paint_info) != 0)
+				continue;
+
+			if ((*(line->get_data()))[i] == c) {
+				count--;
+				if (open_surplus > 0)
+					open_surplus--;
+			} else if ((*(line->get_data()))[i] == c_close) {
+				count++;
+				open_surplus++;
+			}
+		}
+
+		if (open_surplus == 0) {
+			/* In this case, the opening brace is on a line before the current line.
+			   So we have to go back, until we find the line which does have the matching
+			   brace. We now calculate the open_surplus at the end of the line. If it
+			   is greater than or equal to the number of closing brace we have
+			   encountered (including the one we are hoping to match), the opening
+			   brace we are looking for is on the current line. */
+			int local_count;
+
+			for (current_line--; current_line >= 0; current_line--) {
+				line = (file_line_t *) get_line_data(current_line);
+				for (i = 0, local_count = 0, open_surplus = 0; i < line->get_length(); i++) {
+					if ((*(line->get_data()))[i] == c) {
+						local_count--;
+						if (open_surplus > 0)
+							open_surplus--;
+					} else if ((*(line->get_data()))[i] == c_close) {
+						local_count++;
+						open_surplus++;
+					}
+				}
+
+				if (open_surplus >= -count) {
+					count += local_count;
+					break;
+				}
+				count += local_count;
+			}
+			match_max = line->get_length();
+		} else {
+			match_max = cursor.pos;
+		}
+
+		count = -count;
+		for (i = 0; i < match_max; i = line->adjust_position(i, 1)) {
+			if (line->get_base_attr(i, &paint_info) != 0)
+				continue;
+
+			if ((*(line->get_data()))[i] == c) {
+				count--;
+			} else if ((*(line->get_data()))[i] == c_close) {
+				if (count++ == 0)
+					marked_pos = i;
+			}
+		}
+		/* As a safety measure, we ensure that last_match has actually been set. */
+		if (marked_pos >= 0) {
+			match_location.line = current_line;
+			match_location.pos = marked_pos;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool file_buffer_t::goto_matching_brace(void) {
+	text_coordinate_t match_coordinate;
+	if (find_matching_brace(match_coordinate)) {
+		cursor = match_coordinate;
+		return true;
+	}
+	return false;
+}

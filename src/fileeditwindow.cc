@@ -75,3 +75,14 @@ file_buffer_t *file_edit_window_t::get_text(void) const {
 	return (file_buffer_t *) edit_window_t::get_text();
 }
 
+bool file_edit_window_t::process_key(key_t key) {
+	bool result = edit_window_t::process_key(key);
+	if (!result && key == (EKEY_CTRL | 'e')) {
+		if (get_text()->goto_matching_brace()) {
+			ensure_cursor_on_screen();
+			redraw = true;
+		}
+		return true;
+	}
+	return result;
+}
