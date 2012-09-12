@@ -14,6 +14,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstring>
+#ifdef HAS_LIBATTR
+#include <attr/libattr.h>
+#endif
+#ifdef HAS_LIBACL
+#include <acl/libacl.h>
+#endif
 
 #include "filebuffer.h"
 #include "fileline.h"
@@ -244,6 +250,12 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
 				// Preserve ownership and attributes
+#ifdef HAS_LIBATTR
+				attr_copy_file(state->real_name, state->temp_name, NULL, NULL);
+#endif
+#ifdef HAS_LIBACL
+				perm_copy_file(state->real_name, state->temp_name, NULL);
+#endif
 				fchmod(state->fd, state->file_info.st_mode);
 				fchown(state->fd, -1, state->file_info.st_gid);
 				fchown(state->fd, state->file_info.st_uid, -1);

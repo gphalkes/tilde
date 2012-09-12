@@ -188,6 +188,34 @@ int main(int argc, char *argv[]) {
 EOF
 	test_link_cxx "strdup" && CONFIGFLAGS="${CONFIGFLAGS} -DHAS_STRDUP"
 
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <stdlib.h>
+#include <attr/libattr.h>
+
+int main(int argc, char *argv[]) {
+	attr_copy_file(argv[1], argv[2], NULL, NULL);
+}
+EOF
+	if test_link_cxx "libattr" TESTLIBS=-lattr ; then
+		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_LIBATTR"
+		CONFIGLIBS="${CONFIGLIBS} -lattr"
+	fi
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <stdlib.h>
+#include <acl/libacl.h>
+
+int main(int argc, char *argv[]) {
+	perm_copy_file(argv[1], argv[2], NULL);
+}
+EOF
+	if test_link_cxx "libacl" TESTLIBS=-lacl ; then
+		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_LIBACL"
+		CONFIGLIBS="${CONFIGLIBS} -lacl"
+	fi
+
 	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3CONFIG_FLAGS} ${LIBT3HIGHLIGHT_FLAGS}" \
 		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} -lunistring ${LIBT3WIDGET_LIBS} ${LIBT3CONFIG_LIBS} ${LIBT3HIGHLIGHT_LIBS}"
 }

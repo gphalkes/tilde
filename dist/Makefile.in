@@ -18,11 +18,15 @@ CXXFLAGS=-O2
 # CONFIGFLAGS should contain all the flags to compile against the required
 # libraries (libunistring, libt3window, libt3key, libt3widget, libt3config,
 # libt3highlight and libtranscript)
-# If your system does not provide strdup, remove -DHAS_STRDUP
 # CONFIGLIBS should contain all the flags to link against the required
-# libraries
-CONFIGFLAGS=-DHAS_STRDUP
-CONFIGLIBS=
+# libraries.
+# The flags and libraries included below only contain the optional libraries.
+# If your system does not provide:
+#   strdup, then remove -DHAS_STRDUP from CONFIGFLAGS.
+#   libattr, then remove -DHAS_LIBATTR from CONFIGFLAGS and -lattr from CONFIGLIBS
+#   libacl, then remove -DHAS_LIBACL from CONFIGFLAGS and -lacl from CONFIGLIBS
+CONFIGFLAGS=-DHAS_STRDUP -DHAS_LIBATTR -DHAS_LIBACL1
+CONFIGLIBS=-lattr -lacl
 
 # Gettext configuration
 # GETTEXTFLAGS should contain -DUSE_GETTEXT to enable gettext translations

@@ -1,6 +1,8 @@
 Version 0.1.14:
 	New features:
 	- Matching brace highlighting and go to matching brace function.
+	- Tilde now tries to preserve ACLs and other extended attributes (requires
+	  libacl and libattr).
 
 	Bug fixes:
 	- Try to load the correct config file on errors in the configuration file.

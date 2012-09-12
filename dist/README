@@ -54,7 +54,8 @@ Prerequisites and installation
 
 Tilde requires a C++ compiler, the libraries of the Tilde Terminal Toolkit
 (libt3window, libt3key, libt3widget and libt3config), libunistring and
-libtranscript.
+libtranscript. Optionally Tilde can use libattr and libacl to preserve
+attributes and ACLs when saving.
 
 There are two ways in which to compile Tilde:
 

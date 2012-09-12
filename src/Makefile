@@ -34,6 +34,8 @@ SOURCES..objects/edit := \
 LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
 LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3config/.libs -Lt3highlight/.libs
 LDLIBS..objects/edit += `pkg-config --libs sigc++-2.0` -lunistring
+LDLIBS..objects/edit += -lacl
+LDLIBS..objects/edit += -lattr
 CXXFLAGS.option = -I.objects
 
 CXXTARGETS := .objects/edit
@@ -46,9 +48,9 @@ include ../../makesys/rules.mk
 CXXFLAGS += -I.
 CXXFLAGS += -DTILDE_DEBUG
 CXXFLAGS += -DHAS_STRDUP
+CXXFLAGS += -DHAS_LIBACL
+CXXFLAGS += -DHAS_LIBATTR
 #~ CXXFLAGS += -DUSE_GETTEXT -DLOCALEDIR=\"locales\"
-#~ CXXFLAGS += -DUSE_UNICODE
-#~ CXXFLAGS += -DUSE_NL_LANGINFO
 CXXFLAGS += `pkg-config --cflags sigc++-2.0`
 
 clean-logs:
