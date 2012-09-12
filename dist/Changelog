@@ -4,6 +4,7 @@ Version 0.1.14:
 
 	Bug fixes:
 	- Try to load the correct config file on errors in the configuration file.
+	- Use -V as option for version information, rather than -v.
 
 Version 0.1.13:
 	New features:

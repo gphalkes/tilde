@@ -335,7 +335,7 @@ PARSE_FUNCTION(parse_args)
 		OPTION('h', "help", NO_ARG)
 			print_help();
 		END_OPTION
-		OPTION('v', "version", NO_ARG)
+		OPTION('V', "version", NO_ARG)
 			print_version();
 		END_OPTION
 		OPTION('T', "term", REQUIRED_ARG)
