@@ -144,6 +144,8 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 		GET_ATTRIBUTE(menubar_selected);
 		GET_ATTRIBUTE(shadow);
 		GET_ATTRIBUTE(meta_text);
+
+		GET_ATTRIBUTE(brace_highlight);
 	}
 	attributes = t3_config_get(config, "highlight_attributes");
 	if (attributes != NULL) {
@@ -292,6 +294,8 @@ static void post_process_options(void) {
 	SET_OPT_FROM_FILE(highlights[9], T3_ATTR_FG_RED | T3_ATTR_BOLD); // error
 	SET_OPT_FROM_FILE(highlights[10], T3_ATTR_FG_GREEN | T3_ATTR_BOLD); // addition
 	SET_OPT_FROM_FILE(highlights[11], T3_ATTR_FG_RED | T3_ATTR_BOLD); // deletion
+
+	SET_OPT_FROM_FILE(brace_highlight, T3_ATTR_BOLD);
 }
 
 static void print_help(void) {
@@ -479,6 +483,8 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 	const char *highlight_name;
 	for (i = 1; (highlight_name = reverse_map_highlight(i)) != NULL; i++)
 		SET_HL_ATTRIBUTE(i, highlight_name);
+
+	SET_ATTRIBUTE(brace_highlight);
 }
 
 bool write_config(void) {

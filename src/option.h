@@ -72,6 +72,7 @@ struct term_options_t {
 	optional<t3_attr_t> meta_text;
 
 	optional<t3_attr_t> highlights[MAX_HIGHLIGHTS];
+	optional<t3_attr_t> brace_highlight;
 };
 
 struct options_t {
@@ -111,6 +112,7 @@ struct runtime_options_t {
 	size_t max_recent_files;
 	optional<int> key_timeout;
 	t3_attr_t highlights[MAX_HIGHLIGHTS];
+	t3_attr_t brace_highlight;
 };
 
 extern bool config_read_error;

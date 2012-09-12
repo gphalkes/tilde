@@ -23,8 +23,8 @@
 #include "option.h"
 
 file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(new file_line_factory_t(this)),
-		view_parameters(new edit_window_t::view_parameters_t()), has_window(false),
-		highlight_valid(0), highlight_info(NULL), match_line(NULL), last_match(NULL)
+		view_parameters(new edit_window_t::view_parameters_t()), has_window(false), highlight_valid(0),
+		highlight_info(NULL), match_line(NULL), last_match(NULL), matching_brace_valid(false)
 {
 	if (_encoding == NULL)
 		encoding = strdup_impl("UTF-8");
@@ -443,11 +443,14 @@ void file_buffer_t::do_strip_spaces(void) {
 bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
 	file_line_t *line = (file_line_t *) get_line_data(cursor.line);
 	char c = (*(line->get_data()))[cursor.pos];
-	char c_close = c, check_c;
-	bool forward = true;
-	text_line_t::paint_info_t paint_info = { .normal_attr = 0 };
+	char c_close, check_c;
+	bool forward;
 	int current_line, i, count;
 
+	/* In the ASCII/Unicode table, the parenthesis are next to each other but
+	   the other braces are two apart. This is handled by using a switch with a
+	   fallthrough. */
+	c_close = c;
 	switch (c) {
 		case '}':
 		case ']':
@@ -463,6 +466,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
 			/* FALLTHROUGH */
 		case '(':
 			c_close++;
+			forward = true;
 			break;
 		default:
 			return false;
@@ -470,7 +474,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
 
 	prepare_paint_line(cursor.line);
 	/* If the current character is highlighted, it is not considered for brace matching. */
-	if (line->get_base_attr(cursor.pos, &paint_info) != 0)
+	if (line->get_highlight_idx(cursor.pos) > 0)
 		return false;
 
 	if (forward) {
@@ -488,7 +492,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
 			for (i = 0; i < line->get_length(); i = line->adjust_position(i, 1)) {
 start_search:
 				check_c = (*(line->get_data()))[i];
-				if ((check_c != c && check_c != c_close) || line->get_base_attr(i, &paint_info) != 0)
+				if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0)
 					continue;
 
 				if (check_c == c) {
@@ -509,7 +513,14 @@ start_search:
 		current_line = cursor.line;
 		count = -1;
 
-		/* To find the correct opening brace, we keep two separate counts:
+		/* Finding the closing brace would be easy, if not for the fact that the
+		   syntax highlighting can only scan forward. If we were to use the simple
+		   method of simply searching backward, we could hit some seriously nasty
+		   highlighting cases, due to having to rescan the line for syntax
+		   highlighting many times. Thus we use a forward pass over the data, with
+		   a somewhat complicated algorithm to find the correct brace.
+
+		   To find the correct opening brace, we keep two separate counts:
 		   - the count of opening vs. closing braces
 		   - the surplus of opening braces before the closing brace
 		   If the open surplus at the closing brace is greater than 0, the
@@ -518,7 +529,7 @@ start_search:
 		*/
 		for (i = 0; i < cursor.pos; i = line->adjust_position(i, 1)) {
 			check_c = (*(line->get_data()))[i];
-			if ((check_c != c && check_c != c_close) || line->get_base_attr(i, &paint_info) != 0)
+			if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0)
 				continue;
 
 			if (check_c == c) {
@@ -535,7 +546,7 @@ start_search:
 			/* In this case, the opening brace is on a line before the current line.
 			   So we have to go back, until we find the line which does have the matching
 			   brace. We now calculate the open_surplus at the end of the line. If it
-			   is greater than or equal to the number of closing brace we have
+			   is greater than or equal to the number of closing braces we have
 			   encountered (including the one we are hoping to match), the opening
 			   brace we are looking for is on the current line. */
 			int local_count;
@@ -545,7 +556,7 @@ start_search:
 				/* No need to call prepare_paint_line here because we're going backwards. */
 				for (i = 0, local_count = 0, open_surplus = 0; i < line->get_length(); i++) {
 					check_c = (*(line->get_data()))[i];
-					if ((check_c != c && check_c != c_close) || line->get_base_attr(i, &paint_info) != 0)
+					if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0)
 						continue;
 
 					if (check_c == c) {
@@ -585,7 +596,7 @@ start_search:
 		count = -count;
 		for (i = 0; i < match_max; i = line->adjust_position(i, 1)) {
 			check_c = (*(line->get_data()))[i];
-			if ((check_c != c && check_c != c_close) || line->get_base_attr(i, &paint_info) != 0)
+			if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0)
 				continue;
 
 			if (check_c == c) {
@@ -613,4 +624,8 @@ bool file_buffer_t::goto_matching_brace(void) {
 		return true;
 	}
 	return false;
+}
+
+void file_buffer_t::update_matching_brace(void) {
+	matching_brace_valid = find_matching_brace(matching_brace_coordinate);
 }

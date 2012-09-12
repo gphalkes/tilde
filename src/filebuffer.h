@@ -25,6 +25,7 @@ class file_edit_window_t;
 
 class file_buffer_t : public text_buffer_t {
 	friend class file_edit_window_t; // Required to access view_parameters and set_has_window
+	friend class file_line_t;
 	private:
 		cleanup_free_ptr<char>::t name, encoding;
 		text_line_t name_line;
@@ -32,11 +33,11 @@ class file_buffer_t : public text_buffer_t {
 		bool has_window;
 		int highlight_valid;
 		optional<bool> strip_spaces;
-
-	public:
 		t3_highlight_t *highlight_info;
 		text_line_t *match_line;
 		t3_highlight_match_t *last_match;
+		bool matching_brace_valid;
+		text_coordinate_t matching_brace_coordinate;
 
 	private:
 		virtual void prepare_paint_line(int line);
@@ -66,6 +67,7 @@ class file_buffer_t : public text_buffer_t {
 		void do_strip_spaces(void);
 
 		bool goto_matching_brace(void);
+		void update_matching_brace(void);
 };
 
 #endif

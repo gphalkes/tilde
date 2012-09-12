@@ -34,6 +34,8 @@ static char debug_buffer[1024];
 static const char *executable;
 #endif
 
+/* The 'normal' attributes should always be the first in this list. Other code
+   depends on that. */
 static const char *highlight_names[] = {
 	"normal", "comment", "comment-keyword", "keyword", "number", "string",
 	"string-escape", "misc", "variable", "error", "addition", "deletion" };

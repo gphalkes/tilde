@@ -77,6 +77,7 @@ file_buffer_t *file_edit_window_t::get_text(void) const {
 
 bool file_edit_window_t::process_key(key_t key) {
 	bool result = edit_window_t::process_key(key);
+
 	if (!result && key == (EKEY_CTRL | ']')) {
 		if (get_text()->goto_matching_brace()) {
 			ensure_cursor_on_screen();
@@ -92,4 +93,14 @@ void file_edit_window_t::goto_matching_brace(void) {
 		ensure_cursor_on_screen();
 		redraw = true;
 	}
+}
+
+void file_edit_window_t::update_contents(void) {
+	/* Ideally we would only update this when the screen will get updated.
+	   However, the problem is that we don't know exactly when this will be.
+	   Simply checking redraw doesn't work, because the contents is redrawn
+	   every time this is called if the edit window has focus (which we can't
+	   query at this time). Thus we simply update every time :-( */
+	get_text()->update_matching_brace();
+	edit_window_t::update_contents();
 }

@@ -31,8 +31,9 @@ class file_line_t : public text_line_t {
 
 		void set_highlight_start(int state);
 		int get_highlight_end(void);
+		int get_highlight_idx(int i);
 
-	public:
+	protected:
 		virtual t3_attr_t get_base_attr(int i, const paint_info_t *info);
 };
 

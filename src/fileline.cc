@@ -36,17 +36,16 @@ file_line_t::file_line_t(const std::string *str, file_line_factory_t *_factory) 
 		highlight_start_state(0)
 {}
 
-t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
+int file_line_t::get_highlight_idx(int i) {
 	const string *str;
 	file_buffer_t *file = ((file_line_factory_t *) factory)->get_file_buffer();
-	int attribute_idx;
 
 	if (file == NULL || file->highlight_info == NULL)
-		return info->normal_attr;
+		return -1;
 
 	str = get_data();
 	if ((size_t) i >= str->size())
-		return info->normal_attr;
+		return -1;
 
 	if (file->match_line != this || (size_t) i < t3_highlight_get_start(file->last_match)) {
 		file->match_line = this;
@@ -56,11 +55,21 @@ t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
 	while (t3_highlight_get_end(file->last_match) <= (size_t) i)
 		t3_highlight_match(file->last_match, str->data(), str->size());
 
-	attribute_idx = (size_t) i < t3_highlight_get_match_start(file->last_match) ?
+	return (size_t) i < t3_highlight_get_match_start(file->last_match) ?
 		t3_highlight_get_begin_attr(file->last_match) :
 		t3_highlight_get_match_attr(file->last_match);
+}
 
-	return option.highlights[attribute_idx];
+t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
+	file_buffer_t *file = ((file_line_factory_t *) factory)->get_file_buffer();
+	int idx = get_highlight_idx(i);
+	t3_attr_t result = idx < 0 ? info->normal_attr : option.highlights[idx];
+
+	if (file->matching_brace_valid && (i == info->cursor ||
+			(this == file->get_line_data(file->matching_brace_coordinate.line) && i == file->matching_brace_coordinate.pos)))
+		result = t3_term_combine_attrs(result, option.brace_highlight);
+
+	return result;
 }
 
 void file_line_t::set_highlight_start(int state) {
