@@ -443,7 +443,7 @@ void file_buffer_t::do_strip_spaces(void) {
 bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
 	file_line_t *line = (file_line_t *) get_line_data(cursor.line);
 	char c = (*(line->get_data()))[cursor.pos];
-	char c_close = c;
+	char c_close = c, check_c;
 	bool forward = true;
 	text_line_t::paint_info_t paint_info = { .normal_attr = 0 };
 	int current_line, i, count;
@@ -484,13 +484,16 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
 
 		for (; current_line < size(); current_line++) {
 			line = (file_line_t *) get_line_data(current_line);
+			prepare_paint_line(current_line);
 			for (i = 0; i < line->get_length(); i = line->adjust_position(i, 1)) {
 start_search:
-				if (line->get_base_attr(i, &paint_info) != 0)
+				check_c = (*(line->get_data()))[i];
+				if ((check_c != c && check_c != c_close) || line->get_base_attr(i, &paint_info) != 0)
 					continue;
-				if ((*(line->get_data()))[i] == c) {
+
+				if (check_c == c) {
 					count++;
-				} else if ((*(line->get_data()))[i] == c_close) {
+				} else {
 					if (--count == 0) {
 						match_location.pos = i;
 						match_location.line = current_line;
@@ -514,14 +517,15 @@ start_search:
 		   including, the closing brace here).
 		*/
 		for (i = 0; i < cursor.pos; i = line->adjust_position(i, 1)) {
-			if (line->get_base_attr(i, &paint_info) != 0)
+			check_c = (*(line->get_data()))[i];
+			if ((check_c != c && check_c != c_close) || line->get_base_attr(i, &paint_info) != 0)
 				continue;
 
-			if ((*(line->get_data()))[i] == c) {
+			if (check_c == c) {
 				count--;
 				if (open_surplus > 0)
 					open_surplus--;
-			} else if ((*(line->get_data()))[i] == c_close) {
+			} else {
 				count++;
 				open_surplus++;
 			}
@@ -538,15 +542,17 @@ start_search:
 
 			for (current_line--; current_line >= 0; current_line--) {
 				line = (file_line_t *) get_line_data(current_line);
+				/* No need to call prepare_paint_line here because we're going backwards. */
 				for (i = 0, local_count = 0, open_surplus = 0; i < line->get_length(); i++) {
-					if (line->get_base_attr(i, &paint_info) != 0)
+					check_c = (*(line->get_data()))[i];
+					if ((check_c != c && check_c != c_close) || line->get_base_attr(i, &paint_info) != 0)
 						continue;
 
-					if ((*(line->get_data()))[i] == c) {
+					if (check_c == c) {
 						local_count--;
 						if (open_surplus > 0)
 							open_surplus--;
-					} else if ((*(line->get_data()))[i] == c_close) {
+					} else {
 						local_count++;
 						open_surplus++;
 					}
@@ -565,14 +571,26 @@ start_search:
 			match_max = cursor.pos;
 		}
 
+		/* At this point the count variable contains the open vs. close brace
+		   count at the _start_ of the current line, counting back from the
+		   closing brace we want to find a match for. To make sure we do the
+		   counting the same way (i.e. closing braces decrease the count, open
+		   braces increase), we now invert the count, such that when we
+		   reach a zero count we are at the level where the matching brace is.
+
+		   Then we need the last opening brace with a zero count before either
+		   the closing brace, or the end of the line if the open brace is on a
+		   different line.
+		*/
 		count = -count;
 		for (i = 0; i < match_max; i = line->adjust_position(i, 1)) {
-			if (line->get_base_attr(i, &paint_info) != 0)
+			check_c = (*(line->get_data()))[i];
+			if ((check_c != c && check_c != c_close) || line->get_base_attr(i, &paint_info) != 0)
 				continue;
 
-			if ((*(line->get_data()))[i] == c) {
+			if (check_c == c) {
 				count--;
-			} else if ((*(line->get_data()))[i] == c_close) {
+			} else {
 				if (count++ == 0)
 					marked_pos = i;
 			}
