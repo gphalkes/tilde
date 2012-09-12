@@ -1,3 +1,10 @@
+Version 0.1.14:
+	New features:
+	- Matching brace highlighting and go to matching brace function.
+
+	Bug fixes:
+	- Try to load the correct config file on errors in the configuration file.
+
 Version 0.1.13:
 	New features:
 	- Added an option to allow specification of the encoding on the command

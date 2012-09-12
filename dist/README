@@ -42,6 +42,8 @@ The current version of Tilde provides the following features:
 - Mouse support
 - X11 clipboard and primary selection integration
 - Optional saving of backup file
+- Syntax highlighting
+- Brace matching and highlighting
 
 See the file named TODO for information on which features are planned for
 future versions of Tilde.
