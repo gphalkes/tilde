@@ -1,3 +1,8 @@
+Version 0.1.15:
+	Bug fixes:
+	- Explicitly use t3_widget namespace qualifier for key_t to prevent build
+	  failures on some platforms.
+
 Version 0.1.14:
 	New features:
 	- Matching brace highlighting and go to matching brace function.
