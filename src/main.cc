@@ -629,15 +629,14 @@ int main(int argc, char *argv[]) {
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
 	} else if (config_read_error) {
-		string message = "Error loading configuration file";
+		string message = "Error loading configuration file ";
 		if (cli_option.config_file == NULL) {
 			char *file_name = t3_config_xdg_get_path(T3_CONFIG_XDG_CONFIG_HOME, "tilde", 5);
-			message += file_name;
-			message += "/config";
-			free(file_name);
-		} else {
-			message += cli_option.config_file;
+			strcat(file_name, "/config");
+			cli_option.config_file = file_name;
 		}
+
+		message += cli_option.config_file;
 		message += ": ";
 		message += config_read_error_string;
 		if (config_read_error_line != 0) {
@@ -653,10 +652,8 @@ int main(int argc, char *argv[]) {
 		   line. We won't load any other files in this case.
 		*/
 		if (config_read_error_line != 0) {
-			config_file_name = getenv("HOME");
-			config_file_name += "/.tilderc";
 			cli_option.files.clear();
-			cli_option.files.push_back(config_file_name.c_str());
+			cli_option.files.push_back(cli_option.config_file);
 		}
 
 		message_dialog->set_message(&message);
