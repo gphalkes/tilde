@@ -24,4 +24,8 @@ setup_TEST() {
 	else
 		TEST="$1"
 	fi
+
+	while [ "${TEST%/}" != "$TEST" ] ; do
+		TEST="${TEST%/}"
+	done
 }
