@@ -111,4 +111,5 @@ char *strdup_impl(const char *str);
 #define strdup_impl strdup
 #endif
 
+#define ARRAY_SIZE(_x) (sizeof(_x) / sizeof(_x[0]))
 #endif

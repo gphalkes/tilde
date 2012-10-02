@@ -30,7 +30,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	label->set_position(1, 2);
 	push_back(label);
 	tabsize_field = new text_field_t();
-	tabsize_field->set_key_filter(number_keys, sizeof(number_keys) / sizeof(number_keys[0]), true);
+	tabsize_field->set_key_filter(number_keys, ARRAY_SIZE(number_keys), true);
 	tabsize_field->set_label(label);
 	tabsize_field->set_size(1, 5);
 	tabsize_field->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));

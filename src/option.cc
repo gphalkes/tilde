@@ -84,11 +84,28 @@ static t3_bool find_term_config(const t3_config_t *config, const void *data) {
 
 static t3_attr_t attribute_string_to_bin(const char *attr) {
 	size_t i;
-	for (i = 0; i < sizeof(attribute_map) / sizeof(attribute_map[0]); i++) {
+	bool foreground;
+	char *endptr;
+	int color;
+
+	for (i = 0; i < ARRAY_SIZE(attribute_map); i++) {
 		if (strcmp(attr, attribute_map[i].string) == 0)
 			return attribute_map[i].attr;
 	}
-	return 0;
+
+	if (strncmp(attr, "fg ", 3) == 0)
+		foreground = true;
+	else if (strncmp(attr, "bg", 3) == 0)
+		foreground = false;
+	else
+		return 0;
+
+	color = strtol(attr + 3, &endptr, 0);
+	if (*endptr != 0)
+		return 0;
+	if (color < 0 || color > 255)
+		return 0;
+	return foreground ? T3_ATTR_FG(color) : T3_ATTR_BG(color);
 }
 
 static void read_config_attribute(const t3_config_t *config, const char *name, optional<t3_attr_t> *attr) {
@@ -134,7 +151,6 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 		GET_ATTRIBUTE(text);
 		GET_ATTRIBUTE(text_selected);
 		GET_ATTRIBUTE(highlight);
-		GET_ATTRIBUTE(highlight_selected);
 		GET_ATTRIBUTE(dialog);
 		GET_ATTRIBUTE(dialog_selected);
 		GET_ATTRIBUTE(button);
@@ -400,7 +416,6 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(text, attribute_t::TEXT);
 	SET_ATTR_FROM_FILE(text_selected, attribute_t::TEXT_SELECTED);
 	SET_ATTR_FROM_FILE(highlight, attribute_t::HIGHLIGHT);
-	SET_ATTR_FROM_FILE(highlight_selected, attribute_t::HIGHLIGHT_SELECTED);
 	SET_ATTR_FROM_FILE(dialog, attribute_t::DIALOG);
 	SET_ATTR_FROM_FILE(dialog_selected, attribute_t::DIALOG_SELECTED);
 	SET_ATTR_FROM_FILE(button, attribute_t::BUTTON);
@@ -434,13 +449,21 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 
 	config = t3_config_add_list(attributes, name, NULL);
 
-	for (i = 0; i < sizeof(attribute_masks) / sizeof(attribute_masks[0]); i++) {
+	for (i = 0; i < ARRAY_SIZE(attribute_masks); i++) {
 		t3_attr_t search = attr & attribute_masks[i];
-		for (j = 0; j < sizeof(attribute_map) / sizeof(attribute_map[0]); j++) {
+		for (j = 0; j < ARRAY_SIZE(attribute_map); j++) {
 			if (attribute_map[j].attr == search) {
 				t3_config_add_string(config, NULL, attribute_map[j].string);
 				break;
 			}
+		}
+		if (j < ARRAY_SIZE(attribute_map) && (attribute_masks[i] == T3_ATTR_FG_MASK || attribute_masks[i] == T3_ATTR_BG_MASK)) {
+			char color_name_buffer[32];
+			if (attribute_masks[i] == T3_ATTR_FG_MASK)
+				sprintf(color_name_buffer, "fg %d", (search >> T3_ATTR_COLOR_SHIFT) - 1);
+			else
+				sprintf(color_name_buffer, "bg %d", (search >> (T3_ATTR_COLOR_SHIFT + 9)) - 1);
+			t3_config_add_string(config, NULL, color_name_buffer);
 		}
 	}
 }
@@ -468,7 +491,6 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 	SET_ATTRIBUTE(text);
 	SET_ATTRIBUTE(text_selected);
 	SET_ATTRIBUTE(highlight);
-	SET_ATTRIBUTE(highlight_selected);
 	SET_ATTRIBUTE(dialog);
 	SET_ATTRIBUTE(dialog_selected);
 	SET_ATTRIBUTE(button);

@@ -16,8 +16,7 @@ cd_workdir
 cp -r context context.save
 rm -rf after
 cd context || fail "Could not cd into context dir"
-setup_ldlibrary_path
-../../../../../record/src/tdrecord -o ../recording -e LD_LIBRARY_PATH $RECORDOPTS ../../../src/.objects/edit -C ../test.cfg "$@" || fail "!! Could not record test"
+../../../../../record/src/tdrecord -o ../recording $RECORDOPTS -e T3WINDOW_OPTS ../../../src/.objects/edit -C ../test.cfg "$@" || fail "!! Could not record test"
 cd .. || fail "Could not change back to work dir"
 
 rm context/libt3widgetlog.txt context/log.txt

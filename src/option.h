@@ -58,7 +58,6 @@ struct term_options_t {
 	optional<t3_attr_t> text_selected;
 	/* High-light attributes for hot keys. */
 	optional<t3_attr_t> highlight;
-	optional<t3_attr_t> highlight_selected;
 
 	optional<t3_attr_t> dialog;
 	optional<t3_attr_t> dialog_selected;

@@ -33,6 +33,7 @@ SOURCES..objects/edit := \
 
 LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
 LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3config/.libs -Lt3highlight/.libs
+LDFLAGS..objects/edit += -Wl,-rpath=$(CURDIR)/t3widget/.libs:$(CURDIR)/t3window/.libs:$(CURDIR)/transcript/.libs:$(CURDIR)/t3config/.libs:$(CURDIR)/t3highlight/.libs:$(CURDIR)/../../key/src/.libs
 LDLIBS..objects/edit += `pkg-config --libs sigc++-2.0` -lunistring
 LDLIBS..objects/edit += -lacl
 LDLIBS..objects/edit += -lattr

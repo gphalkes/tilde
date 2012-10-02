@@ -23,7 +23,6 @@ types {
 			#~ text { type = "attribute" }
 			#~ text_selected { type = "attribute" }
 			#~ highlight { type = "attribute" }
-			#~ highlight_selected { type = "attribute" }
 			#~ dialog { type = "attribute" }
 			#~ dialog_selected { type = "attribute" }
 			#~ button { type = "attribute" }

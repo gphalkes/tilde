@@ -11,6 +11,9 @@ if [ $# -ne 1 ] ; then
 fi
 
 setup_TEST "$1"
+
+[ -d "$TEST.new" ] && rm -rf "$TEST.new"
+
 cd_workdir
 
 rm -rf *
@@ -28,8 +31,6 @@ rm context/libt3widgetlog.txt context/log.txt
 
 diff -Nurq context after || fail "!! Resulting files are different" >&2
 
-[ -d "$TEST.old" ] && rm -rf "$TEST.old"
-mv "$TEST" "$TEST.old"
-cp -r "$TEST.old" "$TEST"
-mv recording.new "$TEST"/recording
+cp -r "$TEST" "$TEST.new"
+mv recording.new "$TEST.new"/recording
 exit 0

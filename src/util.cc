@@ -40,7 +40,7 @@ static const char *highlight_names[] = {
 	"normal", "comment", "comment-keyword", "keyword", "number", "string",
 	"string-escape", "misc", "variable", "error", "addition", "deletion" };
 
-static_assert(sizeof(highlight_names) / sizeof(highlight_names[0]) <= MAX_HIGHLIGHTS);
+static_assert(ARRAY_SIZE(highlight_names) <= MAX_HIGHLIGHTS);
 
 
 stepped_process_t::stepped_process_t(void) : result(true) {}
@@ -246,7 +246,7 @@ int map_highlight(void *data, const char *name) {
 
 	(void) data;
 
-	for (i = 0; (size_t) i < sizeof(highlight_names) / sizeof(highlight_names[0]); i++) {
+	for (i = 0; (size_t) i < ARRAY_SIZE(highlight_names); i++) {
 		if (strcmp(name, highlight_names[i]) == 0)
 			return i;
 	}
@@ -254,7 +254,7 @@ int map_highlight(void *data, const char *name) {
 }
 
 const char *reverse_map_highlight(int idx) {
-	if (idx < 0 || (size_t) idx >= sizeof(highlight_names) / sizeof(highlight_names[0]))
+	if (idx < 0 || (size_t) idx >= ARRAY_SIZE(highlight_names))
 		return NULL;
 	return highlight_names[idx];
 }
