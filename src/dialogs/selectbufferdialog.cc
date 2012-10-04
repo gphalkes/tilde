@@ -30,7 +30,7 @@ select_buffer_dialog_t::select_buffer_dialog_t(int height, int width) :
 	cancel_button->connect_activate(sigc::mem_fun(this, &select_buffer_dialog_t::close));
 	cancel_button->connect_move_focus_left(sigc::mem_fun(this, &select_buffer_dialog_t::focus_previous));
 	cancel_button->connect_move_focus_up(
-		sigc::bind(sigc::mem_fun(this, &select_buffer_dialog_t::focus_set), list));
+		sigc::bind(sigc::mem_fun(this, &select_buffer_dialog_t::set_child_focus), list));
 	ok_button = new button_t("_OK", true);
 	ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	ok_button->set_position(0, -2);
