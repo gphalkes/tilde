@@ -50,14 +50,13 @@ struct term_options_t {
 	optional<int> key_timeout;
 
 	optional<t3_attr_t> non_print;
-	optional<t3_attr_t> selection_cursor;
-	optional<t3_attr_t> selection_cursor2;
+	optional<t3_attr_t> text_selection_cursor;
+	optional<t3_attr_t> text_selection_cursor2;
 	optional<t3_attr_t> bad_draw;
 	optional<t3_attr_t> text_cursor;
 	optional<t3_attr_t> text;
 	optional<t3_attr_t> text_selected;
-	/* High-light attributes for hot keys. */
-	optional<t3_attr_t> highlight;
+	optional<t3_attr_t> hotkey_highlight;
 
 	optional<t3_attr_t> dialog;
 	optional<t3_attr_t> dialog_selected;

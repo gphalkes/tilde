@@ -144,13 +144,13 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 	attributes = t3_config_get(config, "attributes");
 	if (attributes != NULL) {
 		GET_ATTRIBUTE(non_print);
-		GET_ATTRIBUTE(selection_cursor);
-		GET_ATTRIBUTE(selection_cursor2);
+		GET_ATTRIBUTE(text_selection_cursor);
+		GET_ATTRIBUTE(text_selection_cursor2);
 		GET_ATTRIBUTE(bad_draw);
 		GET_ATTRIBUTE(text_cursor);
 		GET_ATTRIBUTE(text);
 		GET_ATTRIBUTE(text_selected);
-		GET_ATTRIBUTE(highlight);
+		GET_ATTRIBUTE(hotkey_highlight);
 		GET_ATTRIBUTE(dialog);
 		GET_ATTRIBUTE(dialog_selected);
 		GET_ATTRIBUTE(button);
@@ -409,13 +409,13 @@ END_FUNCTION
 
 void set_attributes(void) {
 	SET_ATTR_FROM_FILE(non_print, attribute_t::NON_PRINT);
-	SET_ATTR_FROM_FILE(selection_cursor, attribute_t::SELECTION_CURSOR);
-	SET_ATTR_FROM_FILE(selection_cursor2, attribute_t::SELECTION_CURSOR2);
+	SET_ATTR_FROM_FILE(text_selection_cursor, attribute_t::TEXT_SELECTION_CURSOR);
+	SET_ATTR_FROM_FILE(text_selection_cursor2, attribute_t::TEXT_SELECTION_CURSOR2);
 	SET_ATTR_FROM_FILE(bad_draw, attribute_t::BAD_DRAW);
 	SET_ATTR_FROM_FILE(text_cursor, attribute_t::TEXT_CURSOR);
 	SET_ATTR_FROM_FILE(text, attribute_t::TEXT);
 	SET_ATTR_FROM_FILE(text_selected, attribute_t::TEXT_SELECTED);
-	SET_ATTR_FROM_FILE(highlight, attribute_t::HIGHLIGHT);
+	SET_ATTR_FROM_FILE(hotkey_highlight, attribute_t::HOTKEY_HIGHLIGHT);
 	SET_ATTR_FROM_FILE(dialog, attribute_t::DIALOG);
 	SET_ATTR_FROM_FILE(dialog_selected, attribute_t::DIALOG_SELECTED);
 	SET_ATTR_FROM_FILE(button, attribute_t::BUTTON);
@@ -484,13 +484,13 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 	SET_OPTION(key_timeout, int);
 
 	SET_ATTRIBUTE(non_print);
-	SET_ATTRIBUTE(selection_cursor);
-	SET_ATTRIBUTE(selection_cursor2);
+	SET_ATTRIBUTE(text_selection_cursor);
+	SET_ATTRIBUTE(text_selection_cursor2);
 	SET_ATTRIBUTE(bad_draw);
 	SET_ATTRIBUTE(text_cursor);
 	SET_ATTRIBUTE(text);
 	SET_ATTRIBUTE(text_selected);
-	SET_ATTRIBUTE(highlight);
+	SET_ATTRIBUTE(hotkey_highlight);
 	SET_ATTRIBUTE(dialog);
 	SET_ATTRIBUTE(dialog_selected);
 	SET_ATTRIBUTE(button);
