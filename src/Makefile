@@ -25,6 +25,7 @@ SOURCES..objects/edit := \
 	openfiles.cc \
 	option.cc \
 	util.cc \
+	dialogs/attributesdialog.cc \
 	dialogs/encodingdialog.cc \
 	dialogs/highlightdialog.cc \
 	dialogs/openrecentdialog.cc \

@@ -60,14 +60,13 @@ struct term_options_t {
 
 	optional<t3_attr_t> dialog;
 	optional<t3_attr_t> dialog_selected;
-	optional<t3_attr_t> button;
-	optional<t3_attr_t> button_selected;
 	optional<t3_attr_t> scrollbar;
 	optional<t3_attr_t> menubar;
 	optional<t3_attr_t> menubar_selected;
 
 	optional<t3_attr_t> shadow;
 	optional<t3_attr_t> meta_text;
+	optional<t3_attr_t> background;
 
 	optional<t3_attr_t> highlights[MAX_HIGHLIGHTS];
 	optional<t3_attr_t> brace_highlight;
@@ -113,6 +112,39 @@ struct runtime_options_t {
 	t3_attr_t brace_highlight;
 };
 
+enum attribute_key_t {
+	DIALOG,
+	DIALOG_SELECTED,
+	SHADOW,
+	SCROLLBAR,
+	MENUBAR,
+	MENUBAR_SELECTED,
+	BACKGROUND,
+	HOTKEY_HIGHLIGHT,
+	BAD_DRAW,
+	NON_PRINT,
+
+	TEXT,
+	TEXT_SELECTED,
+	TEXT_CURSOR,
+	TEXT_SELECTION_CURSOR,
+	TEXT_SELECTION_CURSOR2,
+	META_TEXT,
+	BRACE_HIGHLIGHT,
+
+	COMMENT,
+	COMMENT_KEYWORD,
+	KEYWORD,
+	NUMBER,
+	STRING,
+	STRING_ESCAPE,
+	MISC,
+	VARIABLE,
+	ERROR,
+	ADDITION,
+	DELETION,
+};
+
 extern bool config_read_error;
 extern std::string config_read_error_string;
 extern int config_read_error_line;
@@ -126,4 +158,6 @@ extern options_t default_option;
 void parse_args(int argc, char **argv);
 void set_attributes(void);
 bool write_config(void);
+t3_attr_t get_default_attr(attribute_key_t attr);
+
 #endif

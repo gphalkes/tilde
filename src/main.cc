@@ -25,12 +25,14 @@
 #include "dialogs/highlightdialog.h"
 #include "dialogs/openrecentdialog.h"
 #include "dialogs/optionsdialog.h"
+#include "dialogs/attributesdialog.h"
 #include "log.h"
 
 using namespace std;
 using namespace t3_widget;
 
 #define MESSAGE_DIALOG_WIDTH 50
+#define ATTRIBUTES_DIALOG_WIDTH 50
 
 message_dialog_t *continue_abort_dialog;
 open_file_dialog_t *open_file_dialog;
@@ -62,6 +64,7 @@ class main_t : public main_window_base_t {
 		interface_options_dialog_t *interface_options_dialog;
 		misc_options_dialog_t *misc_options_dialog;
 		highlight_dialog_t *highlight_dialog;
+		attributes_dialog_t *attributes_dialog;
 
 	public:
 		main_t(void);
@@ -155,6 +158,9 @@ main_t::main_t(void) {
 	panel->add_item("_Current Buffer...", NULL, action_id_t::OPTIONS_BUFFER);
 	panel->add_item("Buffer _Defaults...", NULL, action_id_t::OPTIONS_DEFAULTS);
 	panel->add_item("_Interface...", NULL, action_id_t::OPTIONS_INTERFACE);
+	//FIXME: should we merge interface and attributes?
+	panel->add_item("_Attributes...", NULL, action_id_t::OPTIONS_ATTRIBUTES);
+
 	panel->add_item("_Miscellaneous...", NULL, action_id_t::OPTIONS_MISC);
 
 	panel = new menu_panel_t("_Help", menu);
@@ -233,6 +239,9 @@ main_t::main_t(void) {
 				"This is used on some platforms to recognise UTF-8 encoded files. On Unix-like systems "
 				"however, the presence of the BOM is undesirable. Do you want to preserve the BOM?");
 	preserve_bom_dialog->center_over(this);
+
+	attributes_dialog = new attributes_dialog_t(20, ATTRIBUTES_DIALOG_WIDTH);
+	attributes_dialog->center_over(this);
 }
 
 main_t::~main_t(void) {
@@ -453,6 +462,10 @@ void main_t::menu_activated(int id) {
 		case action_id_t::OPTIONS_INTERFACE:
 			interface_options_dialog->set_values_from_options();
 			interface_options_dialog->show();
+			break;
+		case action_id_t::OPTIONS_ATTRIBUTES:
+			attributes_dialog->set_attributes_from_options();
+			attributes_dialog->show();
 			break;
 		case action_id_t::OPTIONS_MISC:
 			misc_options_dialog->set_values_from_options();

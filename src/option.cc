@@ -153,13 +153,12 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 		GET_ATTRIBUTE(hotkey_highlight);
 		GET_ATTRIBUTE(dialog);
 		GET_ATTRIBUTE(dialog_selected);
-		GET_ATTRIBUTE(button);
-		GET_ATTRIBUTE(button_selected);
 		GET_ATTRIBUTE(scrollbar);
 		GET_ATTRIBUTE(menubar);
 		GET_ATTRIBUTE(menubar_selected);
 		GET_ATTRIBUTE(shadow);
 		GET_ATTRIBUTE(meta_text);
+		GET_ATTRIBUTE(background);
 
 		GET_ATTRIBUTE(brace_highlight);
 	}
@@ -299,19 +298,19 @@ static void post_process_options(void) {
 			option.key_timeout = term_specific_option.key_timeout;
 
 	option.highlights[0] = 0;
-	SET_OPT_FROM_FILE(highlights[1], T3_ATTR_FG_GREEN); // comment
-	SET_OPT_FROM_FILE(highlights[2], T3_ATTR_FG_YELLOW); // comment-keyword
-	SET_OPT_FROM_FILE(highlights[3], T3_ATTR_FG_CYAN | T3_ATTR_BOLD); // keyword
-	SET_OPT_FROM_FILE(highlights[4], T3_ATTR_FG_WHITE | T3_ATTR_BOLD); // number
-	SET_OPT_FROM_FILE(highlights[5], T3_ATTR_FG_MAGENTA | T3_ATTR_BOLD); // string
-	SET_OPT_FROM_FILE(highlights[6], T3_ATTR_FG_MAGENTA); // string escape
-	SET_OPT_FROM_FILE(highlights[7], T3_ATTR_FG_YELLOW | T3_ATTR_BOLD); // misc
-	SET_OPT_FROM_FILE(highlights[8], T3_ATTR_FG_GREEN | T3_ATTR_BOLD); // variable
-	SET_OPT_FROM_FILE(highlights[9], T3_ATTR_FG_RED | T3_ATTR_BOLD); // error
-	SET_OPT_FROM_FILE(highlights[10], T3_ATTR_FG_GREEN | T3_ATTR_BOLD); // addition
-	SET_OPT_FROM_FILE(highlights[11], T3_ATTR_FG_RED | T3_ATTR_BOLD); // deletion
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "comment")], get_default_attr(COMMENT));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "comment-keyword")], get_default_attr(COMMENT_KEYWORD));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "keyword")], get_default_attr(KEYWORD));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "number")], get_default_attr(NUMBER));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "string")], get_default_attr(STRING));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "string escape")], get_default_attr(STRING_ESCAPE));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "misc")], get_default_attr(MISC));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "variable")], get_default_attr(VARIABLE));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "error")], get_default_attr(ERROR));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "addition")], get_default_attr(ADDITION));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "deletion")], get_default_attr(DELETION));
 
-	SET_OPT_FROM_FILE(brace_highlight, T3_ATTR_BOLD);
+	SET_OPT_FROM_FILE(brace_highlight, get_default_attr(BRACE_HIGHLIGHT));
 }
 
 static void print_help(void) {
@@ -418,13 +417,12 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(hotkey_highlight, attribute_t::HOTKEY_HIGHLIGHT);
 	SET_ATTR_FROM_FILE(dialog, attribute_t::DIALOG);
 	SET_ATTR_FROM_FILE(dialog_selected, attribute_t::DIALOG_SELECTED);
-	SET_ATTR_FROM_FILE(button, attribute_t::BUTTON);
-	SET_ATTR_FROM_FILE(button_selected, attribute_t::BUTTON_SELECTED);
 	SET_ATTR_FROM_FILE(scrollbar, attribute_t::SCROLLBAR);
 	SET_ATTR_FROM_FILE(menubar, attribute_t::MENUBAR);
 	SET_ATTR_FROM_FILE(menubar_selected, attribute_t::MENUBAR_SELECTED);
 	SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
 	SET_ATTR_FROM_FILE(meta_text, attribute_t::META_TEXT);
+	SET_ATTR_FROM_FILE(background, attribute_t::BACKGROUND);
 }
 
 static void set_config_attribute(t3_config_t *config, const char *section_name, const char *name, optional<t3_attr_t> attr) {
@@ -493,13 +491,12 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 	SET_ATTRIBUTE(hotkey_highlight);
 	SET_ATTRIBUTE(dialog);
 	SET_ATTRIBUTE(dialog_selected);
-	SET_ATTRIBUTE(button);
-	SET_ATTRIBUTE(button_selected);
 	SET_ATTRIBUTE(scrollbar);
 	SET_ATTRIBUTE(menubar);
 	SET_ATTRIBUTE(menubar_selected);
 	SET_ATTRIBUTE(shadow);
 	SET_ATTRIBUTE(meta_text);
+	SET_ATTRIBUTE(background);
 
 	int i;
 	const char *highlight_name;
@@ -609,4 +606,41 @@ bool write_config(void) {
 	t3_config_close_write(new_config_file, t3_true, t3_true);
 
 	return false;
+}
+
+t3_attr_t get_default_attr(attribute_key_t attr) {
+	switch (attr) {
+		case DIALOG: return get_default_attribute(attribute_t::DIALOG, option.color);
+		case DIALOG_SELECTED: return get_default_attribute(attribute_t::DIALOG_SELECTED, option.color);
+		case SHADOW: return get_default_attribute(attribute_t::SHADOW, option.color);
+		case SCROLLBAR: return get_default_attribute(attribute_t::SCROLLBAR, option.color);
+		case MENUBAR: return get_default_attribute(attribute_t::MENUBAR, option.color);
+		case MENUBAR_SELECTED: return get_default_attribute(attribute_t::MENUBAR_SELECTED, option.color);
+		case BACKGROUND: return get_default_attribute(attribute_t::BACKGROUND, option.color);
+		case HOTKEY_HIGHLIGHT: return get_default_attribute(attribute_t::HOTKEY_HIGHLIGHT, option.color);
+		case BAD_DRAW: return get_default_attribute(attribute_t::BAD_DRAW, option.color);
+		case NON_PRINT: return get_default_attribute(attribute_t::NON_PRINT, option.color);
+
+		case TEXT: return get_default_attribute(attribute_t::TEXT, option.color);
+		case TEXT_SELECTED: return get_default_attribute(attribute_t::TEXT_SELECTED, option.color);
+		case TEXT_CURSOR: return get_default_attribute(attribute_t::TEXT_CURSOR, option.color);
+		case TEXT_SELECTION_CURSOR: return get_default_attribute(attribute_t::TEXT_SELECTION_CURSOR, option.color);
+		case TEXT_SELECTION_CURSOR2: return get_default_attribute(attribute_t::TEXT_SELECTION_CURSOR2, option.color);
+		case META_TEXT: return get_default_attribute(attribute_t::META_TEXT, option.color);
+
+		case BRACE_HIGHLIGHT: return T3_ATTR_BOLD;
+
+		case COMMENT: return T3_ATTR_FG_GREEN;
+		case COMMENT_KEYWORD: return T3_ATTR_FG_YELLOW;
+		case KEYWORD: return T3_ATTR_FG_CYAN | T3_ATTR_BOLD;
+		case NUMBER: return T3_ATTR_FG_WHITE | T3_ATTR_BOLD;
+		case STRING: return T3_ATTR_FG_MAGENTA | T3_ATTR_BOLD;
+		case STRING_ESCAPE: return T3_ATTR_FG_MAGENTA;
+		case MISC: return T3_ATTR_FG_YELLOW | T3_ATTR_BOLD;
+		case VARIABLE: return T3_ATTR_FG_GREEN | T3_ATTR_BOLD;
+		case ERROR: return T3_ATTR_FG_RED | T3_ATTR_BOLD;
+		case ADDITION: return T3_ATTR_FG_GREEN | T3_ATTR_BOLD;
+		case DELETION: return T3_ATTR_FG_RED | T3_ATTR_BOLD;
+		default: return 0;
+	}
 }
