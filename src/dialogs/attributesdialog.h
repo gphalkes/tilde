@@ -22,14 +22,14 @@ using namespace t3_widget;
 class attributes_dialog_t : public dialog_t {
 	private:
 		attribute_test_line_t *dialog_line, *dialog_selected_line, *shadow_line,
-			*button_line, *button_selected_line, *scrollbar_line, *menubar_line,
-			*menubar_selected_line, *background_line, *hotkey_highlight_line,
-			*bad_draw_line, *non_print_line, *text_line, *text_selected_line,
-			*text_cursor_line, *text_selection_cursor_line, *text_selection_cursor2_line,
-			*meta_text_line, *brace_highlight_line, *comment_line, *comment_keyword_line,
-			*keyword_line, *number_line, *string_line, *string_escape_line,
-			*misc_line, *variable_line, *error_line, *addition_line, *deletion_line;
-		optional<t3_attr_t> dialog, dialog_selected, shadow, button, button_selected,
+			*button_selected_line, *scrollbar_line, *menubar_line, *menubar_selected_line,
+			*background_line, *hotkey_highlight_line, *bad_draw_line, *non_print_line,
+			*text_line, *text_selected_line, *text_cursor_line, *text_selection_cursor_line,
+			*text_selection_cursor2_line, *meta_text_line, *brace_highlight_line,
+			*comment_line, *comment_keyword_line, *keyword_line, *number_line,
+			*string_line, *string_escape_line, *misc_line, *variable_line, *error_line,
+			*addition_line, *deletion_line;
+		optional<t3_attr_t> dialog, dialog_selected, shadow, button_selected,
 			scrollbar, menubar, menubar_selected, background, hotkey_highlight,
 			bad_draw, non_print, text, text_selected, text_cursor, text_selection_cursor,
 			text_selection_cursor2, meta_text, brace_highlight, comment, comment_keyword,

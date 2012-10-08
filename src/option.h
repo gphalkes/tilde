@@ -60,6 +60,7 @@ struct term_options_t {
 
 	optional<t3_attr_t> dialog;
 	optional<t3_attr_t> dialog_selected;
+	optional<t3_attr_t> button_selected;
 	optional<t3_attr_t> scrollbar;
 	optional<t3_attr_t> menubar;
 	optional<t3_attr_t> menubar_selected;
@@ -116,6 +117,7 @@ enum attribute_key_t {
 	DIALOG,
 	DIALOG_SELECTED,
 	SHADOW,
+	BUTTON_SELECTED,
 	SCROLLBAR,
 	MENUBAR,
 	MENUBAR_SELECTED,

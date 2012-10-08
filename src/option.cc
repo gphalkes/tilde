@@ -153,6 +153,7 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 		GET_ATTRIBUTE(hotkey_highlight);
 		GET_ATTRIBUTE(dialog);
 		GET_ATTRIBUTE(dialog_selected);
+		GET_ATTRIBUTE(button_selected);
 		GET_ATTRIBUTE(scrollbar);
 		GET_ATTRIBUTE(menubar);
 		GET_ATTRIBUTE(menubar_selected);
@@ -417,6 +418,7 @@ void set_attributes(void) {
 	SET_ATTR_FROM_FILE(hotkey_highlight, attribute_t::HOTKEY_HIGHLIGHT);
 	SET_ATTR_FROM_FILE(dialog, attribute_t::DIALOG);
 	SET_ATTR_FROM_FILE(dialog_selected, attribute_t::DIALOG_SELECTED);
+	SET_ATTR_FROM_FILE(button_selected, attribute_t::BUTTON_SELECTED);
 	SET_ATTR_FROM_FILE(scrollbar, attribute_t::SCROLLBAR);
 	SET_ATTR_FROM_FILE(menubar, attribute_t::MENUBAR);
 	SET_ATTR_FROM_FILE(menubar_selected, attribute_t::MENUBAR_SELECTED);
@@ -491,6 +493,7 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 	SET_ATTRIBUTE(hotkey_highlight);
 	SET_ATTRIBUTE(dialog);
 	SET_ATTRIBUTE(dialog_selected);
+	SET_ATTRIBUTE(button_selected);
 	SET_ATTRIBUTE(scrollbar);
 	SET_ATTRIBUTE(menubar);
 	SET_ATTRIBUTE(menubar_selected);
@@ -613,6 +616,7 @@ t3_attr_t get_default_attr(attribute_key_t attr) {
 		case DIALOG: return get_default_attribute(attribute_t::DIALOG, option.color);
 		case DIALOG_SELECTED: return get_default_attribute(attribute_t::DIALOG_SELECTED, option.color);
 		case SHADOW: return get_default_attribute(attribute_t::SHADOW, option.color);
+		case BUTTON_SELECTED: return get_default_attribute(attribute_t::BUTTON_SELECTED, option.color);
 		case SCROLLBAR: return get_default_attribute(attribute_t::SCROLLBAR, option.color);
 		case MENUBAR: return get_default_attribute(attribute_t::MENUBAR, option.color);
 		case MENUBAR_SELECTED: return get_default_attribute(attribute_t::MENUBAR_SELECTED, option.color);

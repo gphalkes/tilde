@@ -60,6 +60,7 @@ attributes_dialog_t::attributes_dialog_t(int height, int width) : dialog_t(heigh
 	ADD_ATTRIBUTE_ENTRY("Hotkey highlight", HOTKEY_HIGHLIGHT, hotkey_highlight_line);
 	ADD_ATTRIBUTE_ENTRY("Badly drawn character", BAD_DRAW, bad_draw_line);
 	ADD_ATTRIBUTE_ENTRY("Unprintable character", NON_PRINT, non_print_line);
+	ADD_ATTRIBUTE_ENTRY("Button selected", BUTTON_SELECTED, button_selected_line);
 	ADD_ATTRIBUTE_ENTRY("Scrollbar", SCROLLBAR, scrollbar_line);
 	ADD_ATTRIBUTE_ENTRY("Menu bar", MENUBAR, menubar_line);
 	ADD_ATTRIBUTE_ENTRY("Menu bar selected", MENUBAR_SELECTED, menubar_selected_line);
@@ -129,6 +130,7 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
 		SET_WITH_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
 		SET_WITH_DEFAULT(bad_draw, BAD_DRAW);
 		SET_WITH_DEFAULT(non_print, NON_PRINT);
+		SET_WITH_DEFAULT(button_selected, BUTTON_SELECTED);
 		SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
 		SET_WITH_DEFAULT(menubar, MENUBAR);
 		SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
@@ -177,6 +179,7 @@ void attributes_dialog_t::set_attributes_from_options(void) {
 	hotkey_highlight = term_specific_option.hotkey_highlight;
 	bad_draw = term_specific_option.bad_draw;
 	non_print = term_specific_option.non_print;
+	button_selected = term_specific_option.button_selected;
 	scrollbar = term_specific_option.scrollbar;
 	menubar = term_specific_option.menubar;
 	menubar_selected = term_specific_option.menubar_selected;
@@ -215,6 +218,7 @@ void attributes_dialog_t::update_attribute_lines(void) {
 	SET_WITH_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
 	SET_WITH_DEFAULT(bad_draw, BAD_DRAW);
 	SET_WITH_DEFAULT(non_print, NON_PRINT);
+	SET_WITH_DEFAULT(button_selected, BUTTON_SELECTED);
 	SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
 	SET_WITH_DEFAULT(menubar, MENUBAR);
 	SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
@@ -262,6 +266,7 @@ void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
 		SET_WITH_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
 		SET_WITH_DEFAULT(bad_draw, BAD_DRAW);
 		SET_WITH_DEFAULT(non_print, NON_PRINT);
+		SET_WITH_DEFAULT(button_selected, BUTTON_SELECTED);
 		SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
 		SET_WITH_DEFAULT(menubar, MENUBAR);
 		SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
