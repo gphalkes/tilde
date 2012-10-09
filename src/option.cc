@@ -297,18 +297,18 @@ static void post_process_options(void) {
 	if (!cli_option.ask_input_method && term_specific_option.key_timeout.is_valid())
 			option.key_timeout = term_specific_option.key_timeout;
 
-	option.highlights[0] = 0;
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "comment")], get_default_attr(COMMENT));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "comment-keyword")], get_default_attr(COMMENT_KEYWORD));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "keyword")], get_default_attr(KEYWORD));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "number")], get_default_attr(NUMBER));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "string")], get_default_attr(STRING));
-	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "string escape")], get_default_attr(STRING_ESCAPE));
+	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "string-escape")], get_default_attr(STRING_ESCAPE));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "misc")], get_default_attr(MISC));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "variable")], get_default_attr(VARIABLE));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "error")], get_default_attr(ERROR));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "addition")], get_default_attr(ADDITION));
 	SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "deletion")], get_default_attr(DELETION));
+	option.highlights[0] = 0;
 
 	SET_OPT_FROM_FILE(brace_highlight, get_default_attr(BRACE_HIGHLIGHT));
 }

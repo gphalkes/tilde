@@ -38,7 +38,6 @@ void fatal(const char *fmt, ...) __attribute__((format (printf, 1, 2))) __attrib
 #define ASSERT(_condition) do { if (!(_condition)) PANIC(); } while(0)
 #endif
 
-
 #define ENUM(_name, ...) \
 class _name { \
 	public: \

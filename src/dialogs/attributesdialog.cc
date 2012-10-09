@@ -50,7 +50,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 	smart_label_t *label;
 	button_t *change_button, *ok_button, *cancel_button;
 
-	label = new smart_label_t(_("_Color mode"));
+	label = new smart_label_t(_("Color _mode"));
 	label->set_position(1, 2);
 	push_back(label);
 	color_box = new checkbox_t();
@@ -77,7 +77,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 	ADD_ATTRIBUTE_ENTRY("Scrollbar", SCROLLBAR, scrollbar_line);
 	ADD_ATTRIBUTE_ENTRY("Menu bar", MENUBAR, menubar_line);
 	ADD_ATTRIBUTE_ENTRY("Menu bar selected", MENUBAR_SELECTED, menubar_selected_line);
-	END_WIDGET_GROUP("_Interface", interface)
+	END_WIDGET_GROUP("_Interface attributes", interface)
 	interface->set_position(2, 2);
 
 	START_WIDGET_GROUP
@@ -88,7 +88,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 	ADD_ATTRIBUTE_ENTRY("Selection cursor at start", TEXT_SELECTION_CURSOR2, text_selection_cursor2_line);
 	ADD_ATTRIBUTE_ENTRY("Meta text", META_TEXT, meta_text_line);
 	ADD_ATTRIBUTE_ENTRY("Brace highlight", BRACE_HIGHLIGHT, brace_highlight_line);
-	END_WIDGET_GROUP("_Text area", text_area)
+	END_WIDGET_GROUP("_Text area attributes", text_area)
 	text_area->set_anchor(interface, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
 	text_area->set_position(0, 0);
 
@@ -104,7 +104,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 	ADD_ATTRIBUTE_ENTRY("Error", ERROR, error_line);
 	ADD_ATTRIBUTE_ENTRY("Addition", ADDITION, addition_line);
 	ADD_ATTRIBUTE_ENTRY("Deletion", DELETION, deletion_line);
-	END_WIDGET_GROUP("_Syntax highlighting", syntax_highlight)
+	END_WIDGET_GROUP("_Syntax highlighting attributes", syntax_highlight)
 	syntax_highlight->set_anchor(text_area, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
 	syntax_highlight->set_position(0, 0);
 
@@ -236,7 +236,7 @@ void attributes_dialog_t::set_values_from_options(void) {
 	keyword = term_specific_option.highlights[map_highlight(NULL, "keyword")];
 	number = term_specific_option.highlights[map_highlight(NULL, "number")];
 	string = term_specific_option.highlights[map_highlight(NULL, "string")];
-	string_escape = term_specific_option.highlights[map_highlight(NULL, "string_escape")];
+	string_escape = term_specific_option.highlights[map_highlight(NULL, "string-escape")];
 	misc = term_specific_option.highlights[map_highlight(NULL, "misc")];
 	variable = term_specific_option.highlights[map_highlight(NULL, "variable")];
 	error = term_specific_option.highlights[map_highlight(NULL, "error")];
@@ -286,13 +286,18 @@ void attributes_dialog_t::set_options_from_values(void) {
 	SET_WITH_DEFAULT(keyword, KEYWORD);
 	SET_WITH_DEFAULT(number, NUMBER);
 	SET_WITH_DEFAULT(string, STRING);
-	SET_WITH_DEFAULT(string_escape, STRING_ESCAPE);
+	{
+		int highlight_idx = map_highlight(NULL, "string-escape");
+		term_specific_option.highlights[highlight_idx] = string_escape;
+		option.highlights[highlight_idx] = string_escape.is_valid() ? string_escape() : get_default_attr(STRING_ESCAPE);
+	}
 	SET_WITH_DEFAULT(misc, MISC);
 	SET_WITH_DEFAULT(variable, VARIABLE);
 	SET_WITH_DEFAULT(error, ERROR);
 	SET_WITH_DEFAULT(addition, ADDITION);
 	SET_WITH_DEFAULT(deletion, DELETION);
 #undef SET_WITH_DEFAULT
+	option.highlights[0] = 0;
 	force_redraw_all();
 }
 
