@@ -38,21 +38,7 @@ class buffer_options_dialog_t : public dialog_t {
 		void set_values_from_view(file_edit_window_t *view);
 		void set_view_values(file_edit_window_t *view);
 		void set_values_from_options(void);
-		void set_options_values(void);
-		void handle_activate(void);
-
-	T3_WIDGET_SIGNAL(activate, void);
-};
-
-class interface_options_dialog_t : public dialog_t {
-	protected:
-		checkbox_t *hide_menu_box, *color_box;
-
-	public:
-		interface_options_dialog_t(const char *_title);
-
-		void set_values_from_options(void);
-		void set_options_values(void);
+		void set_options_from_values(void);
 		void handle_activate(void);
 
 	T3_WIDGET_SIGNAL(activate, void);
@@ -60,13 +46,13 @@ class interface_options_dialog_t : public dialog_t {
 
 class misc_options_dialog_t : public dialog_t {
 	protected:
-		checkbox_t *save_backup_box;
+		checkbox_t *hide_menu_box, *save_backup_box;
 
 	public:
 		misc_options_dialog_t(const char *_title);
 
 		void set_values_from_options(void);
-		void set_options_values(void);
+		void set_options_from_values(void);
 		void handle_activate(void);
 
 	T3_WIDGET_SIGNAL(activate, void);

@@ -186,10 +186,10 @@ void buffer_options_dialog_t::set_values_from_options(void) {
 	strip_spaces_box->set_state(option.strip_spaces);
 }
 
-void buffer_options_dialog_t::set_options_values(void) {
+void buffer_options_dialog_t::set_options_from_values(void) {
 	int tabsize = atoi(tabsize_field->get_text()->c_str());
 	if (tabsize > 0 || tabsize < 17)
-		option.tabsize = default_option.term_options.tabsize = tabsize;
+		option.tabsize = default_option.tabsize = tabsize;
 	option.wrap = default_option.wrap = wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE;
 	option.tab_spaces = default_option.tab_spaces = tab_spaces_box->get_state();
 	option.auto_indent = default_option.auto_indent = auto_indent_box->get_state();
@@ -210,13 +210,12 @@ void buffer_options_dialog_t::handle_activate(void) {
 	activate();
 }
 
+//===============================================================
 
-interface_options_dialog_t::interface_options_dialog_t(const char *_title) : dialog_t(5, 25, _title) {
+misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(5, 25, _title) {
 	smart_label_t *label;
 	int width = 0;
 	button_t *ok_button, *cancel_button;
-
-	//FIXME: implement attribute setting
 
 	label = new smart_label_t(_("_Hide menu bar"));
 	label->set_position(1, 2);
@@ -225,78 +224,20 @@ interface_options_dialog_t::interface_options_dialog_t(const char *_title) : dia
 	hide_menu_box->set_label(label);
 	hide_menu_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	hide_menu_box->set_position(1, -2);
-	hide_menu_box->connect_move_focus_up(sigc::mem_fun(this, &interface_options_dialog_t::focus_previous));
-	hide_menu_box->connect_move_focus_down(sigc::mem_fun(this, &interface_options_dialog_t::focus_next));
-	hide_menu_box->connect_activate(sigc::mem_fun(this, &interface_options_dialog_t::handle_activate));
+	hide_menu_box->connect_move_focus_up(sigc::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	hide_menu_box->connect_move_focus_down(sigc::mem_fun(this, &misc_options_dialog_t::focus_next));
+	hide_menu_box->connect_activate(sigc::mem_fun(this, &misc_options_dialog_t::handle_activate));
 	push_back(hide_menu_box);
 
 	width = max(label->get_width() + 2 + 3, width);
 
-	label = new smart_label_t(_("_Color mode"));
-	label->set_position(2, 2);
-	push_back(label);
-	color_box = new checkbox_t();
-	color_box->set_label(label);
-	color_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
-	color_box->set_position(2, -2);
-	color_box->connect_move_focus_up(sigc::mem_fun(this, &interface_options_dialog_t::focus_previous));
-	color_box->connect_move_focus_down(sigc::mem_fun(this, &interface_options_dialog_t::focus_next));
-	color_box->connect_activate(sigc::mem_fun(this, &interface_options_dialog_t::handle_activate));
-	push_back(color_box);
-
-	width = max(label->get_width() + 2 + 3, width);
-
-	cancel_button = new button_t("_Cancel");
-	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
-	cancel_button->set_position(-1, -2);
-	cancel_button->connect_activate(sigc::mem_fun(this, &interface_options_dialog_t::close));
-	cancel_button->connect_move_focus_up(sigc::mem_fun(this, &interface_options_dialog_t::focus_previous));
-	cancel_button->connect_move_focus_up(sigc::mem_fun(this, &interface_options_dialog_t::focus_previous));
-	cancel_button->connect_move_focus_left(sigc::mem_fun(this, &interface_options_dialog_t::focus_previous));
-
-	ok_button = new button_t("_Ok", true);
-	ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
-	ok_button->set_position(0, -2);
-	ok_button->connect_move_focus_up(sigc::mem_fun(this, &interface_options_dialog_t::focus_previous));
-	ok_button->connect_move_focus_right(sigc::mem_fun(this, &interface_options_dialog_t::focus_next));
-	ok_button->connect_activate(sigc::mem_fun(this, &interface_options_dialog_t::handle_activate));
-
-	push_back(ok_button);
-	push_back(cancel_button);
-
-	width = max(ok_button->get_width() + cancel_button->get_width() + 4, width);
-
-	set_size(None, width + 4);
-}
-
-void interface_options_dialog_t::set_values_from_options(void) {
-	hide_menu_box->set_state(option.hide_menubar);
-	color_box->set_state(option.color);
-}
-
-void interface_options_dialog_t::set_options_values(void) {
-	option.hide_menubar = default_option.term_options.hide_menubar = hide_menu_box->get_state();
-	option.color = default_option.term_options.color = color_box->get_state();
-}
-
-void interface_options_dialog_t::handle_activate(void) {
-	/* Do required validation here. */
-	hide();
-	activate();
-}
-
-misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(4, 25, _title) {
-	smart_label_t *label;
-	int width = 0;
-	button_t *ok_button, *cancel_button;
-
 	label = new smart_label_t(_("_Make backup on save"));
-	label->set_position(1, 2);
+	label->set_position(2, 2);
 	push_back(label);
 	save_backup_box = new checkbox_t();
 	save_backup_box->set_label(label);
 	save_backup_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
-	save_backup_box->set_position(1, -2);
+	save_backup_box->set_position(2, -2);
 	save_backup_box->connect_move_focus_up(sigc::mem_fun(this, &misc_options_dialog_t::focus_previous));
 	save_backup_box->connect_move_focus_down(sigc::mem_fun(this, &misc_options_dialog_t::focus_next));
 	save_backup_box->connect_activate(sigc::mem_fun(this, &misc_options_dialog_t::handle_activate));
@@ -328,10 +269,12 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(4, 2
 }
 
 void misc_options_dialog_t::set_values_from_options(void) {
+	hide_menu_box->set_state(option.hide_menubar);
 	save_backup_box->set_state(option.make_backup);
 }
 
-void misc_options_dialog_t::set_options_values(void) {
+void misc_options_dialog_t::set_options_from_values(void) {
+	option.hide_menubar = default_option.hide_menubar = hide_menu_box->get_state();
 	option.make_backup = default_option.make_backup = save_backup_box->get_state();
 }
 

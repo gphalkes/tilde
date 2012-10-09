@@ -35,6 +35,7 @@ class attributes_dialog_t : public dialog_t {
 			text_selection_cursor2, meta_text, brace_highlight, comment, comment_keyword,
 			keyword, number, string, string_escape, misc, variable, error, addition,
 			deletion;
+		checkbox_t *color_box;
 		expander_group_t *expander_group;
 		cleanup_ptr<attribute_picker_dialog_t>::t picker;
 		attribute_key_t change_attribute;
@@ -44,10 +45,15 @@ class attributes_dialog_t : public dialog_t {
 		void update_attribute_lines(void);
 		void attribute_selected(t3_attr_t attribute);
 		void default_attribute_selected(void);
+		void handle_activate(void);
 	public:
-		attributes_dialog_t(int height, int width);
+		attributes_dialog_t(int width);
 		virtual bool set_size(optint height, optint width);
-		void set_attributes_from_options(void);
+		virtual void show(void);
+		void set_values_from_options(void);
+		void set_options_from_values(void);
+
+	T3_WIDGET_SIGNAL(activate, void);
 };
 
 

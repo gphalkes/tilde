@@ -61,7 +61,6 @@ class main_t : public main_window_base_t {
 		select_buffer_dialog_t *select_buffer_dialog;
 		message_dialog_t *about_dialog;
 		buffer_options_dialog_t *buffer_options_dialog, *default_options_dialog;
-		interface_options_dialog_t *interface_options_dialog;
 		misc_options_dialog_t *misc_options_dialog;
 		highlight_dialog_t *highlight_dialog;
 		attributes_dialog_t *attributes_dialog;
@@ -158,8 +157,6 @@ main_t::main_t(void) {
 	panel->add_item("_Current Buffer...", NULL, action_id_t::OPTIONS_BUFFER);
 	panel->add_item("Buffer _Defaults...", NULL, action_id_t::OPTIONS_DEFAULTS);
 	panel->add_item("_Interface...", NULL, action_id_t::OPTIONS_INTERFACE);
-	//FIXME: should we merge interface and attributes?
-	panel->add_item("_Attributes...", NULL, action_id_t::OPTIONS_ATTRIBUTES);
 
 	panel->add_item("_Miscellaneous...", NULL, action_id_t::OPTIONS_MISC);
 
@@ -222,10 +219,6 @@ main_t::main_t(void) {
 	default_options_dialog->center_over(this);
 	default_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_default_options));
 
-	interface_options_dialog = new interface_options_dialog_t("Interface");
-	interface_options_dialog->center_over(this);
-	interface_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_interface_options));
-
 	misc_options_dialog = new misc_options_dialog_t("Miscellaneous");
 	misc_options_dialog->center_over(this);
 	misc_options_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_misc_options));
@@ -240,8 +233,9 @@ main_t::main_t(void) {
 				"however, the presence of the BOM is undesirable. Do you want to preserve the BOM?");
 	preserve_bom_dialog->center_over(this);
 
-	attributes_dialog = new attributes_dialog_t(20, ATTRIBUTES_DIALOG_WIDTH);
+	attributes_dialog = new attributes_dialog_t(ATTRIBUTES_DIALOG_WIDTH);
 	attributes_dialog->center_over(this);
+	attributes_dialog->connect_activate(sigc::mem_fun(this, &main_t::set_interface_options));
 }
 
 main_t::~main_t(void) {
@@ -250,7 +244,7 @@ main_t::~main_t(void) {
 	delete about_dialog;
 	delete buffer_options_dialog,
 	delete default_options_dialog;
-	delete interface_options_dialog;
+	delete attributes_dialog;
 	delete misc_options_dialog;
 	delete highlight_dialog;
 #endif
@@ -460,11 +454,7 @@ void main_t::menu_activated(int id) {
 			default_options_dialog->show();
 			break;
 		case action_id_t::OPTIONS_INTERFACE:
-			interface_options_dialog->set_values_from_options();
-			interface_options_dialog->show();
-			break;
-		case action_id_t::OPTIONS_ATTRIBUTES:
-			attributes_dialog->set_attributes_from_options();
+			attributes_dialog->set_values_from_options();
 			attributes_dialog->show();
 			break;
 		case action_id_t::OPTIONS_MISC:
@@ -530,21 +520,21 @@ void main_t::set_buffer_options(void) {
 }
 
 void main_t::set_default_options(void) {
-	default_options_dialog->set_options_values();
+	default_options_dialog->set_options_from_values();
 	write_config();
 }
 
 void main_t::set_interface_options(void) {
-	interface_options_dialog->set_options_values();
-	split->set_size(t3_win_get_height(window) - !option.hide_menubar, None);
-	split->set_position(!option.hide_menubar, 0);
-	menu->set_hidden(option.hide_menubar);
+	attributes_dialog->set_options_from_values();
 	set_color_mode(option.color);
 	write_config();
 }
 
 void main_t::set_misc_options(void) {
-	misc_options_dialog->set_options_values();
+	misc_options_dialog->set_options_from_values();
+	split->set_size(t3_win_get_height(window) - !option.hide_menubar, None);
+	split->set_position(!option.hide_menubar, 0);
+	menu->set_hidden(option.hide_menubar);
 	write_config();
 }
 

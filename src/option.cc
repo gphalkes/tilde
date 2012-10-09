@@ -134,9 +134,6 @@ static void read_config_attribute(const t3_config_t *config, const char *name, o
 static void read_term_config_part(const t3_config_t *config, term_options_t *opts) {
 	t3_config_t *attributes;
 
-	GET_OPT(tabsize, INT, int);
-
-	GET_OPT(hide_menubar, BOOL, bool);
 	GET_OPT(color, BOOL, bool);
 
 	GET_OPT(key_timeout, INT, int);
@@ -242,7 +239,9 @@ static void read_config(void) {
 	GET_OPT(show_tabs, BOOL, bool);
 	GET_OPT(strip_spaces, BOOL, bool);
 	GET_OPT(make_backup, BOOL, bool);
+	GET_OPT(hide_menubar, BOOL, bool);
 
+	GET_OPT(tabsize, INT, int);
 	GET_OPT(max_recent_files, INT, int);
 	#undef opts
 
@@ -276,8 +275,8 @@ static void read_config(void) {
 } while (0)
 
 static void post_process_options(void) {
-	SET_OPT_FROM_FILE(tabsize, 8);
-	SET_OPT_FROM_FILE(hide_menubar, false);
+	SET_OPT_FROM_DFLT(tabsize, 8);
+	SET_OPT_FROM_DFLT(hide_menubar, false);
 
 	SET_OPT_FROM_DFLT(wrap, false);
 
@@ -441,23 +440,33 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 	t3_config_t *attributes;
 	size_t i, j;
 
-	if (!attr.is_valid())
-		return;
 
-	if ((attributes = t3_config_get(config, section_name)) == NULL || t3_config_get_type(attributes) != T3_CONFIG_SECTION)
+	if ((attributes = t3_config_get(config, section_name)) == NULL || t3_config_get_type(attributes) != T3_CONFIG_SECTION) {
+		if (!attr.is_valid())
+			return;
 		attributes = t3_config_add_section(config, section_name, NULL);
+	}
+
+	if (!attr.is_valid()) {
+		t3_config_erase(attributes, name);
+		return;
+	}
 
 	config = t3_config_add_list(attributes, name, NULL);
 
 	for (i = 0; i < ARRAY_SIZE(attribute_masks); i++) {
 		t3_attr_t search = attr & attribute_masks[i];
+		if (search == 0)
+			continue;
+
 		for (j = 0; j < ARRAY_SIZE(attribute_map); j++) {
 			if (attribute_map[j].attr == search) {
 				t3_config_add_string(config, NULL, attribute_map[j].string);
 				break;
 			}
 		}
-		if (j < ARRAY_SIZE(attribute_map) && (attribute_masks[i] == T3_ATTR_FG_MASK || attribute_masks[i] == T3_ATTR_BG_MASK)) {
+
+		if (j == ARRAY_SIZE(attribute_map) && (attribute_masks[i] == T3_ATTR_FG_MASK || attribute_masks[i] == T3_ATTR_BG_MASK)) {
 			char color_name_buffer[32];
 			if (attribute_masks[i] == T3_ATTR_FG_MASK)
 				sprintf(color_name_buffer, "fg %d", (search >> T3_ATTR_COLOR_SHIFT) - 1);
@@ -476,9 +485,6 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 #define SET_HL_ATTRIBUTE(x, name) set_config_attribute(config, "highlight_attributes", name, opts->highlights[x])
 
 static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
-	SET_OPTION(tabsize, int);
-
-	SET_OPTION(hide_menubar, bool);
 	SET_OPTION(color, bool);
 
 	SET_OPTION(key_timeout, int);
@@ -507,6 +513,11 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 		SET_HL_ATTRIBUTE(i, highlight_name);
 
 	SET_ATTRIBUTE(brace_highlight);
+
+	if (t3_config_get(t3_config_get(config, "highlight_attributes"), NULL) == NULL)
+		t3_config_erase(config, "highlight_attributes");
+	if (t3_config_get(t3_config_get(config, "attributes"), NULL) == NULL)
+		t3_config_erase(config, "attributes");
 }
 
 bool write_config(void) {
@@ -560,7 +571,9 @@ bool write_config(void) {
 	SET_OPTION(show_tabs, bool);
 	SET_OPTION(strip_spaces, bool);
 	SET_OPTION(make_backup, bool);
+	SET_OPTION(hide_menubar, bool);
 
+	SET_OPTION(tabsize, int);
 	SET_OPTION(max_recent_files, int);
 	#undef opts
 
@@ -611,40 +624,41 @@ bool write_config(void) {
 	return false;
 }
 
-t3_attr_t get_default_attr(attribute_key_t attr) {
+t3_attr_t get_default_attr(attribute_key_t attr) { return get_default_attr(attr, option.color); }
+t3_attr_t get_default_attr(attribute_key_t attr, bool color) {
 	switch (attr) {
-		case DIALOG: return get_default_attribute(attribute_t::DIALOG, option.color);
-		case DIALOG_SELECTED: return get_default_attribute(attribute_t::DIALOG_SELECTED, option.color);
-		case SHADOW: return get_default_attribute(attribute_t::SHADOW, option.color);
-		case BUTTON_SELECTED: return get_default_attribute(attribute_t::BUTTON_SELECTED, option.color);
-		case SCROLLBAR: return get_default_attribute(attribute_t::SCROLLBAR, option.color);
-		case MENUBAR: return get_default_attribute(attribute_t::MENUBAR, option.color);
-		case MENUBAR_SELECTED: return get_default_attribute(attribute_t::MENUBAR_SELECTED, option.color);
-		case BACKGROUND: return get_default_attribute(attribute_t::BACKGROUND, option.color);
-		case HOTKEY_HIGHLIGHT: return get_default_attribute(attribute_t::HOTKEY_HIGHLIGHT, option.color);
-		case BAD_DRAW: return get_default_attribute(attribute_t::BAD_DRAW, option.color);
-		case NON_PRINT: return get_default_attribute(attribute_t::NON_PRINT, option.color);
+		case DIALOG: return get_default_attribute(attribute_t::DIALOG, color);
+		case DIALOG_SELECTED: return get_default_attribute(attribute_t::DIALOG_SELECTED, color);
+		case SHADOW: return get_default_attribute(attribute_t::SHADOW, color);
+		case BUTTON_SELECTED: return get_default_attribute(attribute_t::BUTTON_SELECTED, color);
+		case SCROLLBAR: return get_default_attribute(attribute_t::SCROLLBAR, color);
+		case MENUBAR: return get_default_attribute(attribute_t::MENUBAR, color);
+		case MENUBAR_SELECTED: return get_default_attribute(attribute_t::MENUBAR_SELECTED, color);
+		case BACKGROUND: return get_default_attribute(attribute_t::BACKGROUND, color);
+		case HOTKEY_HIGHLIGHT: return get_default_attribute(attribute_t::HOTKEY_HIGHLIGHT, color);
+		case BAD_DRAW: return get_default_attribute(attribute_t::BAD_DRAW, color);
+		case NON_PRINT: return get_default_attribute(attribute_t::NON_PRINT, color);
 
-		case TEXT: return get_default_attribute(attribute_t::TEXT, option.color);
-		case TEXT_SELECTED: return get_default_attribute(attribute_t::TEXT_SELECTED, option.color);
-		case TEXT_CURSOR: return get_default_attribute(attribute_t::TEXT_CURSOR, option.color);
-		case TEXT_SELECTION_CURSOR: return get_default_attribute(attribute_t::TEXT_SELECTION_CURSOR, option.color);
-		case TEXT_SELECTION_CURSOR2: return get_default_attribute(attribute_t::TEXT_SELECTION_CURSOR2, option.color);
-		case META_TEXT: return get_default_attribute(attribute_t::META_TEXT, option.color);
+		case TEXT: return get_default_attribute(attribute_t::TEXT, color);
+		case TEXT_SELECTED: return get_default_attribute(attribute_t::TEXT_SELECTED, color);
+		case TEXT_CURSOR: return get_default_attribute(attribute_t::TEXT_CURSOR, color);
+		case TEXT_SELECTION_CURSOR: return get_default_attribute(attribute_t::TEXT_SELECTION_CURSOR, color);
+		case TEXT_SELECTION_CURSOR2: return get_default_attribute(attribute_t::TEXT_SELECTION_CURSOR2, color);
+		case META_TEXT: return get_default_attribute(attribute_t::META_TEXT, color);
 
-		case BRACE_HIGHLIGHT: return T3_ATTR_BOLD;
+		case BRACE_HIGHLIGHT: return color ? T3_ATTR_BOLD : T3_ATTR_BLINK;
 
-		case COMMENT: return T3_ATTR_FG_GREEN;
-		case COMMENT_KEYWORD: return T3_ATTR_FG_YELLOW;
-		case KEYWORD: return T3_ATTR_FG_CYAN | T3_ATTR_BOLD;
-		case NUMBER: return T3_ATTR_FG_WHITE | T3_ATTR_BOLD;
-		case STRING: return T3_ATTR_FG_MAGENTA | T3_ATTR_BOLD;
-		case STRING_ESCAPE: return T3_ATTR_FG_MAGENTA;
-		case MISC: return T3_ATTR_FG_YELLOW | T3_ATTR_BOLD;
-		case VARIABLE: return T3_ATTR_FG_GREEN | T3_ATTR_BOLD;
-		case ERROR: return T3_ATTR_FG_RED | T3_ATTR_BOLD;
-		case ADDITION: return T3_ATTR_FG_GREEN | T3_ATTR_BOLD;
-		case DELETION: return T3_ATTR_FG_RED | T3_ATTR_BOLD;
+		case COMMENT: return color ? T3_ATTR_FG_GREEN : 0;
+		case COMMENT_KEYWORD: return color ? T3_ATTR_FG_YELLOW : 0;
+		case KEYWORD: return color ? T3_ATTR_FG_CYAN | T3_ATTR_BOLD : T3_ATTR_BOLD;
+		case NUMBER: return color ? T3_ATTR_FG_WHITE | T3_ATTR_BOLD : 0;
+		case STRING: return color ? T3_ATTR_FG_MAGENTA | T3_ATTR_BOLD : T3_ATTR_UNDERLINE;
+		case STRING_ESCAPE: return color ? T3_ATTR_FG_MAGENTA : T3_ATTR_UNDERLINE;
+		case MISC: return color ? T3_ATTR_FG_YELLOW | T3_ATTR_BOLD : 0;
+		case VARIABLE: return color ? T3_ATTR_FG_GREEN | T3_ATTR_BOLD : 0;
+		case ERROR: return color ? T3_ATTR_FG_RED | T3_ATTR_BOLD : 0;
+		case ADDITION: return color ? T3_ATTR_FG_GREEN | T3_ATTR_BOLD : 0;
+		case DELETION: return color ? T3_ATTR_FG_RED | T3_ATTR_BOLD : 0;
 		default: return 0;
 	}
 }

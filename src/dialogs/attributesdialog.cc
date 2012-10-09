@@ -18,7 +18,7 @@
 	widget_group_t *widget_group = new widget_group_t(); \
 	int widget_count = 0;
 #define END_WIDGET_GROUP(name, var) \
-	widget_group->set_size(widget_count, width - 2); \
+	widget_group->set_size(widget_count, width - 4); \
 	var = new expander_t(name); \
 	var->set_child(widget_group); \
 	var->connect_move_focus_up(sigc::mem_fun(this, &attributes_dialog_t::focus_previous)); \
@@ -45,10 +45,23 @@
 } while (0)
 
 //FIXME: we may be better of using a list_pane_t for the longer divisions
-attributes_dialog_t::attributes_dialog_t(int height, int width) : dialog_t(height, width, "Attributes") {
+attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interface") {
 	expander_t *interface, *text_area, *syntax_highlight;
 	smart_label_t *label;
-	button_t *change_button;
+	button_t *change_button, *ok_button, *cancel_button;
+
+	label = new smart_label_t(_("_Color mode"));
+	label->set_position(1, 2);
+	push_back(label);
+	color_box = new checkbox_t();
+	color_box->set_label(label);
+	color_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	color_box->set_position(1, -2);
+	color_box->connect_move_focus_up(sigc::mem_fun(this, &attributes_dialog_t::focus_previous));
+	color_box->connect_move_focus_down(sigc::mem_fun(this, &attributes_dialog_t::focus_next));
+	color_box->connect_activate(sigc::mem_fun(this, &attributes_dialog_t::handle_activate));
+	color_box->connect_toggled(sigc::mem_fun(this, &attributes_dialog_t::update_attribute_lines));
+
 
 	expander_group = new expander_group_t();
 
@@ -65,7 +78,7 @@ attributes_dialog_t::attributes_dialog_t(int height, int width) : dialog_t(heigh
 	ADD_ATTRIBUTE_ENTRY("Menu bar", MENUBAR, menubar_line);
 	ADD_ATTRIBUTE_ENTRY("Menu bar selected", MENUBAR_SELECTED, menubar_selected_line);
 	END_WIDGET_GROUP("_Interface", interface)
-	interface->set_position(1, 1);
+	interface->set_position(2, 2);
 
 	START_WIDGET_GROUP
 	ADD_ATTRIBUTE_ENTRY("Text", TEXT, text_line);
@@ -96,11 +109,29 @@ attributes_dialog_t::attributes_dialog_t(int height, int width) : dialog_t(heigh
 	syntax_highlight->set_position(0, 0);
 
 	expander_group->connect_expanded(sigc::mem_fun(this, &attributes_dialog_t::expander_size_change));
-	dialog_t::set_size(3 + expander_group->get_group_height(), None);
 
+
+	cancel_button = new button_t("_Cancel");
+	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
+	cancel_button->set_position(-1, -2);
+	cancel_button->connect_activate(sigc::mem_fun(this, &attributes_dialog_t::close));
+	cancel_button->connect_move_focus_up(sigc::mem_fun(this, &attributes_dialog_t::focus_previous));
+	cancel_button->connect_move_focus_up(sigc::mem_fun(this, &attributes_dialog_t::focus_previous));
+	cancel_button->connect_move_focus_left(sigc::mem_fun(this, &attributes_dialog_t::focus_previous));
+
+	ok_button = new button_t("_Ok", true);
+	ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	ok_button->set_position(0, -2);
+	ok_button->connect_move_focus_up(sigc::mem_fun(this, &attributes_dialog_t::focus_previous));
+	ok_button->connect_move_focus_right(sigc::mem_fun(this, &attributes_dialog_t::focus_next));
+	ok_button->connect_activate(sigc::mem_fun(this, &attributes_dialog_t::handle_activate));
+
+	push_back(color_box);
 	push_back(interface);
 	push_back(text_area);
 	push_back(syntax_highlight);
+	push_back(ok_button);
+	push_back(cancel_button);
 
 	picker = new attribute_picker_dialog_t();
 	picker->center_over(this);
@@ -109,19 +140,25 @@ attributes_dialog_t::attributes_dialog_t(int height, int width) : dialog_t(heigh
 }
 
 bool attributes_dialog_t::set_size(optint height, optint width) {
+	(void) height;
 	return true;
+}
+
+void attributes_dialog_t::show(void) {
+	expander_group->collapse();
+	dialog_t::show();
 }
 
 void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
 	t3_attr_t text_attr;
 
-	text_attr = text.is_valid() ? text() : get_default_attr(TEXT);
+	text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
 	change_attribute = attribute;
 
 	switch (attribute) {
 #define SET_WITH_DEFAULT(name, attr) case attr: \
 	picker->set_base_attributes(0); \
-	picker->set_attribute(name.is_valid() ? name() : get_default_attr(attr)); \
+	picker->set_attribute(name.is_valid() ? name() : get_default_attr(attr, color_box->get_state())); \
 	break;
 		SET_WITH_DEFAULT(dialog, DIALOG);
 		SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
@@ -145,7 +182,7 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
 
 #define SET_WITH_DEFAULT(name, attr) case attr: \
 	picker->set_base_attributes(text_attr); \
-	picker->set_attribute(name.is_valid() ? name() : get_default_attr(attr)); \
+	picker->set_attribute(name.is_valid() ? name() : get_default_attr(attr, color_box->get_state())); \
 	break;
 		SET_WITH_DEFAULT(meta_text, META_TEXT);
 		SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
@@ -168,10 +205,12 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
 
 void attributes_dialog_t::expander_size_change(bool expanded) {
 	(void) expanded;
-	dialog_t::set_size(3 + expander_group->get_group_height(), None);
+	dialog_t::set_size(4 + expander_group->get_group_height(), None);
 }
 
-void attributes_dialog_t::set_attributes_from_options(void) {
+void attributes_dialog_t::set_values_from_options(void) {
+	color_box->set_state(option.color);
+
 	dialog = term_specific_option.dialog;
 	dialog_selected = term_specific_option.dialog_selected;
 	shadow = term_specific_option.shadow;
@@ -207,10 +246,61 @@ void attributes_dialog_t::set_attributes_from_options(void) {
 	update_attribute_lines();
 }
 
+void attributes_dialog_t::set_options_from_values(void) {
+	option.color = term_specific_option.color = color_box->get_state();
+
+#define SET_WITH_DEFAULT(name, attr) do { \
+	term_specific_option.name = name; \
+	set_attribute(attribute_t::attr, name.is_valid() ? name() : get_default_attribute(attribute_t::attr, option.color)); \
+} while (0)
+	SET_WITH_DEFAULT(dialog, DIALOG);
+	SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
+	SET_WITH_DEFAULT(shadow, SHADOW);
+	SET_WITH_DEFAULT(background, BACKGROUND);
+	SET_WITH_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
+	SET_WITH_DEFAULT(bad_draw, BAD_DRAW);
+	SET_WITH_DEFAULT(non_print, NON_PRINT);
+	SET_WITH_DEFAULT(button_selected, BUTTON_SELECTED);
+	SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
+	SET_WITH_DEFAULT(menubar, MENUBAR);
+	SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
+
+	SET_WITH_DEFAULT(text, TEXT);
+	SET_WITH_DEFAULT(text_selected, TEXT_SELECTED);
+	SET_WITH_DEFAULT(text_cursor, TEXT_CURSOR);
+	SET_WITH_DEFAULT(text_selection_cursor, TEXT_SELECTION_CURSOR);
+	SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
+	SET_WITH_DEFAULT(meta_text, META_TEXT);
+#undef SET_WITH_DEFAULT
+
+	term_specific_option.brace_highlight = brace_highlight;
+	option.brace_highlight = brace_highlight.is_valid() ? brace_highlight() : get_default_attr(BRACE_HIGHLIGHT);
+
+#define SET_WITH_DEFAULT(name, attr) do { \
+	int highlight_idx = map_highlight(NULL, #name); \
+	term_specific_option.highlights[highlight_idx] = name; \
+	option.highlights[highlight_idx] = name.is_valid() ? name() : get_default_attr(attr); \
+} while (0)
+	SET_WITH_DEFAULT(comment, COMMENT);
+	SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
+	SET_WITH_DEFAULT(keyword, KEYWORD);
+	SET_WITH_DEFAULT(number, NUMBER);
+	SET_WITH_DEFAULT(string, STRING);
+	SET_WITH_DEFAULT(string_escape, STRING_ESCAPE);
+	SET_WITH_DEFAULT(misc, MISC);
+	SET_WITH_DEFAULT(variable, VARIABLE);
+	SET_WITH_DEFAULT(error, ERROR);
+	SET_WITH_DEFAULT(addition, ADDITION);
+	SET_WITH_DEFAULT(deletion, DELETION);
+#undef SET_WITH_DEFAULT
+	force_redraw_all();
+}
+
 void attributes_dialog_t::update_attribute_lines(void) {
 	t3_attr_t text_attr;
+	bool color = color_box->get_state();
 
-#define SET_WITH_DEFAULT(name, attr) name##_line->set_attribute(name.is_valid() ? name() : get_default_attr(attr))
+#define SET_WITH_DEFAULT(name, attr) name##_line->set_attribute(name.is_valid() ? name() : get_default_attr(attr, color))
 	SET_WITH_DEFAULT(dialog, DIALOG);
 	SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
 	SET_WITH_DEFAULT(shadow, SHADOW);
@@ -230,9 +320,9 @@ void attributes_dialog_t::update_attribute_lines(void) {
 	SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
 #undef SET_WITH_DEFAULT
 
-	text_attr = text.is_valid() ? text() : get_default_attr(TEXT);
+	text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color);
 
-#define SET_WITH_DEFAULT(name, attr) name##_line->set_attribute(t3_term_combine_attrs(name.is_valid() ? name() : get_default_attr(attr), text_attr))
+#define SET_WITH_DEFAULT(name, attr) name##_line->set_attribute(t3_term_combine_attrs(name.is_valid() ? name() : get_default_attr(attr, color), text_attr))
 	SET_WITH_DEFAULT(meta_text, META_TEXT);
 	SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
 
@@ -252,7 +342,7 @@ void attributes_dialog_t::update_attribute_lines(void) {
 
 void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
 	t3_attr_t text_attr;
-	text_attr = text.is_valid() ? text() : get_default_attr(TEXT);
+	text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
 
 	switch (change_attribute) {
 #define SET_WITH_DEFAULT(name, attr) case attr: \
@@ -303,5 +393,59 @@ void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
 }
 
 void attributes_dialog_t::default_attribute_selected(void) {
+	t3_attr_t text_attr;
+	text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
+
+	switch (change_attribute) {
+#define SET_DEFAULT(name, attr) case attr: \
+	name.unset(); \
+	name##_line->set_attribute(get_default_attr(attr, color_box->get_state())); \
+	break;
+		SET_DEFAULT(dialog, DIALOG);
+		SET_DEFAULT(dialog_selected, DIALOG_SELECTED);
+		SET_DEFAULT(shadow, SHADOW);
+		SET_DEFAULT(background, BACKGROUND);
+		SET_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
+		SET_DEFAULT(bad_draw, BAD_DRAW);
+		SET_DEFAULT(non_print, NON_PRINT);
+		SET_DEFAULT(button_selected, BUTTON_SELECTED);
+		SET_DEFAULT(scrollbar, SCROLLBAR);
+		SET_DEFAULT(menubar, MENUBAR);
+		SET_DEFAULT(menubar_selected, MENUBAR_SELECTED);
+
+		SET_DEFAULT(text, TEXT);
+		SET_DEFAULT(text_selected, TEXT_SELECTED);
+		SET_DEFAULT(text_cursor, TEXT_CURSOR);
+		SET_DEFAULT(text_selection_cursor, TEXT_SELECTION_CURSOR);
+		SET_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
+
+#undef SET_DEFAULT
+
+#define SET_DEFAULT(name, attr) case attr: \
+	name.unset(); \
+	name##_line->set_attribute(t3_term_combine_attrs(get_default_attr(attr, color_box->get_state()), text_attr)); \
+	break;
+		SET_DEFAULT(meta_text, META_TEXT);
+		SET_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
+
+		SET_DEFAULT(comment, COMMENT);
+		SET_DEFAULT(comment_keyword, COMMENT_KEYWORD);
+		SET_DEFAULT(keyword, KEYWORD);
+		SET_DEFAULT(number, NUMBER);
+		SET_DEFAULT(string, STRING);
+		SET_DEFAULT(string_escape, STRING_ESCAPE);
+		SET_DEFAULT(misc, MISC);
+		SET_DEFAULT(variable, VARIABLE);
+		SET_DEFAULT(error, ERROR);
+		SET_DEFAULT(addition, ADDITION);
+		SET_DEFAULT(deletion, DELETION);
+#undef SET_DEFAULT
+	}
 	picker->hide();
+}
+
+void attributes_dialog_t::handle_activate(void) {
+	/* Do required validation here. */
+	hide();
+	activate();
 }

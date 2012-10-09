@@ -42,9 +42,6 @@ struct cli_options_t {
 };
 
 struct term_options_t {
-	optional<int> tabsize;
-
-	optional<bool> hide_menubar;
 	optional<bool> color;
 
 	optional<int> key_timeout;
@@ -82,7 +79,9 @@ struct options_t {
 	optional<bool> show_tabs;
 	optional<bool> strip_spaces;
 	optional<bool> make_backup;
+	optional<bool> hide_menubar;
 
+	optional<int> tabsize;
 	optional<size_t> max_recent_files;
 };
 
@@ -161,5 +160,6 @@ void parse_args(int argc, char **argv);
 void set_attributes(void);
 bool write_config(void);
 t3_attr_t get_default_attr(attribute_key_t attr);
+t3_attr_t get_default_attr(attribute_key_t attr, bool color);
 
 #endif
