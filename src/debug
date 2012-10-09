@@ -17,4 +17,4 @@ DIR="`dirname \"$0\"`"
 make -q -C "$DIR" || make -C "$DIR" || exit 1
 
 { sleep 1 ; sh -c "ddd \"$DIR/.objects/edit\" \"`pgrep -x edit | tail -n1`\"" ; } &
-"$DIR/tedit" --W "$@"
+"$DIR/tedit" --W -Cconfig "$@"
