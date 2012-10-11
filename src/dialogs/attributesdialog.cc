@@ -46,7 +46,6 @@
 
 //FIXME: we may be better of using a list_pane_t for the longer divisions
 attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interface") {
-	expander_t *interface, *text_area, *syntax_highlight;
 	smart_label_t *label;
 	button_t *change_button, *ok_button, *cancel_button;
 
@@ -140,8 +139,15 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 }
 
 bool attributes_dialog_t::set_size(optint height, optint width) {
+	bool result = true;
 	(void) height;
-	return true;
+	if (!width.is_valid())
+		return true;
+
+	result &= interface->set_size(None, width);
+	result &= text_area->set_size(None, width);
+	result &= syntax_highlight->set_size(None, width);
+	return result;
 }
 
 void attributes_dialog_t::show(void) {
@@ -264,7 +270,6 @@ void attributes_dialog_t::set_options_from_values(void) {
 	SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
 	SET_WITH_DEFAULT(menubar, MENUBAR);
 	SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
-
 	SET_WITH_DEFAULT(text, TEXT);
 	SET_WITH_DEFAULT(text_selected, TEXT_SELECTED);
 	SET_WITH_DEFAULT(text_cursor, TEXT_CURSOR);

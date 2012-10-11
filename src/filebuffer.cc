@@ -344,7 +344,7 @@ const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters(void)
 void file_buffer_t::prepare_paint_line(int line) {
 	int i;
 
-	if (highlight_info == NULL || highlight_valid > line)
+	if (highlight_info == NULL || highlight_valid >= line)
 		return;
 
 	for (i = highlight_valid + 1; i <= line; i++) {

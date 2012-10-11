@@ -35,8 +35,9 @@ class attributes_dialog_t : public dialog_t {
 			text_selection_cursor2, meta_text, brace_highlight, comment, comment_keyword,
 			keyword, number, string, string_escape, misc, variable, error, addition,
 			deletion;
+		expander_t *interface, *text_area, *syntax_highlight;
 		checkbox_t *color_box;
-		expander_group_t *expander_group;
+		cleanup_ptr<expander_group_t>::t expander_group;
 		cleanup_ptr<attribute_picker_dialog_t>::t picker;
 		attribute_key_t change_attribute;
 

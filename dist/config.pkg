@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libt3widget/0.1.14 LIBT3WIDGET test_link_cxx || \
+	pkgconfig libt3widget/0.2.0 LIBT3WIDGET test_link_cxx || \
 		error "!! Can not find libt3widget. libt3widget is required to compile tilde."
 
 	clean_cxx

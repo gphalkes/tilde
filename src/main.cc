@@ -525,8 +525,9 @@ void main_t::set_default_options(void) {
 }
 
 void main_t::set_interface_options(void) {
-	attributes_dialog->set_options_from_values();
+	/* First set color mode, because that resets all the attributes to the defaults. */
 	set_color_mode(option.color);
+	attributes_dialog->set_options_from_values();
 	write_config();
 }
 
