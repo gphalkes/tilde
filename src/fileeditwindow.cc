@@ -20,6 +20,7 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 		_text = new file_buffer_t();
 
 	_text->set_has_window(true);
+	rewrap_connection = _text->connect_rewrap_required(sigc::mem_fun(this, &file_edit_window_t::force_repaint_to_bottom));
 	edit_window_t::set_text(_text, _text->get_view_parameters());
 	edit_window_t::set_autocompleter(new file_autocompleter_t());
 
@@ -30,6 +31,7 @@ file_edit_window_t::~file_edit_window_t(void) {
 	file_buffer_t *_text = (file_buffer_t *) text;
 	_text->set_has_window(false);
 	save_view_parameters(_text->view_parameters);
+	rewrap_connection.disconnect();
 }
 
 void file_edit_window_t::draw_info_window(void) {
@@ -67,7 +69,9 @@ void file_edit_window_t::set_text(file_buffer_t *_text) {
 	file_buffer_t *old_text = (file_buffer_t *) edit_window_t::get_text();
 	old_text->set_has_window(false);
 	save_view_parameters(old_text->view_parameters);
+	rewrap_connection.disconnect();
 	_text->set_has_window(true);
+	rewrap_connection = _text->connect_rewrap_required(sigc::mem_fun(this, &file_edit_window_t::force_repaint_to_bottom));
 	edit_window_t::set_text(_text, _text->get_view_parameters());
 }
 
@@ -100,7 +104,19 @@ void file_edit_window_t::update_contents(void) {
 	   However, the problem is that we don't know exactly when this will be.
 	   Simply checking redraw doesn't work, because the contents is redrawn
 	   every time this is called if the edit window has focus (which we can't
-	   query at this time). Thus we simply update every time :-( */
-	get_text()->update_matching_brace();
+	   query at this time). Thus we simply update every time :-(
+
+	   Another improvement would be if we could find out the positions of the
+	   old and new matching brace positions. That would allow more localized
+	   updates.
+	*/
+	if (get_text()->update_matching_brace())
+		update_repaint_lines(0, INT_MAX);
 	edit_window_t::update_contents();
+}
+
+void file_edit_window_t::force_repaint_to_bottom(rewrap_type_t type, int line, int pos) {
+	(void) type;
+	(void) pos;
+	update_repaint_lines(line, INT_MAX);
 }

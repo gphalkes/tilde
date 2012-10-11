@@ -67,7 +67,11 @@ class file_buffer_t : public text_buffer_t {
 		void do_strip_spaces(void);
 
 		bool goto_matching_brace(void);
-		void update_matching_brace(void);
+		/** Update the matching brace information in the file_buffer_t.
+
+		    @return A boolean indicating whether the matching brace information changed.
+		*/
+		bool update_matching_brace(void);
 };
 
 #endif

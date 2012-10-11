@@ -638,6 +638,11 @@ bool file_buffer_t::goto_matching_brace(void) {
 	return false;
 }
 
-void file_buffer_t::update_matching_brace(void) {
+bool file_buffer_t::update_matching_brace(void) {
+	bool old_valid = matching_brace_valid;
+	text_coordinate_t old_coordinate = matching_brace_coordinate;
+
 	matching_brace_valid = find_matching_brace(matching_brace_coordinate);
+
+	return old_valid != matching_brace_valid || (old_valid && old_coordinate != matching_brace_coordinate);
 }
