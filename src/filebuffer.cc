@@ -347,7 +347,7 @@ void file_buffer_t::prepare_paint_line(int line) {
 	if (highlight_info == NULL || highlight_valid >= line)
 		return;
 
-	for (i = highlight_valid + 1; i <= line; i++) {
+	for (i = highlight_valid >= 0 ? highlight_valid + 1 : 1; i <= line; i++) {
 		int state = ((file_line_t *) get_line_data_nonconst(i - 1))->get_highlight_end();
 		((file_line_t *) get_line_data_nonconst(i))->set_highlight_start(state);
 	}
@@ -366,8 +366,8 @@ bool file_buffer_t::get_has_window(void) const {
 void file_buffer_t::invalidate_highlight(rewrap_type_t type, int line, int pos) {
 	(void) type;
 	(void) pos;
-	if (line < highlight_valid)
-		highlight_valid = line;
+	if (line <= highlight_valid)
+		highlight_valid = line - 1;
 }
 
 t3_highlight_t *file_buffer_t::get_highlight(void) {
