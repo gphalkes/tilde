@@ -11,7 +11,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-EXTENSIONS="cxx verbose_compile pkgconfig_dep gettext"
+EXTENSIONS="cxx verbose_compile pkgconfig_dep gettext lfs"
 DEFAULT_LINGUAS=nl
 INSTALLDIRS="bindir docdir mandir"
 
@@ -43,21 +43,6 @@ checkfunction() {
 }
 checkfunction_compile() {
 	checkfunction_internal test_compile_cxx "$@"
-}
-
-# Make these functions available for the gettext extension
-test_link() {
-	mv .config.c .configcxx.cc
-	test_link_cxx "$@"
-}
-
-test_compile() {
-	test_compile_cxx "$@"
-}
-
-clean_c() {
-	clean .config.c
-	clean_cxx
 }
 
 config() {

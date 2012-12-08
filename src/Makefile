@@ -33,8 +33,8 @@ SOURCES..objects/edit := \
 	dialogs/optionsdialog.cc
 
 LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
-LDFLAGS..objects/edit += -Lt3widget/.libs -Lt3window/.libs -Ltranscript/.libs -Lt3config/.libs -Lt3highlight/.libs
-LDFLAGS..objects/edit += -Wl,-rpath=$(CURDIR)/t3widget/.libs:$(CURDIR)/t3window/.libs:$(CURDIR)/transcript/.libs:$(CURDIR)/t3config/.libs:$(CURDIR)/t3highlight/.libs:$(CURDIR)/../../key/src/.libs
+LDFLAGS..objects/edit += -L../include/t3widget/.libs -L../include/t3window/.libs -L../include/transcript/.libs -L../include/t3config/.libs -L../include/t3highlight/.libs
+LDFLAGS..objects/edit += -Wl,-rpath=$(CURDIR)/../include/t3widget/.libs:$(CURDIR)/../include/t3window/.libs:$(CURDIR)/../include/transcript/.libs:$(CURDIR)/../include/t3config/.libs:$(CURDIR)/../include/t3highlight/.libs:$(CURDIR)/../../key/src/.libs
 LDLIBS..objects/edit += `pkg-config --libs sigc++-2.0` -lunistring
 LDLIBS..objects/edit += -lacl
 LDLIBS..objects/edit += -lattr
@@ -47,7 +47,7 @@ EXTRATARGETS := clean-logs
 #================================================#
 include ../../makesys/rules.mk
 #================================================#
-CXXFLAGS += -I.
+CXXFLAGS += -I../include
 CXXFLAGS += -DTILDE_DEBUG
 CXXFLAGS += -DHAS_STRDUP
 CXXFLAGS += -DHAS_LIBACL
@@ -70,15 +70,10 @@ xgettext: all
 
 links:
 	@[ -L record ] || ln -s ../../../record/src record
-	@[ -L t3window ] || ln -s ../../window/src t3window
-	@[ -L t3widget ] || ln -s ../../widget/src t3widget
-	@[ -L t3config ] || ln -s ../../config/src t3config
-	@[ -L t3highlight ] || ln -s ../../highlight/src t3highlight
-	@[ -L transcript ] || ln -s ../../../transcript/src transcript
 
 .objects/%.bytes: %.schema
 	$(GENOBJDIR)
-	$(_VERBOSE_GEN) t3config/data2bytes -s -- $< > $@
+	$(_VERBOSE_GEN) ../include/t3config/data2bytes -s -- $< > $@
 
 .objects/option.o: .objects/config.bytes
 

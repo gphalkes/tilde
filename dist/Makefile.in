@@ -69,10 +69,10 @@ dist-clean: clean
 	rm -rf Makefile config.log
 
 .cc.o:
-	$(SILENTCXX) $(CXX) $(CFLAGS) $(CONFIGFLAGS) $(GETTEXTFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" -Isrc -c -o $@ $<
+	$(SILENTCXX) $(CXX) $(CXXFLAGS) $(CONFIGFLAGS) $(GETTEXTFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" -Isrc -c -o $@ $<
 
 src/tilde: $(OBJECTS)
-	$(SILENTLD) $(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS) $(CONFIGLIBS) $(GETTEXTLIBS)
+	$(SILENTLD) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS) $(CONFIGLIBS) $(GETTEXTLIBS)
 
 # Macros to make DESTDIR support more readable
 _bindir=$(DESTDIR)$(bindir)
