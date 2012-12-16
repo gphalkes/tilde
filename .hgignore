@@ -1,4 +1,5 @@
 syntax: glob
+src/config
 testsuite/testlog*.txt
 testsuite/work
 src/helgrind.log
