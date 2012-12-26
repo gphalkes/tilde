@@ -77,7 +77,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 		PANIC();
 
 	switch (state->state) {
+		case load_process_t::INITIAL_MISSING_OK:
 		case load_process_t::INITIAL: {
+			string converted_name;
 			char *_name;
 			transcript_t *handle;
 			transcript_error_t error;
@@ -88,12 +90,16 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 
 			/* name is a cleanup ptr. */
 			name = _name;
+			convert_lang_codeset(name, &converted_name, true);
+			name_line.set_text(&converted_name);
 
-			if ((state->fd = open(name, O_RDONLY)) < 0)
+			if ((state->fd = open(name, O_RDONLY)) < 0) {
+				if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK)
+					break;
 				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+			}
 
 			try {
-				string converted_name;
 				lprintf("Using encoding %s to read %s\n", encoding(), name());
 
 				handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
@@ -102,8 +108,6 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				//FIXME: if the new fails, the handle will remain open!
 				state->wrapper = new file_read_wrapper_t(state->fd, handle);
 
-				convert_lang_codeset(name, &converted_name, true);
-				name_line.set_text(&converted_name);
 			} catch (bad_alloc &ba) {
 				return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 			}

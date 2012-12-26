@@ -1,3 +1,8 @@
+Version 0.2.2:
+	New features:
+	- When opening a non-existing file from the command line, the message
+	  stating that Tilde could not open the file is now suppressed.
+
 Version 0.2.1:
 	Bug fixes:
 	- Fix invalidation of highlighting information, such that highlighting is

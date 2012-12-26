@@ -22,7 +22,8 @@
 load_process_t::load_process_t(const callback_t &cb) : stepped_process_t(cb), state(SELECT_FILE), bom_state(UNKNOWN), file(NULL),
 		wrapper(NULL), encoding("UTF-8"), fd(-1), buffer_used(true) {}
 
-load_process_t::load_process_t(const callback_t &cb, const char *name, const char *_encoding) : stepped_process_t(cb), state(INITIAL),
+load_process_t::load_process_t(const callback_t &cb, const char *name, const char *_encoding, bool missing_ok) :
+		stepped_process_t(cb), state(missing_ok ? INITIAL_MISSING_OK : INITIAL),
 		bom_state(UNKNOWN), file(new file_buffer_t(name, _encoding == NULL ? "UTF-8" : _encoding)), wrapper(NULL),
 		encoding(_encoding == NULL ? "UTF-8" : _encoding), fd(-1), buffer_used(true) {}
 
@@ -145,8 +146,8 @@ void load_process_t::execute(const callback_t &cb) {
 	(new load_process_t(cb))->run();
 }
 
-void load_process_t::execute(const callback_t &cb, const char *name, const char *encoding) {
-	(new load_process_t(cb, name, encoding))->run();
+void load_process_t::execute(const callback_t &cb, const char *name, const char *encoding, bool missing_ok) {
+	(new load_process_t(cb, name, encoding, missing_ok))->run();
 }
 
 save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file) : stepped_process_t(cb), state(SELECT_FILE),
@@ -400,7 +401,7 @@ bool load_cli_file_process_t::step(void) {
 	in_step = true;
 	while (iter != cli_option.files.end()) {
 		in_load = true;
-		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter, encoding);
+		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter, encoding, true);
 		if (in_load) {
 			in_step = false;
 			return false;

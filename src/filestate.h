@@ -65,10 +65,11 @@ class load_process_t : public stepped_process_t {
 		enum {
 			SELECT_FILE,
 			INITIAL,
+			INITIAL_MISSING_OK,
 			READING_FIRST,
 			READING
 		} state;
-		
+
 		enum {
 			UNKNOWN,
 			REMOVE_BOM,
@@ -82,7 +83,7 @@ class load_process_t : public stepped_process_t {
 		bool buffer_used;
 
 		load_process_t(const callback_t &cb);
-		load_process_t(const callback_t &cb, const char *name, const char *_encoding);
+		load_process_t(const callback_t &cb, const char *name, const char *_encoding, bool missing_ok);
 		void abort(void);
 		virtual bool step(void);
 		virtual void file_selected(const std::string *name);
@@ -94,7 +95,7 @@ class load_process_t : public stepped_process_t {
 	public:
 		virtual file_buffer_t *get_file_buffer(void);
 		static void execute(const callback_t &cb);
-		static void execute(const callback_t &cb, const char *name, const char *encoding = NULL);
+		static void execute(const callback_t &cb, const char *name, const char *encoding = NULL, bool missing_ok = false);
 };
 
 class save_as_process_t : public stepped_process_t {
