@@ -8,7 +8,6 @@ priority.
 - fmt-like rewrapping of text to a specific width
 - Insertion of characters by their Unicode name instead of their codepoint
 - Improve terminal capabilities detection
-- Dialogs for changing the settings (partially done)
 - End-of-line type selection and conversion (LF, CR/LF, CR)
 - Convert indentation from tabs to spaces and vice-versa
 - Recognize vi/emacs modelines, and use sensible information (done for
