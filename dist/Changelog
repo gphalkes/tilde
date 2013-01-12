@@ -1,7 +1,11 @@
 Version 0.2.2:
 	New features:
 	- When opening a non-existing file from the command line, the message
-	  stating that Tilde could not open the file is now suppressed.
+	  stating that Tilde could not open the file is now suppressed (#14).
+
+	Bug fixes:
+	- Compile with Large File Support if such support is available on the
+	  platform.
 
 Version 0.2.1:
 	Bug fixes:
