@@ -68,9 +68,6 @@ linecount:
 xgettext: all
 	xgettext -k_ -kN_ --add-comments=TRANSLATORS -o ../po/messages.pot `cat $$(find .deps -type f) | sed -r 's/^.+://;s/\\\\//g'`
 
-links:
-	@[ -L record ] || ln -s ../../../record/src record
-
 .objects/%.bytes: %.schema
 	$(GENOBJDIR)
 	$(_VERBOSE_GEN) ../include/t3config/data2bytes -s -- $< > $@

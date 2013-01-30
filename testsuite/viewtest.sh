@@ -14,4 +14,4 @@ rm -rf *
 
 cp -r "$TEST"/* . || fail "Could not copy test"
 cd context || fail "Could not cd into context dir"
-../../../../../record/src/tdview $REPLAYOPTS ../recording || fail "!! Terminal output is different"
+tdview $REPLAYOPTS ../recording || fail "!! Terminal output is different"

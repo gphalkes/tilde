@@ -17,7 +17,5 @@ if [ $# -ne 1 ] ; then
 	exit 1
 fi
 
-DIR="`dirname \"$0\"`"
-
 { sleep 1 ; sh -c "ddd \"$DIR/.objects/edit\" \"`pgrep -x edit`\"" ; } &
-"$DIR/record/tdreplay" -d "$1"
+tdreplay -d "$1"

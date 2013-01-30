@@ -24,7 +24,7 @@ cd context || fail "Could not cd into context dir"
 #FIXME: display the old one with view to compare with the new one. Ask user
 #  afterwards if it was correct
 
-../../../../../record/src/tdrerecord -s -o ../recording.new $REPLAYOPTS ../recording || fail "!! Could not rerecord test"
+tdrerecord -s -o ../recording.new $REPLAYOPTS ../recording || fail "!! Could not rerecord test"
 cd .. || fail "Could not change back to work dir"
 
 rm context/libt3widgetlog.txt context/log.txt

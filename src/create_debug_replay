@@ -17,8 +17,6 @@ if [ $# -ne 2 ] ; then
 	exit 1
 fi
 
-DIR="`dirname \"$0\"`"
-
-"$DIR"/record/tdrerecord -o "$2" <( sed -r 's/(start.*)/\1 "--W"/;/[[:space:]]*start/a \
+tdrerecord -o "$2" <( sed -r 's/(start.*)/\1 "--W"/;/[[:space:]]*start/a \
 expect "foo"\
 send 5000 "\\n"' "$1" )

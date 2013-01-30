@@ -14,7 +14,7 @@ rm -rf *
 
 cp -r "$TEST"/* . || fail "Could not copy test"
 cd context || fail "Could not cd into context dir"
-../../../../../record/src/tdreplay -l../replay.log $REPLAYOPTS ../recording || fail "!! Terminal output is different"
+tdreplay -l../replay.log $REPLAYOPTS ../recording || fail "!! Terminal output is different"
 cd .. || fail "Could not change back to work dir"
 
 mv context/libt3widgetlog.txt context/log.txt . 2>/dev/null
