@@ -32,14 +32,6 @@ SOURCES..objects/edit := \
 	dialogs/selectbufferdialog.cc \
 	dialogs/optionsdialog.cc
 
-LDLIBS..objects/edit += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
-LDFLAGS..objects/edit += -L../include/t3widget/.libs -L../include/t3window/.libs -L../include/transcript/.libs -L../include/t3config/.libs -L../include/t3highlight/.libs
-LDFLAGS..objects/edit += -Wl,-rpath=$(CURDIR)/../include/t3widget/.libs:$(CURDIR)/../include/t3window/.libs:$(CURDIR)/../include/transcript/.libs:$(CURDIR)/../include/t3config/.libs:$(CURDIR)/../include/t3highlight/.libs:$(CURDIR)/../../key/src/.libs
-LDLIBS..objects/edit += `pkg-config --libs sigc++-2.0` -lunistring
-LDLIBS..objects/edit += -lacl
-LDLIBS..objects/edit += -lattr
-CXXFLAGS.option = -I.objects
-
 CXXTARGETS := .objects/edit
 EXTRATARGETS := clean-logs
 #================================================#
@@ -47,6 +39,14 @@ EXTRATARGETS := clean-logs
 #================================================#
 include ../../makesys/rules.mk
 #================================================#
+
+LDLIBS += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
+LDFLAGS += $(call L, ../include/t3widget/.libs ../include/t3window/.libs ../include/transcript/.libs ../include/t3config/.libs ../include/t3highlight/.libs)
+LDLIBS += `pkg-config --libs sigc++-2.0` -lunistring
+LDLIBS += -lacl
+LDLIBS += -lattr
+CXXFLAGS.option = -I.objects
+
 CXXFLAGS += -I../include
 CXXFLAGS += -DTILDE_DEBUG
 CXXFLAGS += -DHAS_STRDUP
