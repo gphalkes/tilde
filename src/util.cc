@@ -20,6 +20,7 @@
 #include <limits.h>
 #include <string>
 #include <cstdarg>
+#include <cerrno>
 
 #include <t3widget/widget.h>
 #include "option.h"
@@ -140,60 +141,26 @@ char *resolve_links(const char *start_name) {
 }
 
 char *canonicalize_path(const char *path) {
-	string result;
-	size_t i;
+	char *result = realpath(path, NULL);
 
-	if (path[0] != '/') {
-		result = get_working_directory();
-		result += "/";
-	}
-
-	result += path;
-
-	for (i = 0; i < result.size(); ) {
-		if (result[i] == '/') {
-			if (i + 1 == result.size())
-				break;
-			if (result[i + 1] == '/') {
-				// found //
-				result.erase(i + 1, 1);
-				continue;
-			} else if (result[i + 1] == '.') {
-				if (i + 2 == result.size()) {
-					result.erase(i);
-					break;
-				}
-
-				if (result[i + 2] == '/') {
-					// found /./
-					result.erase(i + 1, 2);
-					continue;
-				} else if (result[i + 2] == '.' && (i + 3 == result.size() || result[i + 3] == '/')) {
-					// found /..
-					if (i == 0) {
-						/* Erase 3 characters after the '/'. If the string is /.., it will simply
-						   erase only the dots. This prevents the situation where we erase the
-						   leading '/' only to leave an empty string. */
-						result.erase(i + 1, 3);
-						continue;
-					} else {
-						size_t last_slash = result.rfind('/', i - 1);
-						result.erase(last_slash + 1, i - last_slash + 3);
-						i = last_slash;
-						continue;
-					}
-				}
-			}
-		}
-		i++;
-	}
-
-	/* TODO:
-		- remove all occurences of // and /./
-	    - remove all occurences of ^/..
-		- remove all occurences of XXX/../
+#ifdef PATH_MAX
+	/* realpath in the POSIX.1-2001 and 2004 specifications is broken, in that
+	   the size of the buffer for the 2nd parameter is ill defined. However,
+	   most systems allow a NULL parameter to do automatic allocation. Those
+	   that don't typically return EINVAL in that case. We can't work around
+	   this for all situations, but when PATH_MAX is defined, we can. Any
+	   system that does not define PATH_MAX and does not do automatic allocation
+	   is broken by design, as that leaves no correct way to allocate a buffer
+	   with the correct size to store the result.
 	*/
-	return strdup_impl(result.c_str());
+	if (result == NULL && path != NULL && errno == EINVAL) {
+		char store_path[PATH_MAX];
+		if (realpath(path, store_path) != NULL)
+			return NULL;
+		return strdup_impl(store_path);
+	}
+#endif
+	return result;
 }
 
 #define BUFFER_START_SIZE 256

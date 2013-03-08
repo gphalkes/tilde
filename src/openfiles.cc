@@ -34,6 +34,8 @@ open_files_t::iterator open_files_t::erase(open_files_t::iterator position) {
 }
 
 open_files_t::iterator open_files_t::contains(const char *name) {
+	/* FIXME: this should really check for ino+dev equality to see if the file
+	   is already open. */
 	for (vector<file_buffer_t *>::iterator iter = files.begin();
 			iter != files.end(); iter++)
 	{

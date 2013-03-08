@@ -84,7 +84,6 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 			transcript_t *handle;
 			transcript_error_t error;
 
-			//FIXME: this is not correct for symlinks!!!
 			if ((_name = canonicalize_path(name)) == NULL)
 				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
