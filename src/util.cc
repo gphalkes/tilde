@@ -122,24 +122,6 @@ void fatal(const char *fmt, ...) {
 	exit(EXIT_FAILURE);
 }
 
-char *resolve_links(const char *start_name) {
-	long buffer_max = pathconf("/", _PC_PATH_MAX);
-
-	if (buffer_max < PATH_MAX)
-		buffer_max = PATH_MAX;
-
-	char buffer[buffer_max + 1];
-	ssize_t retval;
-
-	while ((retval = readlink(start_name, buffer, buffer_max)) > 0) {
-		if (retval == buffer_max)
-			return NULL;
-		buffer[retval] = 0;
-		start_name = buffer;
-	}
-	return strdup_impl(start_name);
-}
-
 char *canonicalize_path(const char *path) {
 	char *result = realpath(path, NULL);
 

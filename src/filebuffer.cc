@@ -209,13 +209,14 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			} else {
 				save_name = state->name.c_str();
 			}
-
-			if ((state->real_name = resolve_links(save_name)) == NULL)
-				return rw_result_t(rw_result_t::ERRNO_ERROR, ENAMETOOLONG);
-
+lprintf("canonicalize_path\n");
+			if ((state->real_name = canonicalize_path(save_name)) == NULL)
+				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+lprintf("stat %s\n", state->real_name);
 			/* FIXME: to avoid race conditions, it is probably better to try open with O_CREAT|O_EXCL
 			   However, this may cause issues with NFS, which is known to have isues with this. */
 			if (stat(state->real_name, &state->file_info) < 0) {
+lprintf("stat failed! %m\n");
 				if (errno == ENOENT) {
 					if ((state->fd = creat(state->real_name, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) < 0)
 						return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
@@ -248,7 +249,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				   to change that string. So we'll just have to strdup it :-( */
 				if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == NULL)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-
+lprintf("mkstemp\n");
 				if ((state->fd = mkstemp(state->temp_name)) < 0)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
@@ -309,6 +310,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 					unlink(backup_name.c_str());
 					link(state->real_name, backup_name.c_str());
 				}
+lprintf("rename\n");
 				if (rename(state->temp_name, state->real_name) < 0)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 			}
