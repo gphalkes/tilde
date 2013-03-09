@@ -98,7 +98,8 @@ static void init_base_dir(void) {
 			if ((base_dir = real_getcwd(NULL, 0)) == NULL)
 				FATAL("getcwd failed: %m\n");
 		} else {
-			base_dir = safe_strdup(base_dir);
+			INIT_LIBC_FUNC(realpath);
+			base_dir = real_realpath(base_dir, NULL);
 		}
 		base_dir_len = strlen(base_dir);
 	}

@@ -48,22 +48,20 @@ int main(int argc, char *argv[]) {
 
 	printf("getcwd: %s\n", name_buffer);
 
-	if (realpath("mockdir_test.c", name_buffer) == NULL)
+	if (realpath("file1", name_buffer) == NULL)
 		fatal("Error in realpath: %m\n");
 
-	printf("realpath for mockdir_test.c: %s\n", name_buffer);
+	printf("realpath for file1: %s\n", name_buffer);
 
 	if (stat(name_buffer, &stat_buf) < 0)
 		fatal("Error in stat: %m\n");
 
-	printf("opening %s\n", name_buffer);
 	if ((fd = open(name_buffer, O_RDONLY)) < 0)
-		fatal("Error in open: %m\n");
+		fatal("Error in open for %s: %m\n", name_buffer);
 	close(fd);
 
-	printf("opening /bin/ls\n");
 	if ((fd = open("/bin/ls", O_RDONLY)) < 0)
-		fatal("Error in open: %m\n");
+		fatal("Error in open for /bin/ls: %m\n");
 	close(fd);
 
 	return EXIT_SUCCESS;

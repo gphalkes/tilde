@@ -1,0 +1,6 @@
+getcwd: {CWD}
+realpath for file1: {CWD}/file1
+getcwd: /mockdir
+realpath for file1: /mockdir/file1
+getcwd: /mockdir/work
+realpath for file1: /mockdir/work/file1
