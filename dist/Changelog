@@ -1,3 +1,9 @@
+Version :
+	Bug fixes:
+	- Use realpath function to determine the name of files, rather than the
+	  incorrect method used previously.
+	- Don't expand autocompletion to word under the cursor (#15).
+
 Version 0.2.2:
 	New features:
 	- When opening a non-existing file from the command line, the message

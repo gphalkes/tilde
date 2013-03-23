@@ -29,6 +29,8 @@ file_autocompleter_t::file_autocompleter_t(void) : current_list(NULL) {
 
 string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buffer_t *text, int *position) {
 	const text_line_t *line;
+	int completion_end;
+	string current_word;
 
 	if (current_list != NULL) {
 		delete current_list;
@@ -40,12 +42,20 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 
 	line = text->get_line_data(text->cursor.line);
 
-	for (completion_start = line->adjust_position(text->cursor.pos, -1); completion_start > 0; completion_start = line->adjust_position(completion_start, -1)) {
+	for (completion_start = line->adjust_position(text->cursor.pos, -1); completion_start > 0;
+			completion_start = line->adjust_position(completion_start, -1))
+	{
 		if (!line->is_alnum(completion_start))
 			break;
 	}
 	if (!line->is_alnum(completion_start))
 		completion_start = line->adjust_position(completion_start, 1);
+
+	for (completion_end = completion_start; completion_end < line->get_length() &&
+			line->is_alnum(completion_end);
+			completion_end = line->adjust_position(completion_end, 1))
+	{}
+	current_word = line->get_data()->substr(completion_start, completion_end - completion_start);
 
 
 	text_coordinate_t start(0, 0);
@@ -58,14 +68,14 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 
 	while (text->find_limited(&finder, start, eof, &find_result)) {
 		line = text->get_line_data(find_result.start.line);
-		for (; find_result.end.pos < text->get_line_max(find_result.end.line) &&
+		for (; find_result.end.pos < line->get_length() &&
 				line->is_alnum(find_result.end.pos);
 				find_result.end.pos = line->adjust_position(find_result.end.pos, 1))
 		{}
 
 		if (find_result.end.pos - find_result.start.pos != text->cursor.pos - completion_start) {
 			word = line->get_data()->substr(find_result.start.pos, find_result.end.pos - find_result.start.pos);
-			if (result_set.count(&word) == 0)
+			if (result_set.count(&word) == 0 && word != current_word)
 				result_set.insert(new string(word));
 		}
 
