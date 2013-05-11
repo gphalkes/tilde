@@ -5,7 +5,7 @@ all: $(PAGES)
 
 output/%: %.txt
 	@mkdir -p $$(dirname '$@')
-	@echo [GEN] $@ ; ../../../manfmt/manfmt -o $@ $<
+	@echo [GEN] $@ ; manscript -o $@ $<
 
 clean:
 	rm -rf output

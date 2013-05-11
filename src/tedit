@@ -25,6 +25,6 @@ fi
 
 DATE="`date +%F@%T`"
 rm "$DIR/.recordings/last" "$DIR/log.txt" "$DIR/libt3widgetlog.txt" "$DIR/libt3windowlog.txt" 2>/dev/null
-tdrecord -o "$DIR/.recordings/last" -eLD_LIBRARY_PATH -X "$DIR/.objects/edit" --D -Cconfig "$@"
+tdrecord -o "$DIR/.recordings/last" -X "$DIR/.objects/edit" --D -Cconfig "$@"
 
 ln "$DIR/.recordings/last" "$DIR/.recordings/record-$DATE"

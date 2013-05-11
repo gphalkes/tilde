@@ -31,6 +31,7 @@ Help:
 
 HIGH PRIORITY
 =============
+- emit reset sequence on segmentation fault
 - line and column numbers may be larger than space reserved!
 - add exception handling for all modifications of vectors and strings which
   can cause the object to grow (and therefore throw bad_alloc)
