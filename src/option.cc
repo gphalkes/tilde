@@ -322,6 +322,7 @@ static void print_help(void) {
 		"                                  the command line."
 		"  -h,--help            Show this help message.\n"
 		"  -I,--select-input-method    Ignore configured input handling method.\n"
+		"  --ignore-running     Ignore instances already running on this terminal\n"
 		"  -T<term>,--terminal=<term>  Use <term> instead of TERM variable.\n"
 	    "  -V,--version         Show version and copyright information.\n"
 		"  -x,--no-ext-clipboard       Disable the external (X11) clipboard interface\n"

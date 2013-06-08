@@ -1,4 +1,7 @@
-Version :
+Version 0.3.0:
+	New features:
+	- Detect instances of Tilde on the same terminal that have been suspended.
+
 	Bug fixes:
 	- Use realpath function to determine the name of files, rather than the
 	  incorrect method used previously.

@@ -621,7 +621,7 @@ static char *get_run_file_name(void) {
 	if (path == NULL) {
 		char uid_str[16];
 		sprintf(uid_str, "%u", (unsigned int) geteuid());
-		if ((path = (char *) malloc(strlen(TMP_DIR_BASE) + strlen(uid_str) + 2 + linkname_len)) == NULL)
+		if ((path = (char *) malloc(strlen(TMP_DIR_BASE) + strlen(uid_str) + 3 + linkname_len)) == NULL)
 			goto return_error;
 		sprintf(path, "%s-%s", TMP_DIR_BASE, uid_str);
 	}
@@ -642,6 +642,7 @@ static char *get_run_file_name(void) {
 			*insert_ptr++ = ttyname_str[i];
 		}
 	}
+	*insert_ptr = 0;
 
 	free(ttyname_str);
 	return path;
