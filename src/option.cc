@@ -374,6 +374,9 @@ PARSE_FUNCTION(parse_args)
 		OPTION('e', "encoding", OPTIONAL_ARG)
 			cli_option.encoding = optArg;
 		END_OPTION
+		LONG_OPTION("ignore-running", NO_ARG)
+			cli_option.ignore_running = true;
+		END_OPTION
 #ifdef DEBUG
 		LONG_OPTION("W", NO_ARG)
 			cli_option.wait = true;

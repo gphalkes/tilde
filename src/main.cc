@@ -13,6 +13,7 @@
 */
 
 #include <cstdlib>
+#include <signal.h>
 #include <t3widget/widget.h>
 
 #include "option.h"
@@ -46,6 +47,8 @@ message_dialog_t *preserve_bom_dialog;
 static dialog_t *input_selection_dialog;
 
 static list<window_component_t *> discard_list;
+
+static char *runfile_name;
 
 static void input_selection_complete(bool selection_made);
 static void configure_input(bool cancel_selects_default);
@@ -587,6 +590,100 @@ static void sync_updates(void) {
 	}
 }
 
+static char *get_run_file_name(void) {
+	static const char *ILLEGAL_CHARS = "%<>:\"'/\\|?*'";
+	static const char *TMP_DIR_BASE = "/tmp/tilde-";
+	char hostname[128];
+	char *ttyname_str = NULL;
+	size_t ttyname_len;
+	size_t ttyname_len_encoded;
+	size_t linkname_len;
+	char *path = NULL;
+	char *insert_ptr;
+
+	if (gethostname(hostname, sizeof(hostname)) == -1)
+		goto return_error;
+	/* Ensure that the hostname string is terminated. */
+	hostname[sizeof(hostname) - 1] = 0;
+	if ((ttyname_str = ttyname(STDIN_FILENO)) == NULL)
+		goto return_error;
+	ttyname_str = strdup_impl(ttyname_str);
+	ttyname_len = strlen(ttyname_str);
+	ttyname_len_encoded = ttyname_len;
+	for (size_t i = 0; i < ttyname_len; i++) {
+		if (ttyname_str[i] < 32 || strchr(ILLEGAL_CHARS, ttyname_str[i]) != NULL)
+			ttyname_len_encoded += 2;
+	}
+
+	linkname_len = ttyname_len_encoded + strlen(hostname) + 1;
+
+	path = t3_config_xdg_get_path(T3_CONFIG_XDG_RUNTIME_DIR, "tilde", linkname_len);
+	if (path == NULL) {
+		char uid_str[16];
+		sprintf(uid_str, "%u", (unsigned int) geteuid());
+		if ((path = (char *) malloc(strlen(TMP_DIR_BASE) + strlen(uid_str) + 2 + linkname_len)) == NULL)
+			goto return_error;
+		sprintf(path, "%s-%s", TMP_DIR_BASE, uid_str);
+	}
+
+	mkdir(path, S_IRWXU);
+
+	insert_ptr = path + strlen(path);
+	strcat(insert_ptr, "/");
+	strcat(insert_ptr, hostname);
+	strcat(insert_ptr, ":");
+
+	insert_ptr = path + strlen(path);
+	for (size_t i = 0; i < ttyname_len; i++) {
+		if (ttyname_str[i] < 32 || strchr(ILLEGAL_CHARS, ttyname_str[i]) != NULL) {
+			sprintf(insert_ptr, "%%%02X", ttyname_str[i]);
+			insert_ptr += 3;
+		} else {
+			*insert_ptr++ = ttyname_str[i];
+		}
+	}
+
+	free(ttyname_str);
+	return path;
+return_error:
+	free(ttyname_str);
+	free(path);
+	return NULL;
+}
+
+static void check_if_already_running(void) {
+	char *name;
+	char pid_str[16];
+	ssize_t readlink_result;
+
+	if (cli_option.ignore_running)
+		return;
+
+	name = get_run_file_name();
+	if (name == NULL)
+		return;
+
+	if ((readlink_result = readlink(name, pid_str, sizeof(pid_str) - 1)) > 0) {
+		char *endptr;
+		int other_pid = strtol(pid_str, &endptr, 10);
+		if (*endptr == 0) {
+			if (kill(other_pid, 0) == 0) {
+				printf("Another instance of Tilde was detected running on this terminal. Use fg %s to bring it to the foreground, or "
+					"start Tilde with --ignore-running.\n", pid_str);
+				exit(EXIT_FAILURE);
+			}
+		}
+	}
+
+	sprintf(pid_str, "%u", getpid());
+	unlink(name);
+	if (symlink(pid_str, name) == 0) {
+		runfile_name = name;
+		return;
+	}
+	free(name);
+}
+
 int main(int argc, char *argv[]) {
 	complex_error_t result;
 	init_parameters_t *params = init_parameters_t::create();
@@ -596,7 +693,9 @@ int main(int argc, char *argv[]) {
 	setlocale(LC_ALL, "");
 	//FIXME: call this when internationalization is started. Requires #include <libintl.h>
 	// bind_textdomain_codeset("UTF-8");
+
 	parse_args(argc, argv);
+	check_if_already_running();
 
 #ifdef DEBUG
 	if (cli_option.start_debugger_on_segfault)
@@ -697,5 +796,9 @@ int main(int argc, char *argv[]) {
 	cleanup();
 	transcript_finalize();
 #endif
+	if (runfile_name != NULL) {
+		unlink(runfile_name);
+		free(runfile_name);
+	}
 	return retval;
 }

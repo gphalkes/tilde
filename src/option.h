@@ -39,6 +39,7 @@ struct cli_options_t {
 #endif
 	const char *config_file;
 	optional<const char *> encoding;
+	bool ignore_running;
 };
 
 struct term_options_t {
