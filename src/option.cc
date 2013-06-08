@@ -318,6 +318,8 @@ static void print_help(void) {
 		"  -b,--black-white     Request black & white mode, overriding config file.\n"
 		"  -c,--color           Request color mode, overriding config file.\n"
 		"  -C<file>,--config=<file>    Use <file> as config file.\n"
+		"  -e<enc>, --encoding=<enc>   Use <enc> as the encoding for loading files from"
+		"                                  the command line."
 		"  -h,--help            Show this help message.\n"
 		"  -I,--select-input-method    Ignore configured input handling method.\n"
 		"  -T<term>,--terminal=<term>  Use <term> instead of TERM variable.\n"
