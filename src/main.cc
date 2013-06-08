@@ -666,6 +666,7 @@ static void check_if_already_running(void) {
 
 	if ((readlink_result = readlink(name, pid_str, sizeof(pid_str) - 1)) > 0) {
 		char *endptr;
+		pid_str[readlink_result] = 0;
 		int other_pid = strtol(pid_str, &endptr, 10);
 		if (*endptr == 0) {
 			if (kill(other_pid, 0) == 0) {
