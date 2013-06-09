@@ -670,8 +670,8 @@ static void check_if_already_running(void) {
 		int other_pid = strtol(pid_str, &endptr, 10);
 		if (*endptr == 0) {
 			if (kill(other_pid, 0) == 0) {
-				printf("Another instance of Tilde was detected running on this terminal. Use fg %s to bring it to the foreground, or "
-					"start Tilde with --ignore-running.\n", pid_str);
+				printf("Another instance of Tilde was detected running on this terminal. Use fg to bring it to the foreground, or "
+					"start Tilde with --ignore-running to start a new instance.\n");
 				exit(EXIT_FAILURE);
 			}
 		}
