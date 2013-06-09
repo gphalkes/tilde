@@ -24,3 +24,7 @@ setup_TEST() {
 		TEST="${TEST%/}"
 	done
 }
+
+fixup_test() {
+	sed -i -r '/^send.*033\[2;.R/s/send +[0-9]+/send 0/' "$1"
+}

@@ -17,6 +17,7 @@ cp -r context context.save
 rm -rf after
 cd context || fail "Could not cd into context dir"
 tdrecord -o ../recording $RECORDOPTS -e T3WINDOW_OPTS ../../../src/.objects/edit -C ../test.cfg "$@" || fail "!! Could not record test"
+fixup_test ../recording
 cd .. || fail "Could not change back to work dir"
 
 rm context/libt3widgetlog.txt context/log.txt
