@@ -84,8 +84,11 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 			transcript_t *handle;
 			transcript_error_t error;
 
-			if ((_name = canonicalize_path(name)) == NULL)
+			if ((_name = canonicalize_path(name)) == NULL) {
+				if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK)
+					break;
 				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+			}
 
 			/* name is a cleanup ptr. */
 			name = _name;
@@ -209,14 +212,16 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			} else {
 				save_name = state->name.c_str();
 			}
-lprintf("canonicalize_path\n");
-			if ((state->real_name = canonicalize_path(save_name)) == NULL)
-				return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-lprintf("stat %s\n", state->real_name);
+
+			if ((state->real_name = canonicalize_path(save_name)) == NULL) {
+				if (errno != ENOENT)
+					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+				state->real_name = strdup_impl(save_name);
+			}
+
 			/* FIXME: to avoid race conditions, it is probably better to try open with O_CREAT|O_EXCL
 			   However, this may cause issues with NFS, which is known to have isues with this. */
 			if (stat(state->real_name, &state->file_info) < 0) {
-lprintf("stat failed! %m\n");
 				if (errno == ENOENT) {
 					if ((state->fd = creat(state->real_name, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) < 0)
 						return rw_result_t(rw_result_t::ERRNO_ERROR, errno);

@@ -1,3 +1,8 @@
+Version 0.3.1:
+	Bug fixes:
+	- Correctly handle non-existent files on load and save. Previous version
+	  accidentally reintroduced the behaviour reported in bug 14.
+
 Version 0.3.0:
 	New features:
 	- Detect instances of Tilde on the same terminal that have been suspended.
