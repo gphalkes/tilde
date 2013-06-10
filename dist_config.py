@@ -1,5 +1,5 @@
 package = 'tilde'
-excludesrc = '/(Makefile|TODO.*|SciTE.*|run\.sh|test\.c)$'
+excludesrc = '/(Makefile|TODO.*|SciTE.*|run\.sh|test\.c|tedit|debug|valgrind.sh|helgrind.sh|debug_replay|create_debug_replay|callgrind.sh|save_recording|valgrind.supp)$'
 auxsources = [ 'src/.objects/*.bytes' ]
 
 def get_replacements(mkdist):
