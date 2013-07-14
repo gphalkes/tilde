@@ -104,7 +104,7 @@ transcript_buffer_t::~transcript_buffer_t(void) {
 	delete wrapped_buffer;
 }
 
-file_read_wrapper_t::file_read_wrapper_t(int fd, transcript_t *handle) : buffer_index(0), at_eof(false), accumulated(NULL) {
+file_read_wrapper_t::file_read_wrapper_t(int fd, transcript_t *handle) {
 	buffer = new read_buffer_t(fd);
 	if (handle != NULL) {
 		buffer_t *transcript_buffer = new transcript_buffer_t(buffer, handle);

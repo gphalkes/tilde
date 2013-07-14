@@ -64,9 +64,6 @@ class transcript_buffer_t : public buffer_t {
 class file_read_wrapper_t {
 	private:
 		buffer_t *buffer;
-		int buffer_index;
-		bool at_eof;
-		string *accumulated;
 
 	public:
 		file_read_wrapper_t(int fd, transcript_t *handle = NULL);

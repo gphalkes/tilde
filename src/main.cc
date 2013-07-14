@@ -58,7 +58,6 @@ class main_t : public main_window_base_t {
 	private:
 		menu_bar_t *menu;
 		menu_panel_t *panel;
-		menu_item_base_t *remove;
 		split_t *split;
 
 		select_buffer_dialog_t *select_buffer_dialog;
