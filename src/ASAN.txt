@@ -1,0 +1,9 @@
+To use ASAN on Tilde, you first need to compile Tilde with the correct flags.
+This can be easily accomplished by adding ASAN=1 to the make command line. You
+should do this for all its libraries as well.
+
+When compiled in debug mode (which is the only mode in which the ASAN flags
+will be passed to the compiler), Tilde normally sets a virtual memory limit to
+prevent memory bugs from causing the machine to become unresponsive due to
+paging. However, this makes ASAN fail (it hangs the Tilde binary with clang
+3.2). To disable the memory limit, add --L -1 to the command line.

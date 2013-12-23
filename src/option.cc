@@ -385,7 +385,7 @@ PARSE_FUNCTION(parse_args)
 			cli_option.wait = true;
 		END_OPTION
 		LONG_OPTION("L", REQUIRED_ARG)
-			PARSE_INT(cli_option.vm_limit, 1, INT_MAX / (1024 * 1024));
+			PARSE_INT(cli_option.vm_limit, -1, INT_MAX / (1024 * 1024));
 		END_OPTION
 		LONG_OPTION("D", NO_ARG)
 			cli_option.start_debugger_on_segfault = true;
