@@ -61,11 +61,15 @@ bool load_process_t::step(void) {
 		case rw_result_t::CONVERSION_OPEN_ERROR:
 			printf_into(&message, "Could not find a converter for selected encoding: %s",
 				transcript_strerror(rw_result.get_transcript_error()));
+			delete file;
+			file = NULL;
 			error_dialog->set_message(&message);
 			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_ERROR:
 			printf_into(&message, "Could not load file in encoding %s: %s", file->get_encoding(), transcript_strerror(rw_result.get_transcript_error()));
+			delete file;
+			file = NULL;
 			error_dialog->set_message(&message);
 			error_dialog->show();
 			break;
@@ -124,8 +128,9 @@ file_buffer_t *load_process_t::get_file_buffer(void) {
 }
 
 load_process_t::~load_process_t(void) {
-	if (!result && file != NULL)
-		delete file;
+#ifdef DEBUG
+	ASSERT(result || file == NULL);
+#endif
 	delete wrapper;
 	if (fd >= 0)
 		close(fd);
