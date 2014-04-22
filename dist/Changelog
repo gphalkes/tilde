@@ -1,3 +1,8 @@
+Version 0.3.2:
+	Bug fixes:
+	- Correctly handle errors in conversion when loading files. When the
+	  converter failed in unexpected ways Tilde would crash.
+
 Version 0.3.1:
 	Bug fixes:
 	- Correctly handle non-existent files on load and save. Previous version
