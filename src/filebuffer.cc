@@ -198,7 +198,6 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 /* FIXME: try to prevent as many race conditions as possible here. */
 rw_result_t file_buffer_t::save(save_as_process_t *state) {
 	size_t idx;
-	const char *save_name;
 
 	if (state->file != this)
 		PANIC();
@@ -208,15 +207,15 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			if (state->name.empty()) {
 				if (name == NULL)
 					PANIC();
-				save_name = name;
+				state->save_name = name;
 			} else {
-				save_name = state->name.c_str();
+				state->save_name = state->name.c_str();
 			}
 
-			if ((state->real_name = canonicalize_path(save_name)) == NULL) {
+			if ((state->real_name = canonicalize_path(state->save_name)) == NULL) {
 				if (errno != ENOENT)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-				state->real_name = strdup_impl(save_name);
+				state->real_name = strdup_impl(state->save_name);
 			}
 
 			/* FIXME: to avoid race conditions, it is probably better to try open with O_CREAT|O_EXCL
@@ -236,7 +235,11 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				   here. It is an ugly hack, but it does prevent a lot of code
 				   duplication and other hacks. */
 		case save_as_process_t::ALLOW_OVERWRITE:
-				string temp_name_str = state->real_name;
+				state->state = save_as_process_t::ALLOW_OVERWRITE_READONLY;
+				if (access(state->save_name, W_OK) != 0)
+					return rw_result_t(rw_result_t::FILE_EXISTS_READONLY);
+		case save_as_process_t::ALLOW_OVERWRITE_READONLY:
+				string temp_name_str = state->real_name.get();
 
 				if ((idx = temp_name_str.rfind('/')) == string::npos)
 					idx = 0;
@@ -254,7 +257,6 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				   to change that string. So we'll just have to strdup it :-( */
 				if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == NULL)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-lprintf("mkstemp\n");
 				if ((state->fd = mkstemp(state->temp_name)) < 0)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 
@@ -310,12 +312,11 @@ lprintf("mkstemp\n");
 			state->fd = -1;
 			if (state->temp_name != NULL) {
 				if (option.make_backup) {
-					string backup_name = state->real_name;
+					string backup_name = state->real_name.get();
 					backup_name += '~';
 					unlink(backup_name.c_str());
 					link(state->real_name, backup_name.c_str());
 				}
-lprintf("rename\n");
 				if (rename(state->temp_name, state->real_name) < 0)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 			}

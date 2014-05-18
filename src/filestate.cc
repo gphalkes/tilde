@@ -156,7 +156,7 @@ void load_process_t::execute(const callback_t &cb, const char *name, const char 
 }
 
 save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file) : stepped_process_t(cb), state(SELECT_FILE),
-		file(_file), real_name(NULL), temp_name(NULL), fd(-1), wrapper(NULL)
+		file(_file), save_name(NULL), real_name(NULL), temp_name(NULL), fd(-1), wrapper(NULL)
 {}
 
 bool save_as_process_t::step(void) {
@@ -188,19 +188,30 @@ bool save_as_process_t::step(void) {
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
+		case rw_result_t::FILE_EXISTS_READONLY:
+			printf_into(&message, "File '%s' is readonly", save_name);
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
+			continue_abort_dialog->set_message(&message);
+			continue_abort_dialog->show();
+			return false;
 		case rw_result_t::ERRNO_ERROR:
 			printf_into(&message, "Could not save file: %s", strerror(rw_result.get_errno_error()));
 			error_dialog->set_message(&message);
 			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_ERROR:
-			printf_into(&message, "Could not save file in encoding FIXME: %s", transcript_strerror(rw_result.get_transcript_error()));
+			if (encoding.empty())
+				encoding = file->get_encoding();
+			printf_into(&message, "Could not save file in encoding %s: %s", encoding.c_str(), transcript_strerror(rw_result.get_transcript_error()));
 			error_dialog->set_message(&message);
 			error_dialog->show();
 			break;
 		case rw_result_t::CONVERSION_IMPRECISE:
+			if (encoding.empty())
+				encoding = file->get_encoding();
 			i++;
-			printf_into(&message, "Conversion into encoding FIXME is irreversible");
+			printf_into(&message, "Conversion into encoding %s is irreversible", encoding.c_str());
 			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
 			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
@@ -225,8 +236,6 @@ void save_as_process_t::encoding_selected(const std::string *_encoding) {
 }
 
 save_as_process_t::~save_as_process_t(void) {
-	free(real_name);
-
 	if (fd >= 0) {
 		close(fd);
 		if (temp_name != NULL) {

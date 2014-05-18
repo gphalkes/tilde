@@ -32,6 +32,7 @@ class rw_result_t {
 		enum stop_reason_t {
 			SUCCESS,
 			FILE_EXISTS,
+			FILE_EXISTS_READONLY,
 			ERRNO_ERROR,
 			CONVERSION_OPEN_ERROR,
 			CONVERSION_IMPRECISE,
@@ -106,6 +107,7 @@ class save_as_process_t : public stepped_process_t {
 			SELECT_FILE,
 			INITIAL,
 			ALLOW_OVERWRITE,
+			ALLOW_OVERWRITE_READONLY,
 			WRITING
 		};
 		int state;
@@ -115,7 +117,8 @@ class save_as_process_t : public stepped_process_t {
 		std::string encoding;
 
 		// State for save file_buffer_t::save function
-		char *real_name;
+		const char *save_name;
+		cleanup_free_ptr<char>::t real_name;
 		char *temp_name;
 		int fd;
 		int i;
