@@ -238,7 +238,7 @@ void attributes_dialog_t::set_values_from_options(void) {
 	brace_highlight = term_specific_option.brace_highlight;
 
 	comment = term_specific_option.highlights[map_highlight(NULL, "comment")];
-	comment_keyword = term_specific_option.highlights[map_highlight(NULL, "comment_keyword")];
+	comment_keyword = term_specific_option.highlights[map_highlight(NULL, "comment-keyword")];
 	keyword = term_specific_option.highlights[map_highlight(NULL, "keyword")];
 	number = term_specific_option.highlights[map_highlight(NULL, "number")];
 	string = term_specific_option.highlights[map_highlight(NULL, "string")];
@@ -287,7 +287,11 @@ void attributes_dialog_t::set_options_from_values(void) {
 	option.highlights[highlight_idx] = name.is_valid() ? name() : get_default_attr(attr); \
 } while (0)
 	SET_WITH_DEFAULT(comment, COMMENT);
-	SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
+	{
+		int highlight_idx = map_highlight(NULL, "comment-keyword");
+		term_specific_option.highlights[highlight_idx] = comment_keyword;
+		option.highlights[highlight_idx] = comment_keyword.is_valid() ? comment_keyword() : get_default_attr(COMMENT_KEYWORD);
+	}
 	SET_WITH_DEFAULT(keyword, KEYWORD);
 	SET_WITH_DEFAULT(number, NUMBER);
 	SET_WITH_DEFAULT(string, STRING);
