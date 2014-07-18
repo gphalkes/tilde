@@ -1,4 +1,4 @@
-Version :
+Version 0.3.3:
 	Bug fixes:
 	- Warn users about attempting to write a read-only file.
 	- Improve warnings about encoding problems when saving.
