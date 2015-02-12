@@ -1,3 +1,6 @@
+Version 0.3.4:
+	Re-release of version 0.3.4 to update the configure script.
+
 Version 0.3.3:
 	Bug fixes:
 	- Warn users about attempting to write a read-only file.
