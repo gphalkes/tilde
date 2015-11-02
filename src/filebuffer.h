@@ -38,6 +38,7 @@ class file_buffer_t : public text_buffer_t {
 		t3_highlight_match_t *last_match;
 		bool matching_brace_valid;
 		text_coordinate_t matching_brace_coordinate;
+		std::string line_comment;
 
 	private:
 		virtual void prepare_paint_line(int line);
@@ -72,6 +73,9 @@ class file_buffer_t : public text_buffer_t {
 		    @return A boolean indicating whether the matching brace information changed.
 		*/
 		bool update_matching_brace(void);
+
+		void set_line_comment(const char *text);
+		void toggle_line_comment();
 };
 
 #endif

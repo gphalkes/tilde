@@ -32,7 +32,7 @@ class highlight_dialog_t : public dialog_t {
 		void ok_activated(void);
 		void set_selected(const char *lang_file);
 
-	T3_WIDGET_SIGNAL(language_selected, void, t3_highlight_t *);
+	T3_WIDGET_SIGNAL(language_selected, void, t3_highlight_t *, const char *);
 };
 
 #endif

@@ -71,6 +71,8 @@ file_buffer_t::~file_buffer_t(void) {
 rw_result_t file_buffer_t::load(load_process_t *state) {
 	const string *line;
 	t3_highlight_t *highlight = NULL;
+	t3_highlight_lang_t lang;
+	t3_bool success = t3_false;
 	int i;
 
 	if (state->file != this)
@@ -171,27 +173,29 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 	   specified the language by hand, that is more likely to be correct than
 	   any autodetection based on the first line or the file name.
 	*/
-	for (i = 0; i < size() && i < 5 && highlight == NULL; i++) {
+	for (i = 0; i < size() && i < 5 && !success; i++) {
 		line = get_line_data(i)->get_data();
-		highlight = t3_highlight_load_by_detect(line->data(), line->size(), false,
-			map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
+		success = t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, NULL);
 	}
-	for (i = size() - 1; i >= 5 && highlight == NULL; i--) {
+	for (i = size() - 1; i >= 5 && !success; i--) {
 		line = get_line_data(i)->get_data();
-		highlight = t3_highlight_load_by_detect(line->data(), line->size(), false,
-			map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
+		success = t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, NULL);
 	}
-	if (highlight == NULL) {
+	if (!success) {
 		line = get_line_data(0)->get_data();
-		highlight = t3_highlight_load_by_detect(line->data(), line->size(), true,
-			map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
+		success = t3_highlight_detect(line->data(), line->size(), true, T3_HIGHLIGHT_UTF8, &lang, NULL);
 	}
-	if (highlight == NULL) {
-		highlight = t3_highlight_load_by_filename(name, map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL);
-		last_match = t3_highlight_new_match(highlight);
+	if (!success) {
+		success = t3_highlight_lang_by_filename(name, T3_HIGHLIGHT_UTF8, &lang, NULL);
 	}
-	if (highlight != NULL)
+	if (success) {
+		highlight = t3_highlight_load(lang.lang_file, map_highlight, NULL, T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, NULL);
 		set_highlight(highlight);
+		std::map<std::string, std::string>::iterator iter = default_option.line_comment_map.find(lang.name);
+		if (iter != default_option.line_comment_map.end())
+			set_line_comment(iter->second.c_str());
+		t3_highlight_free_lang(lang);
+	}
 	return rw_result_t(rw_result_t::SUCCESS);
 }
 
@@ -656,4 +660,33 @@ bool file_buffer_t::update_matching_brace(void) {
 	matching_brace_valid = find_matching_brace(matching_brace_coordinate);
 
 	return old_valid != matching_brace_valid || (old_valid && old_coordinate != matching_brace_coordinate);
+}
+
+
+void file_buffer_t::set_line_comment(const char *text) {
+	if (text == NULL)
+		line_comment.clear();
+	else
+		line_comment = text;
+}
+
+void file_buffer_t::toggle_line_comment() {
+	if (line_comment.empty())
+		return;
+
+	if (get_selection_mode() == selection_mode_t::NONE) {
+		const std::string *text = get_line_data(cursor.line)->get_data();
+		if (text->compare(0, line_comment.size(), line_comment) == 0) {
+			text_coordinate_t saved_cursor = cursor;
+			delete_block(text_coordinate_t(cursor.line, 0), text_coordinate_t(cursor.line, line_comment.size()));
+			cursor.pos = saved_cursor.pos - line_comment.size();
+		} else {
+			text_coordinate_t saved_cursor = cursor;
+			cursor.pos = 0;
+			insert_block(&line_comment);
+			cursor.pos = saved_cursor.pos + line_comment.size();
+		}
+	} else {
+		//FIXME: handle selection case
+	}
 }

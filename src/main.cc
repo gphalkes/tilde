@@ -84,7 +84,7 @@ class main_t : public main_window_base_t {
 		void set_default_options(void);
 		void set_interface_options(void);
 		void set_misc_options(void);
-		void set_highlight(t3_highlight_t *highlight);
+		void set_highlight(t3_highlight_t *highlight, const char *name);
 		void save_as_done(stepped_process_t *process);
 };
 
@@ -541,8 +541,17 @@ void main_t::set_misc_options(void) {
 	write_config();
 }
 
-void main_t::set_highlight(t3_highlight_t *highlight) {
+void main_t::set_highlight(t3_highlight_t *highlight, const char *name) {
 	get_current()->get_text()->set_highlight(highlight);
+	if (name == NULL) {
+		get_current()->get_text()->set_line_comment(NULL);
+	} else {
+		std::map<std::string, std::string>::iterator iter = default_option.line_comment_map.find(name);
+		if (iter == default_option.line_comment_map.end())
+			get_current()->get_text()->set_line_comment(NULL);
+		else
+			get_current()->get_text()->set_line_comment(iter->second.c_str());
+	}
 	get_current()->force_redraw();
 }
 

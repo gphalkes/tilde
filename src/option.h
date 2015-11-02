@@ -16,6 +16,8 @@
 
 #include <cstdlib>
 #include <list>
+#include <map>
+#include <string>
 #include <t3window/window.h>
 
 #include "util.h"
@@ -84,6 +86,8 @@ struct options_t {
 
 	optional<int> tabsize;
 	optional<size_t> max_recent_files;
+
+	std::map<std::string, std::string> line_comment_map;
 };
 
 struct highlight_attrs_t {

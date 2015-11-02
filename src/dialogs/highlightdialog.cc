@@ -96,7 +96,7 @@ void highlight_dialog_t::ok_activated(void) {
 
 	if (idx == 0) {
 		hide();
-		language_selected(NULL);
+		language_selected(NULL, NULL);
 		return;
 	}
 
@@ -110,7 +110,7 @@ void highlight_dialog_t::ok_activated(void) {
 		return;
 	}
 	hide();
-	language_selected(highlight);
+	language_selected(highlight, names[idx - 1].name);
 }
 
 void highlight_dialog_t::set_selected(const char *lang_file) {

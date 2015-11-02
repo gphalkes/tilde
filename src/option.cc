@@ -245,6 +245,13 @@ static void read_config(void) {
 	GET_OPT(max_recent_files, INT, int);
 	#undef opts
 
+	for (t3_config_t *lang = t3_config_get(t3_config_get(config, "lang"), NULL); lang != NULL; lang = t3_config_get_next(lang)) {
+		const char *name = t3_config_get_string(t3_config_get(lang, "name"));
+		const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
+		if (name != NULL && line_comment != NULL)
+			default_option.line_comment_map[std::string(name)] = line_comment;
+	}
+
 	if ((term_specific_config = t3_config_get(config, "terminals")) == NULL)
 		return;
 

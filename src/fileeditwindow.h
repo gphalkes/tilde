@@ -23,6 +23,7 @@ class file_edit_window_t : public edit_window_t {
 	private:
 		sigc::connection rewrap_connection;
 		void force_repaint_to_bottom(rewrap_type_t type, int line, int pos);
+
 	public:
 		file_edit_window_t(file_buffer_t *_text = NULL);
 		virtual ~file_edit_window_t(void);

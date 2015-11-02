@@ -82,12 +82,21 @@ file_buffer_t *file_edit_window_t::get_text(void) const {
 bool file_edit_window_t::process_key(t3_widget::key_t key) {
 	bool result = edit_window_t::process_key(key);
 
-	if (!result && key == (EKEY_CTRL | ']')) {
-		if (get_text()->goto_matching_brace()) {
-			ensure_cursor_on_screen();
-			redraw = true;
+	if (!result) {
+		switch (key) {
+			case EKEY_CTRL | ']':
+				if (get_text()->goto_matching_brace()) {
+					ensure_cursor_on_screen();
+					redraw = true;
+				}
+				return true;
+			case EKEY_CTRL | '_':
+				get_text()->toggle_line_comment();
+				redraw = true;
+				return true;
+			default:
+				break;
 		}
-		return true;
 	}
 	return result;
 }
