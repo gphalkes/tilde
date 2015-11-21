@@ -1,5 +1,9 @@
+Version 0.3.5:
+	New features:
+	- Added "toggle line comment" functionality.
+
 Version 0.3.4:
-	Re-release of version 0.3.4 to update the configure script.
+	Re-release of version 0.3.3 to update the configure script.
 
 Version 0.3.3:
 	Bug fixes:

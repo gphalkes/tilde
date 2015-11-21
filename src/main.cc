@@ -153,6 +153,7 @@ main_t::main_t(void) {
 	panel->add_item("_Highlighting...", NULL, action_id_t::TOOLS_HIGHLIGHTING);
 	panel->add_item("_Strip trailing spaces", NULL, action_id_t::TOOLS_STRIP_SPACES);
 	panel->add_item("_Autocomplete", "C-Space", action_id_t::TOOLS_AUTOCOMPLETE);
+	panel->add_item("_Toggle line comment", "C-/", action_id_t::TOOLS_TOGGLE_LINE_COMMENT);
 
 	panel = new menu_panel_t("_Options", menu);
 	panel->add_item("Input _Handling...", NULL, action_id_t::OPTIONS_INPUT);
@@ -442,6 +443,9 @@ void main_t::menu_activated(int id) {
 			break;
 		case action_id_t::TOOLS_AUTOCOMPLETE:
 			get_current()->autocomplete();
+			break;
+		case action_id_t::TOOLS_TOGGLE_LINE_COMMENT:
+			get_current()->get_text()->toggle_line_comment();
 			break;
 
 		case action_id_t::OPTIONS_INPUT:
