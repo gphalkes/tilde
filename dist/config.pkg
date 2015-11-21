@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libt3highlight/0.2.1 LIBT3HIGHLIGHT test_link_cxx || \
+	pkgconfig libt3highlight/0.4.0 LIBT3HIGHLIGHT test_link_cxx || \
 		error "!! Can not find libt3highlight. libt3highlight is required to compile tilde."
 
 	clean_cxx

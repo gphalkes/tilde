@@ -670,23 +670,77 @@ void file_buffer_t::set_line_comment(const char *text) {
 		line_comment = text;
 }
 
+int starts_with_comment(const std::string *text, const std::string *line_comment) {
+	size_t i;
+	for (i = 0; i < text->size(); i++) {
+		if (text->at(i) != ' ' && text->at(i) != '\t')
+			break;
+	}
+	if (text->compare(i, line_comment->size(), *line_comment) == 0)
+		return i;
+	return -1;
+}
+
 void file_buffer_t::toggle_line_comment() {
 	if (line_comment.empty())
 		return;
 
 	if (get_selection_mode() == selection_mode_t::NONE) {
 		const std::string *text = get_line_data(cursor.line)->get_data();
-		if (text->compare(0, line_comment.size(), line_comment) == 0) {
+		int comment_start = starts_with_comment(text, &line_comment);
+		if (comment_start >= 0) {
 			text_coordinate_t saved_cursor = cursor;
-			delete_block(text_coordinate_t(cursor.line, 0), text_coordinate_t(cursor.line, line_comment.size()));
-			cursor.pos = saved_cursor.pos - line_comment.size();
+			delete_block(text_coordinate_t(cursor.line, comment_start), text_coordinate_t(cursor.line, comment_start + line_comment.size()));
+			if (comment_start < saved_cursor.pos)
+				saved_cursor.pos -= std::min<int>(line_comment.size(), saved_cursor.pos - comment_start);
+			cursor.pos = saved_cursor.pos;
 		} else {
 			text_coordinate_t saved_cursor = cursor;
+			//FIXME: this causes the cursor position to be recorded incorrectly in the undo information.
+			// although one could argue this is to some extent better as it shows the actual edit.
 			cursor.pos = 0;
 			insert_block(&line_comment);
 			cursor.pos = saved_cursor.pos + line_comment.size();
 		}
 	} else {
-		//FIXME: handle selection case
+		text_coordinate_t selection_start = get_selection_start();
+		text_coordinate_t selection_end = get_selection_end();
+		int first_line = std::min(selection_start.line, selection_end.line);
+		int last_line = std::max(selection_start.line, selection_end.line);
+		int i;
+		for (i = first_line; i <= last_line; i++) {
+			const std::string *text = get_line_data(i)->get_data();
+			int comment_start = starts_with_comment(text, &line_comment);
+			if (comment_start < 0)
+				break;
+		}
+		start_undo_block();
+		selection_mode_t old_mode = get_selection_mode();
+		if (i > last_line) {
+			int adjust_cursor = 0;
+			for (i = first_line; i <= last_line; i++) {
+				const std::string *text = get_line_data(i)->get_data();
+				int comment_start = starts_with_comment(text, &line_comment);
+				if (i == selection_start.line && comment_start < selection_start.pos)
+					selection_start.pos -= std::min<int>(line_comment.size(), selection_start.pos - comment_start);
+				if (i == selection_end.line && comment_start < selection_end.pos)
+					selection_end.pos -= std::min<int>(line_comment.size(), selection_end.pos - comment_start);
+				delete_block(text_coordinate_t(i, comment_start), text_coordinate_t(i, comment_start + line_comment.size()));
+			}
+		} else {
+			for (i = first_line; i <= last_line; i++) {
+				cursor.line = i;
+				cursor.pos = 0;
+				insert_block(&line_comment);
+			}
+			selection_start.pos += line_comment.size();
+			selection_end.pos += line_comment.size();
+		}
+		set_selection_mode(selection_mode_t::NONE);
+		cursor = selection_start;
+		set_selection_mode(old_mode);
+		cursor = selection_end;
+		set_selection_end();
+		end_undo_block();
 	}
 }
