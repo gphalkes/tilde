@@ -560,8 +560,9 @@ void main_t::set_highlight(t3_highlight_t *highlight, const char *name) {
 }
 
 void main_t::save_as_done(stepped_process_t *process) {
-	(void) process;
 	get_current()->draw_info_window();
+	if (reinterpret_cast<save_as_process_t *>(process)->get_highlight_changed())
+		get_current()->force_redraw();
 }
 
 static void configure_input(bool cancel_selects_default) {

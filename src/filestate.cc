@@ -155,8 +155,9 @@ void load_process_t::execute(const callback_t &cb, const char *name, const char 
 	(new load_process_t(cb, name, encoding, missing_ok))->run();
 }
 
-save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file) : stepped_process_t(cb), state(SELECT_FILE),
-		file(_file), save_name(NULL), real_name(NULL), temp_name(NULL), fd(-1), wrapper(NULL)
+save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file, bool _allow_highlight_change)
+		: stepped_process_t(cb), state(SELECT_FILE), file(_file), allow_highlight_change(_allow_highlight_change),
+		  highlight_changed(false), save_name(NULL), real_name(NULL), temp_name(NULL), fd(-1), wrapper(NULL)
 {}
 
 bool save_as_process_t::step(void) {
@@ -226,8 +227,10 @@ bool save_as_process_t::step(void) {
 void save_as_process_t::file_selected(const std::string *_name) {
 	name = *_name;
 	state = INITIAL;
-	if (file->get_highlight() == NULL && file->get_name() == NULL)
+	if (allow_highlight_change) {
+		highlight_changed = true;
 		file->set_highlight(t3_highlight_load_by_filename(name.c_str(), map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL));
+	}
 	run();
 }
 
@@ -252,7 +255,11 @@ void save_as_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
 	(new save_as_process_t(cb, _file))->run();
 }
 
-save_process_t::save_process_t(const callback_t &cb, file_buffer_t *_file) : save_as_process_t(cb, _file) {
+bool save_as_process_t::get_highlight_changed() const {
+	return highlight_changed;
+}
+
+save_process_t::save_process_t(const callback_t &cb, file_buffer_t *_file) : save_as_process_t(cb, _file, false) {
 	if (file->get_name() != NULL)
 		state = INITIAL;
 }

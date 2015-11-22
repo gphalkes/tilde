@@ -115,6 +115,8 @@ class save_as_process_t : public stepped_process_t {
 		file_buffer_t *file;
 		std::string name;
 		std::string encoding;
+		bool allow_highlight_change;
+		bool highlight_changed;
 
 		// State for save file_buffer_t::save function
 		const char *save_name;
@@ -125,7 +127,7 @@ class save_as_process_t : public stepped_process_t {
 		file_write_wrapper_t *wrapper;
 		struct stat file_info;
 
-		save_as_process_t(const callback_t &cb, file_buffer_t *_file);
+		save_as_process_t(const callback_t &cb, file_buffer_t *_file, bool _allow_highlight_change = true);
 		virtual bool step(void);
 		virtual void file_selected(const std::string *_name);
 		virtual void encoding_selected(const std::string *_encoding);
@@ -133,6 +135,8 @@ class save_as_process_t : public stepped_process_t {
 
 	public:
 		static void execute(const callback_t &cb, file_buffer_t *_file);
+
+		bool get_highlight_changed() const;
 };
 
 class save_process_t : public save_as_process_t {

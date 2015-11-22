@@ -2,6 +2,11 @@ Version 0.3.5:
 	New features:
 	- Added "toggle line comment" functionality.
 
+	Bug fixes:
+	- When the syntax highlighting changes through saving the file under a new
+	  name, the screen is now correctly updated.
+	- Syntax highlighting is now changed when a file is saved under a new name.
+
 Version 0.3.4:
 	Re-release of version 0.3.3 to update the configure script.
 

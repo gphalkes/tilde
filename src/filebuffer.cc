@@ -717,7 +717,6 @@ void file_buffer_t::toggle_line_comment() {
 		start_undo_block();
 		selection_mode_t old_mode = get_selection_mode();
 		if (i > last_line) {
-			int adjust_cursor = 0;
 			for (i = first_line; i <= last_line; i++) {
 				const std::string *text = get_line_data(i)->get_data();
 				int comment_start = starts_with_comment(text, &line_comment);
