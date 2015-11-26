@@ -16,7 +16,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <transcript/transcript.h>
-#include <sigc++/sigc++.h>
+#include <t3widget/signals.h>
 #include <t3widget/widget.h>
 
 #include "util.h"

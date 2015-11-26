@@ -38,11 +38,11 @@ bool load_process_t::step(void) {
 	rw_result_t rw_result;
 
 	if (state == SELECT_FILE) {
-		connections.push_back(open_file_dialog->connect_closed(sigc::mem_fun(this, &load_process_t::abort)));
-		connections.push_back(open_file_dialog->connect_file_selected(sigc::mem_fun(this, &load_process_t::file_selected)));
+		connections.push_back(open_file_dialog->connect_closed(signals::mem_fun(this, &load_process_t::abort)));
+		connections.push_back(open_file_dialog->connect_file_selected(signals::mem_fun(this, &load_process_t::file_selected)));
 		open_file_dialog->reset();
 		open_file_dialog->show();
-		connections.push_back(encoding_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::encoding_selected)));
+		connections.push_back(encoding_dialog->connect_activate(signals::mem_fun(this, &load_process_t::encoding_selected)));
 		encoding_dialog->set_encoding(encoding.c_str());
 		return false;
 	}
@@ -75,15 +75,15 @@ bool load_process_t::step(void) {
 			break;
 		case rw_result_t::CONVERSION_IMPRECISE:
 			printf_into(&message, "Conversion from encoding %s is irreversible", file->get_encoding());
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::run), 0));
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &load_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &load_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
 		case rw_result_t::CONVERSION_ILLEGAL:
 			printf_into(&message, "Conversion from encoding %s encountered illegal characters", file->get_encoding());
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::run), 0));
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &load_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &load_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
@@ -94,8 +94,8 @@ bool load_process_t::step(void) {
 			error_dialog->show();
 			break;
 		case rw_result_t::BOM_FOUND:
-			connections.push_back(preserve_bom_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::preserve_bom), 0));
-			connections.push_back(preserve_bom_dialog->connect_activate(sigc::mem_fun(this, &load_process_t::remove_bom), 1));
+			connections.push_back(preserve_bom_dialog->connect_activate(signals::mem_fun(this, &load_process_t::preserve_bom), 0));
+			connections.push_back(preserve_bom_dialog->connect_activate(signals::mem_fun(this, &load_process_t::remove_bom), 1));
 			preserve_bom_dialog->show();
 			return false;
 		default:
@@ -167,12 +167,12 @@ bool save_as_process_t::step(void) {
 	if (state == SELECT_FILE) {
 		const char *current_name = file->get_name();
 
-		connections.push_back(save_as_dialog->connect_closed(sigc::mem_fun(this, &save_as_process_t::abort)));
-		connections.push_back(save_as_dialog->connect_file_selected(sigc::mem_fun(this, &save_as_process_t::file_selected)));
+		connections.push_back(save_as_dialog->connect_closed(signals::mem_fun(this, &save_as_process_t::abort)));
+		connections.push_back(save_as_dialog->connect_file_selected(signals::mem_fun(this, &save_as_process_t::file_selected)));
 
 		save_as_dialog->set_file(current_name);
 		save_as_dialog->show();
-		connections.push_back(encoding_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::encoding_selected)));
+		connections.push_back(encoding_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::encoding_selected)));
 		encoding_dialog->set_encoding(file->get_encoding());
 		return false;
 	}
@@ -184,15 +184,15 @@ bool save_as_process_t::step(void) {
 			break;
 		case rw_result_t::FILE_EXISTS:
 			printf_into(&message, "File '%s' already exists", name.c_str());
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
 		case rw_result_t::FILE_EXISTS_READONLY:
 			printf_into(&message, "File '%s' is readonly", save_name);
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
@@ -213,8 +213,8 @@ bool save_as_process_t::step(void) {
 				encoding = file->get_encoding();
 			i++;
 			printf_into(&message, "Conversion into encoding %s is irreversible", encoding.c_str());
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::run), 0));
-			connections.push_back(continue_abort_dialog->connect_activate(sigc::mem_fun(this, &save_as_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::run), 0));
+			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::abort), 1));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
@@ -298,9 +298,9 @@ bool close_process_t::step(void) {
 	} else if (state == CONFIRM_CLOSE) {
 		string message;
 		printf_into(&message, "Save changes to '%s'", file->get_name() == NULL ? "(Untitled)" : file->get_name());
-		connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &close_process_t::do_save), 0));
-		connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &close_process_t::dont_save), 1));
-		connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &close_process_t::abort), 2));
+		connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &close_process_t::do_save), 0));
+		connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &close_process_t::dont_save), 1));
+		connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &close_process_t::abort), 2));
 		close_confirm_dialog->set_message(&message);
 		close_confirm_dialog->show();
 	} else {
@@ -334,9 +334,9 @@ bool exit_process_t::step(void) {
 		if ((*iter)->is_modified()) {
 			string message;
 			printf_into(&message, "Save changes to '%s'", (*iter)->get_name() == NULL ? "(Untitled)" : (*iter)->get_name());
-			connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &exit_process_t::do_save), 0));
-			connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &exit_process_t::dont_save), 1));
-			connections.push_back(close_confirm_dialog->connect_activate(sigc::mem_fun(this, &exit_process_t::abort), 2));
+			connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &exit_process_t::do_save), 0));
+			connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &exit_process_t::dont_save), 1));
+			connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &exit_process_t::abort), 2));
 			close_confirm_dialog->set_message(&message);
 			close_confirm_dialog->show();
 			return false;
@@ -349,7 +349,7 @@ bool exit_process_t::step(void) {
 }
 
 void exit_process_t::do_save(void) {
-	save_process_t::execute(sigc::mem_fun(this, &exit_process_t::save_done), *iter);
+	save_process_t::execute(signals::mem_fun(this, &exit_process_t::save_done), *iter);
 }
 
 void exit_process_t::dont_save(void) {
@@ -374,9 +374,9 @@ open_recent_process_t::open_recent_process_t(const callback_t &cb) : load_proces
 
 bool open_recent_process_t::step(void) {
 	if (state == SELECT_FILE) {
-		connections.push_back(open_recent_dialog->connect_file_selected(sigc::mem_fun(this,
+		connections.push_back(open_recent_dialog->connect_file_selected(signals::mem_fun(this,
 			&open_recent_process_t::recent_file_selected)));
-		connections.push_back(open_recent_dialog->connect_closed(sigc::mem_fun(this, &open_recent_process_t::abort)));
+		connections.push_back(open_recent_dialog->connect_closed(signals::mem_fun(this, &open_recent_process_t::abort)));
 		open_recent_dialog->show();
 		return false;
 	}
@@ -409,8 +409,8 @@ bool load_cli_file_process_t::step(void) {
 		if (cli_option.encoding.is_valid()) {
 			if (cli_option.encoding == NULL) {
 				encoding_dialog->set_encoding("UTF-8");
-				encoding_dialog->connect_activate(sigc::mem_fun(this, &load_cli_file_process_t::encoding_selection_done));
-				encoding_dialog->connect_closed(sigc::mem_fun(this, &load_cli_file_process_t::run));
+				encoding_dialog->connect_activate(signals::mem_fun(this, &load_cli_file_process_t::encoding_selection_done));
+				encoding_dialog->connect_closed(signals::mem_fun(this, &load_cli_file_process_t::run));
 				encoding_dialog->show();
 				return false;
 			} else {
@@ -422,7 +422,7 @@ bool load_cli_file_process_t::step(void) {
 	in_step = true;
 	while (iter != cli_option.files.end()) {
 		in_load = true;
-		load_process_t::execute(sigc::mem_fun(this, &load_cli_file_process_t::load_done), *iter, encoding, true);
+		load_process_t::execute(signals::mem_fun(this, &load_cli_file_process_t::load_done), *iter, encoding, true);
 		if (in_load) {
 			in_step = false;
 			return false;

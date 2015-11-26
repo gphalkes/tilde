@@ -20,7 +20,7 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 		_text = new file_buffer_t();
 
 	_text->set_has_window(true);
-	rewrap_connection = _text->connect_rewrap_required(sigc::mem_fun(this, &file_edit_window_t::force_repaint_to_bottom));
+	rewrap_connection = _text->connect_rewrap_required(signals::mem_fun(this, &file_edit_window_t::force_repaint_to_bottom));
 	edit_window_t::set_text(_text, _text->get_view_parameters());
 	edit_window_t::set_autocompleter(new file_autocompleter_t());
 
@@ -71,7 +71,7 @@ void file_edit_window_t::set_text(file_buffer_t *_text) {
 	save_view_parameters(old_text->view_parameters);
 	rewrap_connection.disconnect();
 	_text->set_has_window(true);
-	rewrap_connection = _text->connect_rewrap_required(sigc::mem_fun(this, &file_edit_window_t::force_repaint_to_bottom));
+	rewrap_connection = _text->connect_rewrap_required(signals::mem_fun(this, &file_edit_window_t::force_repaint_to_bottom));
 	edit_window_t::set_text(_text, _text->get_view_parameters());
 }
 

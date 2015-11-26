@@ -38,7 +38,7 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 	list = new list_pane_t(true);
 	list->set_size(height - 3, width - 2);
 	list->set_position(1, 1);
-	list->connect_activate(sigc::mem_fun(this, &highlight_dialog_t::ok_activated));
+	list->connect_activate(signals::mem_fun(this, &highlight_dialog_t::ok_activated));
 
 	label = new label_t("Plain Text");
 	list->push_back(label);
@@ -63,11 +63,11 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 	cancel_button = new button_t("_Cancel", false);
 	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
 	cancel_button->set_position(-1, -2);
-	cancel_button->connect_activate(sigc::mem_fun(this, &highlight_dialog_t::close));
+	cancel_button->connect_activate(signals::mem_fun(this, &highlight_dialog_t::close));
 	ok_button = new button_t("_OK", true);
 	ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	ok_button->set_position(0, -2);
-	ok_button->connect_activate(sigc::mem_fun(this, &highlight_dialog_t::ok_activated));
+	ok_button->connect_activate(signals::mem_fun(this, &highlight_dialog_t::ok_activated));
 
 	push_back(list);
 	push_back(ok_button);

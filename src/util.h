@@ -17,7 +17,7 @@
 #include <limits.h>
 #include <string>
 #include <list>
-#include <sigc++/sigc++.h>
+#include <t3widget/signals.h>
 #include <t3window/window.h>
 
 #ifdef __GNUC__
@@ -72,8 +72,8 @@ class version_t {
 
 class stepped_process_t {
 	protected:
-		std::list<sigc::connection> connections;
-		typedef sigc::slot<void, stepped_process_t *> callback_t;
+		std::list<signals::connection> connections;
+		typedef signals::slot<void, stepped_process_t *> callback_t;
 		callback_t done_cb;
 		bool result;
 

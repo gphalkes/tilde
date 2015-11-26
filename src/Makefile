@@ -42,7 +42,10 @@ include ../../makesys/rules.mk
 
 LDLIBS += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
 LDFLAGS += $(call L, ../include/t3widget/.libs ../include/t3window/.libs ../include/transcript/.libs ../include/t3config/.libs ../include/t3highlight/.libs)
-LDLIBS += `pkg-config --libs sigc++-2.0` -lunistring
+LDLIBS += -lunistring
+ifndef CPP11
+LDLIBS += `pkg-config --libs sigc++-2.0`
+endif
 LDLIBS += -lacl
 LDLIBS += -lattr
 CXXFLAGS.option = -I.objects
@@ -53,7 +56,11 @@ CXXFLAGS += -DHAS_STRDUP
 CXXFLAGS += -DHAS_LIBACL
 CXXFLAGS += -DHAS_LIBATTR
 #~ CXXFLAGS += -DUSE_GETTEXT -DLOCALEDIR=\"locales\"
+ifdef CPP11
+CXXFLAGS += -std=c++11
+else
 CXXFLAGS += `pkg-config --cflags sigc++-2.0`
+endif
 
 clean-logs:
 	@find .recordings/ -name "record-*" -mtime +7 | xargs -r rm

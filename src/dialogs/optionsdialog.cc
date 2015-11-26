@@ -35,8 +35,8 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	tabsize_field->set_size(1, 5);
 	tabsize_field->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	tabsize_field->set_position(1, -2);
-	tabsize_field->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
-	tabsize_field->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	tabsize_field->connect_move_focus_down(signals::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	tabsize_field->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::handle_activate));
 	push_back(tabsize_field);
 
 	width = label->get_width() + 2 + 5;
@@ -48,9 +48,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	tab_spaces_box->set_label(label);
 	tab_spaces_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	tab_spaces_box->set_position(2, -2);
-	tab_spaces_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	tab_spaces_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
-	tab_spaces_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	tab_spaces_box->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	tab_spaces_box->connect_move_focus_down(signals::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	tab_spaces_box->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::handle_activate));
 	push_back(tab_spaces_box);
 
 	width = max(label->get_width() + 2 + 3, width);
@@ -62,9 +62,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	wrap_box->set_label(label);
 	wrap_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	wrap_box->set_position(3, -2);
-	wrap_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	wrap_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
-	wrap_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	wrap_box->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	wrap_box->connect_move_focus_down(signals::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	wrap_box->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::handle_activate));
 	push_back(wrap_box);
 
 	width = max(label->get_width() + 2 + 3, width);
@@ -76,9 +76,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	auto_indent_box->set_label(label);
 	auto_indent_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	auto_indent_box->set_position(4, -2);
-	auto_indent_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	auto_indent_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
-	auto_indent_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	auto_indent_box->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	auto_indent_box->connect_move_focus_down(signals::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	auto_indent_box->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::handle_activate));
 	push_back(auto_indent_box);
 
 	width = max(label->get_width() + 2 + 3, width);
@@ -90,9 +90,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	indent_aware_home_box->set_label(label);
 	indent_aware_home_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	indent_aware_home_box->set_position(5, -2);
-	indent_aware_home_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	indent_aware_home_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
-	indent_aware_home_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	indent_aware_home_box->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	indent_aware_home_box->connect_move_focus_down(signals::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	indent_aware_home_box->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::handle_activate));
 	push_back(indent_aware_home_box);
 
 	width = max(label->get_width() + 2 + 3, width);
@@ -104,9 +104,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	show_tabs_box->set_label(label);
 	show_tabs_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	show_tabs_box->set_position(6, -2);
-	show_tabs_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	show_tabs_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
-	show_tabs_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	show_tabs_box->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	show_tabs_box->connect_move_focus_down(signals::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	show_tabs_box->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::handle_activate));
 	push_back(show_tabs_box);
 
 	width = max(label->get_width() + 2 + 3, width);
@@ -118,9 +118,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	strip_spaces_box->set_label(label);
 	strip_spaces_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	strip_spaces_box->set_position(7, -2);
-	strip_spaces_box->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	strip_spaces_box->connect_move_focus_down(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
-	strip_spaces_box->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	strip_spaces_box->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	strip_spaces_box->connect_move_focus_down(signals::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	strip_spaces_box->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::handle_activate));
 	push_back(strip_spaces_box);
 
 	width = max(label->get_width() + 2 + 3, width);
@@ -128,17 +128,17 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 	cancel_button = new button_t("_Cancel");
 	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
 	cancel_button->set_position(-1, -2);
-	cancel_button->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::close));
-	cancel_button->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	cancel_button->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	cancel_button->connect_move_focus_left(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	cancel_button->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::close));
+	cancel_button->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	cancel_button->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	cancel_button->connect_move_focus_left(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
 
 	ok_button = new button_t("_Ok", true);
 	ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	ok_button->set_position(0, -2);
-	ok_button->connect_move_focus_up(sigc::mem_fun(this, &buffer_options_dialog_t::focus_previous));
-	ok_button->connect_move_focus_right(sigc::mem_fun(this, &buffer_options_dialog_t::focus_next));
-	ok_button->connect_activate(sigc::mem_fun(this, &buffer_options_dialog_t::handle_activate));
+	ok_button->connect_move_focus_up(signals::mem_fun(this, &buffer_options_dialog_t::focus_previous));
+	ok_button->connect_move_focus_right(signals::mem_fun(this, &buffer_options_dialog_t::focus_next));
+	ok_button->connect_activate(signals::mem_fun(this, &buffer_options_dialog_t::handle_activate));
 
 	push_back(ok_button);
 	push_back(cancel_button);
@@ -224,9 +224,9 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(5, 2
 	hide_menu_box->set_label(label);
 	hide_menu_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	hide_menu_box->set_position(1, -2);
-	hide_menu_box->connect_move_focus_up(sigc::mem_fun(this, &misc_options_dialog_t::focus_previous));
-	hide_menu_box->connect_move_focus_down(sigc::mem_fun(this, &misc_options_dialog_t::focus_next));
-	hide_menu_box->connect_activate(sigc::mem_fun(this, &misc_options_dialog_t::handle_activate));
+	hide_menu_box->connect_move_focus_up(signals::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	hide_menu_box->connect_move_focus_down(signals::mem_fun(this, &misc_options_dialog_t::focus_next));
+	hide_menu_box->connect_activate(signals::mem_fun(this, &misc_options_dialog_t::handle_activate));
 	push_back(hide_menu_box);
 
 	width = max(label->get_width() + 2 + 3, width);
@@ -238,9 +238,9 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(5, 2
 	save_backup_box->set_label(label);
 	save_backup_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	save_backup_box->set_position(2, -2);
-	save_backup_box->connect_move_focus_up(sigc::mem_fun(this, &misc_options_dialog_t::focus_previous));
-	save_backup_box->connect_move_focus_down(sigc::mem_fun(this, &misc_options_dialog_t::focus_next));
-	save_backup_box->connect_activate(sigc::mem_fun(this, &misc_options_dialog_t::handle_activate));
+	save_backup_box->connect_move_focus_up(signals::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	save_backup_box->connect_move_focus_down(signals::mem_fun(this, &misc_options_dialog_t::focus_next));
+	save_backup_box->connect_activate(signals::mem_fun(this, &misc_options_dialog_t::handle_activate));
 	push_back(save_backup_box);
 
 	width = max(label->get_width() + 2 + 3, width);
@@ -248,17 +248,17 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(5, 2
 	cancel_button = new button_t("_Cancel");
 	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
 	cancel_button->set_position(-1, -2);
-	cancel_button->connect_activate(sigc::mem_fun(this, &misc_options_dialog_t::close));
-	cancel_button->connect_move_focus_up(sigc::mem_fun(this, &misc_options_dialog_t::focus_previous));
-	cancel_button->connect_move_focus_up(sigc::mem_fun(this, &misc_options_dialog_t::focus_previous));
-	cancel_button->connect_move_focus_left(sigc::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	cancel_button->connect_activate(signals::mem_fun(this, &misc_options_dialog_t::close));
+	cancel_button->connect_move_focus_up(signals::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	cancel_button->connect_move_focus_up(signals::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	cancel_button->connect_move_focus_left(signals::mem_fun(this, &misc_options_dialog_t::focus_previous));
 
 	ok_button = new button_t("_Ok", true);
 	ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	ok_button->set_position(0, -2);
-	ok_button->connect_move_focus_up(sigc::mem_fun(this, &misc_options_dialog_t::focus_previous));
-	ok_button->connect_move_focus_right(sigc::mem_fun(this, &misc_options_dialog_t::focus_next));
-	ok_button->connect_activate(sigc::mem_fun(this, &misc_options_dialog_t::handle_activate));
+	ok_button->connect_move_focus_up(signals::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	ok_button->connect_move_focus_right(signals::mem_fun(this, &misc_options_dialog_t::focus_next));
+	ok_button->connect_activate(signals::mem_fun(this, &misc_options_dialog_t::handle_activate));
 
 	push_back(ok_button);
 	push_back(cancel_button);

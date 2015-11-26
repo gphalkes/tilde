@@ -21,7 +21,7 @@ using namespace t3_widget;
 
 class file_edit_window_t : public edit_window_t {
 	private:
-		sigc::connection rewrap_connection;
+		signals::connection rewrap_connection;
 		void force_repaint_to_bottom(rewrap_type_t type, int line, int pos);
 
 	public:

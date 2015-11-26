@@ -55,7 +55,7 @@ void stepped_process_t::run(void) {
 void stepped_process_t::abort(void) { done(false); }
 
 void stepped_process_t::disconnect(void) {
-	for (list<sigc::connection>::iterator iter = connections.begin();
+	for (list<signals::connection>::iterator iter = connections.begin();
 			iter != connections.end(); iter++)
 		(*iter).disconnect();
 	connections.clear();
