@@ -714,8 +714,9 @@ void file_buffer_t::toggle_line_comment() {
 			if (comment_start < 0)
 				break;
 		}
-		start_undo_block();
 		selection_mode_t old_mode = get_selection_mode();
+		//FIXME: The code below contains some hideous hacks to make sure the cursor positioning
+		// for undos is as expected. Ideally we'd just call start_undo_block here.
 		if (i > last_line) {
 			for (i = first_line; i <= last_line; i++) {
 				const std::string *text = get_line_data(i)->get_data();
@@ -724,22 +725,29 @@ void file_buffer_t::toggle_line_comment() {
 					selection_start.pos -= std::min<int>(line_comment.size(), selection_start.pos - comment_start);
 				if (i == selection_end.line && comment_start < selection_end.pos)
 					selection_end.pos -= std::min<int>(line_comment.size(), selection_end.pos - comment_start);
+				if (i == first_line) {
+					cursor.line = i;
+					cursor.pos = comment_start + line_comment.size();
+					start_undo_block();
+				}
 				delete_block(text_coordinate_t(i, comment_start), text_coordinate_t(i, comment_start + line_comment.size()));
 			}
 		} else {
 			for (i = first_line; i <= last_line; i++) {
 				cursor.line = i;
 				cursor.pos = 0;
+				if (i == first_line)
+					start_undo_block();
 				insert_block(&line_comment);
 			}
 			selection_start.pos += line_comment.size();
 			selection_end.pos += line_comment.size();
 		}
+		end_undo_block();
 		set_selection_mode(selection_mode_t::NONE);
 		cursor = selection_start;
 		set_selection_mode(old_mode);
 		cursor = selection_end;
 		set_selection_end();
-		end_undo_block();
 	}
 }
