@@ -46,6 +46,7 @@ checkfunction_compile() {
 }
 
 config() {
+	has_support_cxx11
 	clean_cxx
 	cat > .configcxx.cc <<EOF
 #include <transcript/transcript.h>

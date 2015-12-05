@@ -11,7 +11,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#~ COMPILER := gcc
+#COMPILER := gcc
+include ../../t3widget/src/Makefile.signal.conf
 
 SOURCES..objects/edit := \
 	fileautocompleter.cc \
@@ -58,6 +59,7 @@ CXXFLAGS += -DHAS_LIBATTR
 #~ CXXFLAGS += -DUSE_GETTEXT -DLOCALEDIR=\"locales\"
 ifdef CPP11
 CXXFLAGS += -std=c++11
+CXXFLAGS += -DCXX11SWITCH=1
 else
 CXXFLAGS += `pkg-config --cflags sigc++-2.0`
 endif
