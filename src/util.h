@@ -72,8 +72,8 @@ class version_t {
 
 class stepped_process_t {
 	protected:
-		std::list<signals::connection> connections;
-		typedef signals::slot<void, stepped_process_t *> callback_t;
+		std::list<t3_widget::signals::connection> connections;
+		typedef t3_widget::signals::slot<void, stepped_process_t *> callback_t;
 		callback_t done_cb;
 		bool result;
 
