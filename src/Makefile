@@ -63,6 +63,7 @@ CXXFLAGS += -DCXX11SWITCH=1
 else
 CXXFLAGS += `pkg-config --cflags sigc++-2.0`
 endif
+CXXFLAGS += -DDATADIR='"$(CURDIR)"'
 
 clean-logs:
 	@find .recordings/ -name "record-*" -mtime +7 | xargs -r rm
@@ -81,7 +82,7 @@ xgettext: all
 	$(GENOBJDIR)
 	$(_VERBOSE_GEN) ../include/t3config/data2bytes -s -- $< > $@
 
-.objects/option.o: .objects/config.bytes
+.objects/option.o: .objects/config.bytes .objects/base_config.bytes
 
 .PHONY: links xgettext linecount
 

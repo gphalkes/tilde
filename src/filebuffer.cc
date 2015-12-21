@@ -191,8 +191,8 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 	if (success) {
 		highlight = t3_highlight_load(lang.lang_file, map_highlight, NULL, T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, NULL);
 		set_highlight(highlight);
-		std::map<std::string, std::string>::iterator iter = default_option.line_comment_map.find(lang.name);
-		if (iter != default_option.line_comment_map.end())
+		std::map<std::string, std::string>::iterator iter = option.line_comment_map.find(lang.name);
+		if (iter != option.line_comment_map.end())
 			set_line_comment(iter->second.c_str());
 		t3_highlight_free_lang(lang);
 	}

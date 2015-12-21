@@ -59,15 +59,6 @@ types {
 		item-type = "any"
 		%constraint = "name"
 	}
-	lang_desc {
-		type = "section"
-		allowed-keys {
-			name { type = "string" }
-			line_comment { type = "string" }
-		}
-		item-type = "any"
-		%constraint = "name"
-	}
 }
 
 allowed-keys {
@@ -92,11 +83,6 @@ allowed-keys {
 	key_timeout { type = "int" }
 	attributes { type = "attributes" }
 	highlight_attributes { type = "highlight_attributes" }
-
-	lang {
-		type = "list"
-		item-type = "lang_desc"
-	}
 }
 item-type = "any"
 

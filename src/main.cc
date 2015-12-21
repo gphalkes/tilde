@@ -550,8 +550,8 @@ void main_t::set_highlight(t3_highlight_t *highlight, const char *name) {
 	if (name == NULL) {
 		get_current()->get_text()->set_line_comment(NULL);
 	} else {
-		std::map<std::string, std::string>::iterator iter = default_option.line_comment_map.find(name);
-		if (iter == default_option.line_comment_map.end())
+		std::map<std::string, std::string>::iterator iter = option.line_comment_map.find(name);
+		if (iter == option.line_comment_map.end())
 			get_current()->get_text()->set_line_comment(NULL);
 		else
 			get_current()->get_text()->set_line_comment(iter->second.c_str());

@@ -76,6 +76,10 @@ static const char config_schema[] = {
 #include "config.bytes"
 };
 
+static const char base_config_schema[] = {
+#include "config.bytes"
+};
+
 static t3_bool find_term_config(const t3_config_t *config, const void *data) {
 	if (t3_config_get_type(config) != T3_CONFIG_SECTION)
 		return t3_false;
@@ -180,6 +184,40 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 	}
 }
 
+static void read_base_config(void) {
+	cleanup_func2_ptr<FILE, int, fclose>::t config_file;
+	t3_config_error_t error;
+	cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
+	cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema>::t schema;
+
+	if ((config_file = fopen(DATADIR "/" "base.config", "r")) == NULL) {
+		lprintf("Failed to open file: %s %m\n", DATADIR "/" "base.config");
+		return;
+	}
+
+	if ((config = t3_config_read_file(config_file, &error, NULL)) == NULL) {
+		lprintf("Error loading base config: %d: %s\n", error.line_number, t3_config_strerror(error.error));
+		return;
+	}
+
+	if ((schema = t3_config_read_schema_buffer(base_config_schema, sizeof(base_config_schema), &error, NULL)) == NULL) {
+		lprintf("Error loading schema: %d: %s\n", error.line_number, t3_config_strerror(error.error));
+		return;
+	}
+
+	if (!t3_config_validate(config, schema, &error, 0)) {
+		lprintf("Error validating base config: %d: %s\n", error.line_number, t3_config_strerror(error.error));
+		return;
+	}
+
+	for (t3_config_t *lang = t3_config_get(t3_config_get(config, "lang"), NULL); lang != NULL; lang = t3_config_get_next(lang)) {
+		const char *name = t3_config_get_string(t3_config_get(lang, "name"));
+		const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
+		if (name != NULL && line_comment != NULL)
+			option.line_comment_map[std::string(name)] = line_comment;
+	}
+}
+
 static void read_config(void) {
 	cleanup_func2_ptr<FILE, int, fclose>::t config_file;
 	t3_config_error_t error;
@@ -218,10 +256,6 @@ static void read_config(void) {
 		return;
 	}
 
-	/* Note: when supporting later versions, read the config_version key here.
-	      t3_config_get_int(t3_config_get(config, "config_version"))
-	*/
-
 	if (!t3_config_validate(config, schema, &error, 0)) {
 		config_read_error = true;
 		config_read_error_string = t3_config_strerror(error.error);
@@ -249,7 +283,7 @@ static void read_config(void) {
 		const char *name = t3_config_get_string(t3_config_get(lang, "name"));
 		const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
 		if (name != NULL && line_comment != NULL)
-			default_option.line_comment_map[std::string(name)] = line_comment;
+			option.line_comment_map[std::string(name)] = line_comment;
 	}
 
 	if ((term_specific_config = t3_config_get(config, "terminals")) == NULL)
@@ -407,7 +441,11 @@ PARSE_FUNCTION(parse_args)
 		cli_option.files.push_back(optcurrent);
 	END_OPTIONS
 
+	read_base_config();
 	read_config();
+/*	for (const auto &lc : option.line_comment_map) {
+		printf("Line comment config: %s: %s\n", lc.first.c_str(), lc.second.c_str());
+	}*/
 
 	post_process_options();
 END_FUNCTION

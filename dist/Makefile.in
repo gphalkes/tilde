@@ -47,6 +47,7 @@ prefix=/usr/local
 bindir=$(prefix)/bin
 docdir=$(prefix)/share/doc/tilde
 mandir=$(prefix)/share/man
+datadir=$(prefix)/share
 
 # Install program to use (should be BSD install compatible)
 INSTALL=install
@@ -69,7 +70,7 @@ dist-clean: clean
 	rm -rf Makefile config.log
 
 .cc.o:
-	$(SILENTCXX) $(CXX) $(CXXFLAGS) $(CONFIGFLAGS) $(GETTEXTFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" -Isrc -c -o $@ $<
+	$(SILENTCXX) $(CXX) $(CXXFLAGS) $(CONFIGFLAGS) $(GETTEXTFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" -DDATADIR=\"$(datadir)/tilde\" -Isrc -c -o $@ $<
 
 src/tilde: $(OBJECTS)
 	$(SILENTLD) $(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) $(LDLIBS) $(CONFIGLIBS) $(GETTEXTLIBS)
@@ -78,6 +79,7 @@ src/tilde: $(OBJECTS)
 _bindir=$(DESTDIR)$(bindir)
 _docdir=$(DESTDIR)$(docdir)
 _mandir=$(DESTDIR)$(mandir)
+_datadir=$(DESTDIR)$(datadir)
 _LOCALEDIR=$(DESTDIR)$(LOCALEDIR)
 
 install: all
@@ -87,8 +89,11 @@ install: all
 	$(INSTALL) -m0644 COPYING README Changelog $(_docdir)
 	$(INSTALL) -d $(_mandir)/man1
 	$(INSTALL) -m0644 man/tilde.1 $(_mandir)/man1
+	$(INSTALL) -d $(_datadir)/tilde/
+	$(INSTALL) -m0644 base.config $(_datadir)
 
 uninstall:
 	rm -f $(_bindir)/tilde
 	rm -rf $(_docdir)
 	rm -f $(_mandir)/man1/tilde.1
+	rm -rf $(_datadir)/tilde

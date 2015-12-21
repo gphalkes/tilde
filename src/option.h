@@ -86,8 +86,6 @@ struct options_t {
 
 	optional<int> tabsize;
 	optional<size_t> max_recent_files;
-
-	std::map<std::string, std::string> line_comment_map;
 };
 
 struct highlight_attrs_t {
@@ -115,6 +113,8 @@ struct runtime_options_t {
 	optional<int> key_timeout;
 	t3_attr_t highlights[MAX_HIGHLIGHTS];
 	t3_attr_t brace_highlight;
+
+	std::map<std::string, std::string> line_comment_map;
 };
 
 enum attribute_key_t {
