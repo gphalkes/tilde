@@ -99,7 +99,7 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
 
 	if (strncmp(attr, "fg ", 3) == 0)
 		foreground = true;
-	else if (strncmp(attr, "bg", 3) == 0)
+	else if (strncmp(attr, "bg ", 3) == 0)
 		foreground = false;
 	else
 		return 0;
