@@ -6,6 +6,10 @@ Version 0.3.5:
 	- When the syntax highlighting changes through saving the file under a new
 	  name, the screen is now correctly updated.
 	- Syntax highlighting is now changed when a file is saved under a new name.
+	- Reading in background colors from the configuration file did not work
+	  for most colors.
+	- Better handling of several signals, ensuring that the terminal won't be
+	  left in an unusable state.
 
 Version 0.3.4:
 	Re-release of version 0.3.3 to update the configure script.

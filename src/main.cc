@@ -699,6 +699,36 @@ static void check_if_already_running(void) {
 	free(name);
 }
 
+static void terminate_handler(int sig) {
+	lprintf("received signal %d\n", sig);
+	t3_widget::async_safe_exit_main_loop(sig + 128);
+}
+
+static void setup_term_signal_handler(int sig) {
+	struct sigaction sa;
+	sa.sa_handler = ::terminate_handler;
+	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, sig);
+	sa.sa_flags = SA_RESETHAND;
+	sigaction(sig, &sa, NULL) ;
+}
+
+static void setup_ign_signal_handler(int sig) {
+	struct sigaction sa;
+	sa.sa_handler = SIG_IGN;
+	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, sig);
+	sa.sa_flags = 0;
+	sigaction(sig, &sa, NULL) ;
+}
+
+static void setup_signal_handlers() {
+	setup_term_signal_handler(SIGHUP);
+	setup_term_signal_handler(SIGTERM);
+	setup_ign_signal_handler(SIGUSR1);
+	setup_ign_signal_handler(SIGUSR2);
+}
+
 int main(int argc, char *argv[]) {
 	complex_error_t result;
 	init_parameters_t *params = init_parameters_t::create();
@@ -795,6 +825,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	load_cli_file_process_t::execute(signals::mem_fun(main_window, &main_t::load_cli_files_done));
+	setup_signal_handlers();
 	int retval = main_loop();
 #ifdef TILDE_DEBUG
 	delete continue_abort_dialog;
@@ -814,6 +845,9 @@ int main(int argc, char *argv[]) {
 	if (runfile_name != NULL) {
 		unlink(runfile_name);
 		free(runfile_name);
+	}
+	if (retval > 128) {
+		fprintf(stderr, "Killed by signal %d\n", retval - 128);
 	}
 	return retval;
 }
