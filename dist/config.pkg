@@ -45,6 +45,10 @@ checkfunction_compile() {
 	checkfunction_internal test_compile_cxx "$@"
 }
 
+test_link_cxx_with_flags() {
+	test_link_cxx "$@" "CXXFLAGS=$CXXFLAGS"
+}
+
 config() {
 	has_support_cxx11
 	clean_cxx
@@ -83,7 +87,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libt3widget/0.5.0 LIBT3WIDGET test_link_cxx || \
+	pkgconfig libt3widget/0.5.0 LIBT3WIDGET test_link_cxx_with_flags || \
 		error "!! Can not find libt3widget. libt3widget is required to compile tilde."
 
 	clean_cxx

@@ -90,7 +90,7 @@ install: all
 	$(INSTALL) -d $(_mandir)/man1
 	$(INSTALL) -m0644 man/tilde.1 $(_mandir)/man1
 	$(INSTALL) -d $(_datadir)/tilde/
-	$(INSTALL) -m0644 base.config $(_datadir)
+	$(INSTALL) -m0644 src/base.config $(_datadir)/tilde/
 
 uninstall:
 	rm -f $(_bindir)/tilde
