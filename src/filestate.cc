@@ -38,8 +38,8 @@ bool load_process_t::step(void) {
 	rw_result_t rw_result;
 
 	if (state == SELECT_FILE) {
-		connections.push_back(open_file_dialog->connect_closed(signals::mem_fun(this, &load_process_t::abort)));
 		connections.push_back(open_file_dialog->connect_file_selected(signals::mem_fun(this, &load_process_t::file_selected)));
+		connections.push_back(open_file_dialog->connect_closed(signals::mem_fun(this, &load_process_t::abort)));
 		open_file_dialog->reset();
 		open_file_dialog->show();
 		connections.push_back(encoding_dialog->connect_activate(signals::mem_fun(this, &load_process_t::encoding_selected)));
@@ -77,6 +77,7 @@ bool load_process_t::step(void) {
 			printf_into(&message, "Conversion from encoding %s is irreversible", file->get_encoding());
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &load_process_t::run), 0));
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &load_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_closed(signals::mem_fun(this, &load_process_t::abort)));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
@@ -84,6 +85,7 @@ bool load_process_t::step(void) {
 			printf_into(&message, "Conversion from encoding %s encountered illegal characters", file->get_encoding());
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &load_process_t::run), 0));
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &load_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_closed(signals::mem_fun(this, &load_process_t::abort)));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
@@ -96,6 +98,7 @@ bool load_process_t::step(void) {
 		case rw_result_t::BOM_FOUND:
 			connections.push_back(preserve_bom_dialog->connect_activate(signals::mem_fun(this, &load_process_t::preserve_bom), 0));
 			connections.push_back(preserve_bom_dialog->connect_activate(signals::mem_fun(this, &load_process_t::remove_bom), 1));
+			connections.push_back(preserve_bom_dialog->connect_closed(signals::mem_fun(this, &load_process_t::preserve_bom)));
 			preserve_bom_dialog->show();
 			return false;
 		default:
@@ -167,8 +170,8 @@ bool save_as_process_t::step(void) {
 	if (state == SELECT_FILE) {
 		const char *current_name = file->get_name();
 
-		connections.push_back(save_as_dialog->connect_closed(signals::mem_fun(this, &save_as_process_t::abort)));
 		connections.push_back(save_as_dialog->connect_file_selected(signals::mem_fun(this, &save_as_process_t::file_selected)));
+		connections.push_back(save_as_dialog->connect_closed(signals::mem_fun(this, &save_as_process_t::abort)));
 
 		save_as_dialog->set_file(current_name);
 		save_as_dialog->show();
@@ -186,6 +189,7 @@ bool save_as_process_t::step(void) {
 			printf_into(&message, "File '%s' already exists", name.c_str());
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::run), 0));
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_closed(signals::mem_fun(this, &save_as_process_t::abort)));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
@@ -193,6 +197,7 @@ bool save_as_process_t::step(void) {
 			printf_into(&message, "File '%s' is readonly", save_name);
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::run), 0));
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_closed(signals::mem_fun(this, &save_as_process_t::abort)));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
@@ -215,6 +220,7 @@ bool save_as_process_t::step(void) {
 			printf_into(&message, "Conversion into encoding %s is irreversible", encoding.c_str());
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::run), 0));
 			connections.push_back(continue_abort_dialog->connect_activate(signals::mem_fun(this, &save_as_process_t::abort), 1));
+			connections.push_back(continue_abort_dialog->connect_closed(signals::mem_fun(this, &save_as_process_t::abort)));
 			continue_abort_dialog->set_message(&message);
 			continue_abort_dialog->show();
 			return false;
@@ -275,7 +281,6 @@ close_process_t::close_process_t(const callback_t &cb, file_buffer_t *_file) : s
 }
 
 bool close_process_t::step(void) {
-
 	if (state < CONFIRM_CLOSE) {
 		if (save_process_t::step()) {
 			if (!result)
@@ -301,6 +306,7 @@ bool close_process_t::step(void) {
 		connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &close_process_t::do_save), 0));
 		connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &close_process_t::dont_save), 1));
 		connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &close_process_t::abort), 2));
+		connections.push_back(close_confirm_dialog->connect_closed(signals::mem_fun(this, &close_process_t::abort)));
 		close_confirm_dialog->set_message(&message);
 		close_confirm_dialog->show();
 	} else {
@@ -337,6 +343,7 @@ bool exit_process_t::step(void) {
 			connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &exit_process_t::do_save), 0));
 			connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &exit_process_t::dont_save), 1));
 			connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &exit_process_t::abort), 2));
+			connections.push_back(close_confirm_dialog->connect_closed(signals::mem_fun(this, &exit_process_t::abort)));
 			close_confirm_dialog->set_message(&message);
 			close_confirm_dialog->show();
 			return false;

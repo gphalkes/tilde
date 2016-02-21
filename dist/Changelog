@@ -1,3 +1,9 @@
+Version 0.3.7:
+	Bug fixes:
+	- Make the dialogs for stepped actions (save, load, quit) abort when the
+	  user closes the dialog by using the escape key. Failing to do so would
+	  result in failure to reset the terminal and random crashes.
+
 Version 0.3.6:
 	Re-release of version 0.3.5 to fix build problems.
 
