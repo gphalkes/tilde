@@ -205,6 +205,13 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
 		SET_WITH_DEFAULT(addition, ADDITION);
 		SET_WITH_DEFAULT(deletion, DELETION);
 #undef SET_WITH_DEFAULT
+		default:
+			// This means we somehow got a bad attribute key, which is a logic error.
+			// However, we don't want to crash on this (at least outside of debug mode).
+#ifdef DEBUG
+			PANIC();
+#endif
+			break;
 	}
 	picker->show();
 }
@@ -402,6 +409,13 @@ void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
 		SET_WITH_DEFAULT(addition, ADDITION);
 		SET_WITH_DEFAULT(deletion, DELETION);
 #undef SET_WITH_DEFAULT
+	default:
+		// This means we somehow got a bad attribute key, which is a logic error.
+		// However, we don't want to crash on this (at least outside of debug mode).
+#ifdef DEBUG
+		PANIC();
+#endif
+		break;
 	}
 	picker->hide();
 }
@@ -454,6 +468,13 @@ void attributes_dialog_t::default_attribute_selected(void) {
 		SET_DEFAULT(addition, ADDITION);
 		SET_DEFAULT(deletion, DELETION);
 #undef SET_DEFAULT
+	default:
+		// This means we somehow got a bad attribute key, which is a logic error.
+		// However, we don't want to crash on this (at least outside of debug mode).
+#ifdef DEBUG
+		PANIC();
+#endif
+		break;
 	}
 	picker->hide();
 }

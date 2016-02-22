@@ -141,6 +141,8 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 								}
 								state->state = load_process_t::READING;
 								continue;
+							default:
+								break;
 						}
 						state->state = load_process_t::READING;
 					}
