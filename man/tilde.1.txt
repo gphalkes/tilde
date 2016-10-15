@@ -61,8 +61,8 @@ BUGS
 
 If you think you have found a bug, please check that you are using the latest
 version of Tilde <http://os.ghalkes.nl/tilde.html>. A bugtracker is available
-at <http://os.ghalkes.nl/bugzilla>. When reporting bugs, please include a
-minimal example that demonstrates the problem.
+at <https://github.com/gphalkes/tilde/issues>. When reporting bugs, please
+include a minimal example that demonstrates the problem.
 
 AUTHOR
 ======
@@ -72,7 +72,7 @@ G.P. Halkes <tilde@ghalkes.nl>
 COPYRIGHT
 =========
 
-Copyright \(co 2011-2012 G.P. Halkes +
+Copyright \(co 2011-2016 G.P. Halkes +
 Tilde is licensed under the GNU General Public License version 3. +
 For more details on the license, see the file COPYING in the documentation
 directory. On Un*x systems this is usually /usr/share/doc/tilde.
