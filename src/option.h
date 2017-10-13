@@ -42,6 +42,7 @@ struct cli_options_t {
 	const char *config_file;
 	optional<const char *> encoding;
 	bool ignore_running;
+	bool disable_file_position_parsing;
 };
 
 struct term_options_t {
@@ -83,6 +84,7 @@ struct options_t {
 	optional<bool> strip_spaces;
 	optional<bool> make_backup;
 	optional<bool> hide_menubar;
+	optional<bool> parse_file_positions;
 
 	optional<int> tabsize;
 	optional<size_t> max_recent_files;

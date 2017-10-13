@@ -83,6 +83,7 @@ allowed-keys {
 	key_timeout { type = "int" }
 	attributes { type = "attributes" }
 	highlight_attributes { type = "highlight_attributes" }
+	parse_file_positions { type = "bool" }
 }
 item-type = "any"
 

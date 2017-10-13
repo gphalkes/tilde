@@ -212,7 +212,7 @@ void buffer_options_dialog_t::handle_activate(void) {
 
 //===============================================================
 
-misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(5, 25, _title) {
+misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(6, 26, _title) {
 	smart_label_t *label;
 	int width = 0;
 	button_t *ok_button, *cancel_button;
@@ -245,6 +245,20 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(5, 2
 
 	width = max(label->get_width() + 2 + 3, width);
 
+	label = new smart_label_t(_("_Parse file positions"));
+	label->set_position(3, 2);
+	push_back(label);
+	parse_file_positions_box = new checkbox_t();
+	parse_file_positions_box->set_label(label);
+	parse_file_positions_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	parse_file_positions_box->set_position(3, -2);
+	parse_file_positions_box->connect_move_focus_up(signals::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	parse_file_positions_box->connect_move_focus_down(signals::mem_fun(this, &misc_options_dialog_t::focus_next));
+	parse_file_positions_box->connect_activate(signals::mem_fun(this, &misc_options_dialog_t::handle_activate));
+	push_back(parse_file_positions_box);
+
+	width = max(label->get_width() + 2 + 3, width);
+
 	cancel_button = new button_t("_Cancel");
 	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
 	cancel_button->set_position(-1, -2);
@@ -271,11 +285,13 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(5, 2
 void misc_options_dialog_t::set_values_from_options(void) {
 	hide_menu_box->set_state(option.hide_menubar);
 	save_backup_box->set_state(option.make_backup);
+	parse_file_positions_box->set_state(default_option.parse_file_positions.value_or_default(true));
 }
 
 void misc_options_dialog_t::set_options_from_values(void) {
 	option.hide_menubar = default_option.hide_menubar = hide_menu_box->get_state();
 	option.make_backup = default_option.make_backup = save_backup_box->get_state();
+	default_option.parse_file_positions = parse_file_positions_box->get_state();
 }
 
 void misc_options_dialog_t::handle_activate(void) {

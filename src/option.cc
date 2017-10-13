@@ -274,6 +274,7 @@ static void read_config(void) {
 	GET_OPT(strip_spaces, BOOL, bool);
 	GET_OPT(make_backup, BOOL, bool);
 	GET_OPT(hide_menubar, BOOL, bool);
+	GET_OPT(parse_file_positions, BOOL, bool);
 
 	GET_OPT(tabsize, INT, int);
 	GET_OPT(max_recent_files, INT, int);
@@ -302,17 +303,12 @@ static void read_config(void) {
 #define SET_OPT_FROM_FILE(name, deflt) do { \
 	if (term_specific_option.name.is_valid()) \
 		option.name = term_specific_option.name; \
-	else if (default_option.term_options.name.is_valid()) \
-		option.name = default_option.term_options.name; \
 	else \
-		option.name = deflt; \
+		option.name = default_option.term_options.name.value_or_default(deflt); \
 } while (0)
 
 #define SET_OPT_FROM_DFLT(name, deflt) do { \
-	if (default_option.name.is_valid()) \
-		option.name = default_option.name; \
-	else \
-		option.name = deflt; \
+	option.name = default_option.name.value_or_default(deflt); \
 } while (0)
 
 static void post_process_options(void) {
@@ -420,6 +416,9 @@ PARSE_FUNCTION(parse_args)
 		END_OPTION
 		LONG_OPTION("ignore-running", NO_ARG)
 			cli_option.ignore_running = true;
+		END_OPTION
+		OPTION('J', "no-parse-file-position", NO_ARG)
+			cli_option.disable_file_position_parsing = true;
 		END_OPTION
 #ifdef DEBUG
 		LONG_OPTION("W", NO_ARG)
@@ -620,6 +619,7 @@ bool write_config(void) {
 	SET_OPTION(strip_spaces, bool);
 	SET_OPTION(make_backup, bool);
 	SET_OPTION(hide_menubar, bool);
+	SET_OPTION(parse_file_positions, bool);
 
 	SET_OPTION(tabsize, int);
 	SET_OPTION(max_recent_files, int);

@@ -428,12 +428,18 @@ bool load_cli_file_process_t::step(void) {
 
 	in_step = true;
 	while (iter != cli_option.files.end()) {
+		int line = -1, pos = -1;
+		string filename = *iter;
+		if (default_option.parse_file_positions.value_or_default(true) && !cli_option.disable_file_position_parsing)
+			attempt_file_position_parse(&filename, &line, &pos);
+
 		in_load = true;
-		load_process_t::execute(signals::mem_fun(this, &load_cli_file_process_t::load_done), *iter, encoding, true);
+		load_process_t::execute(signals::mem_fun(this, &load_cli_file_process_t::load_done), filename.c_str(), encoding, true);
 		if (in_load) {
 			in_step = false;
 			return false;
 		}
+		open_files.back()->goto_pos(line, pos);
 	}
 	result = true;
 	return true;
@@ -455,4 +461,41 @@ void load_cli_file_process_t::execute(const callback_t &cb) {
 void load_cli_file_process_t::encoding_selection_done(const string *_encoding) {
 	encoding = strdup_impl(_encoding->c_str());
 	run();
+}
+
+static bool is_ascii_digit(int c) {
+	return c >= '0' && c <= '9';
+}
+
+void load_cli_file_process_t::attempt_file_position_parse(string *filename, int *line, int *pos) {
+	size_t idx = filename->size();
+	if (idx < 3) {
+		return;
+	}
+	--idx;
+
+	// Skip trailing colon. These will typically occur when copying error messages.
+	if ((*filename)[idx] == ':')
+		--idx;
+
+	while (idx > 0 && is_ascii_digit((*filename)[idx])) {
+		--idx;
+	}
+	if (idx == 0)
+		return;
+	if ((*filename)[idx] != ':')
+		return;
+
+	*line = atoi(filename->c_str() + idx + 1);
+	filename->erase(idx);
+
+	--idx;
+	while (idx > 0 && is_ascii_digit((*filename)[idx])) {
+		--idx;
+	}
+	if (idx == 0 || (*filename)[idx] != ':')
+		return;
+	*pos = *line;
+	*line = atoi(filename->c_str() + idx + 1);
+	filename->erase(idx);
 }
