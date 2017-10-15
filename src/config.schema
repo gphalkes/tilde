@@ -14,24 +14,24 @@
 types {
 	attributes {
 		type = "section"
-		#~ allowed-keys {
-			#~ non_print { type = "attribute" }
-			#~ selection_cursor { type = "attribute" }
-			#~ selection_cursor2 { type = "attribute" }
-			#~ bad_draw { type = "attribute" }
-			#~ text_cursor { type = "attribute" }
-			#~ text { type = "attribute" }
-			#~ text_selected { type = "attribute" }
-			#~ highlight { type = "attribute" }
-			#~ dialog { type = "attribute" }
-			#~ dialog_selected { type = "attribute" }
-			#~ button { type = "attribute" }
-			#~ button_selected { type = "attribute" }
-			#~ scrollbar { type = "attribute" }
-			#~ menubar { type = "attribute" }
-			#~ menubar_selected { type = "attribute" }
-			#~ shadow { type = "attribute" }
-		#~ }
+		allowed-keys {
+			non_print { type = "attribute" }
+			selection_cursor { type = "attribute" }
+			selection_cursor2 { type = "attribute" }
+			bad_draw { type = "attribute" }
+			text_cursor { type = "attribute" }
+			text { type = "attribute" }
+			text_selected { type = "attribute" }
+			highlight { type = "attribute" }
+			dialog { type = "attribute" }
+			dialog_selected { type = "attribute" }
+			button { type = "attribute" }
+			button_selected { type = "attribute" }
+			scrollbar { type = "attribute" }
+			menubar { type = "attribute" }
+			menubar_selected { type = "attribute" }
+			shadow { type = "attribute" }
+		}
 		item-type = "attribute"
 	}
 	highlight_attributes {
