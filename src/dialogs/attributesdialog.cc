@@ -47,7 +47,7 @@
 //FIXME: we may be better of using a list_pane_t for the longer divisions
 attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interface") {
 	smart_label_t *label;
-	button_t *change_button, *ok_button, *cancel_button;
+	button_t *change_button, *ok_button, *cancel_button, *save_defaults_button;
 
 	label = new smart_label_t(_("Color _mode"));
 	label->set_position(1, 2);
@@ -116,10 +116,20 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 	cancel_button->connect_activate(signals::mem_fun(this, &attributes_dialog_t::close));
 	cancel_button->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
 	cancel_button->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
+	cancel_button->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
 	cancel_button->connect_move_focus_left(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
 
+	save_defaults_button = new button_t("Save as _defaults");
+	save_defaults_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	save_defaults_button->set_position(0, -2);
+	save_defaults_button->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
+	save_defaults_button->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
+	save_defaults_button->connect_move_focus_left(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
+	save_defaults_button->connect_move_focus_right(signals::mem_fun(this, &attributes_dialog_t::focus_next));
+	save_defaults_button->connect_activate(signals::mem_fun(this, &attributes_dialog_t::handle_save_defaults));
+
 	ok_button = new button_t("_Ok", true);
-	ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	ok_button->set_anchor(save_defaults_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
 	ok_button->set_position(0, -2);
 	ok_button->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
 	ok_button->connect_move_focus_right(signals::mem_fun(this, &attributes_dialog_t::focus_next));
@@ -130,6 +140,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 	push_back(text_area);
 	push_back(syntax_highlight);
 	push_back(ok_button);
+	push_back(save_defaults_button);
 	push_back(cancel_button);
 
 	picker = new attribute_picker_dialog_t();
@@ -259,11 +270,19 @@ void attributes_dialog_t::set_values_from_options(void) {
 	update_attribute_lines();
 }
 
-void attributes_dialog_t::set_options_from_values(void) {
-	option.color = term_specific_option.color = color_box->get_state();
+void attributes_dialog_t::set_term_options_from_values(void) {
+	set_options_from_values(&term_specific_option);
+}
+
+void attributes_dialog_t::set_default_options_from_values(void) {
+	set_options_from_values(&default_option.term_options);
+}
+
+void attributes_dialog_t::set_options_from_values(term_options_t *term_options) {
+	option.color = term_options->color = color_box->get_state();
 
 #define SET_WITH_DEFAULT(name, attr) do { \
-	term_specific_option.name = name; \
+	term_options->name = name; \
 	set_attribute(attribute_t::attr, name.is_valid() ? name() : get_default_attribute(attribute_t::attr, option.color)); \
 } while (0)
 	SET_WITH_DEFAULT(dialog, DIALOG);
@@ -285,18 +304,18 @@ void attributes_dialog_t::set_options_from_values(void) {
 	SET_WITH_DEFAULT(meta_text, META_TEXT);
 #undef SET_WITH_DEFAULT
 
-	term_specific_option.brace_highlight = brace_highlight;
+	term_options->brace_highlight = brace_highlight;
 	option.brace_highlight = brace_highlight.is_valid() ? brace_highlight() : get_default_attr(BRACE_HIGHLIGHT);
 
 #define SET_WITH_DEFAULT(name, attr) do { \
 	int highlight_idx = map_highlight(NULL, #name); \
-	term_specific_option.highlights[highlight_idx] = name; \
+	term_options->highlights[highlight_idx] = name; \
 	option.highlights[highlight_idx] = name.is_valid() ? name() : get_default_attr(attr); \
 } while (0)
 	SET_WITH_DEFAULT(comment, COMMENT);
 	{
 		int highlight_idx = map_highlight(NULL, "comment-keyword");
-		term_specific_option.highlights[highlight_idx] = comment_keyword;
+		term_options->highlights[highlight_idx] = comment_keyword;
 		option.highlights[highlight_idx] = comment_keyword.is_valid() ? comment_keyword() : get_default_attr(COMMENT_KEYWORD);
 	}
 	SET_WITH_DEFAULT(keyword, KEYWORD);
@@ -304,7 +323,7 @@ void attributes_dialog_t::set_options_from_values(void) {
 	SET_WITH_DEFAULT(string, STRING);
 	{
 		int highlight_idx = map_highlight(NULL, "string-escape");
-		term_specific_option.highlights[highlight_idx] = string_escape;
+		term_options->highlights[highlight_idx] = string_escape;
 		option.highlights[highlight_idx] = string_escape.is_valid() ? string_escape() : get_default_attr(STRING_ESCAPE);
 	}
 	SET_WITH_DEFAULT(misc, MISC);
@@ -483,4 +502,10 @@ void attributes_dialog_t::handle_activate(void) {
 	/* Do required validation here. */
 	hide();
 	activate();
+}
+
+void attributes_dialog_t::handle_save_defaults(void) {
+	/* Do required validation here. */
+	hide();
+	save_defaults();
 }

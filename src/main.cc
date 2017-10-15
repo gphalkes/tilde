@@ -83,6 +83,7 @@ class main_t : public main_window_base_t {
 		void set_buffer_options(void);
 		void set_default_options(void);
 		void set_interface_options(void);
+		void set_default_interface_options(void);
 		void set_misc_options(void);
 		void set_highlight(t3_highlight_t *highlight, const char *name);
 		void save_as_done(stepped_process_t *process);
@@ -239,6 +240,7 @@ main_t::main_t(void) {
 	attributes_dialog = new attributes_dialog_t(ATTRIBUTES_DIALOG_WIDTH);
 	attributes_dialog->center_over(this);
 	attributes_dialog->connect_activate(signals::mem_fun(this, &main_t::set_interface_options));
+	attributes_dialog->connect_save_defaults(signals::mem_fun(this, &main_t::set_default_interface_options));
 }
 
 main_t::~main_t(void) {
@@ -533,7 +535,14 @@ void main_t::set_default_options(void) {
 void main_t::set_interface_options(void) {
 	/* First set color mode, because that resets all the attributes to the defaults. */
 	set_color_mode(option.color);
-	attributes_dialog->set_options_from_values();
+	attributes_dialog->set_term_options_from_values();
+	write_config();
+}
+
+void main_t::set_default_interface_options(void) {
+	/* First set color mode, because that resets all the attributes to the defaults. */
+	set_color_mode(option.color);
+	attributes_dialog->set_default_options_from_values();
 	write_config();
 }
 

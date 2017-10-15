@@ -3,6 +3,8 @@ Version 0.3.8:
 	- Files can be opened at a specific position, by appending line (and
 	  column) number(s). This allows jumping to positions indicated by programs
 	  processing text files such as compilers.
+	- Allow changing the default interface attributes from the Interface
+	  Options dialog
 
 	Bug fixes:
 	- Validate the attribute names used in the config file.
