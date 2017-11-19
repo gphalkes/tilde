@@ -37,7 +37,7 @@ done
 ```
 3. Build all packages: `./t3shared/doall make -C src`
 
-Once the build is complete, tilde/src/.objects/edit is the newly compiled
+Once the build is complete, `tilde/src/.objects/edit` is the newly compiled
 tilde. If the [termdebug](https://os.ghalkes.nl/termdebug.html) suite of tools
-is installed, then tilde/src/tedit can be used to run the editor while
+is installed, then `tilde/src/tedit` can be used to run the editor while
 recording the input and output for debugging purposes.
