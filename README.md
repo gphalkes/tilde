@@ -21,6 +21,16 @@ Building from the official release is recommended over attempting to build from
 the git repositories for installing Tilde. Only for development of Tilde should
 the git repositories be used.
 
+## Getting help
+
+There are several ways to get help, should you have problems using, installing
+or building Tilde:
+
+* For bug reports or feature suggestions, please file a bug in the github
+  [bugtracker](https://github.com/gphalkes/tilde/issues).
+* For online support, try the #tilde IRC channel on freenode
+  ([webchat](http://webchat.freenode.net/?channels=tilde)).
+
 ## Developing Tilde
 
 To help developing Tilde, you will need to build Tilde from the git
@@ -41,3 +51,9 @@ Once the build is complete, `tilde/src/.objects/edit` is the newly compiled
 tilde. If the [termdebug](https://os.ghalkes.nl/termdebug.html) suite of tools
 is installed, then `tilde/src/tedit` can be used to run the editor while
 recording the input and output for debugging purposes.
+
+## Other ways to contribute
+
+* Answer questions on the IRC channel (see the [Getting help](#getting-help)
+  section).
+* Creating and maintaining packages for different distributions.
