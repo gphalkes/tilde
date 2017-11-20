@@ -26,10 +26,12 @@ the git repositories be used.
 There are several ways to get help, should you have problems using, installing
 or building Tilde:
 
-* For bug reports or feature suggestions, please file a bug in the github
-  [bugtracker](https://github.com/gphalkes/tilde/issues).
 * For online support, try the #tilde IRC channel on freenode
   ([webchat](http://webchat.freenode.net/?channels=tilde)).
+* Alternatively, questions, discussions etc. can be posted on the mailing list
+  tilde-text-editor &lt;at&gt; googlegroups.com.
+* For bug reports or feature suggestions, please file a bug in the github
+  [bugtracker](https://github.com/gphalkes/tilde/issues).
 
 ## Developing Tilde
 
@@ -38,11 +40,27 @@ repositories. The repositories assume that all parts of Tilde, i.e. Tilde
 itself and its support libraries, are built from the git repositories. Please
 follow the steps below to build Tilde from the git repositories:
 
-1. Install the dependencies of Tilde from the system libraries.
+1. Install the dependencies of Tilde from the system libraries. On a typical
+   Debian/Ubuntu system this would include (packages for OpenSUSE and Fedora
+   have similar names):
+   * flex
+   * gettext
+   * libacl1-dev
+   * libattr1-dev
+   * libfuse-dev
+   * libgpm-dev
+   * libncurses-dev
+   * libpcre3-dev
+   * libsigc++-2.0-dev
+   * libtool-bin
+   * libunistring-dev
+   * libxcb-dev and/or libx11-dev
+   * pkg-config
+   * LLnextgen (available [here](https://os.ghalkes.nl/LLnextgen/download.html)
 2. Clone the repositories:
 ```bash
 for i in makesys transcript t3shared t3window t3widget t3key t3config t3highlight tilde ; do
-	git clone https://github.com/gphalkes/$i.git
+    git clone https://github.com/gphalkes/$i.git
 done
 ```
 3. Build all packages: `./t3shared/doall make -C src`
