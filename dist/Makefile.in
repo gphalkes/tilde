@@ -59,7 +59,7 @@ OBJECTS=<OBJECTS>
 
 all: src/tilde
 
-.PHONY: all clean dist-clean install uninstall
+.PHONY: all clean dist-clean distclean install uninstall
 .SUFFIXES: .cc .o .mo .po
 .IGNORE: uninstall
 
@@ -67,7 +67,9 @@ clean:
 	rm -rf src/*.o src/dialogs/*.o src/tilde
 
 dist-clean: clean
-	rm -rf Makefile config.log
+	rm -rf Makefile config.log .Makefile* .config*
+
+distclean: dist-clean
 
 .cc.o:
 	$(SILENTCXX) $(CXX) $(CXXFLAGS) $(CONFIGFLAGS) $(GETTEXTFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" -DDATADIR=\"$(datadir)/tilde\" -Isrc -c -o $@ $<

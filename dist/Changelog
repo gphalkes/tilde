@@ -1,3 +1,6 @@
+Version 0.3.9:
+	Minor updates to Makefile.in for compatibility with Debian packaging.
+
 Version 0.3.8:
 	New features:
 	- Files can be opened at a specific position, by appending line (and
