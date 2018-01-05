@@ -140,6 +140,8 @@ int main(int argc, char *argv[]) {
 	fchmod(fd, 0644);
 	fchown(fd, 0, 0);
 	fsync(fd);
+	ftruncate(fd, 5);
+	off_t offset = lseek(fd, 0, SEEK_CUR);
 	fd = open("name", O_RDONLY);
 	unlink("name");
 	bufsiz = readlink("path", buf, sizeof(buf));
@@ -158,6 +160,8 @@ EOF
 		checkfunction "fchmod" 'int fd; fchmod(fd, 0);' "<sys/stat.h>"
 		checkfunction "fchown" 'int fd; fchown(fd, 0, 0);' "<unistd.h>"
 		checkfunction "fsync" 'int fd; fsync(fd);' "<unistd.h>"
+		checkfunction "ftruncate" 'int fd; ftrucnate(fd, 5);' "<unistd.h>" "<sys/types.h>"
+		checkfunction "lseek" 'off_t offset = lseek(fd, 0, SEEK_CUR);' "<sys/types.h>" "<unistd.h>"
 		checkfunction "open" 'int fd = open("name", O_RDONLY);' "<fcntl.h>" "<sys/stat.h>" "<sys/types.h>"
 		checkfunction "unlink" 'unlink("name");' "<unistd.h>"
 		checkfunction "readlink" 'char buf[1024]; size_t bufsiz; bufsiz = readlink("path", buf, sizeof(buf));' "<unistd.h>"

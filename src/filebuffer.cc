@@ -28,6 +28,8 @@
 #include "log.h"
 #include "option.h"
 
+#define CREATE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
+
 file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_buffer_t(new file_line_factory_t(this)),
 		view_parameters(new edit_window_t::view_parameters_t()), has_window(false), highlight_valid(0),
 		highlight_info(NULL), match_line(NULL), last_match(NULL), matching_brace_valid(false)
@@ -228,7 +230,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			   However, this may cause issues with NFS, which is known to have isues with this. */
 			if (stat(state->real_name, &state->file_info) < 0) {
 				if (errno == ENOENT) {
-					if ((state->fd = creat(state->real_name, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) < 0)
+					if ((state->fd = creat(state->real_name, CREATE_MODE)) < 0)
 						return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
 				} else {
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
@@ -263,19 +265,28 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				   to change that string. So we'll just have to strdup it :-( */
 				if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == NULL)
 					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-				if ((state->fd = mkstemp(state->temp_name)) < 0)
-					return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-
-				// Preserve ownership and attributes
+				/* Attempt to create a temporary file. If this fails, just write the file
+				   directly. The latter has some risk (e.g. file truncation due to full disk,
+				   or corruption due to computer crashes), but these are so small that it is
+				   worth permitting this if we can't create the temporary file. */
+				if ((state->fd = mkstemp(state->temp_name)) >= 0) {
+					// Preserve ownership and attributes
 #ifdef HAS_LIBATTR
-				attr_copy_file(state->real_name, state->temp_name, NULL, NULL);
+					attr_copy_file(state->real_name, state->temp_name, NULL, NULL);
 #endif
 #ifdef HAS_LIBACL
-				perm_copy_file(state->real_name, state->temp_name, NULL);
+					perm_copy_file(state->real_name, state->temp_name, NULL);
 #endif
-				fchmod(state->fd, state->file_info.st_mode);
-				fchown(state->fd, -1, state->file_info.st_gid);
-				fchown(state->fd, state->file_info.st_uid, -1);
+					fchmod(state->fd, state->file_info.st_mode);
+					fchown(state->fd, -1, state->file_info.st_gid);
+					fchown(state->fd, state->file_info.st_uid, -1);
+				} else {
+					free(state->temp_name);
+					state->temp_name = NULL;
+					if ((state->fd = open(state->real_name, O_WRONLY | O_CREAT, CREATE_MODE)) < 0) {
+						return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+					}
+				}
 			}
 
 		{
@@ -298,7 +309,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			state->i = 0;
 			state->state = save_as_process_t::WRITING;
 		}
-		case save_as_process_t::WRITING:
+		case save_as_process_t::WRITING: {
 			if (strip_spaces.is_valid() ? (bool) strip_spaces : option.strip_spaces)
 				do_strip_spaces();
 			try {
@@ -313,6 +324,12 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				return error;
 			}
 
+			// If the file is being overwritten, truncate it to the written size.
+			if (state->temp_name == NULL) {
+				off_t curr_pos = lseek(state->fd, 0, SEEK_CUR);
+				if (curr_pos >= 0)
+					ftruncate(state->fd, curr_pos);
+			}
 			fsync(state->fd);
 			close(state->fd);
 			state->fd = -1;
@@ -336,6 +353,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			}
 			set_undo_mark();
 			break;
+		}
 		default:
 			PANIC();
 	}

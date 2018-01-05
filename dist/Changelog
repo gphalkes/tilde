@@ -1,3 +1,10 @@
+Version 0.4.0:
+	New features:
+	- Allow writing files if the directory they are in is not writable for the
+	  current user. This is ever so slightly more risky than creating a
+	  temporary file and moving it over the existing one, which is the default
+	  behavior.
+
 Version 0.3.9:
 	Minor updates to Makefile.in for compatibility with Debian packaging.
 
