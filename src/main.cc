@@ -123,10 +123,9 @@ main_t::main_t(void) {
 	panel->add_separator();
 	panel->add_item("Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
 	panel->add_item("_Mark Selection", "^T", action_id_t::EDIT_MARK);
+	panel->add_item("Paste _Selection", "S-Ins", action_id_t::EDIT_PASTE_SELECTION);
 	panel->add_separator();
-	panel->add_item("_Indent Selection", "Tab", action_id_t::EDIT_INDENT_SELECTION);
-	panel->add_item("U_nindent Selection", "S-Tab", action_id_t::EDIT_UNINDENT_SELECTION);
-	panel->add_separator();
+	panel->add_item("_Delete Line", "^K", action_id_t::EDIT_DELETE_LINE);
 	panel->add_item("Insert C_haracter...", "F9", action_id_t::EDIT_INSERT_CHAR);
 	panel->add_item("T_oggle INS/OVR", "Ins", action_id_t::EDIT_TOGGLE_INSERT);
 
@@ -155,6 +154,8 @@ main_t::main_t(void) {
 	panel->add_item("_Strip trailing spaces", NULL, action_id_t::TOOLS_STRIP_SPACES);
 	panel->add_item("_Autocomplete", "C-Space", action_id_t::TOOLS_AUTOCOMPLETE);
 	panel->add_item("_Toggle line comment", "C-/", action_id_t::TOOLS_TOGGLE_LINE_COMMENT);
+	panel->add_item("_Indent Selection", "Tab", action_id_t::TOOLS_INDENT_SELECTION);
+	panel->add_item("_Unindent Selection", "S-Tab", action_id_t::TOOLS_UNINDENT_SELECTION);
 
 	panel = new menu_panel_t("_Options", menu);
 	panel->add_item("Input _Handling...", NULL, action_id_t::OPTIONS_INPUT);
@@ -210,7 +211,7 @@ main_t::main_t(void) {
 	about_dialog = new message_dialog_t(45, "About", "Close", NULL);
 	about_dialog->center_over(this);
 	about_dialog->set_max_text_height(13);
-	about_dialog->set_message("Tilde - The intuitive text editor\n\nVersion <VERSION>\nCopyright (c) 2011-2012 G.P. Halkes\n\n" // @copyright
+	about_dialog->set_message("Tilde - The intuitive text editor\n\nVersion <VERSION>\nCopyright (c) 2011-2017 G.P. Halkes\n\n" // @copyright
 		"The Tilde text editor is licensed under the GNU General Public License version 3. "
 		"You should have received a copy of the GNU General Public License along with this program. "
 		"If not, see <http://www.gnu.org/licenses/>.");
@@ -367,17 +368,23 @@ void main_t::menu_activated(int id) {
 		case action_id_t::EDIT_MARK:
 			get_current()->process_key(0);
 			break;
+		case action_id_t::EDIT_PASTE_SELECTION:
+			get_current()->paste_selection();
+			break;
 		case action_id_t::EDIT_INSERT_CHAR:
 			get_current()->insert_special();
 			break;
-		case action_id_t::EDIT_INDENT_SELECTION:
+		case action_id_t::TOOLS_INDENT_SELECTION:
 			get_current()->indent_selection();
 			break;
-		case action_id_t::EDIT_UNINDENT_SELECTION:
+		case action_id_t::TOOLS_UNINDENT_SELECTION:
 			get_current()->unindent_selection();
 			break;
 		case action_id_t::EDIT_TOGGLE_INSERT:
 			get_current()->process_key(EKEY_INS);
+			break;
+		case action_id_t::EDIT_DELETE_LINE:
+			get_current()->delete_line();
 			break;
 
 		case action_id_t::SEARCH_SEARCH:
