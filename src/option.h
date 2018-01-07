@@ -33,6 +33,7 @@ struct cli_options_t {
 
 	std::list<const char *> files;
 	bool disable_external_clipboard;
+	bool disable_primary_selection;
 
 #ifdef DEBUG
 	bool wait;
@@ -85,6 +86,7 @@ struct options_t {
 	optional<bool> make_backup;
 	optional<bool> hide_menubar;
 	optional<bool> parse_file_positions;
+	optional<bool> disable_primary_selection_over_ssh;
 
 	optional<int> tabsize;
 	optional<size_t> max_recent_files;

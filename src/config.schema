@@ -84,6 +84,7 @@ allowed-keys {
 	attributes { type = "attributes" }
 	highlight_attributes { type = "highlight_attributes" }
 	parse_file_positions { type = "bool" }
+	disable_primary_selection_over_ssh { type = "bool" }
 }
 item-type = "any"
 

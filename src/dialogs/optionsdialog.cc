@@ -212,7 +212,7 @@ void buffer_options_dialog_t::handle_activate(void) {
 
 //===============================================================
 
-misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(6, 26, _title) {
+misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 26, _title) {
 	smart_label_t *label;
 	int width = 0;
 	button_t *ok_button, *cancel_button;
@@ -259,6 +259,20 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(6, 2
 
 	width = max(label->get_width() + 2 + 3, width);
 
+	label = new smart_label_t(_("Disable primary selection over _SSH"));
+	label->set_position(4, 2);
+	push_back(label);
+	disable_selection_over_ssh_box = new checkbox_t();
+	disable_selection_over_ssh_box->set_label(label);
+	disable_selection_over_ssh_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+	disable_selection_over_ssh_box->set_position(4, -2);
+	disable_selection_over_ssh_box->connect_move_focus_up(signals::mem_fun(this, &misc_options_dialog_t::focus_previous));
+	disable_selection_over_ssh_box->connect_move_focus_down(signals::mem_fun(this, &misc_options_dialog_t::focus_next));
+	disable_selection_over_ssh_box->connect_activate(signals::mem_fun(this, &misc_options_dialog_t::handle_activate));
+	push_back(disable_selection_over_ssh_box);
+
+	width = max(label->get_width() + 2 + 3, width);
+
 	cancel_button = new button_t("_Cancel");
 	cancel_button->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
 	cancel_button->set_position(-1, -2);
@@ -286,12 +300,17 @@ void misc_options_dialog_t::set_values_from_options(void) {
 	hide_menu_box->set_state(option.hide_menubar);
 	save_backup_box->set_state(option.make_backup);
 	parse_file_positions_box->set_state(default_option.parse_file_positions.value_or_default(true));
+	disable_selection_over_ssh_box->set_state(default_option.disable_primary_selection_over_ssh.value_or_default(false));
 }
 
 void misc_options_dialog_t::set_options_from_values(void) {
 	option.hide_menubar = default_option.hide_menubar = hide_menu_box->get_state();
 	option.make_backup = default_option.make_backup = save_backup_box->get_state();
 	default_option.parse_file_positions = parse_file_positions_box->get_state();
+	default_option.disable_primary_selection_over_ssh = disable_selection_over_ssh_box->get_state();
+	if (!cli_option.disable_primary_selection && getenv("SSH_TTY") != NULL) {
+		t3_widget::set_primary_selection_mode(!default_option.disable_primary_selection_over_ssh.value_or_default(false));
+	}
 }
 
 void misc_options_dialog_t::handle_activate(void) {

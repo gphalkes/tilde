@@ -771,6 +771,10 @@ int main(int argc, char *argv[]) {
 	params->term = cli_option.term;
 	params->program_name = "Tilde";
 	params->disable_external_clipboard = cli_option.disable_external_clipboard;
+	if ((default_option.disable_primary_selection_over_ssh.value_or_default(false) && getenv("SSH_TTY") != NULL) ||
+			cli_option.disable_primary_selection) {
+		t3_widget::set_primary_selection_mode(false);
+	}
 
 	if (!(result = init(params)).get_success()) {
 		fprintf(stderr, "Error: %s\n", result.get_string());

@@ -275,6 +275,7 @@ static void read_config(void) {
 	GET_OPT(make_backup, BOOL, bool);
 	GET_OPT(hide_menubar, BOOL, bool);
 	GET_OPT(parse_file_positions, BOOL, bool);
+	GET_OPT(disable_primary_selection_over_ssh, BOOL, bool);
 
 	GET_OPT(tabsize, INT, int);
 	GET_OPT(max_recent_files, INT, int);
@@ -407,6 +408,9 @@ PARSE_FUNCTION(parse_args)
 		END_OPTION
 		OPTION('x', "no-ext-clipboard", NO_ARG)
 			cli_option.disable_external_clipboard = true;
+		END_OPTION
+		OPTION('P', "no-primary-selection", NO_ARG)
+			cli_option.disable_primary_selection = true;
 		END_OPTION
 		OPTION('C', "config", REQUIRED_ARG)
 			cli_option.config_file = optArg;
@@ -620,6 +624,7 @@ bool write_config(void) {
 	SET_OPTION(make_backup, bool);
 	SET_OPTION(hide_menubar, bool);
 	SET_OPTION(parse_file_positions, bool);
+	SET_OPTION(disable_primary_selection_over_ssh, bool);
 
 	SET_OPTION(tabsize, int);
 	SET_OPTION(max_recent_files, int);

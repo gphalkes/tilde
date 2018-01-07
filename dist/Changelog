@@ -6,6 +6,10 @@ Version 0.4.0:
 	  behavior.
 	- Add menu items for the new Paste Selection (which pastes the X11 primary
 	  selection) and for the new Delete Line actions.
+	- Make it possible to disable claiming the primary selection, and to
+	  automatically disable this when running over SSH. When running over SSH
+	  on high-latency connections and while running a clipboard manager
+	  locally, the primary selection claiming can make Tilde work slowly.
 
 Version 0.3.9:
 	Minor updates to Makefile.in for compatibility with Debian packaging.
