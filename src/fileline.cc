@@ -37,7 +37,7 @@ file_line_t::file_line_t(const std::string *str, file_line_factory_t *_factory) 
 {}
 
 int file_line_t::get_highlight_idx(int i) {
-	const string *str;
+	const std::string *str;
 	file_buffer_t *file = ((file_line_factory_t *) factory)->get_file_buffer();
 
 	if (file == NULL || file->highlight_info == NULL)
@@ -77,7 +77,7 @@ void file_line_t::set_highlight_start(int state) {
 }
 
 int file_line_t::get_highlight_end(void) {
-	const string *str;
+	const std::string *str;
 
 	file_buffer_t *file = ((file_line_factory_t *) factory)->get_file_buffer();
 	if (file == NULL || file->highlight_info == NULL)

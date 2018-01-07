@@ -37,7 +37,7 @@ open_files_t::iterator open_files_t::erase(open_files_t::iterator position) {
 open_files_t::iterator open_files_t::contains(const char *name) {
 	/* FIXME: this should really check for ino+dev equality to see if the file
 	   is already open. */
-	for (vector<file_buffer_t *>::iterator iter = files.begin();
+	for (std::vector<file_buffer_t *>::iterator iter = files.begin();
 			iter != files.end(); iter++)
 	{
 		if ((*iter)->get_name() != NULL && strcmp(name, (*iter)->get_name()) == 0)
@@ -108,10 +108,10 @@ void open_files_t::cleanup(void) {
 
 recent_file_info_t::recent_file_info_t(file_buffer_t *file) {
 	if ((name = strdup_impl(file->get_name())) == NULL)
-		throw bad_alloc();
+		throw std::bad_alloc();
 	if ((encoding = strdup_impl(file->get_encoding())) == NULL) {
 		free(name);
-		throw bad_alloc();
+		throw std::bad_alloc();
 	}
 }
 
@@ -133,7 +133,7 @@ void recent_files_t::push_front(file_buffer_t *text) {
 	if (text->get_name() == NULL)
 		return;
 
-	for (deque<recent_file_info_t *>::iterator iter = names.begin();
+	for (std::deque<recent_file_info_t *>::iterator iter = names.begin();
 			iter != names.end(); iter++)
 	{
 		if (strcmp((*iter)->get_name(), text->get_name()) == 0)
@@ -154,7 +154,7 @@ recent_file_info_t *recent_files_t::get_info(size_t idx) {
 }
 
 void recent_files_t::erase(recent_file_info_t *info) {
-	for (deque<recent_file_info_t *>::iterator iter = names.begin();
+	for (std::deque<recent_file_info_t *>::iterator iter = names.begin();
 			iter != names.end(); iter++)
 	{
 		if (*iter == info) {

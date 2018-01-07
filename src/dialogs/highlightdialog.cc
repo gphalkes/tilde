@@ -21,7 +21,6 @@
 #include "util.h"
 #include "dialogs/highlightdialog.h"
 
-using namespace std;
 
 static bool cmp_lang_names(t3_highlight_lang_t a, t3_highlight_lang_t b) {
 	return strcmp(a.name, b.name) < 0;
@@ -45,10 +44,10 @@ highlight_dialog_t::highlight_dialog_t(int height, int width) :
 
 	if ((names = t3_highlight_list(0, &error)) == NULL) {
 		if (error.error == T3_ERR_OUT_OF_MEMORY)
-			throw bad_alloc();
+			throw std::bad_alloc();
 	} else {
 		for (ptr = names; ptr->name != NULL; ptr++) {}
-		sort((t3_highlight_lang_t *) names, ptr, cmp_lang_names);
+		std::sort((t3_highlight_lang_t *) names, ptr, cmp_lang_names);
 
 		for (ptr = names; ptr->name != NULL; ptr++) {
 			label = new label_t(ptr->name);
@@ -102,7 +101,7 @@ void highlight_dialog_t::ok_activated(void) {
 
 	if ((highlight = t3_highlight_load(names[idx - 1].lang_file, map_highlight, NULL,
 			T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, &error)) == NULL) {
-		string message(_("Error loading highlighting patterns: "));
+		std::string message(_("Error loading highlighting patterns: "));
 		message += t3_highlight_strerror(error.error);
 		error_dialog->set_message(&message);
 		error_dialog->center_over(this);

@@ -34,7 +34,7 @@ void load_process_t::abort(void) {
 }
 
 bool load_process_t::step(void) {
-	string message;
+	std::string message;
 	rw_result_t rw_result;
 
 	if (state == SELECT_FILE) {
@@ -107,7 +107,7 @@ bool load_process_t::step(void) {
 	return true;
 }
 
-void load_process_t::file_selected(const string *name) {
+void load_process_t::file_selected(const std::string *name) {
 	open_files_t::iterator iter;
 	if ((iter = open_files.contains(name->c_str())) != open_files.end()) {
 		file = *iter;
@@ -120,7 +120,7 @@ void load_process_t::file_selected(const string *name) {
 	run();
 }
 
-void load_process_t::encoding_selected(const string *_encoding) {
+void load_process_t::encoding_selected(const std::string *_encoding) {
 	encoding = *_encoding;
 }
 
@@ -164,7 +164,7 @@ save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file,
 {}
 
 bool save_as_process_t::step(void) {
-	string message;
+	std::string message;
 	rw_result_t rw_result;
 
 	if (state == SELECT_FILE) {
@@ -301,7 +301,7 @@ bool close_process_t::step(void) {
 		result = true;
 		return true;
 	} else if (state == CONFIRM_CLOSE) {
-		string message;
+		std::string message;
 		printf_into(&message, "Save changes to '%s'", file->get_name() == NULL ? "(Untitled)" : file->get_name());
 		connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &close_process_t::do_save), 0));
 		connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &close_process_t::dont_save), 1));
@@ -338,7 +338,7 @@ exit_process_t::exit_process_t(const callback_t &cb) : stepped_process_t(cb), it
 bool exit_process_t::step(void) {
 	for (; iter != open_files.end(); iter++) {
 		if ((*iter)->is_modified()) {
-			string message;
+			std::string message;
 			printf_into(&message, "Save changes to '%s'", (*iter)->get_name() == NULL ? "(Untitled)" : (*iter)->get_name());
 			connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &exit_process_t::do_save), 0));
 			connections.push_back(close_confirm_dialog->connect_activate(signals::mem_fun(this, &exit_process_t::dont_save), 1));
@@ -429,7 +429,7 @@ bool load_cli_file_process_t::step(void) {
 	in_step = true;
 	while (iter != cli_option.files.end()) {
 		int line = -1, pos = -1;
-		string filename = *iter;
+		std::string filename = *iter;
 		if (default_option.parse_file_positions.value_or_default(true) && !cli_option.disable_file_position_parsing)
 			attempt_file_position_parse(&filename, &line, &pos);
 
@@ -458,7 +458,7 @@ void load_cli_file_process_t::execute(const callback_t &cb) {
 	(new load_cli_file_process_t(cb))->run();
 }
 
-void load_cli_file_process_t::encoding_selection_done(const string *_encoding) {
+void load_cli_file_process_t::encoding_selection_done(const std::string *_encoding) {
 	encoding = strdup_impl(_encoding->c_str());
 	run();
 }
@@ -467,7 +467,7 @@ static bool is_ascii_digit(int c) {
 	return c >= '0' && c <= '9';
 }
 
-void load_cli_file_process_t::attempt_file_position_parse(string *filename, int *line, int *pos) {
+void load_cli_file_process_t::attempt_file_position_parse(std::string *filename, int *line, int *pos) {
 	size_t idx = filename->size();
 	if (idx < 3) {
 		return;

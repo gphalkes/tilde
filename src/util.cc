@@ -27,7 +27,6 @@
 
 #include "static_assert.h"
 
-using namespace std;
 using namespace t3_widget;
 
 #ifdef DEBUG
@@ -55,7 +54,7 @@ void stepped_process_t::run(void) {
 void stepped_process_t::abort(void) { done(false); }
 
 void stepped_process_t::disconnect(void) {
-	for (list<signals::connection>::iterator iter = connections.begin();
+	for (std::list<signals::connection>::iterator iter = connections.begin();
 			iter != connections.end(); iter++)
 		(*iter).disconnect();
 	connections.clear();
@@ -150,7 +149,7 @@ char *canonicalize_path(const char *path) {
 
 #define BUFFER_START_SIZE 256
 #define BUFFER_MAX 4096
-void printf_into(string *message, const char *format, ...) {
+void printf_into(std::string *message, const char *format, ...) {
 	static cleanup_free_ptr<char>::t message_buffer;
 	static int message_buffer_size;
 
@@ -175,7 +174,7 @@ void printf_into(string *message, const char *format, ...) {
 		return;
 	}
 
-	result = min(BUFFER_MAX - 1, result);
+	result = std::min(BUFFER_MAX - 1, result);
 	if (result < message_buffer_size || (new_message_buffer = (char *) realloc(message_buffer, result + 1)) == NULL) {
 		*message = message_buffer;
 		va_end(args);

@@ -39,15 +39,15 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding) : text_bu
 	else
 		encoding = strdup_impl(_encoding);
 	if (encoding == NULL)
-		throw bad_alloc();
+		throw std::bad_alloc();
 
 	if (_name == NULL) {
 		name_line.set_text("(Untitled)");
 	} else {
 		if ((name = strdup_impl(_name)) == NULL)
-			throw bad_alloc();
+			throw std::bad_alloc();
 
-		string converted_name;
+		std::string converted_name;
 		convert_lang_codeset(name, &converted_name, true);
 		name_line.set_text(&converted_name);
 	}
@@ -71,7 +71,7 @@ file_buffer_t::~file_buffer_t(void) {
 }
 
 rw_result_t file_buffer_t::load(load_process_t *state) {
-	const string *line;
+	const std::string *line;
 	t3_highlight_t *highlight = NULL;
 	t3_highlight_lang_t lang;
 	t3_bool success = t3_false;
@@ -83,7 +83,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 	switch (state->state) {
 		case load_process_t::INITIAL_MISSING_OK:
 		case load_process_t::INITIAL: {
-			string converted_name;
+			std::string converted_name;
 			char *_name;
 			transcript_t *handle;
 			transcript_error_t error;
@@ -114,7 +114,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 				//FIXME: if the new fails, the handle will remain open!
 				state->wrapper = new file_read_wrapper_t(state->fd, handle);
 
-			} catch (bad_alloc &ba) {
+			} catch (std::bad_alloc &ba) {
 				return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 			}
 			state->state = load_process_t::READING_FIRST;
@@ -247,9 +247,9 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				if (access(state->save_name, W_OK) != 0)
 					return rw_result_t(rw_result_t::FILE_EXISTS_READONLY);
 		case save_as_process_t::ALLOW_OVERWRITE_READONLY:
-				string temp_name_str = state->real_name.get();
+			std::string temp_name_str = state->real_name.get();
 
-				if ((idx = temp_name_str.rfind('/')) == string::npos)
+				if ((idx = temp_name_str.rfind('/')) == std::string::npos)
 					idx = 0;
 				else
 					idx++;
@@ -257,7 +257,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				temp_name_str.erase(idx);
 				try {
 					temp_name_str.append(".tildeXXXXXX");
-				} catch (bad_alloc &ba) {
+				} catch (std::bad_alloc &ba) {
 					return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
 				}
 
@@ -314,7 +314,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 				do_strip_spaces();
 			try {
 				for (; state->i < size(); state->i++) {
-					const string *data;
+					const std::string *data;
 					if (state->i != 0)
 						state->wrapper->write("\n", 1);
 					data = get_line_data(state->i)->get_data();
@@ -335,7 +335,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			state->fd = -1;
 			if (state->temp_name != NULL) {
 				if (option.make_backup) {
-					string backup_name = state->real_name.get();
+					std::string backup_name = state->real_name.get();
 					backup_name += '~';
 					unlink(backup_name.c_str());
 					link(state->real_name, backup_name.c_str());
@@ -345,7 +345,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 			}
 
 			if (!state->name.empty()) {
-				string converted_name;
+				std::string converted_name;
 				/* name is a cleanup ptr. */
 				name = strdup_impl(state->name.c_str());
 				convert_lang_codeset(name, &converted_name, true);
@@ -450,7 +450,7 @@ void file_buffer_t::do_strip_spaces(void) {
 
 	for (i = 0; i < size() ; i++) {
 		const text_line_t *line = get_line_data(i);
-		const string *str = line->get_data();
+		const std::string *str = line->get_data();
 		const char *data = str->data();
 		strip_start = str->size();
 		for (idx = strip_start; idx > 0; idx--) {

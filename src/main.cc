@@ -29,7 +29,6 @@
 #include "dialogs/attributesdialog.h"
 #include "log.h"
 
-using namespace std;
 using namespace t3_widget;
 
 #define MESSAGE_DIALOG_WIDTH 50
@@ -46,7 +45,7 @@ message_dialog_t *preserve_bom_dialog;
 
 static dialog_t *input_selection_dialog;
 
-static list<window_component_t *> discard_list;
+static std::list<window_component_t *> discard_list;
 
 static char *runfile_name;
 
@@ -281,11 +280,11 @@ bool main_t::set_size(optint height, optint width) {
 	result &= open_file_dialog->set_size(height - 4, width - 4);
 	result &= save_as_dialog->set_size(height - 4, width - 4);
 	result &= open_recent_dialog->set_size(11, width - 4);
-	result &= encoding_dialog->set_size(min(height - 8, 16), min(width - 8, 72));
+	result &= encoding_dialog->set_size(std::min(height - 8, 16), std::min(width - 8, 72));
 	result &= highlight_dialog->set_size(height - 4, None);
 	if (input_selection_dialog != NULL && dynamic_cast<input_selection_dialog_t *>(input_selection_dialog) != NULL) {
-		int is_width = min(max(width - 16, 40), 100);
-		int is_height = min(max(height - 3, 15), 3200 / is_width);
+		int is_width = std::min(std::max(width - 16, 40), 100);
+		int is_height = std::min(std::max(height - 3, 15), 3200 / is_width);
 		input_selection_dialog->set_size(is_height, is_width);
 	}
 	return true;
@@ -589,8 +588,8 @@ static void configure_input(bool cancel_selects_default) {
 	signal_update();
 
 	t3_term_get_size(&height, &width);
-	is_width = min(max(width - 16, 40), 100);
-	is_height = min(max(height - 3, 15), 3200 / is_width);
+	is_width = std::min(std::max(width - 16, 40), 100);
+	is_height = std::min(std::max(height - 3, 15), 3200 / is_width);
 
 	input_selection = new input_selection_dialog_t(is_height, is_width);
 	input_selection->connect_activate(signals::bind(signals::ptr_fun(input_selection_complete), true));
@@ -613,7 +612,7 @@ static void input_selection_complete(bool selection_made) {
 
 static void sync_updates(void) {
 	if (!discard_list.empty()) {
-		for (list<window_component_t *>::iterator iter = discard_list.begin(); iter != discard_list.end(); iter++)
+		for (std::list<window_component_t *>::iterator iter = discard_list.begin(); iter != discard_list.end(); iter++)
 			delete *iter;
 		discard_list.clear();
 	}
@@ -748,7 +747,7 @@ static void setup_signal_handlers() {
 int main(int argc, char *argv[]) {
 	complex_error_t result;
 	init_parameters_t *params = init_parameters_t::create();
-	string config_file_name;
+	std::string config_file_name;
 
 	init_log();
 	setlocale(LC_ALL, "");
@@ -797,7 +796,7 @@ int main(int argc, char *argv[]) {
 	if (option.key_timeout.is_valid()) {
 		set_key_timeout(option.key_timeout);
 	} else if (config_read_error) {
-		string message = "Error loading configuration file ";
+		std::string message = "Error loading configuration file ";
 		if (cli_option.config_file == NULL) {
 			char *file_name = t3_config_xdg_get_path(T3_CONFIG_XDG_CONFIG_HOME, "tilde", 5);
 			strcat(file_name, "/config");

@@ -23,7 +23,6 @@
 #include "optionMacros.h"
 #include "log.h"
 
-using namespace std;
 using namespace t3_widget;
 
 #define MAX_TAB 16
@@ -41,7 +40,7 @@ term_options_t term_specific_option;
 options_t default_option;
 
 bool config_read_error;
-string config_read_error_string;
+std::string config_read_error_string;
 int config_read_error_line;
 
 static struct { const char *string; t3_attr_t attr; } attribute_map[] = {

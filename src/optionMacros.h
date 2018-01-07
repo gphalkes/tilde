@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <climits>
 
-using namespace std;
 
 /* INSTRUCTIONS:
 - A fatal routine should be provided.

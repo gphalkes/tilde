@@ -16,13 +16,12 @@
 #include "fileautocompleter.h"
 #include "log.h"
 
-using namespace std;
 
-static bool compare_strings(string *a, string *b) {
+static bool compare_strings(std::string *a, std::string *b) {
 	return a->compare(*b) < 0;
 }
 
-typedef set<string *, bool(*)(string *, string *)> result_set_t;
+typedef std::set<std::string *, bool(*)(std::string *, std::string *)> result_set_t;
 
 file_autocompleter_t::file_autocompleter_t(void) : current_list(NULL) {
 }
@@ -30,7 +29,7 @@ file_autocompleter_t::file_autocompleter_t(void) : current_list(NULL) {
 string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buffer_t *text, int *position) {
 	const text_line_t *line;
 	int completion_end;
-	string current_word;
+	std::string current_word;
 
 	if (current_list != NULL) {
 		delete current_list;
@@ -60,11 +59,11 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 
 	text_coordinate_t start(0, 0);
 	text_coordinate_t eof(INT_MAX, INT_MAX);
-	string needle(*line->get_data(), completion_start, text->cursor.pos - completion_start);
+	std::string needle(*line->get_data(), completion_start, text->cursor.pos - completion_start);
 	finder_t finder(&needle, find_flags_t::ANCHOR_WORD_LEFT, NULL);
 	find_result_t find_result;
 	result_set_t result_set(compare_strings);
-	string word;
+	std::string word;
 
 	while (text->find_limited(&finder, start, eof, &find_result)) {
 		line = text->get_line_data(find_result.start.line);
@@ -76,7 +75,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 		if (find_result.end.pos - find_result.start.pos != text->cursor.pos - completion_start) {
 			word = line->get_data()->substr(find_result.start.pos, find_result.end.pos - find_result.start.pos);
 			if (result_set.count(&word) == 0 && word != current_word)
-				result_set.insert(new string(word));
+				result_set.insert(new std::string(word));
 		}
 
 		start.line = find_result.end.line;
@@ -88,7 +87,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 
 	try {
 		current_list = new string_list_t();
-	} catch (const bad_alloc&) {
+	} catch (const std::bad_alloc&) {
 		current_list = NULL;
 		return NULL;
 	}

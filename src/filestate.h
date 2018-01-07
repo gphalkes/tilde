@@ -191,10 +191,10 @@ class open_recent_process_t : public load_process_t	{
 
 class load_cli_file_process_t : public stepped_process_t {
 	private:
-		void attempt_file_position_parse(string *filename, int *line, int *pos);
+		void attempt_file_position_parse(std::string *filename, int *line, int *pos);
 
 	protected:
-		list<const char *>::const_iterator iter;
+		std::list<const char *>::const_iterator iter;
 		bool in_load, in_step, encoding_selected;
 		cleanup_free_ptr<char>::t encoding;
 

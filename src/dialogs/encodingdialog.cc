@@ -19,14 +19,13 @@
 #include "encodingdialog.h"
 #include "log.h"
 
-using namespace std;
 
 struct charset_desc_t {
 	const char *name; // Display name for this character set
 	const char *tag; // Known working name for this character set
 };
 
-typedef deque<charset_desc_t> charset_descs_t;
+typedef std::deque<charset_desc_t> charset_descs_t;
 
 static charset_desc_t friendly_charsets[] = {
 	{ "Arabic (ISO-8859-6)", "ISO-8859-6" },
@@ -166,7 +165,7 @@ bool encoding_dialog_t::set_size(optint height, optint width) {
 }
 
 void encoding_dialog_t::ok_activated(void) {
-	string encoding;
+	std::string encoding;
 	size_t idx = list->get_current();
 
 	if (idx + 1 == list->size()) {
@@ -175,7 +174,7 @@ void encoding_dialog_t::ok_activated(void) {
 
 		lprintf("Testing encoding name: %s\n", encoding.c_str());
 		if (!transcript_probe_converter(encoding.c_str())) {
-			string message = "Requested character set is not available";
+			std::string message = "Requested character set is not available";
 			message_dialog->set_message(&message);
 			message_dialog->center_over(this);
 			message_dialog->show();

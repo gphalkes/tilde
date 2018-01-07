@@ -19,7 +19,6 @@
 #include <string>
 #include <transcript/transcript.h>
 
-using namespace std;
 
 #define FILE_BUFFER_SIZE 1024
 //~ #define FILE_BUFFER_SIZE 102

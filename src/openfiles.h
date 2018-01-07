@@ -17,7 +17,6 @@
 #include <vector>
 #include <deque>
 
-using namespace std;
 
 #include "util.h"
 
@@ -25,14 +24,14 @@ class file_buffer_t;
 
 class open_files_t {
 	private:
-		vector<file_buffer_t *> files;
+		std::vector<file_buffer_t *> files;
 		version_t version;
 
 	public:
 		void push_back(file_buffer_t *text);
 
-		typedef vector<file_buffer_t *>::iterator iterator;
-		typedef vector<file_buffer_t *>::reverse_iterator reverse_iterator;
+		typedef std::vector<file_buffer_t *>::iterator iterator;
+		typedef std::vector<file_buffer_t *>::reverse_iterator reverse_iterator;
 		size_t size(void) const;
 		bool empty() const;
 		iterator erase(iterator position);
@@ -66,7 +65,7 @@ class recent_file_info_t {
 
 class recent_files_t {
 	private:
-		deque<recent_file_info_t *> names;
+		std::deque<recent_file_info_t *> names;
 		version_t version;
 
 	public:
@@ -75,7 +74,7 @@ class recent_files_t {
 		void erase(recent_file_info_t *info);
 
 		int get_version(void);
-		typedef deque<recent_file_info_t *>::iterator iterator;
+		typedef std::deque<recent_file_info_t *>::iterator iterator;
 		iterator begin(void);
 		iterator end(void);
 

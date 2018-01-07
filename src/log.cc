@@ -16,7 +16,6 @@
 #include <cstring>
 #include "log.h"
 
-using namespace std;
 
 #ifdef DEBUG
 static FILE *log_file;
