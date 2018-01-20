@@ -288,6 +288,32 @@ void attributes_dialog_t::set_term_options_from_values(void) {
 
 void attributes_dialog_t::set_default_options_from_values(void) {
 	set_options_from_values(&default_option.term_options);
+
+	// Make this terminal obey the defaults.
+	term_specific_option.color = nullopt;
+	term_specific_option.non_print = nullopt;
+	term_specific_option.text_selection_cursor = nullopt;
+	term_specific_option.text_selection_cursor2 = nullopt;
+	term_specific_option.bad_draw = nullopt;
+	term_specific_option.text_cursor = nullopt;
+	term_specific_option.text = nullopt;
+	term_specific_option.text_selected = nullopt;
+	term_specific_option.hotkey_highlight = nullopt;
+
+	term_specific_option.dialog = nullopt;
+	term_specific_option.dialog_selected = nullopt;
+	term_specific_option.button_selected = nullopt;
+	term_specific_option.scrollbar = nullopt;
+	term_specific_option.menubar = nullopt;
+	term_specific_option.menubar_selected = nullopt;
+
+	term_specific_option.shadow = nullopt;
+	term_specific_option.meta_text = nullopt;
+	term_specific_option.background = nullopt;
+
+	for (int i = 0; i < MAX_HIGHLIGHTS; ++i)
+		term_specific_option.highlights[i] = nullopt;
+	term_specific_option.brace_highlight = nullopt;
 }
 
 void attributes_dialog_t::set_options_from_values(term_options_t *term_options) {

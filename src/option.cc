@@ -530,6 +530,8 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 #define SET_OPTION(name, type) do { \
 	if (opts->name.is_valid()) \
 		t3_config_add_##type(config, #name, opts->name); \
+	else \
+		t3_config_erase(config, #name); \
 } while (0)
 #define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, opts->name)
 #define SET_HL_ATTRIBUTE(x, name) set_config_attribute(config, "highlight_attributes", name, opts->highlights[x])
