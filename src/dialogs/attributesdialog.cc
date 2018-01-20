@@ -235,38 +235,50 @@ void attributes_dialog_t::expander_size_change(bool expanded) {
 void attributes_dialog_t::set_values_from_options(void) {
 	color_box->set_state(option.color);
 
-	dialog = term_specific_option.dialog;
-	dialog_selected = term_specific_option.dialog_selected;
-	shadow = term_specific_option.shadow;
-	background = term_specific_option.background;
-	hotkey_highlight = term_specific_option.hotkey_highlight;
-	bad_draw = term_specific_option.bad_draw;
-	non_print = term_specific_option.non_print;
-	button_selected = term_specific_option.button_selected;
-	scrollbar = term_specific_option.scrollbar;
-	menubar = term_specific_option.menubar;
-	menubar_selected = term_specific_option.menubar_selected;
+#define SET_OPTION_VALUE(name) do { \
+	name = term_specific_option.name; \
+	if (!name.is_valid()) \
+		name = default_option.term_options.name; \
+} while (false)
 
-	text = term_specific_option.text;
-	text_selected = term_specific_option.text_selected;
-	text_cursor = term_specific_option.text_cursor;
-	text_selection_cursor = term_specific_option.text_selection_cursor;
-	text_selection_cursor2 = term_specific_option.text_selection_cursor2;
-	meta_text = term_specific_option.meta_text;
-	brace_highlight = term_specific_option.brace_highlight;
+	SET_OPTION_VALUE(dialog);
+	SET_OPTION_VALUE(dialog_selected);
+	SET_OPTION_VALUE(shadow);
+	SET_OPTION_VALUE(background);
+	SET_OPTION_VALUE(hotkey_highlight);
+	SET_OPTION_VALUE(bad_draw);
+	SET_OPTION_VALUE(non_print);
+	SET_OPTION_VALUE(button_selected);
+	SET_OPTION_VALUE(scrollbar);
+	SET_OPTION_VALUE(menubar);
+	SET_OPTION_VALUE(menubar_selected);
 
-	comment = term_specific_option.highlights[map_highlight(NULL, "comment")];
-	comment_keyword = term_specific_option.highlights[map_highlight(NULL, "comment-keyword")];
-	keyword = term_specific_option.highlights[map_highlight(NULL, "keyword")];
-	number = term_specific_option.highlights[map_highlight(NULL, "number")];
-	string = term_specific_option.highlights[map_highlight(NULL, "string")];
-	string_escape = term_specific_option.highlights[map_highlight(NULL, "string-escape")];
-	misc = term_specific_option.highlights[map_highlight(NULL, "misc")];
-	variable = term_specific_option.highlights[map_highlight(NULL, "variable")];
-	error = term_specific_option.highlights[map_highlight(NULL, "error")];
-	addition = term_specific_option.highlights[map_highlight(NULL, "addition")];
-	deletion = term_specific_option.highlights[map_highlight(NULL, "deletion")];
+	SET_OPTION_VALUE(text);
+	SET_OPTION_VALUE(text_selected);
+	SET_OPTION_VALUE(text_cursor);
+	SET_OPTION_VALUE(text_selection_cursor);
+	SET_OPTION_VALUE(text_selection_cursor2);
+	SET_OPTION_VALUE(meta_text);
+	SET_OPTION_VALUE(brace_highlight);
+#undef SET_OPTION_VALUE
 
+#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name) do { \
+	name = term_specific_option.highlights[map_highlight(NULL, highlight_name)]; \
+	if (!name.is_valid()) \
+		name = default_option.term_options.highlights[map_highlight(NULL, highlight_name)]; \
+} while (false)
+	SET_HIGHLIGHT_OPTION_VALUE(comment, "comment");
+	SET_HIGHLIGHT_OPTION_VALUE(comment_keyword, "comment-keyword");
+	SET_HIGHLIGHT_OPTION_VALUE(keyword, "keyword");
+	SET_HIGHLIGHT_OPTION_VALUE(number, "number");
+	SET_HIGHLIGHT_OPTION_VALUE(string, "string");
+	SET_HIGHLIGHT_OPTION_VALUE(string_escape, "string-escape");
+	SET_HIGHLIGHT_OPTION_VALUE(misc, "misc");
+	SET_HIGHLIGHT_OPTION_VALUE(variable, "variable");
+	SET_HIGHLIGHT_OPTION_VALUE(error, "error");
+	SET_HIGHLIGHT_OPTION_VALUE(addition, "addition");
+	SET_HIGHLIGHT_OPTION_VALUE(deletion, "deletion");
+#undef SET_HIGHLIGHT_OPTION_VALUE
 	update_attribute_lines();
 }
 
@@ -445,8 +457,8 @@ void attributes_dialog_t::default_attribute_selected(void) {
 
 	switch (change_attribute) {
 #define SET_DEFAULT(name, attr) case attr: \
-	name.unset(); \
-	name##_line->set_attribute(get_default_attr(attr, color_box->get_state())); \
+	name = default_option.term_options.name; \
+	name##_line->set_attribute(name.is_valid() ? name() : get_default_attr(attr, color_box->get_state())); \
 	break;
 		SET_DEFAULT(dialog, DIALOG);
 		SET_DEFAULT(dialog_selected, DIALOG_SELECTED);
