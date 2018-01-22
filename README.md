@@ -49,14 +49,13 @@ follow the steps below to build Tilde from the git repositories:
    * libattr1-dev
    * libfuse-dev
    * libgpm-dev
-   * libncurses-dev
+   * libncurses5-dev
    * libpcre3-dev
-   * libsigc++-2.0-dev
    * libtool-bin
    * libunistring-dev
-   * libxcb-dev and/or libx11-dev
+   * libxcb1-dev and/or libx11-dev
    * pkg-config
-   * LLnextgen (available [here](https://os.ghalkes.nl/LLnextgen/download.html)
+   * LLnextgen (available [here](https://os.ghalkes.nl/LLnextgen/download.html))
 2. Clone the repositories:
 ```bash
 for i in makesys transcript t3shared t3window t3widget t3key t3config t3highlight tilde ; do
