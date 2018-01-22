@@ -119,9 +119,8 @@ const char *recent_file_info_t::get_encoding() const { return encoding; }
 void recent_files_t::push_front(file_buffer_t *text) {
   if (text->get_name() == nullptr) return;
 
-  for (std::deque<recent_file_info_t *>::iterator iter = names.begin(); iter != names.end();
-       iter++) {
-    if (strcmp((*iter)->get_name(), text->get_name()) == 0) return;
+  for (recent_file_info_t *name : names) {
+    if (strcmp(name->get_name(), text->get_name()) == 0) return;
   }
 
   version++;

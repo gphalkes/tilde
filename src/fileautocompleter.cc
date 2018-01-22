@@ -19,7 +19,8 @@
 
 static bool compare_strings(std::string *a, std::string *b) { return a->compare(*b) < 0; }
 
-using result_set_t = std::set<std::string *, bool (*)(std::string *, std::string *)>;
+using comparator_t = bool (*)(std::string *, std::string *);
+using result_set_t = std::set<std::string *, comparator_t>;
 
 file_autocompleter_t::file_autocompleter_t() : current_list(nullptr) {}
 
@@ -85,8 +86,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     return nullptr;
   }
 
-  for (result_set_t::iterator iter = result_set.begin(); iter != result_set.end(); iter++)
-    current_list->push_back(*iter);
+  for (std::string *result : result_set) current_list->push_back(result);
   *position = completion_start;
 
   return current_list;

@@ -52,9 +52,7 @@ void stepped_process_t::run() {
 void stepped_process_t::abort() { done(false); }
 
 void stepped_process_t::disconnect() {
-  for (std::list<signals::connection>::iterator iter = connections.begin();
-       iter != connections.end(); iter++)
-    (*iter).disconnect();
+  for (t3_widget::signals::connection &iter : connections) iter.disconnect();
   connections.clear();
 }
 

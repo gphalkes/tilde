@@ -623,9 +623,7 @@ static void input_selection_complete(bool selection_made) {
 
 static void sync_updates() {
   if (!discard_list.empty()) {
-    for (std::list<window_component_t *>::iterator iter = discard_list.begin();
-         iter != discard_list.end(); iter++)
-      delete *iter;
+    for (window_component_t *iter : discard_list) delete iter;
     discard_list.clear();
   }
 }

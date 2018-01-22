@@ -336,7 +336,7 @@ void attributes_dialog_t::set_default_options_from_values() {
   term_specific_option.meta_text = nullopt;
   term_specific_option.background = nullopt;
 
-  for (int i = 0; i < MAX_HIGHLIGHTS; ++i) term_specific_option.highlights[i] = nullopt;
+  for (optional<t3_attr_t> &highlight : term_specific_option.highlights) highlight = nullopt;
   term_specific_option.brace_highlight = nullopt;
 }
 

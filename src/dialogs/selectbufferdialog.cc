@@ -70,7 +70,7 @@ void select_buffer_dialog_t::show() {
       delete multi_widget;
     }
 
-    for (open_files_t::iterator iter = open_files.begin(); iter != open_files.end(); iter++) {
+    for (file_buffer_t *open_file : open_files) {
       bullet_t *bullet;
       label_t *label;
       const char *name;
@@ -78,9 +78,9 @@ void select_buffer_dialog_t::show() {
       multi_widget = new multi_widget_t();
       multi_widget->set_size(None, width - 5);
       multi_widget->show();
-      bullet = new bullet_t(signals::mem_fun((*iter), &file_buffer_t::get_has_window));
+      bullet = new bullet_t(signals::mem_fun(open_file, &file_buffer_t::get_has_window));
       multi_widget->push_back(bullet, -1, true, false);
-      name = (*iter)->get_name();
+      name = open_file->get_name();
       if (name == nullptr) name = "(Untitled)";
       label = new label_t(name);
       label->set_anchor(bullet, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPLEFT));

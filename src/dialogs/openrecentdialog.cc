@@ -56,8 +56,8 @@ void open_recent_dialog_t::show() {
       delete widget;
     }
 
-    for (recent_files_t::iterator iter = recent_files.begin(); iter != recent_files.end(); iter++) {
-      label_t *label = new label_t((*iter)->get_name());
+    for (recent_file_info_t *recent_file : recent_files) {
+      label_t *label = new label_t(recent_file->get_name());
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
       list->push_back(label);
     }
