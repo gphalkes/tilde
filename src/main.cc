@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <signal.h>
 #include <t3widget/widget.h>
+#include <t3widget/key_binding.h>
 
 #include "option.h"
 #include "action.h"
@@ -86,10 +87,20 @@ class main_t : public main_window_base_t {
 		void set_misc_options(void);
 		void set_highlight(t3_highlight_t *highlight, const char *name);
 		void save_as_done(stepped_process_t *process);
+
+		static key_bindings_t<action_id_t> key_bindings;
 };
 
 static main_t *main_window;
-
+key_bindings_t<action_id_t> main_t::key_bindings{
+	{action_id_t::FILE_NEW, "FileNew", {EKEY_CTRL | 'n'}},
+	{action_id_t::FILE_OPEN, "FileOpen", {EKEY_CTRL | 'o'}},
+	{action_id_t::FILE_CLOSE, "FileClose", {EKEY_CTRL | 'w'}},
+	{action_id_t::FILE_SAVE, "FileSave", {EKEY_CTRL | 's'}},
+	{action_id_t::FILE_EXIT, "Exit", {EKEY_CTRL | 'q'}},
+	{action_id_t::WINDOWS_NEXT_BUFFER, "NextBuffer", {EKEY_F6, EKEY_META | '6'}},
+	{action_id_t::WINDOWS_PREV_BUFFER, "PreviousBuffer", {EKEY_F6 | EKEY_SHIFT}},
+};
 
 main_t::main_t(void) {
 	button_t *encoding_button;
@@ -256,17 +267,11 @@ main_t::~main_t(void) {
 }
 
 bool main_t::process_key(t3_widget::key_t key) {
-	switch (key) {
-		case EKEY_CTRL | 'n':          menu_activated(action_id_t::FILE_NEW); break;
-		case EKEY_CTRL | 'o':          menu_activated(action_id_t::FILE_OPEN); break;
-		case EKEY_CTRL | 'w':          menu_activated(action_id_t::FILE_CLOSE); break;
-		case EKEY_CTRL | 's':          menu_activated(action_id_t::FILE_SAVE); break;
-		case EKEY_CTRL | 'q':          menu_activated(action_id_t::FILE_EXIT); break;
-		case EKEY_F6:
-		case EKEY_META | '6':          menu_activated(action_id_t::WINDOWS_NEXT_BUFFER); break;
-		case EKEY_F6 | EKEY_SHIFT:     menu_activated(action_id_t::WINDOWS_PREV_BUFFER); break;
-		default:
-			return main_window_base_t::process_key(key);
+	optional<action_id_t> action = key_bindings.find_action(key);
+	if (action.is_valid()) {
+		menu_activated(action());
+	} else {
+		return main_window_base_t::process_key(key);
 	}
 	return true;
 }
