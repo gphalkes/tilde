@@ -20,17 +20,17 @@ using namespace t3_widget;
 #include "filebuffer.h"
 
 class select_buffer_dialog_t : public dialog_t {
-	private:
-		list_pane_t *list;
-		int known_version;
+ private:
+  list_pane_t *list;
+  int known_version;
 
-	public:
-		select_buffer_dialog_t(int height, int width);
-		virtual bool set_size(optint height, optint width);
-		virtual void show(void);
-		virtual void ok_activated(void);
+ public:
+  select_buffer_dialog_t(int height, int width);
+  virtual bool set_size(optint height, optint width);
+  virtual void show(void);
+  virtual void ok_activated(void);
 
-	T3_WIDGET_SIGNAL(activate, void, file_buffer_t *);
+  T3_WIDGET_SIGNAL(activate, void, file_buffer_t *);
 };
 
 #endif

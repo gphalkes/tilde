@@ -14,73 +14,77 @@
 #ifndef FILEWRAPPER_H
 #define FILEWRAPPER_H
 
-#include <unistd.h>
 #include <cerrno>
 #include <string>
 #include <transcript/transcript.h>
-
+#include <unistd.h>
 
 #define FILE_BUFFER_SIZE 1024
 //~ #define FILE_BUFFER_SIZE 102
 
 class buffer_t {
-	protected:
-		int fill;
-		char buffer[FILE_BUFFER_SIZE];
+ protected:
+  int fill;
+  char buffer[FILE_BUFFER_SIZE];
 
-	public:
-		buffer_t(void) : fill(0) {}
-		virtual ~buffer_t(void) {}
-		const char *get_buffer(void) { return buffer; }
-		virtual int get_fill(void) const { return fill; }
-		virtual char operator[](int idx) const { return buffer[idx]; }
-		virtual bool fill_buffer(int used) = 0;
+ public:
+  buffer_t(void) : fill(0) {}
+  virtual ~buffer_t(void) {}
+  const char *get_buffer(void) { return buffer; }
+  virtual int get_fill(void) const { return fill; }
+  virtual char operator[](int idx) const { return buffer[idx]; }
+  virtual bool fill_buffer(int used) = 0;
 };
 
 class read_buffer_t : public buffer_t {
-	private:
-		int fd;
+ private:
+  int fd;
 
-	public:
-		read_buffer_t(int _fd) : fd(_fd) {}
-		virtual bool fill_buffer(int used);
+ public:
+  read_buffer_t(int _fd) : fd(_fd) {}
+  virtual bool fill_buffer(int used);
 };
 
 class transcript_buffer_t : public buffer_t {
-	private:
-		buffer_t *wrapped_buffer;
-		int buffer_index, conversion_flags;
-		transcript_t *handle;
-		bool at_eof;
+ private:
+  buffer_t *wrapped_buffer;
+  int buffer_index, conversion_flags;
+  transcript_t *handle;
+  bool at_eof;
 
-	public:
-		transcript_buffer_t(buffer_t *_buffer, transcript_t *_handle) : wrapped_buffer(_buffer), buffer_index(0), conversion_flags(TRANSCRIPT_FILE_START),
-			handle(_handle), at_eof(false) {}
-		virtual ~transcript_buffer_t(void);
-		virtual bool fill_buffer(int used);
+ public:
+  transcript_buffer_t(buffer_t *_buffer, transcript_t *_handle)
+      : wrapped_buffer(_buffer),
+        buffer_index(0),
+        conversion_flags(TRANSCRIPT_FILE_START),
+        handle(_handle),
+        at_eof(false) {}
+  virtual ~transcript_buffer_t(void);
+  virtual bool fill_buffer(int used);
 };
 
 class file_read_wrapper_t {
-	private:
-		buffer_t *buffer;
+ private:
+  buffer_t *buffer;
 
-	public:
-		file_read_wrapper_t(int fd, transcript_t *handle = NULL);
-		~file_read_wrapper_t(void);
-		const char *get_buffer(void);
-		int get_fill(void);
-		bool fill_buffer(int used);
+ public:
+  file_read_wrapper_t(int fd, transcript_t *handle = NULL);
+  ~file_read_wrapper_t(void);
+  const char *get_buffer(void);
+  int get_fill(void);
+  bool fill_buffer(int used);
 };
 
 class file_write_wrapper_t {
-	private:
-		int fd, conversion_flags;
-		transcript_t *handle;
+ private:
+  int fd, conversion_flags;
+  transcript_t *handle;
 
-	public:
-		file_write_wrapper_t(int _fd, transcript_t *_handle = NULL) : fd(_fd), conversion_flags(TRANSCRIPT_FILE_START), handle(_handle) {}
-		~file_write_wrapper_t(void);
-		void write(const char *buffer, size_t bytes);
+ public:
+  file_write_wrapper_t(int _fd, transcript_t *_handle = NULL)
+      : fd(_fd), conversion_flags(TRANSCRIPT_FILE_START), handle(_handle) {}
+  ~file_write_wrapper_t(void);
+  void write(const char *buffer, size_t bytes);
 };
 
 #endif

@@ -22,24 +22,23 @@ using namespace t3_widget;
 void init_charsets(void);
 
 class encoding_dialog_t : public dialog_t {
-	protected:
-		list_pane_t *list;
-		separator_t *horizontal_separator;
-		text_field_t *manual_entry;
-		int selected;
-		char *saved_tag;
+ protected:
+  list_pane_t *list;
+  separator_t *horizontal_separator;
+  text_field_t *manual_entry;
+  int selected;
+  char *saved_tag;
 
-		void ok_activated(void);
-		void selection_changed(void);
+  void ok_activated(void);
+  void selection_changed(void);
 
-	public:
-		encoding_dialog_t(int height, int width);
-		virtual bool set_size(optint height, optint width);
+ public:
+  encoding_dialog_t(int height, int width);
+  virtual bool set_size(optint height, optint width);
 
-		void set_encoding(const char *encoding);
+  void set_encoding(const char *encoding);
 
-	T3_WIDGET_SIGNAL(activate, void, const std::string *);
+  T3_WIDGET_SIGNAL(activate, void, const std::string *);
 };
-
 
 #endif

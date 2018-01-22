@@ -19,10 +19,10 @@
 #ifdef DEBUG
 void init_log(void);
 void lprintf(const char *fmt, ...)
-	#ifdef __GNUC__
-	__attribute__((format(printf, 1, 2)))
-	#endif
-	;
+#ifdef __GNUC__
+    __attribute__((format(printf, 1, 2)))
+#endif
+    ;
 void ldumpstr(const char *str, int length);
 void logkeyseq(const char *keys);
 #else

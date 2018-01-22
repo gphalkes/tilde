@@ -11,20 +11,20 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <sys/time.h>
-#include <sys/resource.h>
+#include <cerrno>
 #include <csignal>
+#include <cstdarg>
 #include <cstdio>
 #include <cstring>
-#include <unistd.h>
 #include <limits.h>
 #include <string>
-#include <cstdarg>
-#include <cerrno>
+#include <sys/resource.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 #include <t3widget/widget.h>
-#include "option.h"
 
+#include "option.h"
 #include "static_assert.h"
 
 using namespace t3_widget;
@@ -36,78 +36,72 @@ static const char *executable;
 
 /* The 'normal' attributes should always be the first in this list. Other code
    depends on that. */
-static const char *highlight_names[] = {
-	"normal", "comment", "comment-keyword", "keyword", "number", "string",
-	"string-escape", "misc", "variable", "error", "addition", "deletion" };
+static const char *highlight_names[] = {"normal",   "comment", "comment-keyword", "keyword",
+                                        "number",   "string",  "string-escape",   "misc",
+                                        "variable", "error",   "addition",        "deletion"};
 
 static_assert(ARRAY_SIZE(highlight_names) <= MAX_HIGHLIGHTS);
-
 
 stepped_process_t::stepped_process_t(void) : result(true) {}
 stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(false) {}
 
 void stepped_process_t::run(void) {
-	if (step())
-		done(result);
+  if (step()) done(result);
 }
 
 void stepped_process_t::abort(void) { done(false); }
 
 void stepped_process_t::disconnect(void) {
-	for (std::list<signals::connection>::iterator iter = connections.begin();
-			iter != connections.end(); iter++)
-		(*iter).disconnect();
-	connections.clear();
+  for (std::list<signals::connection>::iterator iter = connections.begin();
+       iter != connections.end(); iter++)
+    (*iter).disconnect();
+  connections.clear();
 }
 
 void stepped_process_t::done(bool _result) {
-	result = _result;
-	done_cb(this);
-	delete this;
+  result = _result;
+  done_cb(this);
+  delete this;
 }
 
-stepped_process_t::~stepped_process_t() {
-	disconnect();
-}
+stepped_process_t::~stepped_process_t() { disconnect(); }
 
 bool stepped_process_t::get_result(void) { return result; }
 
-void stepped_process_t::ignore_result(stepped_process_t *process) { (void) process; }
-
+void stepped_process_t::ignore_result(stepped_process_t *process) { (void)process; }
 
 #ifdef DEBUG
 static void start_debugger_on_segfault(int sig) {
-	struct rlimit vm_limit;
-	(void) sig;
+  struct rlimit vm_limit;
+  (void)sig;
 
-	fprintf(stderr, "Handling signal %d\n", sig);
+  fprintf(stderr, "Handling signal %d\n", sig);
 
-	signal(SIGSEGV, SIG_DFL);
-	signal(SIGABRT, SIG_DFL);
+  signal(SIGSEGV, SIG_DFL);
+  signal(SIGABRT, SIG_DFL);
 
-	getrlimit(RLIMIT_AS, &vm_limit);
-	vm_limit.rlim_cur = vm_limit.rlim_max;
-	setrlimit(RLIMIT_AS, &vm_limit);
-	sprintf(debug_buffer, "DISPLAY=:0.0 ddd %s %d", executable, getpid());
-	system(debug_buffer);
+  getrlimit(RLIMIT_AS, &vm_limit);
+  vm_limit.rlim_cur = vm_limit.rlim_max;
+  setrlimit(RLIMIT_AS, &vm_limit);
+  sprintf(debug_buffer, "DISPLAY=:0.0 ddd %s %d", executable, getpid());
+  system(debug_buffer);
 }
 
 void enable_debugger_on_segfault(const char *_executable) {
-	executable = strdup_impl(_executable);
-	signal(SIGSEGV, start_debugger_on_segfault);
-	signal(SIGABRT, start_debugger_on_segfault);
+  executable = strdup_impl(_executable);
+  signal(SIGSEGV, start_debugger_on_segfault);
+  signal(SIGABRT, start_debugger_on_segfault);
 }
 
 void set_limits() {
-	if (cli_option.vm_limit < 0)
-		return;
+  if (cli_option.vm_limit < 0) return;
 
-	int mb = cli_option.vm_limit == 0 ? 250 : cli_option.vm_limit;
-	struct rlimit vm_limit;
-	printf("Debug mode: Setting VM limit\n");
-	getrlimit(RLIMIT_AS, &vm_limit);
-	vm_limit.rlim_cur = mb * 1024 * 1024;
-	setrlimit(RLIMIT_AS, &vm_limit);
+  int mb = cli_option.vm_limit == 0 ? 250 : cli_option.vm_limit;
+  struct rlimit vm_limit;
+  printf("Debug mode: Setting VM limit\n");
+  getrlimit(RLIMIT_AS, &vm_limit);
+  vm_limit.rlim_cur = mb * 1024 * 1024;
+  setrlimit(RLIMIT_AS, &vm_limit);
 }
 #endif
 
@@ -116,108 +110,104 @@ void set_limits() {
     @param ... The arguments for printing.
 */
 void fatal(const char *fmt, ...) {
-	va_list args;
+  va_list args;
 
-	va_start(args, fmt);
-	vfprintf(stderr, fmt, args);
-	va_end(args);
-	exit(EXIT_FAILURE);
+  va_start(args, fmt);
+  vfprintf(stderr, fmt, args);
+  va_end(args);
+  exit(EXIT_FAILURE);
 }
 
 char *canonicalize_path(const char *path) {
-	char *result = realpath(path, NULL);
+  char *result = realpath(path, NULL);
 
 #ifdef PATH_MAX
-	/* realpath in the POSIX.1-2001 and 2004 specifications is broken, in that
-	   the size of the buffer for the 2nd parameter is ill defined. However,
-	   most systems allow a NULL parameter to do automatic allocation. Those
-	   that don't typically return EINVAL in that case. We can't work around
-	   this for all situations, but when PATH_MAX is defined, we can. Any
-	   system that does not define PATH_MAX and does not do automatic allocation
-	   is broken by design, as that leaves no correct way to allocate a buffer
-	   with the correct size to store the result.
-	*/
-	if (result == NULL && path != NULL && errno == EINVAL) {
-		char store_path[PATH_MAX];
-		if (realpath(path, store_path) != NULL)
-			return NULL;
-		return strdup_impl(store_path);
-	}
+  /* realpath in the POSIX.1-2001 and 2004 specifications is broken, in that
+     the size of the buffer for the 2nd parameter is ill defined. However,
+     most systems allow a NULL parameter to do automatic allocation. Those
+     that don't typically return EINVAL in that case. We can't work around
+     this for all situations, but when PATH_MAX is defined, we can. Any
+     system that does not define PATH_MAX and does not do automatic allocation
+     is broken by design, as that leaves no correct way to allocate a buffer
+     with the correct size to store the result.
+  */
+  if (result == NULL && path != NULL && errno == EINVAL) {
+    char store_path[PATH_MAX];
+    if (realpath(path, store_path) != NULL) return NULL;
+    return strdup_impl(store_path);
+  }
 #endif
-	return result;
+  return result;
 }
 
 #define BUFFER_START_SIZE 256
 #define BUFFER_MAX 4096
 void printf_into(std::string *message, const char *format, ...) {
-	static cleanup_free_ptr<char>::t message_buffer;
-	static int message_buffer_size;
+  static cleanup_free_ptr<char>::t message_buffer;
+  static int message_buffer_size;
 
-	char *new_message_buffer;
-	int result;
-	va_list args;
+  char *new_message_buffer;
+  int result;
+  va_list args;
 
-	message->clear();
-	va_start(args, format);
+  message->clear();
+  va_start(args, format);
 
-	if (message_buffer == NULL) {
-		if ((message_buffer = (char *) malloc(BUFFER_START_SIZE)) == NULL) {
-			va_end(args);
-			return;
-		}
-		message_buffer_size = BUFFER_START_SIZE;
-	}
+  if (message_buffer == NULL) {
+    if ((message_buffer = (char *)malloc(BUFFER_START_SIZE)) == NULL) {
+      va_end(args);
+      return;
+    }
+    message_buffer_size = BUFFER_START_SIZE;
+  }
 
-	result = vsnprintf(message_buffer, message_buffer_size, format, args);
-	if (result < 0) {
-		va_end(args);
-		return;
-	}
+  result = vsnprintf(message_buffer, message_buffer_size, format, args);
+  if (result < 0) {
+    va_end(args);
+    return;
+  }
 
-	result = std::min(BUFFER_MAX - 1, result);
-	if (result < message_buffer_size || (new_message_buffer = (char *) realloc(message_buffer, result + 1)) == NULL) {
-		*message = message_buffer;
-		va_end(args);
-		return;
-	}
+  result = std::min(BUFFER_MAX - 1, result);
+  if (result < message_buffer_size ||
+      (new_message_buffer = (char *)realloc(message_buffer, result + 1)) == NULL) {
+    *message = message_buffer;
+    va_end(args);
+    return;
+  }
 
-	message_buffer = new_message_buffer;
-	message_buffer_size = result + 1;
-	result = vsnprintf(message_buffer, message_buffer_size, format, args);
-	va_end(args);
-	if (result < 0)
-		return;
+  message_buffer = new_message_buffer;
+  message_buffer_size = result + 1;
+  result = vsnprintf(message_buffer, message_buffer_size, format, args);
+  va_end(args);
+  if (result < 0) return;
 
-	*message = message_buffer;
-	return;
+  *message = message_buffer;
+  return;
 }
 
 int map_highlight(void *data, const char *name) {
-	int i;
+  int i;
 
-	(void) data;
+  (void)data;
 
-	for (i = 0; (size_t) i < ARRAY_SIZE(highlight_names); i++) {
-		if (strcmp(name, highlight_names[i]) == 0)
-			return i;
-	}
-	return 0;
+  for (i = 0; (size_t)i < ARRAY_SIZE(highlight_names); i++) {
+    if (strcmp(name, highlight_names[i]) == 0) return i;
+  }
+  return 0;
 }
 
 const char *reverse_map_highlight(int idx) {
-	if (idx < 0 || (size_t) idx >= ARRAY_SIZE(highlight_names))
-		return NULL;
-	return highlight_names[idx];
+  if (idx < 0 || (size_t)idx >= ARRAY_SIZE(highlight_names)) return NULL;
+  return highlight_names[idx];
 }
 
 #ifndef HAS_STRDUP
 char *strdup_impl(const char *str) {
-	char *result;
-	size_t len = strlen(str) + 1;
+  char *result;
+  size_t len = strlen(str) + 1;
 
-	if ((result = (char *) malloc(len)) == NULL)
-		return NULL;
-	memcpy(result, str, len);
-	return result;
+  if ((result = (char *)malloc(len)) == NULL) return NULL;
+  memcpy(result, str, len);
+  return result;
 }
 #endif

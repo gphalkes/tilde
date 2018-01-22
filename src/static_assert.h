@@ -22,7 +22,10 @@
    However, to do this we need another layer of indirection because the
    arguments of ## are not expanded before pasting.
 */
-#define __static_assert(_condition, _line) struct __static_assert_##_line { int static_assert_failed[_condition ? 1 : -1]; }
+#define __static_assert(_condition, _line)         \
+  struct __static_assert_##_line {                 \
+    int static_assert_failed[_condition ? 1 : -1]; \
+  }
 #define _static_assert(_condition, _line) __static_assert(_condition, _line)
 #define static_assert(_condition) _static_assert(_condition, __LINE__)
 

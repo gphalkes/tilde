@@ -16,6 +16,7 @@
 
 #include "util.h"
 
+// clang-format off
 ENUM(action_id_t,
 	ACTION_NONE,
 	/* Menu actions */
@@ -67,5 +68,6 @@ ENUM(action_id_t,
 	TOOLS_AUTOCOMPLETE,
 	TOOLS_TOGGLE_LINE_COMMENT,
 );
+// clang-format on
 
 #endif

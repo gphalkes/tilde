@@ -13,8 +13,8 @@
 */
 #include <cstring>
 
-#include "openfiles.h"
 #include "filebuffer.h"
+#include "openfiles.h"
 #include "option.h"
 
 open_files_t open_files;
@@ -24,26 +24,23 @@ size_t open_files_t::size(void) const { return files.size(); }
 bool open_files_t::empty(void) const { return files.empty(); }
 
 void open_files_t::push_back(file_buffer_t *text) {
-	files.push_back(text);
-	version++;
+  files.push_back(text);
+  version++;
 }
 
 open_files_t::iterator open_files_t::erase(open_files_t::iterator position) {
-	open_files_t::iterator result = files.erase(position);
-	version++;
-	return result;
+  open_files_t::iterator result = files.erase(position);
+  version++;
+  return result;
 }
 
 open_files_t::iterator open_files_t::contains(const char *name) {
-	/* FIXME: this should really check for ino+dev equality to see if the file
-	   is already open. */
-	for (std::vector<file_buffer_t *>::iterator iter = files.begin();
-			iter != files.end(); iter++)
-	{
-		if ((*iter)->get_name() != NULL && strcmp(name, (*iter)->get_name()) == 0)
-			return iter;
-	}
-	return files.end();
+  /* FIXME: this should really check for ino+dev equality to see if the file
+     is already open. */
+  for (std::vector<file_buffer_t *>::iterator iter = files.begin(); iter != files.end(); iter++) {
+    if ((*iter)->get_name() != NULL && strcmp(name, (*iter)->get_name()) == 0) return iter;
+  }
+  return files.end();
 }
 
 int open_files_t::get_version(void) { return version; }
@@ -55,115 +52,99 @@ file_buffer_t *open_files_t::operator[](size_t idx) { return files[idx]; }
 file_buffer_t *open_files_t::back() { return files.back(); }
 
 void open_files_t::erase(file_buffer_t *buffer) {
-	for (iterator iter = files.begin(); iter != files.end(); iter++) {
-		if (*iter == buffer) {
-			files.erase(iter);
-			version++;
-			return;
-		}
-	}
+  for (iterator iter = files.begin(); iter != files.end(); iter++) {
+    if (*iter == buffer) {
+      files.erase(iter);
+      version++;
+      return;
+    }
+  }
 }
 
 file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
-	iterator current = files.begin(), iter;
+  iterator current = files.begin(), iter;
 
-	if (start != NULL)
-		for (; current != files.end() && *current != start; current++) {}
+  if (start != NULL)
+    for (; current != files.end() && *current != start; current++) {
+    }
 
-	for (iter = current; iter != files.end(); iter++) {
-		if (!(*iter)->get_has_window())
-			return *iter;
-	}
+  for (iter = current; iter != files.end(); iter++) {
+    if (!(*iter)->get_has_window()) return *iter;
+  }
 
-	for (iter = files.begin(); iter != current; iter++) {
-		if (!(*iter)->get_has_window())
-			return *iter;
-	}
-	return start;
+  for (iter = files.begin(); iter != current; iter++) {
+    if (!(*iter)->get_has_window()) return *iter;
+  }
+  return start;
 }
 
 file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
-	reverse_iterator current = files.rbegin(), iter;
+  reverse_iterator current = files.rbegin(), iter;
 
-	if (start != NULL)
-		for (; current != files.rend() && *current != start; current++) {}
+  if (start != NULL)
+    for (; current != files.rend() && *current != start; current++) {
+    }
 
-	for (iter = current; iter != files.rend(); iter++) {
-		if (!(*iter)->get_has_window())
-			return *iter;
-	}
+  for (iter = current; iter != files.rend(); iter++) {
+    if (!(*iter)->get_has_window()) return *iter;
+  }
 
-	for (iter = files.rbegin(); iter != current; iter++) {
-		if (!(*iter)->get_has_window())
-			return *iter;
-	}
-	return start;
+  for (iter = files.rbegin(); iter != current; iter++) {
+    if (!(*iter)->get_has_window()) return *iter;
+  }
+  return start;
 }
 
 void open_files_t::cleanup(void) {
-	while (!files.empty())
-		delete files.front();
+  while (!files.empty()) delete files.front();
 }
 
-
 recent_file_info_t::recent_file_info_t(file_buffer_t *file) {
-	if ((name = strdup_impl(file->get_name())) == NULL)
-		throw std::bad_alloc();
-	if ((encoding = strdup_impl(file->get_encoding())) == NULL) {
-		free(name);
-		throw std::bad_alloc();
-	}
+  if ((name = strdup_impl(file->get_name())) == NULL) throw std::bad_alloc();
+  if ((encoding = strdup_impl(file->get_encoding())) == NULL) {
+    free(name);
+    throw std::bad_alloc();
+  }
 }
 
 recent_file_info_t::~recent_file_info_t(void) {
-	free(name);
-	free(encoding);
+  free(name);
+  free(encoding);
 }
 
-const char *recent_file_info_t::get_name(void) const {
-	return name;
-}
+const char *recent_file_info_t::get_name(void) const { return name; }
 
-const char *recent_file_info_t::get_encoding(void) const {
-	return encoding;
-}
-
+const char *recent_file_info_t::get_encoding(void) const { return encoding; }
 
 void recent_files_t::push_front(file_buffer_t *text) {
-	if (text->get_name() == NULL)
-		return;
+  if (text->get_name() == NULL) return;
 
-	for (std::deque<recent_file_info_t *>::iterator iter = names.begin();
-			iter != names.end(); iter++)
-	{
-		if (strcmp((*iter)->get_name(), text->get_name()) == 0)
-			return;
-	}
+  for (std::deque<recent_file_info_t *>::iterator iter = names.begin(); iter != names.end();
+       iter++) {
+    if (strcmp((*iter)->get_name(), text->get_name()) == 0) return;
+  }
 
-	version++;
+  version++;
 
-	if (names.size() == option.max_recent_files) {
-		delete names.back();
-		names.pop_back();
-	}
-	names.push_front(new recent_file_info_t(text));
+  if (names.size() == option.max_recent_files) {
+    delete names.back();
+    names.pop_back();
+  }
+  names.push_front(new recent_file_info_t(text));
 }
 
-recent_file_info_t *recent_files_t::get_info(size_t idx) {
-	return names[idx];
-}
+recent_file_info_t *recent_files_t::get_info(size_t idx) { return names[idx]; }
 
 void recent_files_t::erase(recent_file_info_t *info) {
-	for (std::deque<recent_file_info_t *>::iterator iter = names.begin();
-			iter != names.end(); iter++)
-	{
-		if (*iter == info) {
-			delete *iter;
-			names.erase(iter);
-			version++;
-			break;
-		}
-	}
+  for (std::deque<recent_file_info_t *>::iterator iter = names.begin(); iter != names.end();
+       iter++) {
+    if (*iter == info) {
+      delete *iter;
+      names.erase(iter);
+      version++;
+      break;
+    }
+  }
 }
 
 int recent_files_t::get_version(void) { return version; }
@@ -171,8 +152,8 @@ recent_files_t::iterator recent_files_t::begin(void) { return names.begin(); }
 recent_files_t::iterator recent_files_t::end(void) { return names.end(); }
 
 void recent_files_t::cleanup(void) {
-	while (!names.empty()) {
-		delete names.back();
-		names.pop_back();
-	}
+  while (!names.empty()) {
+    delete names.back();
+    names.pop_back();
+  }
 }

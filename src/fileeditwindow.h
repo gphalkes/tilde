@@ -14,26 +14,26 @@
 #ifndef FILE_EDIT_WINDOW_T
 #define FILE_EDIT_WINDOW_T
 
-#include <t3widget/widget.h>
 #include "filebuffer.h"
+#include <t3widget/widget.h>
 
 using namespace t3_widget;
 
 class file_edit_window_t : public edit_window_t {
-	private:
-		signals::connection rewrap_connection;
-		void force_repaint_to_bottom(rewrap_type_t type, int line, int pos);
+ private:
+  signals::connection rewrap_connection;
+  void force_repaint_to_bottom(rewrap_type_t type, int line, int pos);
 
-	public:
-		file_edit_window_t(file_buffer_t *_text = NULL);
-		virtual ~file_edit_window_t(void);
-		virtual void draw_info_window(void);
-		virtual bool process_key(t3_widget::key_t key);
-		virtual void update_contents(void);
+ public:
+  file_edit_window_t(file_buffer_t *_text = NULL);
+  virtual ~file_edit_window_t(void);
+  virtual void draw_info_window(void);
+  virtual bool process_key(t3_widget::key_t key);
+  virtual void update_contents(void);
 
-		void set_text(file_buffer_t *_text);
-		file_buffer_t *get_text(void) const;
-		void goto_matching_brace(void);
+  void set_text(file_buffer_t *_text);
+  file_buffer_t *get_text(void) const;
+  void goto_matching_brace(void);
 };
 
 #endif

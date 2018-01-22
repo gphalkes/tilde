@@ -20,18 +20,17 @@ using namespace t3_widget;
 #include "openfiles.h"
 
 class open_recent_dialog_t : public dialog_t {
-	private:
-		list_pane_t *list;
-		int known_version;
+ private:
+  list_pane_t *list;
+  int known_version;
 
-	public:
-		open_recent_dialog_t(int height, int width);
-		virtual bool set_size(optint height, optint width);
-		virtual void show(void);
-		virtual void ok_activated(void);
+ public:
+  open_recent_dialog_t(int height, int width);
+  virtual bool set_size(optint height, optint width);
+  virtual void show(void);
+  virtual void ok_activated(void);
 
-	T3_WIDGET_SIGNAL(file_selected, void, recent_file_info_t *);
+  T3_WIDGET_SIGNAL(file_selected, void, recent_file_info_t *);
 };
-
 
 #endif

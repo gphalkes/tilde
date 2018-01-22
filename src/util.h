@@ -15,80 +15,91 @@
 #define UTIL_H
 
 #include <limits.h>
-#include <string>
 #include <list>
+#include <stdlib.h>
+#include <string>
 #include <t3widget/signals.h>
 #include <t3window/window.h>
 
 #ifdef __GNUC__
-void fatal(const char *fmt, ...) __attribute__((format (printf, 1, 2))) __attribute__((noreturn));
+void fatal(const char *fmt, ...) __attribute__((format(printf, 1, 2))) __attribute__((noreturn));
 #else
 /*@noreturn@*/ void fatal(const char *fmt, ...);
 #endif
 
 #define _(x) x
 
-#include <stdlib.h>
-//FIXME: once gettext is up and running, use localized error message
+// FIXME: once gettext is up and running, use localized error message
 //~ #define PANIC() fatal(_("Program logic error at %s:%d\n"), __FILE__, __LINE__)
 #define PANIC() fatal(("Program logic error at %s:%d\n"), __FILE__, __LINE__)
 #ifdef DEBUG
-#define ASSERT(_condition) do { if (!(_condition)) { fprintf(stderr, "Assertion failure (%s) on %s:%d\n", #_condition, __FILE__, __LINE__); abort(); } } while(0)
+#define ASSERT(_condition)                                                                   \
+  do {                                                                                       \
+    if (!(_condition)) {                                                                     \
+      fprintf(stderr, "Assertion failure (%s) on %s:%d\n", #_condition, __FILE__, __LINE__); \
+      abort();                                                                               \
+    }                                                                                        \
+  } while (0)
 #else
-#define ASSERT(_condition) do { if (!(_condition)) PANIC(); } while(0)
+#define ASSERT(_condition)      \
+  do {                          \
+    if (!(_condition)) PANIC(); \
+  } while (0)
 #endif
 
-#define ENUM(_name, ...) \
-class _name { \
-	public: \
-		enum _values { \
-			__VA_ARGS__ \
-		}; \
-		_name(void) {} \
-		_name(_values _value_arg) : _value(_value_arg) {} \
-		_values operator =(_values _value_arg) { _value = _value_arg; return _value; } \
-		operator int (void) const { return (int) _value; } \
-		bool operator == (_values _value_arg) const { return _value == _value_arg; } \
-	private: \
-		_values _value; \
-}
-
+#define ENUM(_name, ...)                                                       \
+  class _name {                                                                \
+   public:                                                                     \
+    enum _values { __VA_ARGS__ };                                              \
+    _name(void) {}                                                             \
+    _name(_values _value_arg) : _value(_value_arg) {}                          \
+    _values operator=(_values _value_arg) {                                    \
+      _value = _value_arg;                                                     \
+      return _value;                                                           \
+    }                                                                          \
+    operator int(void) const { return (int)_value; }                           \
+    bool operator==(_values _value_arg) const { return _value == _value_arg; } \
+                                                                               \
+   private:                                                                    \
+    _values _value;                                                            \
+  }
 
 class version_t {
-	private:
-		int value;
-	public:
-		version_t(void) : value(INT_MIN) {}
-		int operator++(int) {
-			if (value == INT_MAX)
-				value = INT_MIN;
-			else
-				value++;
-			return value;
-		}
-		operator int (void) const { return value; }
-		bool operator==(int other) { return value == other; }
+ private:
+  int value;
+
+ public:
+  version_t(void) : value(INT_MIN) {}
+  int operator++(int) {
+    if (value == INT_MAX)
+      value = INT_MIN;
+    else
+      value++;
+    return value;
+  }
+  operator int(void) const { return value; }
+  bool operator==(int other) { return value == other; }
 };
 
 class stepped_process_t {
-	protected:
-		std::list<t3_widget::signals::connection> connections;
-		typedef t3_widget::signals::slot<void, stepped_process_t *> callback_t;
-		callback_t done_cb;
-		bool result;
+ protected:
+  std::list<t3_widget::signals::connection> connections;
+  typedef t3_widget::signals::slot<void, stepped_process_t *> callback_t;
+  callback_t done_cb;
+  bool result;
 
-		stepped_process_t(void);
-		stepped_process_t(const callback_t &cb);
-		virtual bool step(void) = 0;
-		void run(void);
-		void abort(void);
-		void disconnect(void);
-		void done(bool _result);
+  stepped_process_t(void);
+  stepped_process_t(const callback_t &cb);
+  virtual bool step(void) = 0;
+  void run(void);
+  void abort(void);
+  void disconnect(void);
+  void done(bool _result);
 
-	public:
-		bool get_result(void);
-		virtual ~stepped_process_t();
-		static void ignore_result(stepped_process_t *process);
+ public:
+  bool get_result(void);
+  virtual ~stepped_process_t();
+  static void ignore_result(stepped_process_t *process);
 };
 
 void enable_debugger_on_segfault(const char *_executable);

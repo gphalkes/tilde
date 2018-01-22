@@ -14,25 +14,25 @@
 #ifndef HIGHLIGHTDIALOG_H
 #define HIGHLIGHTDIALOG_H
 
-#include <t3widget/widget.h>
 #include <t3highlight/highlight.h>
+#include <t3widget/widget.h>
 
 using namespace t3_widget;
 
 typedef cleanup_func_ptr<t3_highlight_lang_t, t3_highlight_free_list>::t cleanup_lang_t;
 
 class highlight_dialog_t : public dialog_t {
-	private:
-		cleanup_lang_t names;
-		list_pane_t *list;
+ private:
+  cleanup_lang_t names;
+  list_pane_t *list;
 
-	public:
-		highlight_dialog_t(int height, int width);
-		virtual bool set_size(optint height, optint width);
-		void ok_activated(void);
-		void set_selected(const char *lang_file);
+ public:
+  highlight_dialog_t(int height, int width);
+  virtual bool set_size(optint height, optint width);
+  void ok_activated(void);
+  void set_selected(const char *lang_file);
 
-	T3_WIDGET_SIGNAL(language_selected, void, t3_highlight_t *, const char *);
+  T3_WIDGET_SIGNAL(language_selected, void, t3_highlight_t *, const char *);
 };
 
 #endif

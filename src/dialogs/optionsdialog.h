@@ -15,6 +15,7 @@
 #define OPTIONSDIALOG_H
 
 #include <t3widget/widget.h>
+
 #include "fileeditwindow.h"
 
 using namespace t3_widget;
@@ -22,40 +23,36 @@ using namespace t3_widget;
 void init_charsets(void);
 
 class buffer_options_dialog_t : public dialog_t {
-	protected:
-		checkbox_t *tab_spaces_box,
-			*wrap_box,
-			*hide_menu_box,
-			*auto_indent_box,
-			*indent_aware_home_box,
-			*show_tabs_box,
-			*strip_spaces_box;
-		text_field_t *tabsize_field;
+ protected:
+  checkbox_t *tab_spaces_box, *wrap_box, *hide_menu_box, *auto_indent_box, *indent_aware_home_box,
+      *show_tabs_box, *strip_spaces_box;
+  text_field_t *tabsize_field;
 
-	public:
-		buffer_options_dialog_t(const char *_title);
+ public:
+  buffer_options_dialog_t(const char *_title);
 
-		void set_values_from_view(file_edit_window_t *view);
-		void set_view_values(file_edit_window_t *view);
-		void set_values_from_options(void);
-		void set_options_from_values(void);
-		void handle_activate(void);
+  void set_values_from_view(file_edit_window_t *view);
+  void set_view_values(file_edit_window_t *view);
+  void set_values_from_options(void);
+  void set_options_from_values(void);
+  void handle_activate(void);
 
-	T3_WIDGET_SIGNAL(activate, void);
+  T3_WIDGET_SIGNAL(activate, void);
 };
 
 class misc_options_dialog_t : public dialog_t {
-	protected:
-		checkbox_t *hide_menu_box, *save_backup_box, *parse_file_positions_box, *disable_selection_over_ssh_box;
+ protected:
+  checkbox_t *hide_menu_box, *save_backup_box, *parse_file_positions_box,
+      *disable_selection_over_ssh_box;
 
-	public:
-		misc_options_dialog_t(const char *_title);
+ public:
+  misc_options_dialog_t(const char *_title);
 
-		void set_values_from_options(void);
-		void set_options_from_values(void);
-		void handle_activate(void);
+  void set_values_from_options(void);
+  void set_options_from_values(void);
+  void handle_activate(void);
 
-	T3_WIDGET_SIGNAL(activate, void);
+  T3_WIDGET_SIGNAL(activate, void);
 };
 
 #endif

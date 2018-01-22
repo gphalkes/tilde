@@ -15,39 +15,40 @@
 #define FILE_LINE_H
 
 #include <t3widget/textline.h>
+
 #include "filebuffer.h"
 
 class file_line_factory_t;
 
 class file_line_t : public text_line_t {
-	protected:
-		int highlight_start_state;
+ protected:
+  int highlight_start_state;
 
-	public:
-		file_line_t(int buffersize = BUFFERSIZE, file_line_factory_t *_factory = NULL);
-		file_line_t(const char *_buffer, file_line_factory_t *_factory = NULL);
-		file_line_t(const char *_buffer, int length, file_line_factory_t *_factory = NULL);
-		file_line_t(const std::string *str, file_line_factory_t *_factory = NULL);
+ public:
+  file_line_t(int buffersize = BUFFERSIZE, file_line_factory_t *_factory = NULL);
+  file_line_t(const char *_buffer, file_line_factory_t *_factory = NULL);
+  file_line_t(const char *_buffer, int length, file_line_factory_t *_factory = NULL);
+  file_line_t(const std::string *str, file_line_factory_t *_factory = NULL);
 
-		void set_highlight_start(int state);
-		int get_highlight_end(void);
-		int get_highlight_idx(int i);
+  void set_highlight_start(int state);
+  int get_highlight_end(void);
+  int get_highlight_idx(int i);
 
-	protected:
-		virtual t3_attr_t get_base_attr(int i, const paint_info_t *info);
+ protected:
+  virtual t3_attr_t get_base_attr(int i, const paint_info_t *info);
 };
 
 class file_line_factory_t : public text_line_factory_t {
-	private:
-		file_buffer_t *file_buffer;
-	public:
-		file_line_factory_t(file_buffer_t *_file_buffer);
-		virtual text_line_t *new_text_line_t(int buffersize = BUFFERSIZE);
-		virtual text_line_t *new_text_line_t(const char *_buffer);
-		virtual text_line_t *new_text_line_t(const char *_buffer, int length);
-		virtual text_line_t *new_text_line_t(const std::string *str);
-		file_buffer_t *get_file_buffer(void) const;
+ private:
+  file_buffer_t *file_buffer;
+
+ public:
+  file_line_factory_t(file_buffer_t *_file_buffer);
+  virtual text_line_t *new_text_line_t(int buffersize = BUFFERSIZE);
+  virtual text_line_t *new_text_line_t(const char *_buffer);
+  virtual text_line_t *new_text_line_t(const char *_buffer, int length);
+  virtual text_line_t *new_text_line_t(const std::string *str);
+  file_buffer_t *get_file_buffer(void) const;
 };
 
 #endif
-

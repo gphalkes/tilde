@@ -19,13 +19,14 @@
 using namespace t3_widget;
 
 class file_autocompleter_t : public autocompleter_t {
-	private:
-		string_list_t *current_list;
-		int completion_start;
-	public:
-		file_autocompleter_t(void);
-		string_list_base_t *build_autocomplete_list(const text_buffer_t *text, int *position);
-		void autocomplete(text_buffer_t *text, size_t idx);
+ private:
+  string_list_t *current_list;
+  int completion_start;
+
+ public:
+  file_autocompleter_t(void);
+  string_list_base_t *build_autocomplete_list(const text_buffer_t *text, int *position);
+  void autocomplete(text_buffer_t *text, size_t idx);
 };
 
 #endif
