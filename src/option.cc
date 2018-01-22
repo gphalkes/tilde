@@ -113,9 +113,9 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
   t3_config_t *attr_config;
   t3_attr_t accumulated_attr = 0;
 
-  if ((attr_config = t3_config_get(config, name)) == NULL) return;
+  if ((attr_config = t3_config_get(config, name)) == nullptr) return;
 
-  for (attr_config = t3_config_get(attr_config, NULL); attr_config != NULL;
+  for (attr_config = t3_config_get(attr_config, nullptr); attr_config != nullptr;
        attr_config = t3_config_get_next(attr_config)) {
     if (t3_config_get_type(attr_config) == T3_CONFIG_STRING)
       accumulated_attr = t3_term_combine_attrs(
@@ -142,7 +142,7 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
   GET_OPT(key_timeout, INT, int);
 
   attributes = t3_config_get(config, "attributes");
-  if (attributes != NULL) {
+  if (attributes != nullptr) {
     GET_ATTRIBUTE(non_print);
     GET_ATTRIBUTE(text_selection_cursor);
     GET_ATTRIBUTE(text_selection_cursor2);
@@ -164,7 +164,7 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
     GET_ATTRIBUTE(brace_highlight);
   }
   attributes = t3_config_get(config, "highlight_attributes");
-  if (attributes != NULL) {
+  if (attributes != nullptr) {
     GET_HL_ATTRIBUTE("comment");
     GET_HL_ATTRIBUTE("comment-keyword");
     GET_HL_ATTRIBUTE("keyword");
@@ -183,7 +183,7 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
   }
 }
 
-static void read_base_config(void) {
+static void read_base_config() {
   cleanup_func2_ptr<FILE, int, fclose>::t config_file;
   t3_config_error_t error;
   cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
@@ -191,21 +191,21 @@ static void read_base_config(void) {
 
   if ((config_file = fopen(DATADIR "/"
                                    "base.config",
-                           "r")) == NULL) {
+                           "r")) == nullptr) {
     lprintf("Failed to open file: %s %m\n", DATADIR
             "/"
             "base.config");
     return;
   }
 
-  if ((config = t3_config_read_file(config_file, &error, NULL)) == NULL) {
+  if ((config = t3_config_read_file(config_file, &error, nullptr)) == nullptr) {
     lprintf("Error loading base config: %d: %s\n", error.line_number,
             t3_config_strerror(error.error));
     return;
   }
 
   if ((schema = t3_config_read_schema_buffer(base_config_schema, sizeof(base_config_schema), &error,
-                                             NULL)) == NULL) {
+                                             nullptr)) == nullptr) {
     lprintf("Error loading schema: %d: %s\n", error.line_number, t3_config_strerror(error.error));
     return;
   }
@@ -216,16 +216,16 @@ static void read_base_config(void) {
     return;
   }
 
-  for (t3_config_t *lang = t3_config_get(t3_config_get(config, "lang"), NULL); lang != NULL;
+  for (t3_config_t *lang = t3_config_get(t3_config_get(config, "lang"), nullptr); lang != nullptr;
        lang = t3_config_get_next(lang)) {
     const char *name = t3_config_get_string(t3_config_get(lang, "name"));
     const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
-    if (name != NULL && line_comment != NULL)
+    if (name != nullptr && line_comment != nullptr)
       option.line_comment_map[std::string(name)] = line_comment;
   }
 }
 
-static void read_config(void) {
+static void read_config() {
   cleanup_func2_ptr<FILE, int, fclose>::t config_file;
   t3_config_error_t error;
   cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
@@ -233,12 +233,12 @@ static void read_config(void) {
   t3_config_t *term_specific_config;
   const char *term;
 
-  if (cli_option.config_file == NULL)
+  if (cli_option.config_file == nullptr)
     config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   else
     config_file = fopen(cli_option.config_file, "r");
 
-  if (config_file == NULL) {
+  if (config_file == nullptr) {
     if (errno != ENOENT) {
       config_read_error = true;
       config_read_error_string = strerror(errno);
@@ -247,15 +247,15 @@ static void read_config(void) {
     return;
   }
 
-  if ((config = t3_config_read_file(config_file, &error, NULL)) == NULL) {
+  if ((config = t3_config_read_file(config_file, &error, nullptr)) == nullptr) {
     config_read_error = true;
     config_read_error_string = t3_config_strerror(error.error);
     config_read_error_line = error.line_number;
     return;
   }
 
-  if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), &error, NULL)) ==
-      NULL) {
+  if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), &error,
+                                             nullptr)) == nullptr) {
     config_read_error = true;
     lprintf("Error loading schema: %d: %s\n", error.line_number, t3_config_strerror(error.error));
     config_read_error_string = t3_config_strerror(
@@ -289,23 +289,23 @@ static void read_config(void) {
   GET_OPT(max_recent_files, INT, int);
 #undef opts
 
-  for (t3_config_t *lang = t3_config_get(t3_config_get(config, "lang"), NULL); lang != NULL;
+  for (t3_config_t *lang = t3_config_get(t3_config_get(config, "lang"), nullptr); lang != nullptr;
        lang = t3_config_get_next(lang)) {
     const char *name = t3_config_get_string(t3_config_get(lang, "name"));
     const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
-    if (name != NULL && line_comment != NULL)
+    if (name != nullptr && line_comment != nullptr)
       option.line_comment_map[std::string(name)] = line_comment;
   }
 
-  if ((term_specific_config = t3_config_get(config, "terminals")) == NULL) return;
+  if ((term_specific_config = t3_config_get(config, "terminals")) == nullptr) return;
 
-  if (cli_option.term != NULL)
+  if (cli_option.term != nullptr)
     term = cli_option.term;
-  else if ((term = getenv("TERM")) == NULL)
+  else if ((term = getenv("TERM")) == nullptr)
     return;
 
-  if ((term_specific_config = t3_config_find(term_specific_config, find_term_config, term, NULL)) !=
-      NULL)
+  if ((term_specific_config =
+           t3_config_find(term_specific_config, find_term_config, term, nullptr)) != nullptr)
     read_term_config_part(term_specific_config, &term_specific_option);
 }
 
@@ -322,7 +322,7 @@ static void read_config(void) {
     option.name = default_option.name.value_or_default(deflt); \
   } while (0)
 
-static void post_process_options(void) {
+static void post_process_options() {
   SET_OPT_FROM_DFLT(tabsize, 8);
   SET_OPT_FROM_DFLT(hide_menubar, false);
 
@@ -345,25 +345,25 @@ static void post_process_options(void) {
   if (!cli_option.ask_input_method && term_specific_option.key_timeout.is_valid())
     option.key_timeout = term_specific_option.key_timeout;
 
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "comment")], get_default_attr(COMMENT));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "comment-keyword")],
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "comment")], get_default_attr(COMMENT));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "comment-keyword")],
                     get_default_attr(COMMENT_KEYWORD));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "keyword")], get_default_attr(KEYWORD));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "number")], get_default_attr(NUMBER));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "string")], get_default_attr(STRING));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "string-escape")],
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "keyword")], get_default_attr(KEYWORD));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "number")], get_default_attr(NUMBER));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "string")], get_default_attr(STRING));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "string-escape")],
                     get_default_attr(STRING_ESCAPE));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "misc")], get_default_attr(MISC));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "variable")], get_default_attr(VARIABLE));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "error")], get_default_attr(ERROR));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "addition")], get_default_attr(ADDITION));
-  SET_OPT_FROM_FILE(highlights[map_highlight(NULL, "deletion")], get_default_attr(DELETION));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "misc")], get_default_attr(MISC));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "variable")], get_default_attr(VARIABLE));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "error")], get_default_attr(ERROR));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "addition")], get_default_attr(ADDITION));
+  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "deletion")], get_default_attr(DELETION));
   option.highlights[0] = 0;
 
   SET_OPT_FROM_FILE(brace_highlight, get_default_attr(BRACE_HIGHLIGHT));
 }
 
-static void print_help(void) {
+static void print_help() {
   printf(
       "Usage: tilde [<OPTIONS>] [<FILE...>]\n"
       "  -b,--black-white            Request black & white mode, overriding config file\n"
@@ -380,7 +380,7 @@ static void print_help(void) {
   exit(EXIT_SUCCESS);
 }
 
-static void print_version(void) {
+static void print_version() {
   printf(
       "Tilde version <VERSION>\n"
       "Copyright (c) 2011-2017 G.P. Halkes\n"  // @copyright
@@ -477,7 +477,7 @@ END_FUNCTION
       set_attribute(const_name, default_option.term_options.name); \
   } while (0)
 
-void set_attributes(void) {
+void set_attributes() {
   SET_ATTR_FROM_FILE(non_print, attribute_t::NON_PRINT);
   SET_ATTR_FROM_FILE(text_selection_cursor, attribute_t::TEXT_SELECTION_CURSOR);
   SET_ATTR_FROM_FILE(text_selection_cursor2, attribute_t::TEXT_SELECTION_CURSOR2);
@@ -506,10 +506,10 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
   t3_config_t *attributes;
   size_t i, j;
 
-  if ((attributes = t3_config_get(config, section_name)) == NULL ||
+  if ((attributes = t3_config_get(config, section_name)) == nullptr ||
       t3_config_get_type(attributes) != T3_CONFIG_SECTION) {
     if (!attr.is_valid()) return;
-    attributes = t3_config_add_section(config, section_name, NULL);
+    attributes = t3_config_add_section(config, section_name, nullptr);
   }
 
   if (!attr.is_valid()) {
@@ -517,7 +517,7 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
     return;
   }
 
-  config = t3_config_add_list(attributes, name, NULL);
+  config = t3_config_add_list(attributes, name, nullptr);
 
   for (i = 0; i < ARRAY_SIZE(attribute_masks); i++) {
     t3_attr_t search = attr & attribute_masks[i];
@@ -525,7 +525,7 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 
     for (j = 0; j < ARRAY_SIZE(attribute_map); j++) {
       if (attribute_map[j].attr == search) {
-        t3_config_add_string(config, NULL, attribute_map[j].string);
+        t3_config_add_string(config, nullptr, attribute_map[j].string);
         break;
       }
     }
@@ -537,7 +537,7 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
         sprintf(color_name_buffer, "fg %d", (search >> T3_ATTR_COLOR_SHIFT) - 1);
       else
         sprintf(color_name_buffer, "bg %d", (search >> (T3_ATTR_COLOR_SHIFT + 9)) - 1);
-      t3_config_add_string(config, NULL, color_name_buffer);
+      t3_config_add_string(config, nullptr, color_name_buffer);
     }
   }
 }
@@ -578,18 +578,18 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 
   int i;
   const char *highlight_name;
-  for (i = 1; (highlight_name = reverse_map_highlight(i)) != NULL; i++)
+  for (i = 1; (highlight_name = reverse_map_highlight(i)) != nullptr; i++)
     SET_HL_ATTRIBUTE(i, highlight_name);
 
   SET_ATTRIBUTE(brace_highlight);
 
-  if (t3_config_get(t3_config_get(config, "highlight_attributes"), NULL) == NULL)
+  if (t3_config_get(t3_config_get(config, "highlight_attributes"), nullptr) == nullptr)
     t3_config_erase(config, "highlight_attributes");
-  if (t3_config_get(t3_config_get(config, "attributes"), NULL) == NULL)
+  if (t3_config_get(t3_config_get(config, "attributes"), nullptr) == nullptr)
     t3_config_erase(config, "attributes");
 }
 
-bool write_config(void) {
+bool write_config() {
   FILE *config_file;
   t3_config_write_file_t *new_config_file;
   const char *term;
@@ -600,25 +600,25 @@ bool write_config(void) {
 
   // FIXME: verify return values
 
-  if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), NULL, NULL)) ==
-      NULL)
+  if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), nullptr,
+                                             nullptr)) == nullptr)
     return false;
 
-  if (cli_option.config_file == NULL)
+  if (cli_option.config_file == nullptr)
     config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   else
     config_file = fopen(cli_option.config_file, "r");
 
-  if (config_file != NULL) {
+  if (config_file != nullptr) {
     /* Start by reading the existing configuration. */
     t3_config_error_t error;
-    config = t3_config_read_file(config_file, &error, NULL);
+    config = t3_config_read_file(config_file, &error, nullptr);
     fclose(config_file);
   } else if (errno != ENOENT) {
     return false;
   }
 
-  if (config == NULL ||
+  if (config == nullptr ||
       (version = t3_config_get_int(t3_config_get(config, "config_version"))) < 1) {
     /* Clean-out config, because it is an old version. */
     t3_config_delete(config);
@@ -627,7 +627,7 @@ bool write_config(void) {
     /* Don't overwrite config files with newer config version. */
     return false;
   } else {
-    if (!t3_config_validate(config, schema, NULL, 0)) return false;
+    if (!t3_config_validate(config, schema, nullptr, 0)) return false;
   }
 
   default_option.term_options.key_timeout.unset();
@@ -651,18 +651,19 @@ bool write_config(void) {
 
   t3_config_add_int(config, "config_version", 1);
 
-  if (cli_option.term != NULL)
+  if (cli_option.term != nullptr)
     term = cli_option.term;
   else
     term = getenv("TERM");
 
-  if (term != NULL) {
-    if ((terminals = t3_config_get(config, "terminals")) == NULL || !t3_config_is_list(terminals))
-      terminals = t3_config_add_plist(config, "terminals", NULL);
+  if (term != nullptr) {
+    if ((terminals = t3_config_get(config, "terminals")) == nullptr ||
+        !t3_config_is_list(terminals))
+      terminals = t3_config_add_plist(config, "terminals", nullptr);
 
-    terminal_config = t3_config_find(terminals, find_term_config, term, NULL);
-    if (terminal_config == NULL) {
-      terminal_config = t3_config_add_section(terminals, NULL, NULL);
+    terminal_config = t3_config_find(terminals, find_term_config, term, nullptr);
+    if (terminal_config == nullptr) {
+      terminal_config = t3_config_add_section(terminals, nullptr, nullptr);
       t3_config_add_string(terminal_config, "name", term);
     }
 
@@ -672,17 +673,17 @@ bool write_config(void) {
   /* Validate config using schema, such that we can be sure that we won't
      say it is invalid when reading. That would fit nicely into the
      "bad things" category. */
-  if (!t3_config_validate(config, schema, NULL, 0)) {
+  if (!t3_config_validate(config, schema, nullptr, 0)) {
     t3_config_delete(config);
     return false;
   }
 
-  if (cli_option.config_file == NULL)
+  if (cli_option.config_file == nullptr)
     new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   else
     new_config_file = t3_config_open_write(cli_option.config_file);
 
-  if (new_config_file == NULL) {
+  if (new_config_file == nullptr) {
     lprintf("Could not open config file for writing: %m\n");
     t3_config_delete(config);
     return false;

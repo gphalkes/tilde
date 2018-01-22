@@ -21,3 +21,5 @@
 /testsuite/mockdir/libmockdir.la
 /testsuite/mockdir/work
 /man/output
+src/.clang-tidy
+src/.clang-tidy-opts

@@ -82,13 +82,13 @@ clang-format:
 	clang-format -i *.cc *.h */*.cc */*.h
 
 .clang-tidy-opts: Makefile
-	@echo "-xc++ -std=c++11 $(filter -D%, $(CXXFLAGS)) $(filter -I%, $(CXXFLAGS))" > .clang-tidy-opts
+	@echo "-xc++ -std=c++11 $(filter -D%, $(CXXFLAGS)) $(filter -I%, $(CXXFLAGS) $(CXXFLAGS.option))" | sed "s/'/\"/g" > .clang-tidy-opts
 
 clang-tidy: .clang-tidy-opts $(patsubst %, clang-tidy/%, $(foreach STEM, $(CXXTARGETS), $(SOURCES.$(STEM)))) \
 	$(patsubst %.cc, clang-tidy/%.h, $(foreach STEM, $(CXXTARGETS), $(SOURCES.$(STEM))))
 
 clang-tidy/%:
-	@if [[ -f "$*" ]] ; then echo "[CLANG-TIDY] $*" ; clang-tidy $(CT_CHECKS) $* -- `cat .clang-tidy-opts` ; fi
+	if [[ -f "$*" ]] ; then echo "[CLANG-TIDY] $*" ; clang-tidy $(CT_CHECKS) $* -- `cat .clang-tidy-opts` ; fi
 
 clean::
 	rm -f .clang-tidy-opts
