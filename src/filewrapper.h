@@ -29,7 +29,7 @@ class buffer_t {
 
  public:
   buffer_t() : fill(0) {}
-  virtual ~buffer_t() {}
+  virtual ~buffer_t() = default;
   const char *get_buffer() { return buffer; }
   virtual int get_fill() const { return fill; }
   virtual char operator[](int idx) const { return buffer[idx]; }

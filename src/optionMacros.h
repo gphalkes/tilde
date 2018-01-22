@@ -109,7 +109,7 @@ END_FUNCTION
     else if (retval == 1)                                                             \
       optcontrol++;                                                                   \
     goto check_next;                                                                  \
-  } while (0)
+  } while (false)
 
 /** Indicate the start of option processing.
 
@@ -275,7 +275,7 @@ END_FUNCTION
 #define NO_MORE_OPTIONS \
   do {                  \
     optnomore = 1;      \
-  } while (0)
+  } while (false)
 
 /** Check an option argument for an integer value.
         @param var The variable to store the result in.
@@ -296,7 +296,7 @@ END_FUNCTION
       fatal(_("Value for " OPTFMT " option (%ld) is out of range\n"), OPTPRARG, value); \
     }                                                                                   \
     var = (int)value;                                                                   \
-  } while (0)
+  } while (false)
 
 #define PARSE_BOOLEAN(var)                                                                      \
   do {                                                                                          \
@@ -309,7 +309,7 @@ END_FUNCTION
     else                                                                                        \
       fatal(_("Value for " OPTFMT " option (%s) is not a valid boolean value\n"), OPTPRARG,     \
             optArg);                                                                            \
-  } while (0)
+  } while (false)
 
 typedef enum { SHORT, LONG } arg_type_t;
 

@@ -88,7 +88,7 @@ clang-tidy: .clang-tidy-opts $(patsubst %, clang-tidy/%, $(foreach STEM, $(CXXTA
 	$(patsubst %.cc, clang-tidy/%.h, $(foreach STEM, $(CXXTARGETS), $(SOURCES.$(STEM))))
 
 clang-tidy/%:
-	if [[ -f "$*" ]] ; then echo "[CLANG-TIDY] $*" ; clang-tidy $(CT_CHECKS) $* -- `cat .clang-tidy-opts` ; fi
+	@if [[ -f "$*" ]] ; then echo "[CLANG-TIDY] $*" ; clang-tidy $(CT_CHECKS) $* -- `cat .clang-tidy-opts` ; fi
 
 clean::
 	rm -f .clang-tidy-opts

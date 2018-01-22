@@ -25,7 +25,7 @@ struct charset_desc_t {
   const char *tag;   // Known working name for this character set
 };
 
-typedef std::deque<charset_desc_t> charset_descs_t;
+using charset_descs_t = std::deque<charset_desc_t>;
 
 static charset_desc_t friendly_charsets[] = {
     {"Arabic (ISO-8859-6)", "ISO-8859-6"},

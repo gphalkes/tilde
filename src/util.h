@@ -39,12 +39,12 @@ void fatal(const char *fmt, ...) __attribute__((format(printf, 1, 2))) __attribu
       fprintf(stderr, "Assertion failure (%s) on %s:%d\n", #_condition, __FILE__, __LINE__); \
       abort();                                                                               \
     }                                                                                        \
-  } while (0)
+  } while (false)
 #else
 #define ASSERT(_condition)      \
   do {                          \
     if (!(_condition)) PANIC(); \
-  } while (0)
+  } while (false)
 #endif
 
 #define ENUM(_name, ...)                                                       \
@@ -84,7 +84,7 @@ class version_t {
 class stepped_process_t {
  protected:
   std::list<t3_widget::signals::connection> connections;
-  typedef t3_widget::signals::slot<void, stepped_process_t *> callback_t;
+  using callback_t = t3_widget::signals::slot<void, stepped_process_t *>;
   callback_t done_cb;
   bool result;
 

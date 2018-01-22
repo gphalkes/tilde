@@ -29,8 +29,8 @@ class open_files_t {
  public:
   void push_back(file_buffer_t *text);
 
-  typedef std::vector<file_buffer_t *>::iterator iterator;
-  typedef std::vector<file_buffer_t *>::reverse_iterator reverse_iterator;
+  using iterator = std::vector<file_buffer_t *>::iterator;
+  using reverse_iterator = std::vector<file_buffer_t *>::reverse_iterator;
   size_t size() const;
   bool empty() const;
   iterator erase(iterator position);
@@ -74,7 +74,7 @@ class recent_files_t {
   void erase(recent_file_info_t *info);
 
   int get_version();
-  typedef std::deque<recent_file_info_t *>::iterator iterator;
+  using iterator = std::deque<recent_file_info_t *>::iterator;
   iterator begin();
   iterator end();
 

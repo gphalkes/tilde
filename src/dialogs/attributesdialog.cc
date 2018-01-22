@@ -49,7 +49,7 @@
     widget_name->set_position(0, -2);                                                        \
     widget_group->add_child(widget_name);                                                    \
     widget_count++;                                                                          \
-  } while (0)
+  } while (false)
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
 attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interface") {
@@ -349,7 +349,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
     set_attribute(                                                                          \
         attribute_t::attr,                                                                  \
         name.is_valid() ? name() : get_default_attribute(attribute_t::attr, option.color)); \
-  } while (0)
+  } while (false)
   SET_WITH_DEFAULT(dialog, DIALOG);
   SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
   SET_WITH_DEFAULT(shadow, SHADOW);
@@ -378,7 +378,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
     int highlight_idx = map_highlight(NULL, #name);                                       \
     term_options->highlights[highlight_idx] = name;                                       \
     option.highlights[highlight_idx] = name.is_valid() ? name() : get_default_attr(attr); \
-  } while (0)
+  } while (false)
   SET_WITH_DEFAULT(comment, COMMENT);
   {
     int highlight_idx = map_highlight(nullptr, "comment-keyword");

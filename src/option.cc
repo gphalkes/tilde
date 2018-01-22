@@ -129,7 +129,7 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
   do {                                                                                        \
     t3_config_t *tmp;                                                                         \
     if ((tmp = t3_config_get(config, #name)) != NULL) opts->name = t3_config_get_##type(tmp); \
-  } while (0)
+  } while (false)
 #define GET_ATTRIBUTE(name) read_config_attribute(attributes, #name, &opts->name)
 #define GET_HL_ATTRIBUTE(name) \
   read_config_attribute(attributes, name, &opts->highlights[map_highlight(NULL, name)])
@@ -315,12 +315,12 @@ static void read_config() {
       option.name = term_specific_option.name;                                \
     else                                                                      \
       option.name = default_option.term_options.name.value_or_default(deflt); \
-  } while (0)
+  } while (false)
 
 #define SET_OPT_FROM_DFLT(name, deflt)                         \
   do {                                                         \
     option.name = default_option.name.value_or_default(deflt); \
-  } while (0)
+  } while (false)
 
 static void post_process_options() {
   SET_OPT_FROM_DFLT(tabsize, 8);
@@ -475,7 +475,7 @@ END_FUNCTION
       set_attribute(const_name, term_specific_option.name);        \
     else if (default_option.term_options.name.is_valid())          \
       set_attribute(const_name, default_option.term_options.name); \
-  } while (0)
+  } while (false)
 
 void set_attributes() {
   SET_ATTR_FROM_FILE(non_print, attribute_t::NON_PRINT);
@@ -548,7 +548,7 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
       t3_config_add_##type(config, #name, opts->name); \
     else                                               \
       t3_config_erase(config, #name);                  \
-  } while (0)
+  } while (false)
 #define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, opts->name)
 #define SET_HL_ATTRIBUTE(x, name) \
   set_config_attribute(config, "highlight_attributes", name, opts->highlights[x])

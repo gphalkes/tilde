@@ -19,7 +19,7 @@
 
 static bool compare_strings(std::string *a, std::string *b) { return a->compare(*b) < 0; }
 
-typedef std::set<std::string *, bool (*)(std::string *, std::string *)> result_set_t;
+using result_set_t = std::set<std::string *, bool (*)(std::string *, std::string *)>;
 
 file_autocompleter_t::file_autocompleter_t() : current_list(nullptr) {}
 
