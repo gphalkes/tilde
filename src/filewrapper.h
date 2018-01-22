@@ -24,11 +24,11 @@
 
 class buffer_t {
  protected:
-  int fill;
+  int fill = 0;
   char buffer[FILE_BUFFER_SIZE];
 
  public:
-  buffer_t() : fill(0) {}
+  buffer_t() = default;
   virtual ~buffer_t() = default;
   const char *get_buffer() { return buffer; }
   virtual int get_fill() const { return fill; }

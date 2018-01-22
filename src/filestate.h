@@ -43,14 +43,14 @@ class rw_result_t {
   };
 
  private:
-  stop_reason_t reason;
+  stop_reason_t reason = SUCCESS;
   union {
     int errno_error;
     transcript_error_t transcript_error;
   };
 
  public:
-  rw_result_t() : reason(SUCCESS) {}
+  rw_result_t() = default;
   rw_result_t(stop_reason_t _reason) : reason(_reason) {}
   rw_result_t(stop_reason_t _reason, int _errno_error)
       : reason(_reason), errno_error(_errno_error) {}
