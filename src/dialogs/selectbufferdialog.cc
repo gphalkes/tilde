@@ -58,7 +58,7 @@ bool select_buffer_dialog_t::set_size(optint height, optint width) {
   return result;
 }
 
-void select_buffer_dialog_t::show(void) {
+void select_buffer_dialog_t::show() {
   if (open_files.get_version() != known_version) {
     multi_widget_t *multi_widget;
     known_version = open_files.get_version();
@@ -81,7 +81,7 @@ void select_buffer_dialog_t::show(void) {
       bullet = new bullet_t(signals::mem_fun((*iter), &file_buffer_t::get_has_window));
       multi_widget->push_back(bullet, -1, true, false);
       name = (*iter)->get_name();
-      if (name == NULL) name = "(Untitled)";
+      if (name == nullptr) name = "(Untitled)";
       label = new label_t(name);
       label->set_anchor(bullet, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
@@ -93,7 +93,7 @@ void select_buffer_dialog_t::show(void) {
   dialog_t::show();
 }
 
-void select_buffer_dialog_t::ok_activated(void) {
+void select_buffer_dialog_t::ok_activated() {
   hide();
   activate(open_files[list->get_current()]);
 }

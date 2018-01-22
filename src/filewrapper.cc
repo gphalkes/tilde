@@ -97,24 +97,24 @@ bool transcript_buffer_t::fill_buffer(int used) {
   return fill > 0;
 }
 
-transcript_buffer_t::~transcript_buffer_t(void) {
+transcript_buffer_t::~transcript_buffer_t() {
   transcript_close_converter(handle);
   delete wrapped_buffer;
 }
 
 file_read_wrapper_t::file_read_wrapper_t(int fd, transcript_t *handle) {
   buffer = new read_buffer_t(fd);
-  if (handle != NULL) {
+  if (handle != nullptr) {
     buffer_t *transcript_buffer = new transcript_buffer_t(buffer, handle);
     buffer = transcript_buffer;
   }
 }
 
-file_read_wrapper_t::~file_read_wrapper_t(void) { delete buffer; }
+file_read_wrapper_t::~file_read_wrapper_t() { delete buffer; }
 
-const char *file_read_wrapper_t::get_buffer(void) { return buffer->get_buffer(); }
+const char *file_read_wrapper_t::get_buffer() { return buffer->get_buffer(); }
 
-int file_read_wrapper_t::get_fill(void) { return buffer->get_fill(); }
+int file_read_wrapper_t::get_fill() { return buffer->get_fill(); }
 
 bool file_read_wrapper_t::fill_buffer(int used) { return buffer->fill_buffer(used); }
 
@@ -129,8 +129,8 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
   // Convert to NFC before writing
   // FIXME: check return value
   nfc_output =
-      (char *)u8_normalize(UNINORM_NFC, (const uint8_t *)buffer, bytes, NULL, &nfc_output_len);
-  if (handle == NULL) {
+      (char *)u8_normalize(UNINORM_NFC, (const uint8_t *)buffer, bytes, nullptr, &nfc_output_len);
+  if (handle == nullptr) {
     if (nosig_write(fd, nfc_output, nfc_output_len) < 0) {
       throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
     }
@@ -171,6 +171,6 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
   return;
 }
 
-file_write_wrapper_t::~file_write_wrapper_t(void) {
-  if (handle != NULL) transcript_close_converter(handle);
+file_write_wrapper_t::~file_write_wrapper_t() {
+  if (handle != nullptr) transcript_close_converter(handle);
 }

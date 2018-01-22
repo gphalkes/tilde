@@ -16,7 +16,7 @@
 
 file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
   text_buffer_t *old_text = get_text();
-  if (_text == NULL) _text = new file_buffer_t();
+  if (_text == nullptr) _text = new file_buffer_t();
 
   _text->set_has_window(true);
   rewrap_connection = _text->connect_rewrap_required(
@@ -27,14 +27,14 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
   delete old_text;
 }
 
-file_edit_window_t::~file_edit_window_t(void) {
+file_edit_window_t::~file_edit_window_t() {
   file_buffer_t *_text = (file_buffer_t *)text;
   _text->set_has_window(false);
   save_view_parameters(_text->view_parameters);
   rewrap_connection.disconnect();
 }
 
-void file_edit_window_t::draw_info_window(void) {
+void file_edit_window_t::draw_info_window() {
   file_buffer_t *_text = (file_buffer_t *)text;
   text_line_t *name_line = _text->get_name_line();
   text_line_t::paint_info_t paint_info;
@@ -76,7 +76,7 @@ void file_edit_window_t::set_text(file_buffer_t *_text) {
   edit_window_t::set_text(_text, _text->get_view_parameters());
 }
 
-file_buffer_t *file_edit_window_t::get_text(void) const {
+file_buffer_t *file_edit_window_t::get_text() const {
   return (file_buffer_t *)edit_window_t::get_text();
 }
 
@@ -102,14 +102,14 @@ bool file_edit_window_t::process_key(t3_widget::key_t key) {
   return result;
 }
 
-void file_edit_window_t::goto_matching_brace(void) {
+void file_edit_window_t::goto_matching_brace() {
   if (get_text()->goto_matching_brace()) {
     ensure_cursor_on_screen();
     redraw = true;
   }
 }
 
-void file_edit_window_t::update_contents(void) {
+void file_edit_window_t::update_contents() {
   /* Ideally we would only update this when the screen will get updated.
      However, the problem is that we don't know exactly when this will be.
      Simply checking redraw doesn't work, because the contents is redrawn

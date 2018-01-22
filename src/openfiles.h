@@ -31,15 +31,15 @@ class open_files_t {
 
   typedef std::vector<file_buffer_t *>::iterator iterator;
   typedef std::vector<file_buffer_t *>::reverse_iterator reverse_iterator;
-  size_t size(void) const;
+  size_t size() const;
   bool empty() const;
   iterator erase(iterator position);
   iterator contains(const char *name);
-  int get_version(void);
-  iterator begin(void);
-  iterator end(void);
-  reverse_iterator rbegin(void);
-  reverse_iterator rend(void);
+  int get_version();
+  iterator begin();
+  iterator end();
+  reverse_iterator rbegin();
+  reverse_iterator rend();
   file_buffer_t *operator[](size_t idx);
   file_buffer_t *back();
 
@@ -47,7 +47,7 @@ class open_files_t {
   file_buffer_t *next_buffer(file_buffer_t *start);
   file_buffer_t *previous_buffer(file_buffer_t *start);
 
-  void cleanup(void);
+  void cleanup();
 };
 
 class recent_file_info_t {
@@ -57,10 +57,10 @@ class recent_file_info_t {
 
  public:
   recent_file_info_t(file_buffer_t *file);
-  ~recent_file_info_t(void);
+  ~recent_file_info_t();
 
-  const char *get_name(void) const;
-  const char *get_encoding(void) const;
+  const char *get_name() const;
+  const char *get_encoding() const;
 };
 
 class recent_files_t {
@@ -73,12 +73,12 @@ class recent_files_t {
   recent_file_info_t *get_info(size_t idx);
   void erase(recent_file_info_t *info);
 
-  int get_version(void);
+  int get_version();
   typedef std::deque<recent_file_info_t *>::iterator iterator;
-  iterator begin(void);
-  iterator end(void);
+  iterator begin();
+  iterator end();
 
-  void cleanup(void);
+  void cleanup();
 };
 
 extern open_files_t open_files;

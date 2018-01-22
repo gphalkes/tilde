@@ -50,15 +50,15 @@ class rw_result_t {
   };
 
  public:
-  rw_result_t(void) : reason(SUCCESS) {}
+  rw_result_t() : reason(SUCCESS) {}
   rw_result_t(stop_reason_t _reason) : reason(_reason) {}
   rw_result_t(stop_reason_t _reason, int _errno_error)
       : reason(_reason), errno_error(_errno_error) {}
   rw_result_t(stop_reason_t _reason, transcript_error_t _transcript_error)
       : reason(_reason), transcript_error(_transcript_error) {}
-  int get_errno_error(void) { return errno_error; }
-  transcript_error_t get_transcript_error(void) { return transcript_error; }
-  operator int(void) const { return (int)reason; }
+  int get_errno_error() { return errno_error; }
+  transcript_error_t get_transcript_error() { return transcript_error; }
+  operator int() const { return (int)reason; }
 };
 
 class load_process_t : public stepped_process_t {
@@ -81,18 +81,18 @@ class load_process_t : public stepped_process_t {
 
   load_process_t(const callback_t &cb);
   load_process_t(const callback_t &cb, const char *name, const char *_encoding, bool missing_ok);
-  void abort(void);
-  virtual bool step(void);
+  void abort();
+  bool step() override;
   virtual void file_selected(const std::string *name);
   virtual void encoding_selected(const std::string *_encoding);
-  virtual ~load_process_t(void);
-  void preserve_bom(void);
-  void remove_bom(void);
+  ~load_process_t() override;
+  void preserve_bom();
+  void remove_bom();
 
  public:
-  virtual file_buffer_t *get_file_buffer(void);
+  virtual file_buffer_t *get_file_buffer();
   static void execute(const callback_t &cb);
-  static void execute(const callback_t &cb, const char *name, const char *encoding = NULL,
+  static void execute(const callback_t &cb, const char *name, const char *encoding = nullptr,
                       bool missing_ok = false);
 };
 
@@ -120,10 +120,10 @@ class save_as_process_t : public stepped_process_t {
 
   save_as_process_t(const callback_t &cb, file_buffer_t *_file,
                     bool _allow_highlight_change = true);
-  virtual bool step(void);
+  bool step() override;
   virtual void file_selected(const std::string *_name);
   virtual void encoding_selected(const std::string *_encoding);
-  virtual ~save_as_process_t(void);
+  ~save_as_process_t() override;
 
  public:
   static void execute(const callback_t &cb, file_buffer_t *_file);
@@ -144,13 +144,13 @@ class close_process_t : public save_process_t {
   enum { CONFIRM_CLOSE = WRITING + 1, CLOSE };
 
   close_process_t(const callback_t &cb, file_buffer_t *_file);
-  virtual bool step(void);
-  virtual void do_save(void);
-  virtual void dont_save(void);
+  bool step() override;
+  virtual void do_save();
+  virtual void dont_save();
 
  public:
   static void execute(const callback_t &cb, file_buffer_t *_file);
-  virtual const file_buffer_t *get_file_buffer_ptr(void);
+  virtual const file_buffer_t *get_file_buffer_ptr();
 };
 
 class exit_process_t : public stepped_process_t {
@@ -158,9 +158,9 @@ class exit_process_t : public stepped_process_t {
   open_files_t::iterator iter;
 
   exit_process_t(const callback_t &cb);
-  virtual bool step(void);
-  virtual void do_save(void);
-  virtual void dont_save(void);
+  bool step() override;
+  virtual void do_save();
+  virtual void dont_save();
   virtual void save_done(stepped_process_t *process);
 
  public:
@@ -172,9 +172,9 @@ class open_recent_process_t : public load_process_t {
   recent_file_info_t *info;
 
   open_recent_process_t(const callback_t &cb);
-  ~open_recent_process_t(void);
+  ~open_recent_process_t() override;
   virtual void recent_file_selected(recent_file_info_t *_info);
-  virtual bool step(void);
+  bool step() override;
 
  public:
   static void execute(const callback_t &cb);
@@ -190,11 +190,11 @@ class load_cli_file_process_t : public stepped_process_t {
   cleanup_free_ptr<char>::t encoding;
 
   load_cli_file_process_t(const callback_t &cb);
-  virtual bool step(void);
+  bool step() override;
   virtual void load_done(stepped_process_t *process);
 
   void encoding_selection_done(const std::string *);
-  void encoding_selection_canceled(void);
+  void encoding_selection_canceled();
 
  public:
   static void execute(const callback_t &cb);

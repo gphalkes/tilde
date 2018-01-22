@@ -166,7 +166,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
 
   width = std::max(ok_button->get_width() + cancel_button->get_width() + 4, width);
 
-  set_size(None, width + 4);
+  dialog_t::set_size(None, width + 4);
 }
 
 void buffer_options_dialog_t::set_values_from_view(file_edit_window_t *view) {
@@ -193,7 +193,7 @@ void buffer_options_dialog_t::set_view_values(file_edit_window_t *view) {
   view->get_text()->set_strip_spaces(strip_spaces_box->get_state());
 }
 
-void buffer_options_dialog_t::set_values_from_options(void) {
+void buffer_options_dialog_t::set_values_from_options() {
   char tabsize_text[20];
   sprintf(tabsize_text, "%d", option.tabsize);
   tabsize_field->set_text(tabsize_text);
@@ -206,7 +206,7 @@ void buffer_options_dialog_t::set_values_from_options(void) {
   strip_spaces_box->set_state(option.strip_spaces);
 }
 
-void buffer_options_dialog_t::set_options_from_values(void) {
+void buffer_options_dialog_t::set_options_from_values() {
   int tabsize = atoi(tabsize_field->get_text()->c_str());
   if (tabsize > 0 || tabsize < 17) option.tabsize = default_option.tabsize = tabsize;
   option.wrap = default_option.wrap = wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE;
@@ -217,7 +217,7 @@ void buffer_options_dialog_t::set_options_from_values(void) {
   option.strip_spaces = default_option.strip_spaces = strip_spaces_box->get_state();
 }
 
-void buffer_options_dialog_t::handle_activate(void) {
+void buffer_options_dialog_t::handle_activate() {
   int tabsize = atoi(tabsize_field->get_text()->c_str());
   if (tabsize < 1 || tabsize > 16) {
     error_dialog->set_message(_("Tab size out of range (must be between 1 and 16 inclusive)."));
@@ -329,10 +329,10 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 2
 
   width = std::max(ok_button->get_width() + cancel_button->get_width() + 4, width);
 
-  set_size(None, width + 4);
+  dialog_t::set_size(None, width + 4);
 }
 
-void misc_options_dialog_t::set_values_from_options(void) {
+void misc_options_dialog_t::set_values_from_options() {
   hide_menu_box->set_state(option.hide_menubar);
   save_backup_box->set_state(option.make_backup);
   parse_file_positions_box->set_state(default_option.parse_file_positions.value_or_default(true));
@@ -340,18 +340,18 @@ void misc_options_dialog_t::set_values_from_options(void) {
       default_option.disable_primary_selection_over_ssh.value_or_default(false));
 }
 
-void misc_options_dialog_t::set_options_from_values(void) {
+void misc_options_dialog_t::set_options_from_values() {
   option.hide_menubar = default_option.hide_menubar = hide_menu_box->get_state();
   option.make_backup = default_option.make_backup = save_backup_box->get_state();
   default_option.parse_file_positions = parse_file_positions_box->get_state();
   default_option.disable_primary_selection_over_ssh = disable_selection_over_ssh_box->get_state();
-  if (!cli_option.disable_primary_selection && getenv("SSH_TTY") != NULL) {
+  if (!cli_option.disable_primary_selection && getenv("SSH_TTY") != nullptr) {
     t3_widget::set_primary_selection_mode(
         !default_option.disable_primary_selection_over_ssh.value_or_default(false));
   }
 }
 
-void misc_options_dialog_t::handle_activate(void) {
+void misc_options_dialog_t::handle_activate() {
   /* Do required validation here. */
   hide();
   activate();

@@ -26,9 +26,9 @@ class select_buffer_dialog_t : public dialog_t {
 
  public:
   select_buffer_dialog_t(int height, int width);
-  virtual bool set_size(optint height, optint width);
-  virtual void show(void);
-  virtual void ok_activated(void);
+  bool set_size(optint height, optint width) override;
+  void show() override;
+  virtual void ok_activated();
 
   T3_WIDGET_SIGNAL(activate, void, file_buffer_t *);
 };

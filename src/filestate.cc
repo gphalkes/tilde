@@ -23,8 +23,8 @@ load_process_t::load_process_t(const callback_t &cb)
     : stepped_process_t(cb),
       state(SELECT_FILE),
       bom_state(UNKNOWN),
-      file(NULL),
-      wrapper(NULL),
+      file(nullptr),
+      wrapper(nullptr),
       encoding("UTF-8"),
       fd(-1),
       buffer_used(true) {}
@@ -34,19 +34,19 @@ load_process_t::load_process_t(const callback_t &cb, const char *name, const cha
     : stepped_process_t(cb),
       state(missing_ok ? INITIAL_MISSING_OK : INITIAL),
       bom_state(UNKNOWN),
-      file(new file_buffer_t(name, _encoding == NULL ? "UTF-8" : _encoding)),
-      wrapper(NULL),
-      encoding(_encoding == NULL ? "UTF-8" : _encoding),
+      file(new file_buffer_t(name, _encoding == nullptr ? "UTF-8" : _encoding)),
+      wrapper(nullptr),
+      encoding(_encoding == nullptr ? "UTF-8" : _encoding),
       fd(-1),
       buffer_used(true) {}
 
-void load_process_t::abort(void) {
+void load_process_t::abort() {
   delete file;
-  file = NULL;
+  file = nullptr;
   stepped_process_t::abort();
 }
 
-bool load_process_t::step(void) {
+bool load_process_t::step() {
   std::string message;
   rw_result_t rw_result;
 
@@ -79,7 +79,7 @@ bool load_process_t::step(void) {
       printf_into(&message, "Could not find a converter for selected encoding: %s",
                   transcript_strerror(rw_result.get_transcript_error()));
       delete file;
-      file = NULL;
+      file = nullptr;
       error_dialog->set_message(&message);
       error_dialog->show();
       break;
@@ -87,7 +87,7 @@ bool load_process_t::step(void) {
       printf_into(&message, "Could not load file in encoding %s: %s", file->get_encoding(),
                   transcript_strerror(rw_result.get_transcript_error()));
       delete file;
-      file = NULL;
+      file = nullptr;
       error_dialog->set_message(&message);
       error_dialog->show();
       break;
@@ -150,26 +150,26 @@ void load_process_t::file_selected(const std::string *name) {
 
 void load_process_t::encoding_selected(const std::string *_encoding) { encoding = *_encoding; }
 
-file_buffer_t *load_process_t::get_file_buffer(void) {
+file_buffer_t *load_process_t::get_file_buffer() {
   if (result) return file;
-  return NULL;
+  return nullptr;
 }
 
-load_process_t::~load_process_t(void) {
+load_process_t::~load_process_t() {
 #ifdef DEBUG
-  ASSERT(result || file == NULL);
+  ASSERT(result || file == nullptr);
 #endif
   delete wrapper;
   if (fd >= 0) close(fd);
 }
 
-void load_process_t::preserve_bom(void) {
+void load_process_t::preserve_bom() {
   // FIXME: set encoding accordingly
   bom_state = PRESERVE_BOM;
   run();
 }
 
-void load_process_t::remove_bom(void) {
+void load_process_t::remove_bom() {
   bom_state = REMOVE_BOM;
   run();
 }
@@ -188,13 +188,13 @@ save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file,
       file(_file),
       allow_highlight_change(_allow_highlight_change),
       highlight_changed(false),
-      save_name(NULL),
-      real_name(NULL),
-      temp_name(NULL),
+      save_name(nullptr),
+      real_name(nullptr),
+      temp_name(nullptr),
       fd(-1),
-      wrapper(NULL) {}
+      wrapper(nullptr) {}
 
-bool save_as_process_t::step(void) {
+bool save_as_process_t::step() {
   std::string message;
   rw_result_t rw_result;
 
@@ -277,18 +277,18 @@ void save_as_process_t::file_selected(const std::string *_name) {
   state = INITIAL;
   if (allow_highlight_change) {
     highlight_changed = true;
-    file->set_highlight(
-        t3_highlight_load_by_filename(name.c_str(), map_highlight, NULL, T3_HIGHLIGHT_UTF8, NULL));
+    file->set_highlight(t3_highlight_load_by_filename(name.c_str(), map_highlight, nullptr,
+                                                      T3_HIGHLIGHT_UTF8, nullptr));
   }
   run();
 }
 
 void save_as_process_t::encoding_selected(const std::string *_encoding) { encoding = *_encoding; }
 
-save_as_process_t::~save_as_process_t(void) {
+save_as_process_t::~save_as_process_t() {
   if (fd >= 0) {
     close(fd);
-    if (temp_name != NULL) {
+    if (temp_name != nullptr) {
       unlink(temp_name);
       free(temp_name);
     } else {
@@ -306,7 +306,7 @@ bool save_as_process_t::get_highlight_changed() const { return highlight_changed
 
 save_process_t::save_process_t(const callback_t &cb, file_buffer_t *_file)
     : save_as_process_t(cb, _file, false) {
-  if (file->get_name() != NULL) state = INITIAL;
+  if (file->get_name() != nullptr) state = INITIAL;
 }
 
 void save_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
@@ -319,7 +319,7 @@ close_process_t::close_process_t(const callback_t &cb, file_buffer_t *_file)
   if (!_file->is_modified()) state = CLOSE;
 }
 
-bool close_process_t::step(void) {
+bool close_process_t::step() {
   if (state < CONFIRM_CLOSE) {
     if (save_process_t::step()) {
       if (!result) return true;
@@ -341,7 +341,7 @@ bool close_process_t::step(void) {
   } else if (state == CONFIRM_CLOSE) {
     std::string message;
     printf_into(&message, "Save changes to '%s'",
-                file->get_name() == NULL ? "(Untitled)" : file->get_name());
+                file->get_name() == nullptr ? "(Untitled)" : file->get_name());
     connections.push_back(close_confirm_dialog->connect_activate(
         signals::mem_fun(this, &close_process_t::do_save), 0));
     connections.push_back(close_confirm_dialog->connect_activate(
@@ -358,12 +358,12 @@ bool close_process_t::step(void) {
   return false;
 }
 
-void close_process_t::do_save(void) {
-  state = file->get_name() == NULL ? SELECT_FILE : INITIAL;
+void close_process_t::do_save() {
+  state = file->get_name() == nullptr ? SELECT_FILE : INITIAL;
   run();
 }
 
-void close_process_t::dont_save(void) {
+void close_process_t::dont_save() {
   state = CLOSE;
   run();
 }
@@ -372,17 +372,17 @@ void close_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
   (new close_process_t(cb, _file))->run();
 }
 
-const file_buffer_t *close_process_t::get_file_buffer_ptr(void) { return file; }
+const file_buffer_t *close_process_t::get_file_buffer_ptr() { return file; }
 
 exit_process_t::exit_process_t(const callback_t &cb)
     : stepped_process_t(cb), iter(open_files.begin()) {}
 
-bool exit_process_t::step(void) {
+bool exit_process_t::step() {
   for (; iter != open_files.end(); iter++) {
     if ((*iter)->is_modified()) {
       std::string message;
       printf_into(&message, "Save changes to '%s'",
-                  (*iter)->get_name() == NULL ? "(Untitled)" : (*iter)->get_name());
+                  (*iter)->get_name() == nullptr ? "(Untitled)" : (*iter)->get_name());
       connections.push_back(close_confirm_dialog->connect_activate(
           signals::mem_fun(this, &exit_process_t::do_save), 0));
       connections.push_back(close_confirm_dialog->connect_activate(
@@ -402,11 +402,11 @@ bool exit_process_t::step(void) {
           return true;*/
 }
 
-void exit_process_t::do_save(void) {
+void exit_process_t::do_save() {
   save_process_t::execute(signals::mem_fun(this, &exit_process_t::save_done), *iter);
 }
 
-void exit_process_t::dont_save(void) {
+void exit_process_t::dont_save() {
   iter++;
   run();
 }
@@ -424,7 +424,7 @@ void exit_process_t::execute(const callback_t &cb) { (new exit_process_t(cb))->r
 
 open_recent_process_t::open_recent_process_t(const callback_t &cb) : load_process_t(cb) {}
 
-bool open_recent_process_t::step(void) {
+bool open_recent_process_t::step() {
   if (state == SELECT_FILE) {
     connections.push_back(open_recent_dialog->connect_file_selected(
         signals::mem_fun(this, &open_recent_process_t::recent_file_selected)));
@@ -443,7 +443,7 @@ void open_recent_process_t::recent_file_selected(recent_file_info_t *_info) {
   run();
 }
 
-open_recent_process_t::~open_recent_process_t(void) {
+open_recent_process_t::~open_recent_process_t() {
   if (result) recent_files.erase(info);
 }
 
@@ -458,11 +458,11 @@ load_cli_file_process_t::load_cli_file_process_t(const callback_t &cb)
       in_step(false),
       encoding_selected(false) {}
 
-bool load_cli_file_process_t::step(void) {
+bool load_cli_file_process_t::step() {
   if (!encoding_selected) {
     encoding_selected = true;
     if (cli_option.encoding.is_valid()) {
-      if (cli_option.encoding == NULL) {
+      if (cli_option.encoding == nullptr) {
         encoding_dialog->set_encoding("UTF-8");
         encoding_dialog->connect_activate(
             signals::mem_fun(this, &load_cli_file_process_t::encoding_selection_done));

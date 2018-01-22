@@ -18,6 +18,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <t3widget/util.h>
 #include <t3window/window.h>
 
 #include "util.h"
@@ -166,8 +167,8 @@ extern term_options_t term_specific_option;
 extern options_t default_option;
 
 void parse_args(int argc, char **argv);
-void set_attributes(void);
-bool write_config(void);
+void set_attributes();
+bool write_config();
 t3_attr_t get_default_attr(attribute_key_t attr);
 t3_attr_t get_default_attr(attribute_key_t attr, bool color);
 

@@ -26,9 +26,9 @@ class open_recent_dialog_t : public dialog_t {
 
  public:
   open_recent_dialog_t(int height, int width);
-  virtual bool set_size(optint height, optint width);
-  virtual void show(void);
-  virtual void ok_activated(void);
+  bool set_size(optint height, optint width) override;
+  void show() override;
+  virtual void ok_activated();
 
   T3_WIDGET_SIGNAL(file_selected, void, recent_file_info_t *);
 };

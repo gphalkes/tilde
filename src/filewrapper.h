@@ -28,10 +28,10 @@ class buffer_t {
   char buffer[FILE_BUFFER_SIZE];
 
  public:
-  buffer_t(void) : fill(0) {}
-  virtual ~buffer_t(void) {}
-  const char *get_buffer(void) { return buffer; }
-  virtual int get_fill(void) const { return fill; }
+  buffer_t() : fill(0) {}
+  virtual ~buffer_t() {}
+  const char *get_buffer() { return buffer; }
+  virtual int get_fill() const { return fill; }
   virtual char operator[](int idx) const { return buffer[idx]; }
   virtual bool fill_buffer(int used) = 0;
 };
@@ -42,7 +42,7 @@ class read_buffer_t : public buffer_t {
 
  public:
   read_buffer_t(int _fd) : fd(_fd) {}
-  virtual bool fill_buffer(int used);
+  bool fill_buffer(int used) override;
 };
 
 class transcript_buffer_t : public buffer_t {
@@ -59,8 +59,8 @@ class transcript_buffer_t : public buffer_t {
         conversion_flags(TRANSCRIPT_FILE_START),
         handle(_handle),
         at_eof(false) {}
-  virtual ~transcript_buffer_t(void);
-  virtual bool fill_buffer(int used);
+  ~transcript_buffer_t() override;
+  bool fill_buffer(int used) override;
 };
 
 class file_read_wrapper_t {
@@ -68,10 +68,10 @@ class file_read_wrapper_t {
   buffer_t *buffer;
 
  public:
-  file_read_wrapper_t(int fd, transcript_t *handle = NULL);
-  ~file_read_wrapper_t(void);
-  const char *get_buffer(void);
-  int get_fill(void);
+  file_read_wrapper_t(int fd, transcript_t *handle = nullptr);
+  ~file_read_wrapper_t();
+  const char *get_buffer();
+  int get_fill();
   bool fill_buffer(int used);
 };
 
@@ -81,9 +81,9 @@ class file_write_wrapper_t {
   transcript_t *handle;
 
  public:
-  file_write_wrapper_t(int _fd, transcript_t *_handle = NULL)
+  file_write_wrapper_t(int _fd, transcript_t *_handle = nullptr)
       : fd(_fd), conversion_flags(TRANSCRIPT_FILE_START), handle(_handle) {}
-  ~file_write_wrapper_t(void);
+  ~file_write_wrapper_t();
   void write(const char *buffer, size_t bytes);
 };
 

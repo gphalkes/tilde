@@ -35,20 +35,20 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
       view_parameters(new edit_window_t::view_parameters_t()),
       has_window(false),
       highlight_valid(0),
-      highlight_info(NULL),
-      match_line(NULL),
-      last_match(NULL),
+      highlight_info(nullptr),
+      match_line(nullptr),
+      last_match(nullptr),
       matching_brace_valid(false) {
-  if (_encoding == NULL)
+  if (_encoding == nullptr)
     encoding = strdup_impl("UTF-8");
   else
     encoding = strdup_impl(_encoding);
-  if (encoding == NULL) throw std::bad_alloc();
+  if (encoding == nullptr) throw std::bad_alloc();
 
-  if (_name == NULL) {
+  if (_name == nullptr) {
     name_line.set_text("(Untitled)");
   } else {
-    if ((name = strdup_impl(_name)) == NULL) throw std::bad_alloc();
+    if ((name = strdup_impl(_name)) == nullptr) throw std::bad_alloc();
 
     std::string converted_name;
     convert_lang_codeset(name, &converted_name, true);
@@ -66,7 +66,7 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
   open_files.push_back(this);
 }
 
-file_buffer_t::~file_buffer_t(void) {
+file_buffer_t::~file_buffer_t() {
   open_files.erase(this);
   t3_highlight_free(highlight_info);
   t3_highlight_free_match(last_match);
@@ -75,7 +75,7 @@ file_buffer_t::~file_buffer_t(void) {
 
 rw_result_t file_buffer_t::load(load_process_t *state) {
   const std::string *line;
-  t3_highlight_t *highlight = NULL;
+  t3_highlight_t *highlight = nullptr;
   t3_highlight_lang_t lang;
   t3_bool success = t3_false;
   int i;
@@ -90,7 +90,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
       transcript_t *handle;
       transcript_error_t error;
 
-      if ((_name = canonicalize_path(name)) == NULL) {
+      if ((_name = canonicalize_path(name)) == nullptr) {
         if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) break;
         return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
       }
@@ -109,7 +109,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
         lprintf("Using encoding %s to read %s\n", encoding(), name());
 
         handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
-        if (handle == NULL) return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
+        if (handle == nullptr) return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
         // FIXME: if the new fails, the handle will remain open!
         state->wrapper = new file_read_wrapper_t(state->fd, handle);
 
@@ -179,23 +179,24 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
   for (i = 0; i < size() && i < 5 && !success; i++) {
     line = get_line_data(i)->get_data();
     success =
-        t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, NULL);
+        t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   for (i = size() - 1; i >= 5 && !success; i--) {
     line = get_line_data(i)->get_data();
     success =
-        t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, NULL);
+        t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   if (!success) {
     line = get_line_data(0)->get_data();
-    success = t3_highlight_detect(line->data(), line->size(), true, T3_HIGHLIGHT_UTF8, &lang, NULL);
+    success =
+        t3_highlight_detect(line->data(), line->size(), true, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   if (!success) {
-    success = t3_highlight_lang_by_filename(name, T3_HIGHLIGHT_UTF8, &lang, NULL);
+    success = t3_highlight_lang_by_filename(name, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   if (success) {
-    highlight = t3_highlight_load(lang.lang_file, map_highlight, NULL,
-                                  T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, NULL);
+    highlight = t3_highlight_load(lang.lang_file, map_highlight, nullptr,
+                                  T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, nullptr);
     set_highlight(highlight);
     std::map<std::string, std::string>::iterator iter = option.line_comment_map.find(lang.name);
     if (iter != option.line_comment_map.end()) set_line_comment(iter->second.c_str());
@@ -213,13 +214,13 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
   switch (state->state) {
     case save_as_process_t::INITIAL:
       if (state->name.empty()) {
-        if (name == NULL) PANIC();
+        if (name == nullptr) PANIC();
         state->save_name = name;
       } else {
         state->save_name = state->name.c_str();
       }
 
-      if ((state->real_name = canonicalize_path(state->save_name)) == NULL) {
+      if ((state->real_name = canonicalize_path(state->save_name)) == nullptr) {
         if (errno != ENOENT) return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
         state->real_name = strdup_impl(state->save_name);
       }
@@ -260,7 +261,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 
           /* Unfortunately, we can't pass the c_str result to mkstemp as we are not allowed
              to change that string. So we'll just have to strdup it :-( */
-          if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == NULL)
+          if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == nullptr)
             return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
           /* Attempt to create a temporary file. If this fails, just write the file
              directly. The latter has some risk (e.g. file truncation due to full disk,
@@ -269,17 +270,17 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
           if ((state->fd = mkstemp(state->temp_name)) >= 0) {
 // Preserve ownership and attributes
 #ifdef HAS_LIBATTR
-            attr_copy_file(state->real_name, state->temp_name, NULL, NULL);
+            attr_copy_file(state->real_name, state->temp_name, nullptr, nullptr);
 #endif
 #ifdef HAS_LIBACL
-            perm_copy_file(state->real_name, state->temp_name, NULL);
+            perm_copy_file(state->real_name, state->temp_name, nullptr);
 #endif
             fchmod(state->fd, state->file_info.st_mode);
             fchown(state->fd, -1, state->file_info.st_gid);
             fchown(state->fd, state->file_info.st_uid, -1);
           } else {
             free(state->temp_name);
-            state->temp_name = NULL;
+            state->temp_name = nullptr;
             if ((state->fd = open(state->real_name, O_WRONLY | O_CREAT, CREATE_MODE)) < 0) {
               return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
             }
@@ -291,15 +292,15 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         transcript_error_t error;
         if (!state->encoding.empty()) {
           if ((handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0,
-                                                  &error)) == NULL)
+                                                  &error)) == nullptr)
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
           /* encoding is a cleanup ptr. */
           encoding = strdup_impl(state->encoding.c_str());
         } else if (strcmp(encoding, "UTF-8") != 0) {
-          if ((handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error)) == NULL)
+          if ((handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error)) == nullptr)
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
         } else {
-          handle = NULL;
+          handle = nullptr;
         }
         // FIXME: if the new fails, the handle will remain open!
         // FIXME: if the new fails, this will abort with an exception! This should not happen!
@@ -321,14 +322,14 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       }
 
       // If the file is being overwritten, truncate it to the written size.
-      if (state->temp_name == NULL) {
+      if (state->temp_name == nullptr) {
         off_t curr_pos = lseek(state->fd, 0, SEEK_CUR);
         if (curr_pos >= 0) ftruncate(state->fd, curr_pos);
       }
       fsync(state->fd);
       close(state->fd);
       state->fd = -1;
-      if (state->temp_name != NULL) {
+      if (state->temp_name != nullptr) {
         if (option.make_backup) {
           std::string backup_name = state->real_name.get();
           backup_name += '~';
@@ -355,32 +356,32 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
   return rw_result_t(rw_result_t::SUCCESS);
 }
 
-const char *file_buffer_t::get_name(void) const { return name(); }
+const char *file_buffer_t::get_name() const { return name(); }
 
-const char *file_buffer_t::get_encoding(void) const { return encoding(); }
+const char *file_buffer_t::get_encoding() const { return encoding(); }
 
-text_line_t *file_buffer_t::get_name_line(void) { return &name_line; }
+text_line_t *file_buffer_t::get_name_line() { return &name_line; }
 
-const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters(void) const {
+const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters() const {
   return view_parameters();
 }
 
 void file_buffer_t::prepare_paint_line(int line) {
   int i;
 
-  if (highlight_info == NULL || highlight_valid >= line) return;
+  if (highlight_info == nullptr || highlight_valid >= line) return;
 
   for (i = highlight_valid >= 0 ? highlight_valid + 1 : 1; i <= line; i++) {
     int state = ((file_line_t *)get_line_data_nonconst(i - 1))->get_highlight_end();
     ((file_line_t *)get_line_data_nonconst(i))->set_highlight_start(state);
   }
   highlight_valid = line;
-  match_line = NULL;
+  match_line = nullptr;
 }
 
 void file_buffer_t::set_has_window(bool _has_window) { has_window = _has_window; }
 
-bool file_buffer_t::get_has_window(void) const { return has_window; }
+bool file_buffer_t::get_has_window() const { return has_window; }
 
 void file_buffer_t::invalidate_highlight(rewrap_type_t type, int line, int pos) {
   (void)type;
@@ -388,31 +389,31 @@ void file_buffer_t::invalidate_highlight(rewrap_type_t type, int line, int pos) 
   if (line <= highlight_valid) highlight_valid = line - 1;
 }
 
-t3_highlight_t *file_buffer_t::get_highlight(void) { return highlight_info; }
+t3_highlight_t *file_buffer_t::get_highlight() { return highlight_info; }
 
 void file_buffer_t::set_highlight(t3_highlight_t *highlight) {
-  if (highlight_info != NULL) t3_highlight_free(highlight_info);
+  if (highlight_info != nullptr) t3_highlight_free(highlight_info);
   highlight_info = highlight;
 
-  if (last_match != NULL) {
+  if (last_match != nullptr) {
     t3_highlight_free_match(last_match);
-    last_match = NULL;
+    last_match = nullptr;
   }
 
-  match_line = NULL;
+  match_line = nullptr;
   highlight_valid = 0;
 
-  if (highlight_info != NULL) last_match = t3_highlight_new_match(highlight_info);
+  if (highlight_info != nullptr) last_match = t3_highlight_new_match(highlight_info);
 }
 
-bool file_buffer_t::get_strip_spaces(void) const {
+bool file_buffer_t::get_strip_spaces() const {
   if (strip_spaces.is_valid()) return strip_spaces;
   return option.strip_spaces;
 }
 
 void file_buffer_t::set_strip_spaces(bool _strip_spaces) { strip_spaces = _strip_spaces; }
 
-void file_buffer_t::do_strip_spaces(void) {
+void file_buffer_t::do_strip_spaces() {
   size_t idx, strip_start;
   bool undo_started = false;
   text_coordinate_t saved_cursor = cursor;
@@ -625,7 +626,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
   return false;
 }
 
-bool file_buffer_t::goto_matching_brace(void) {
+bool file_buffer_t::goto_matching_brace() {
   text_coordinate_t match_coordinate;
   if (find_matching_brace(match_coordinate)) {
     cursor = match_coordinate;
@@ -634,7 +635,7 @@ bool file_buffer_t::goto_matching_brace(void) {
   return false;
 }
 
-bool file_buffer_t::update_matching_brace(void) {
+bool file_buffer_t::update_matching_brace() {
   bool old_valid = matching_brace_valid;
   text_coordinate_t old_coordinate = matching_brace_coordinate;
 
@@ -645,7 +646,7 @@ bool file_buffer_t::update_matching_brace(void) {
 }
 
 void file_buffer_t::set_line_comment(const char *text) {
-  if (text == NULL)
+  if (text == nullptr)
     line_comment.clear();
   else
     line_comment = text;

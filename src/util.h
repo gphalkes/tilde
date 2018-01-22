@@ -14,9 +14,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <limits.h>
+#include <climits>
+#include <cstdlib>
 #include <list>
-#include <stdlib.h>
 #include <string>
 #include <t3widget/signals.h>
 #include <t3window/window.h>
@@ -69,7 +69,7 @@ class version_t {
   int value;
 
  public:
-  version_t(void) : value(INT_MIN) {}
+  version_t() : value(INT_MIN) {}
   int operator++(int) {
     if (value == INT_MAX)
       value = INT_MIN;
@@ -77,7 +77,7 @@ class version_t {
       value++;
     return value;
   }
-  operator int(void) const { return value; }
+  operator int() const { return value; }
   bool operator==(int other) { return value == other; }
 };
 
@@ -88,16 +88,16 @@ class stepped_process_t {
   callback_t done_cb;
   bool result;
 
-  stepped_process_t(void);
+  stepped_process_t();
   stepped_process_t(const callback_t &cb);
-  virtual bool step(void) = 0;
-  void run(void);
-  void abort(void);
-  void disconnect(void);
+  virtual bool step() = 0;
+  void run();
+  void abort();
+  void disconnect();
   void done(bool _result);
 
  public:
-  bool get_result(void);
+  bool get_result();
   virtual ~stepped_process_t();
   static void ignore_result(stepped_process_t *process);
 };

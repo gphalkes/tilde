@@ -21,7 +21,7 @@ static bool compare_strings(std::string *a, std::string *b) { return a->compare(
 
 typedef std::set<std::string *, bool (*)(std::string *, std::string *)> result_set_t;
 
-file_autocompleter_t::file_autocompleter_t(void) : current_list(NULL) {}
+file_autocompleter_t::file_autocompleter_t() : current_list(nullptr) {}
 
 string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buffer_t *text,
                                                                   int *position) {
@@ -29,12 +29,12 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   int completion_end;
   std::string current_word;
 
-  if (current_list != NULL) {
+  if (current_list != nullptr) {
     delete current_list;
-    current_list = NULL;
+    current_list = nullptr;
   }
 
-  if (text->cursor.pos == 0) return NULL;
+  if (text->cursor.pos == 0) return nullptr;
 
   line = text->get_line_data(text->cursor.line);
 
@@ -54,7 +54,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   text_coordinate_t start(0, 0);
   text_coordinate_t eof(INT_MAX, INT_MAX);
   std::string needle(*line->get_data(), completion_start, text->cursor.pos - completion_start);
-  finder_t finder(&needle, find_flags_t::ANCHOR_WORD_LEFT, NULL);
+  finder_t finder(&needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
   find_result_t find_result;
   result_set_t result_set(compare_strings);
   std::string word;
@@ -76,13 +76,13 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     start.pos = find_result.end.pos;
   }
 
-  if (result_set.empty()) return NULL;
+  if (result_set.empty()) return nullptr;
 
   try {
     current_list = new string_list_t();
   } catch (const std::bad_alloc &) {
-    current_list = NULL;
-    return NULL;
+    current_list = nullptr;
+    return nullptr;
   }
 
   for (result_set_t::iterator iter = result_set.begin(); iter != result_set.end(); iter++)
@@ -96,5 +96,5 @@ void file_autocompleter_t::autocomplete(text_buffer_t *text, size_t idx) {
   text_coordinate_t start(text->cursor.line, completion_start);
   text->replace_block(start, text->cursor, (*current_list)[idx]);
   delete current_list;
-  current_list = NULL;
+  current_list = nullptr;
 }

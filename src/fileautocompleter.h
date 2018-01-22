@@ -24,9 +24,9 @@ class file_autocompleter_t : public autocompleter_t {
   int completion_start;
 
  public:
-  file_autocompleter_t(void);
-  string_list_base_t *build_autocomplete_list(const text_buffer_t *text, int *position);
-  void autocomplete(text_buffer_t *text, size_t idx);
+  file_autocompleter_t();
+  string_list_base_t *build_autocomplete_list(const text_buffer_t *text, int *position) override;
+  void autocomplete(text_buffer_t *text, size_t idx) override;
 };
 
 #endif

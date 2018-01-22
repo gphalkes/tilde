@@ -12,11 +12,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <cerrno>
+#include <climits>
 #include <csignal>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
-#include <limits.h>
 #include <string>
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -42,16 +42,16 @@ static const char *highlight_names[] = {"normal",   "comment", "comment-keyword"
 
 static_assert(ARRAY_SIZE(highlight_names) <= MAX_HIGHLIGHTS);
 
-stepped_process_t::stepped_process_t(void) : result(true) {}
+stepped_process_t::stepped_process_t() : result(true) {}
 stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(false) {}
 
-void stepped_process_t::run(void) {
+void stepped_process_t::run() {
   if (step()) done(result);
 }
 
-void stepped_process_t::abort(void) { done(false); }
+void stepped_process_t::abort() { done(false); }
 
-void stepped_process_t::disconnect(void) {
+void stepped_process_t::disconnect() {
   for (std::list<signals::connection>::iterator iter = connections.begin();
        iter != connections.end(); iter++)
     (*iter).disconnect();
@@ -66,7 +66,7 @@ void stepped_process_t::done(bool _result) {
 
 stepped_process_t::~stepped_process_t() { disconnect(); }
 
-bool stepped_process_t::get_result(void) { return result; }
+bool stepped_process_t::get_result() { return result; }
 
 void stepped_process_t::ignore_result(stepped_process_t *process) { (void)process; }
 
@@ -119,7 +119,7 @@ void fatal(const char *fmt, ...) {
 }
 
 char *canonicalize_path(const char *path) {
-  char *result = realpath(path, NULL);
+  char *result = realpath(path, nullptr);
 
 #ifdef PATH_MAX
   /* realpath in the POSIX.1-2001 and 2004 specifications is broken, in that
@@ -131,9 +131,9 @@ char *canonicalize_path(const char *path) {
      is broken by design, as that leaves no correct way to allocate a buffer
      with the correct size to store the result.
   */
-  if (result == NULL && path != NULL && errno == EINVAL) {
+  if (result == nullptr && path != nullptr && errno == EINVAL) {
     char store_path[PATH_MAX];
-    if (realpath(path, store_path) != NULL) return NULL;
+    if (realpath(path, store_path) != nullptr) return nullptr;
     return strdup_impl(store_path);
   }
 #endif
@@ -153,8 +153,8 @@ void printf_into(std::string *message, const char *format, ...) {
   message->clear();
   va_start(args, format);
 
-  if (message_buffer == NULL) {
-    if ((message_buffer = (char *)malloc(BUFFER_START_SIZE)) == NULL) {
+  if (message_buffer == nullptr) {
+    if ((message_buffer = (char *)malloc(BUFFER_START_SIZE)) == nullptr) {
       va_end(args);
       return;
     }
@@ -169,7 +169,7 @@ void printf_into(std::string *message, const char *format, ...) {
 
   result = std::min(BUFFER_MAX - 1, result);
   if (result < message_buffer_size ||
-      (new_message_buffer = (char *)realloc(message_buffer, result + 1)) == NULL) {
+      (new_message_buffer = (char *)realloc(message_buffer, result + 1)) == nullptr) {
     *message = message_buffer;
     va_end(args);
     return;
@@ -197,7 +197,7 @@ int map_highlight(void *data, const char *name) {
 }
 
 const char *reverse_map_highlight(int idx) {
-  if (idx < 0 || (size_t)idx >= ARRAY_SIZE(highlight_names)) return NULL;
+  if (idx < 0 || (size_t)idx >= ARRAY_SIZE(highlight_names)) return nullptr;
   return highlight_names[idx];
 }
 

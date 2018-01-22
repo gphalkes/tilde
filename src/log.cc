@@ -20,10 +20,10 @@
 #ifdef DEBUG
 static FILE *log_file;
 
-static void close_log(void) { fclose(log_file); }
+static void close_log() { fclose(log_file); }
 
-void init_log(void) {
-  if (log_file == NULL) {
+void init_log() {
+  if (log_file == nullptr) {
     log_file = fopen("log.txt", "a");
     if (log_file) atexit(close_log);
   }

@@ -76,7 +76,7 @@ static charset_desc_t friendly_charsets[] = {
     {"Western European (ISO-8859-14)", "ISO-8859-14"},
     {"Western European (ISO-8859-15)", "ISO-8859-15"},
     {"Western European (Windows-1252)", "WINDOWS-1252"},
-    {NULL, NULL}};
+    {nullptr, nullptr}};
 
 charset_descs_t available_charsets;
 
@@ -84,14 +84,14 @@ static bool compare_charset_names(charset_desc_t a, charset_desc_t b) {
   return strcmp(a.name, b.name) < 0;
 }
 
-void init_charsets(void) {
+void init_charsets() {
   // As we use UTF-8 internally, we don't need to convert, and so this is always available
   charset_desc_t utf8 = {"Unicode (UTF-8)", "UTF-8"};
   charset_desc_t other = {"Other (use text field below)", "<OTHER>"};
 
   transcript_init();
   available_charsets.push_back(utf8);
-  for (charset_desc_t *ptr = &friendly_charsets[0]; ptr->name != NULL; ptr++) {
+  for (charset_desc_t *ptr = &friendly_charsets[0]; ptr->name != nullptr; ptr++) {
     if (!transcript_probe_converter(ptr->tag)) {
       lprintf("Unavailable: %s\n", ptr->name);
       continue;
@@ -104,7 +104,7 @@ void init_charsets(void) {
 }
 
 encoding_dialog_t::encoding_dialog_t(int height, int width)
-    : dialog_t(height, width, "Encoding"), selected(-1), saved_tag(NULL) {
+    : dialog_t(height, width, "Encoding"), selected(-1), saved_tag(nullptr) {
   button_t *ok_button, *cancel_button;
 
   list = new list_pane_t(true);
@@ -160,7 +160,7 @@ bool encoding_dialog_t::set_size(optint height, optint width) {
   return result;
 }
 
-void encoding_dialog_t::ok_activated(void) {
+void encoding_dialog_t::ok_activated() {
   std::string encoding;
   size_t idx = list->get_current();
 
@@ -183,7 +183,7 @@ void encoding_dialog_t::ok_activated(void) {
   hide();
 }
 
-void encoding_dialog_t::selection_changed(void) {
+void encoding_dialog_t::selection_changed() {
   if (list->get_current() + 1 == list->size())
     manual_entry->show();
   else
@@ -194,7 +194,7 @@ void encoding_dialog_t::set_encoding(const char *encoding) {
   charset_descs_t::const_iterator iter;
   int i;
 
-  if (encoding == NULL) encoding = "UTF-8";
+  if (encoding == nullptr) encoding = "UTF-8";
 
   for (iter = available_charsets.begin(), i = 0; iter != available_charsets.end(); iter++, i++) {
     if (transcript_equal(encoding, iter->tag)) {

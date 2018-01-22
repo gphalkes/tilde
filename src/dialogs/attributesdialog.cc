@@ -182,7 +182,7 @@ bool attributes_dialog_t::set_size(optint height, optint width) {
   return result;
 }
 
-void attributes_dialog_t::show(void) {
+void attributes_dialog_t::show() {
   expander_group->collapse();
   dialog_t::show();
 }
@@ -256,7 +256,7 @@ void attributes_dialog_t::expander_size_change(bool expanded) {
   dialog_t::set_size(4 + expander_group->get_group_height(), None);
 }
 
-void attributes_dialog_t::set_values_from_options(void) {
+void attributes_dialog_t::set_values_from_options() {
   color_box->set_state(option.color);
 
 #define SET_OPTION_VALUE(name)                                     \
@@ -307,11 +307,11 @@ void attributes_dialog_t::set_values_from_options(void) {
   update_attribute_lines();
 }
 
-void attributes_dialog_t::set_term_options_from_values(void) {
+void attributes_dialog_t::set_term_options_from_values() {
   set_options_from_values(&term_specific_option);
 }
 
-void attributes_dialog_t::set_default_options_from_values(void) {
+void attributes_dialog_t::set_default_options_from_values() {
   set_options_from_values(&default_option.term_options);
 
   // Make this terminal obey the defaults.
@@ -381,7 +381,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
   } while (0)
   SET_WITH_DEFAULT(comment, COMMENT);
   {
-    int highlight_idx = map_highlight(NULL, "comment-keyword");
+    int highlight_idx = map_highlight(nullptr, "comment-keyword");
     term_options->highlights[highlight_idx] = comment_keyword;
     option.highlights[highlight_idx] =
         comment_keyword.is_valid() ? comment_keyword() : get_default_attr(COMMENT_KEYWORD);
@@ -390,7 +390,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
   SET_WITH_DEFAULT(number, NUMBER);
   SET_WITH_DEFAULT(string, STRING);
   {
-    int highlight_idx = map_highlight(NULL, "string-escape");
+    int highlight_idx = map_highlight(nullptr, "string-escape");
     term_options->highlights[highlight_idx] = string_escape;
     option.highlights[highlight_idx] =
         string_escape.is_valid() ? string_escape() : get_default_attr(STRING_ESCAPE);
@@ -405,7 +405,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
   force_redraw_all();
 }
 
-void attributes_dialog_t::update_attribute_lines(void) {
+void attributes_dialog_t::update_attribute_lines() {
   t3_attr_t text_attr;
   bool color = color_box->get_state();
 
@@ -513,7 +513,7 @@ void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
   picker->hide();
 }
 
-void attributes_dialog_t::default_attribute_selected(void) {
+void attributes_dialog_t::default_attribute_selected() {
   t3_attr_t text_attr;
   text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
 
@@ -576,13 +576,13 @@ void attributes_dialog_t::default_attribute_selected(void) {
   picker->hide();
 }
 
-void attributes_dialog_t::handle_activate(void) {
+void attributes_dialog_t::handle_activate() {
   /* Do required validation here. */
   hide();
   activate();
 }
 
-void attributes_dialog_t::handle_save_defaults(void) {
+void attributes_dialog_t::handle_save_defaults() {
   /* Do required validation here. */
   hide();
   save_defaults();

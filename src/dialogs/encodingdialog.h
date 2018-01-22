@@ -19,7 +19,7 @@
 
 using namespace t3_widget;
 
-void init_charsets(void);
+void init_charsets();
 
 class encoding_dialog_t : public dialog_t {
  protected:
@@ -29,12 +29,12 @@ class encoding_dialog_t : public dialog_t {
   int selected;
   char *saved_tag;
 
-  void ok_activated(void);
-  void selection_changed(void);
+  void ok_activated();
+  void selection_changed();
 
  public:
   encoding_dialog_t(int height, int width);
-  virtual bool set_size(optint height, optint width);
+  bool set_size(optint height, optint width) override;
 
   void set_encoding(const char *encoding);
 

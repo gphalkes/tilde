@@ -25,17 +25,17 @@ class file_line_t : public text_line_t {
   int highlight_start_state;
 
  public:
-  file_line_t(int buffersize = BUFFERSIZE, file_line_factory_t *_factory = NULL);
-  file_line_t(const char *_buffer, file_line_factory_t *_factory = NULL);
-  file_line_t(const char *_buffer, int length, file_line_factory_t *_factory = NULL);
-  file_line_t(const std::string *str, file_line_factory_t *_factory = NULL);
+  file_line_t(int buffersize = BUFFERSIZE, file_line_factory_t *_factory = nullptr);
+  file_line_t(const char *_buffer, file_line_factory_t *_factory = nullptr);
+  file_line_t(const char *_buffer, int length, file_line_factory_t *_factory = nullptr);
+  file_line_t(const std::string *str, file_line_factory_t *_factory = nullptr);
 
   void set_highlight_start(int state);
-  int get_highlight_end(void);
+  int get_highlight_end();
   int get_highlight_idx(int i);
 
  protected:
-  virtual t3_attr_t get_base_attr(int i, const paint_info_t *info);
+  t3_attr_t get_base_attr(int i, const paint_info_t *info) override;
 };
 
 class file_line_factory_t : public text_line_factory_t {
@@ -44,11 +44,11 @@ class file_line_factory_t : public text_line_factory_t {
 
  public:
   file_line_factory_t(file_buffer_t *_file_buffer);
-  virtual text_line_t *new_text_line_t(int buffersize = BUFFERSIZE);
-  virtual text_line_t *new_text_line_t(const char *_buffer);
-  virtual text_line_t *new_text_line_t(const char *_buffer, int length);
-  virtual text_line_t *new_text_line_t(const std::string *str);
-  file_buffer_t *get_file_buffer(void) const;
+  text_line_t *new_text_line_t(int buffersize = BUFFERSIZE) override;
+  text_line_t *new_text_line_t(const char *_buffer) override;
+  text_line_t *new_text_line_t(const char *_buffer, int length) override;
+  text_line_t *new_text_line_t(const std::string *str) override;
+  file_buffer_t *get_file_buffer() const;
 };
 
 #endif

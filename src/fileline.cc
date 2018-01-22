@@ -14,29 +14,29 @@
 #include "fileline.h"
 #include "option.h"
 
-static file_line_factory_t default_file_line_factory(NULL);
+static file_line_factory_t default_file_line_factory(nullptr);
 
 file_line_t::file_line_t(int buffersize, file_line_factory_t *_factory)
-    : text_line_t(buffersize, _factory == NULL ? &default_file_line_factory : _factory),
+    : text_line_t(buffersize, _factory == nullptr ? &default_file_line_factory : _factory),
       highlight_start_state(0) {}
 
 file_line_t::file_line_t(const char *_buffer, file_line_factory_t *_factory)
-    : text_line_t(_buffer, _factory == NULL ? &default_file_line_factory : _factory),
+    : text_line_t(_buffer, _factory == nullptr ? &default_file_line_factory : _factory),
       highlight_start_state(0) {}
 
 file_line_t::file_line_t(const char *_buffer, int length, file_line_factory_t *_factory)
-    : text_line_t(_buffer, length, _factory == NULL ? &default_file_line_factory : _factory),
+    : text_line_t(_buffer, length, _factory == nullptr ? &default_file_line_factory : _factory),
       highlight_start_state(0) {}
 
 file_line_t::file_line_t(const std::string *str, file_line_factory_t *_factory)
-    : text_line_t(str, _factory == NULL ? &default_file_line_factory : _factory),
+    : text_line_t(str, _factory == nullptr ? &default_file_line_factory : _factory),
       highlight_start_state(0) {}
 
 int file_line_t::get_highlight_idx(int i) {
   const std::string *str;
   file_buffer_t *file = ((file_line_factory_t *)factory)->get_file_buffer();
 
-  if (file == NULL || file->highlight_info == NULL) return -1;
+  if (file == nullptr || file->highlight_info == nullptr) return -1;
 
   str = get_data();
   if ((size_t)i >= str->size()) return -1;
@@ -69,11 +69,11 @@ t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
 
 void file_line_t::set_highlight_start(int state) { highlight_start_state = state; }
 
-int file_line_t::get_highlight_end(void) {
+int file_line_t::get_highlight_end() {
   const std::string *str;
 
   file_buffer_t *file = ((file_line_factory_t *)factory)->get_file_buffer();
-  if (file == NULL || file->highlight_info == NULL) return 0;
+  if (file == nullptr || file->highlight_info == nullptr) return 0;
 
   if (file->match_line != this) {
     file->match_line = this;
@@ -109,4 +109,4 @@ text_line_t *file_line_factory_t::new_text_line_t(const std::string *str) {
   return new file_line_t(str, this);
 }
 
-file_buffer_t *file_line_factory_t::get_file_buffer(void) const { return file_buffer; }
+file_buffer_t *file_line_factory_t::get_file_buffer() const { return file_buffer; }

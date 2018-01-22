@@ -42,19 +42,19 @@ class attributes_dialog_t : public dialog_t {
 
   void change_button_activated(attribute_key_t attribute);
   void expander_size_change(bool);
-  void update_attribute_lines(void);
+  void update_attribute_lines();
   void attribute_selected(t3_attr_t attribute);
-  void default_attribute_selected(void);
-  void handle_activate(void);
-  void handle_save_defaults(void);
+  void default_attribute_selected();
+  void handle_activate();
+  void handle_save_defaults();
 
  public:
   attributes_dialog_t(int width);
-  virtual bool set_size(optint height, optint width);
-  virtual void show(void);
-  void set_values_from_options(void);
-  void set_term_options_from_values(void);
-  void set_default_options_from_values(void);
+  bool set_size(optint height, optint width) override;
+  void show() override;
+  void set_values_from_options();
+  void set_term_options_from_values();
+  void set_default_options_from_values();
   void set_options_from_values(term_options_t *term_options);
 
   T3_WIDGET_SIGNAL(activate, void);

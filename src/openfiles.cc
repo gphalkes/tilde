@@ -20,8 +20,8 @@
 open_files_t open_files;
 recent_files_t recent_files;
 
-size_t open_files_t::size(void) const { return files.size(); }
-bool open_files_t::empty(void) const { return files.empty(); }
+size_t open_files_t::size() const { return files.size(); }
+bool open_files_t::empty() const { return files.empty(); }
 
 void open_files_t::push_back(file_buffer_t *text) {
   files.push_back(text);
@@ -38,16 +38,16 @@ open_files_t::iterator open_files_t::contains(const char *name) {
   /* FIXME: this should really check for ino+dev equality to see if the file
      is already open. */
   for (std::vector<file_buffer_t *>::iterator iter = files.begin(); iter != files.end(); iter++) {
-    if ((*iter)->get_name() != NULL && strcmp(name, (*iter)->get_name()) == 0) return iter;
+    if ((*iter)->get_name() != nullptr && strcmp(name, (*iter)->get_name()) == 0) return iter;
   }
   return files.end();
 }
 
-int open_files_t::get_version(void) { return version; }
-open_files_t::iterator open_files_t::begin(void) { return files.begin(); }
-open_files_t::iterator open_files_t::end(void) { return files.end(); }
-open_files_t::reverse_iterator open_files_t::rbegin(void) { return files.rbegin(); }
-open_files_t::reverse_iterator open_files_t::rend(void) { return files.rend(); }
+int open_files_t::get_version() { return version; }
+open_files_t::iterator open_files_t::begin() { return files.begin(); }
+open_files_t::iterator open_files_t::end() { return files.end(); }
+open_files_t::reverse_iterator open_files_t::rbegin() { return files.rbegin(); }
+open_files_t::reverse_iterator open_files_t::rend() { return files.rend(); }
 file_buffer_t *open_files_t::operator[](size_t idx) { return files[idx]; }
 file_buffer_t *open_files_t::back() { return files.back(); }
 
@@ -64,7 +64,7 @@ void open_files_t::erase(file_buffer_t *buffer) {
 file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
   iterator current = files.begin(), iter;
 
-  if (start != NULL)
+  if (start != nullptr)
     for (; current != files.end() && *current != start; current++) {
     }
 
@@ -81,7 +81,7 @@ file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
 file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
   reverse_iterator current = files.rbegin(), iter;
 
-  if (start != NULL)
+  if (start != nullptr)
     for (; current != files.rend() && *current != start; current++) {
     }
 
@@ -95,29 +95,29 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
   return start;
 }
 
-void open_files_t::cleanup(void) {
+void open_files_t::cleanup() {
   while (!files.empty()) delete files.front();
 }
 
 recent_file_info_t::recent_file_info_t(file_buffer_t *file) {
-  if ((name = strdup_impl(file->get_name())) == NULL) throw std::bad_alloc();
-  if ((encoding = strdup_impl(file->get_encoding())) == NULL) {
+  if ((name = strdup_impl(file->get_name())) == nullptr) throw std::bad_alloc();
+  if ((encoding = strdup_impl(file->get_encoding())) == nullptr) {
     free(name);
     throw std::bad_alloc();
   }
 }
 
-recent_file_info_t::~recent_file_info_t(void) {
+recent_file_info_t::~recent_file_info_t() {
   free(name);
   free(encoding);
 }
 
-const char *recent_file_info_t::get_name(void) const { return name; }
+const char *recent_file_info_t::get_name() const { return name; }
 
-const char *recent_file_info_t::get_encoding(void) const { return encoding; }
+const char *recent_file_info_t::get_encoding() const { return encoding; }
 
 void recent_files_t::push_front(file_buffer_t *text) {
-  if (text->get_name() == NULL) return;
+  if (text->get_name() == nullptr) return;
 
   for (std::deque<recent_file_info_t *>::iterator iter = names.begin(); iter != names.end();
        iter++) {
@@ -147,11 +147,11 @@ void recent_files_t::erase(recent_file_info_t *info) {
   }
 }
 
-int recent_files_t::get_version(void) { return version; }
-recent_files_t::iterator recent_files_t::begin(void) { return names.begin(); }
-recent_files_t::iterator recent_files_t::end(void) { return names.end(); }
+int recent_files_t::get_version() { return version; }
+recent_files_t::iterator recent_files_t::begin() { return names.begin(); }
+recent_files_t::iterator recent_files_t::end() { return names.end(); }
 
-void recent_files_t::cleanup(void) {
+void recent_files_t::cleanup() {
   while (!names.empty()) {
     delete names.back();
     names.pop_back();

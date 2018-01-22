@@ -14,10 +14,10 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef DEBUG
-void init_log(void);
+void init_log();
 void lprintf(const char *fmt, ...)
 #ifdef __GNUC__
     __attribute__((format(printf, 1, 2)))

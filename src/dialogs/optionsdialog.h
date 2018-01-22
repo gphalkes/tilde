@@ -20,7 +20,7 @@
 
 using namespace t3_widget;
 
-void init_charsets(void);
+void init_charsets();
 
 class buffer_options_dialog_t : public dialog_t {
  protected:
@@ -33,9 +33,9 @@ class buffer_options_dialog_t : public dialog_t {
 
   void set_values_from_view(file_edit_window_t *view);
   void set_view_values(file_edit_window_t *view);
-  void set_values_from_options(void);
-  void set_options_from_values(void);
-  void handle_activate(void);
+  void set_values_from_options();
+  void set_options_from_values();
+  void handle_activate();
 
   T3_WIDGET_SIGNAL(activate, void);
 };
@@ -48,9 +48,9 @@ class misc_options_dialog_t : public dialog_t {
  public:
   misc_options_dialog_t(const char *_title);
 
-  void set_values_from_options(void);
-  void set_options_from_values(void);
-  void handle_activate(void);
+  void set_values_from_options();
+  void set_options_from_values();
+  void handle_activate();
 
   T3_WIDGET_SIGNAL(activate, void);
 };

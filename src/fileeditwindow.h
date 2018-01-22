@@ -25,15 +25,15 @@ class file_edit_window_t : public edit_window_t {
   void force_repaint_to_bottom(rewrap_type_t type, int line, int pos);
 
  public:
-  file_edit_window_t(file_buffer_t *_text = NULL);
-  virtual ~file_edit_window_t(void);
-  virtual void draw_info_window(void);
-  virtual bool process_key(t3_widget::key_t key);
-  virtual void update_contents(void);
+  file_edit_window_t(file_buffer_t *_text = nullptr);
+  ~file_edit_window_t() override;
+  void draw_info_window() override;
+  bool process_key(t3_widget::key_t key) override;
+  void update_contents() override;
 
   void set_text(file_buffer_t *_text);
-  file_buffer_t *get_text(void) const;
-  void goto_matching_brace(void);
+  file_buffer_t *get_text() const;
+  void goto_matching_brace();
 };
 
 #endif

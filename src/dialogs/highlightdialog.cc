@@ -40,14 +40,14 @@ highlight_dialog_t::highlight_dialog_t(int height, int width)
   label = new label_t("Plain Text");
   list->push_back(label);
 
-  if ((names = t3_highlight_list(0, &error)) == NULL) {
+  if ((names = t3_highlight_list(0, &error)) == nullptr) {
     if (error.error == T3_ERR_OUT_OF_MEMORY) throw std::bad_alloc();
   } else {
-    for (ptr = names; ptr->name != NULL; ptr++) {
+    for (ptr = names; ptr->name != nullptr; ptr++) {
     }
     std::sort((t3_highlight_lang_t *)names, ptr, cmp_lang_names);
 
-    for (ptr = names; ptr->name != NULL; ptr++) {
+    for (ptr = names; ptr->name != nullptr; ptr++) {
       label = new label_t(ptr->name);
       list->push_back(label);
     }
@@ -55,7 +55,7 @@ highlight_dialog_t::highlight_dialog_t(int height, int width)
 
   /* Resize to list size if there are fewer list items than the size of the
      dialog allows. */
-  set_size(height, width);
+  dialog_t::set_size(height, width);
 
   cancel_button = new button_t("_Cancel", false);
   cancel_button->set_anchor(this,
@@ -84,19 +84,20 @@ bool highlight_dialog_t::set_size(optint height, optint width) {
   return result;
 }
 
-void highlight_dialog_t::ok_activated(void) {
+void highlight_dialog_t::ok_activated() {
   size_t idx = list->get_current();
   t3_highlight_t *highlight;
   t3_highlight_error_t error;
 
   if (idx == 0) {
     hide();
-    language_selected(NULL, NULL);
+    language_selected(nullptr, nullptr);
     return;
   }
 
-  if ((highlight = t3_highlight_load(names[idx - 1].lang_file, map_highlight, NULL,
-                                     T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, &error)) == NULL) {
+  if ((highlight = t3_highlight_load(names[idx - 1].lang_file, map_highlight, nullptr,
+                                     T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, &error)) ==
+      nullptr) {
     std::string message(_("Error loading highlighting patterns: "));
     message += t3_highlight_strerror(error.error);
     error_dialog->set_message(&message);
@@ -112,12 +113,12 @@ void highlight_dialog_t::set_selected(const char *lang_file) {
   t3_highlight_lang_t *ptr;
   size_t idx;
 
-  if (lang_file == NULL) {
+  if (lang_file == nullptr) {
     list->set_current(0);
     return;
   }
 
-  for (ptr = names, idx = 1; ptr->name != NULL; ptr++, idx++) {
+  for (ptr = names, idx = 1; ptr->name != nullptr; ptr++, idx++) {
     if (strcmp(lang_file, ptr->lang_file) == 0) {
       list->set_current(idx);
       return;

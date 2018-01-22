@@ -11,9 +11,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <climits>
+
 #include "dialogs/openrecentdialog.h"
 #include "openfiles.h"
-#include <limits.h>
 
 open_recent_dialog_t::open_recent_dialog_t(int height, int width)
     : dialog_t(height, width, "Open Recent"), known_version(INT_MIN) {
@@ -45,7 +46,7 @@ bool open_recent_dialog_t::set_size(optint height, optint width) {
   return result;
 }
 
-void open_recent_dialog_t::show(void) {
+void open_recent_dialog_t::show() {
   if (recent_files.get_version() != known_version) {
     known_version = recent_files.get_version();
 
@@ -65,7 +66,7 @@ void open_recent_dialog_t::show(void) {
   dialog_t::show();
 }
 
-void open_recent_dialog_t::ok_activated(void) {
+void open_recent_dialog_t::ok_activated() {
   hide();
   if (list->size() > 0) file_selected(recent_files.get_info(list->get_current()));
 }

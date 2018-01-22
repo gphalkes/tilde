@@ -42,38 +42,38 @@ class file_buffer_t : public text_buffer_t {
   std::string line_comment;
 
  private:
-  virtual void prepare_paint_line(int line);
+  void prepare_paint_line(int line) override;
   void set_has_window(bool _has_window);
   void invalidate_highlight(rewrap_type_t type, int line, int pos);
   bool find_matching_brace(text_coordinate_t &match_location);
 
  public:
-  file_buffer_t(const char *_name = NULL, const char *_encoding = NULL);
-  virtual ~file_buffer_t(void);
+  file_buffer_t(const char *_name = nullptr, const char *_encoding = nullptr);
+  ~file_buffer_t() override;
   rw_result_t load(load_process_t *state);
   rw_result_t save(save_as_process_t *state);
 
-  const char *get_name(void) const;
-  const char *get_encoding(void) const;
-  const edit_window_t::view_parameters_t *get_view_parameters(void) const;
-  text_line_t *get_name_line(void);
+  const char *get_name() const;
+  const char *get_encoding() const;
+  const edit_window_t::view_parameters_t *get_view_parameters() const;
+  text_line_t *get_name_line();
 
-  bool get_has_window(void) const;
+  bool get_has_window() const;
 
-  t3_highlight_t *get_highlight(void);
+  t3_highlight_t *get_highlight();
   void set_highlight(t3_highlight_t *highlight);
 
-  bool get_strip_spaces(void) const;
+  bool get_strip_spaces() const;
   void set_strip_spaces(bool _strip_spaces);
 
-  void do_strip_spaces(void);
+  void do_strip_spaces();
 
-  bool goto_matching_brace(void);
+  bool goto_matching_brace();
   /** Update the matching brace information in the file_buffer_t.
 
       @return A boolean indicating whether the matching brace information changed.
   */
-  bool update_matching_brace(void);
+  bool update_matching_brace();
 
   void set_line_comment(const char *text);
   void toggle_line_comment();
