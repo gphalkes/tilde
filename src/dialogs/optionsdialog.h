@@ -29,7 +29,7 @@ class buffer_options_dialog_t : public dialog_t {
   text_field_t *tabsize_field;
 
  public:
-  buffer_options_dialog_t(const char *_title);
+  explicit buffer_options_dialog_t(const char *_title);
 
   void set_values_from_view(file_edit_window_t *view);
   void set_view_values(file_edit_window_t *view);
@@ -46,7 +46,7 @@ class misc_options_dialog_t : public dialog_t {
       *disable_selection_over_ssh_box;
 
  public:
-  misc_options_dialog_t(const char *_title);
+  explicit misc_options_dialog_t(const char *_title);
 
   void set_values_from_options();
   void set_options_from_values();

@@ -25,7 +25,7 @@ class file_edit_window_t : public edit_window_t {
   void force_repaint_to_bottom(rewrap_type_t type, int line, int pos);
 
  public:
-  file_edit_window_t(file_buffer_t *_text = nullptr);
+  explicit file_edit_window_t(file_buffer_t *_text = nullptr);
   ~file_edit_window_t() override;
   void draw_info_window() override;
   bool process_key(t3_widget::key_t key) override;

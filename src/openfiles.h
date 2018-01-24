@@ -56,7 +56,7 @@ class recent_file_info_t {
   char *encoding;
 
  public:
-  recent_file_info_t(file_buffer_t *file);
+  explicit recent_file_info_t(file_buffer_t *file);
   ~recent_file_info_t();
 
   const char *get_name() const;

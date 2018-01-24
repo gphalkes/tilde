@@ -41,7 +41,7 @@ class read_buffer_t : public buffer_t {
   int fd;
 
  public:
-  read_buffer_t(int _fd) : fd(_fd) {}
+  explicit read_buffer_t(int _fd) : fd(_fd) {}
   bool fill_buffer(int used) override;
 };
 
@@ -68,7 +68,7 @@ class file_read_wrapper_t {
   buffer_t *buffer;
 
  public:
-  file_read_wrapper_t(int fd, transcript_t *handle = nullptr);
+  explicit file_read_wrapper_t(int fd, transcript_t *handle = nullptr);
   ~file_read_wrapper_t();
   const char *get_buffer();
   int get_fill();
@@ -81,7 +81,7 @@ class file_write_wrapper_t {
   transcript_t *handle;
 
  public:
-  file_write_wrapper_t(int _fd, transcript_t *_handle = nullptr)
+  explicit file_write_wrapper_t(int _fd, transcript_t *_handle = nullptr)
       : fd(_fd), conversion_flags(TRANSCRIPT_FILE_START), handle(_handle) {}
   ~file_write_wrapper_t();
   void write(const char *buffer, size_t bytes);

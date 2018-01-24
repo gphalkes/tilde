@@ -89,7 +89,7 @@ class stepped_process_t {
   bool result;
 
   stepped_process_t();
-  stepped_process_t(const callback_t &cb);
+  explicit stepped_process_t(const callback_t &cb);
   virtual bool step() = 0;
   void run();
   void abort();

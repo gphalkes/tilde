@@ -49,7 +49,7 @@ class attributes_dialog_t : public dialog_t {
   void handle_save_defaults();
 
  public:
-  attributes_dialog_t(int width);
+  explicit attributes_dialog_t(int width);
   bool set_size(optint height, optint width) override;
   void show() override;
   void set_values_from_options();

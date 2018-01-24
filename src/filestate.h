@@ -51,7 +51,7 @@ class rw_result_t {
 
  public:
   rw_result_t() = default;
-  rw_result_t(stop_reason_t _reason) : reason(_reason) {}
+  explicit rw_result_t(stop_reason_t _reason) : reason(_reason) {}
   rw_result_t(stop_reason_t _reason, int _errno_error)
       : reason(_reason), errno_error(_errno_error) {}
   rw_result_t(stop_reason_t _reason, transcript_error_t _transcript_error)
@@ -79,7 +79,7 @@ class load_process_t : public stepped_process_t {
   int fd;
   bool buffer_used;
 
-  load_process_t(const callback_t &cb);
+  explicit load_process_t(const callback_t &cb);
   load_process_t(const callback_t &cb, const char *name, const char *_encoding, bool missing_ok);
   void abort();
   bool step() override;
@@ -157,7 +157,7 @@ class exit_process_t : public stepped_process_t {
  protected:
   open_files_t::iterator iter;
 
-  exit_process_t(const callback_t &cb);
+  explicit exit_process_t(const callback_t &cb);
   bool step() override;
   virtual void do_save();
   virtual void dont_save();
@@ -171,7 +171,7 @@ class open_recent_process_t : public load_process_t {
  protected:
   recent_file_info_t *info;
 
-  open_recent_process_t(const callback_t &cb);
+  explicit open_recent_process_t(const callback_t &cb);
   ~open_recent_process_t() override;
   virtual void recent_file_selected(recent_file_info_t *_info);
   bool step() override;
@@ -189,7 +189,7 @@ class load_cli_file_process_t : public stepped_process_t {
   bool in_load, in_step, encoding_selected;
   cleanup_free_ptr<char>::t encoding;
 
-  load_cli_file_process_t(const callback_t &cb);
+  explicit load_cli_file_process_t(const callback_t &cb);
   bool step() override;
   virtual void load_done(stepped_process_t *process);
 
