@@ -34,7 +34,7 @@ file_line_t::file_line_t(const std::string *str, file_line_factory_t *_factory)
 
 int file_line_t::get_highlight_idx(int i) {
   const std::string *str;
-  file_buffer_t *file = ((file_line_factory_t *)factory)->get_file_buffer();
+  file_buffer_t *file = static_cast<file_line_factory_t *>(factory)->get_file_buffer();
 
   if (file == nullptr || file->highlight_info == nullptr) return -1;
 
@@ -57,7 +57,7 @@ int file_line_t::get_highlight_idx(int i) {
 }
 
 t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
-  file_buffer_t *file = ((file_line_factory_t *)factory)->get_file_buffer();
+  file_buffer_t *file = static_cast<file_line_factory_t *>(factory)->get_file_buffer();
   int idx = get_highlight_idx(i);
   t3_attr_t result = idx < 0 ? info->normal_attr : option.highlights[idx];
 
@@ -75,7 +75,7 @@ void file_line_t::set_highlight_start(int state) { highlight_start_state = state
 int file_line_t::get_highlight_end() {
   const std::string *str;
 
-  file_buffer_t *file = ((file_line_factory_t *)factory)->get_file_buffer();
+  file_buffer_t *file = static_cast<file_line_factory_t *>(factory)->get_file_buffer();
   if (file == nullptr || file->highlight_info == nullptr) return 0;
 
   if (file->match_line != this) {

@@ -318,7 +318,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         state->state = save_as_process_t::WRITING;
       }
     case save_as_process_t::WRITING: {
-      if (strip_spaces.is_valid() ? (bool)strip_spaces : option.strip_spaces) do_strip_spaces();
+      if (strip_spaces.is_valid() ? strip_spaces() : option.strip_spaces) do_strip_spaces();
       try {
         for (; state->i < size(); state->i++) {
           const std::string *data;
@@ -382,8 +382,8 @@ void file_buffer_t::prepare_paint_line(int line) {
   if (highlight_info == nullptr || highlight_valid >= line) return;
 
   for (i = highlight_valid >= 0 ? highlight_valid + 1 : 1; i <= line; i++) {
-    int state = ((file_line_t *)get_line_data_nonconst(i - 1))->get_highlight_end();
-    ((file_line_t *)get_line_data_nonconst(i))->set_highlight_start(state);
+    int state = static_cast<file_line_t *>(get_line_data_nonconst(i - 1))->get_highlight_end();
+    static_cast<file_line_t *>(get_line_data_nonconst(i))->set_highlight_start(state);
   }
   highlight_valid = line;
   match_line = nullptr;

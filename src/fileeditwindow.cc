@@ -28,14 +28,14 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 }
 
 file_edit_window_t::~file_edit_window_t() {
-  file_buffer_t *_text = (file_buffer_t *)text;
+  file_buffer_t *_text = static_cast<file_buffer_t *>(text);
   _text->set_has_window(false);
   save_view_parameters(_text->view_parameters);
   rewrap_connection.disconnect();
 }
 
 void file_edit_window_t::draw_info_window() {
-  file_buffer_t *_text = (file_buffer_t *)text;
+  file_buffer_t *_text = static_cast<file_buffer_t *>(text);
   text_line_t *name_line = _text->get_name_line();
   text_line_t::paint_info_t paint_info;
   int name_width = t3_win_get_width(info_window);
@@ -66,7 +66,7 @@ void file_edit_window_t::draw_info_window() {
 }
 
 void file_edit_window_t::set_text(file_buffer_t *_text) {
-  file_buffer_t *old_text = (file_buffer_t *)edit_window_t::get_text();
+  file_buffer_t *old_text = static_cast<file_buffer_t *>(edit_window_t::get_text());
   old_text->set_has_window(false);
   save_view_parameters(old_text->view_parameters);
   rewrap_connection.disconnect();
@@ -77,7 +77,7 @@ void file_edit_window_t::set_text(file_buffer_t *_text) {
 }
 
 file_buffer_t *file_edit_window_t::get_text() const {
-  return (file_buffer_t *)edit_window_t::get_text();
+  return static_cast<file_buffer_t *>(edit_window_t::get_text());
 }
 
 bool file_edit_window_t::process_key(t3_widget::key_t key) {
