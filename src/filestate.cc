@@ -480,8 +480,9 @@ bool load_cli_file_process_t::step() {
     int line = -1, pos = -1;
     std::string filename = *iter;
     if (default_option.parse_file_positions.value_or_default(true) &&
-        !cli_option.disable_file_position_parsing)
+        !cli_option.disable_file_position_parsing) {
       attempt_file_position_parse(&filename, &line, &pos);
+}
 
     in_load = true;
     load_process_t::execute(signals::mem_fun(this, &load_cli_file_process_t::load_done),

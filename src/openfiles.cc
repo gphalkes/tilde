@@ -64,9 +64,10 @@ void open_files_t::erase(file_buffer_t *buffer) {
 file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
   iterator current = files.begin(), iter;
 
-  if (start != nullptr)
+  if (start != nullptr) {
     for (; current != files.end() && *current != start; current++) {
     }
+}
 
   for (iter = current; iter != files.end(); iter++) {
     if (!(*iter)->get_has_window()) return *iter;
@@ -81,9 +82,10 @@ file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
 file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
   reverse_iterator current = files.rbegin(), iter;
 
-  if (start != nullptr)
+  if (start != nullptr) {
     for (; current != files.rend() && *current != start; current++) {
     }
+}
 
   for (iter = current; iter != files.rend(); iter++) {
     if (!(*iter)->get_has_window()) return *iter;

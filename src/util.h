@@ -71,10 +71,11 @@ class version_t {
  public:
   version_t() : value(INT_MIN) {}
   int operator++(int) {
-    if (value == INT_MAX)
+    if (value == INT_MAX) {
       value = INT_MIN;
-    else
+    } else {
       value++;
+}
     return value;
   }
   operator int() const { return value; }

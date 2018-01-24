@@ -41,8 +41,9 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
        completion_start = line->adjust_position(completion_start, -1)) {
     if (!line->is_alnum(completion_start)) break;
   }
-  if (!line->is_alnum(completion_start))
+  if (!line->is_alnum(completion_start)) {
     completion_start = line->adjust_position(completion_start, 1);
+}
 
   for (completion_end = completion_start;
        completion_end < line->get_length() && line->is_alnum(completion_end);
@@ -67,8 +68,9 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     if (find_result.end.pos - find_result.start.pos != text->cursor.pos - completion_start) {
       word = line->get_data()->substr(find_result.start.pos,
                                       find_result.end.pos - find_result.start.pos);
-      if (result_set.count(&word) == 0 && word != current_word)
+      if (result_set.count(&word) == 0 && word != current_word) {
         result_set.insert(new std::string(word));
+}
     }
 
     start.line = find_result.end.line;

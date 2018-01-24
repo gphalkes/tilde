@@ -32,8 +32,9 @@ bool read_buffer_t::fill_buffer(int used) {
     fill = 0;
   }
 
-  if ((retval = nosig_read(fd, buffer + fill, FILE_BUFFER_SIZE - fill)) < 0)
+  if ((retval = nosig_read(fd, buffer + fill, FILE_BUFFER_SIZE - fill)) < 0) {
     throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+}
 
   fill += retval;
   return fill > 0;
@@ -162,8 +163,9 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
     }
     if (transcript_buffer_ptr > transcript_buffer) {
       conversion_flags &= ~TRANSCRIPT_FILE_START;
-      if (nosig_write(fd, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0)
+      if (nosig_write(fd, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0) {
         throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+}
     }
   }
 

@@ -184,10 +184,11 @@ void encoding_dialog_t::ok_activated() {
 }
 
 void encoding_dialog_t::selection_changed() {
-  if (list->get_current() + 1 == list->size())
+  if (list->get_current() + 1 == list->size()) {
     manual_entry->show();
-  else
+  } else {
     manual_entry->hide();
+}
 }
 
 void encoding_dialog_t::set_encoding(const char *encoding) {

@@ -39,10 +39,11 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
       match_line(nullptr),
       last_match(nullptr),
       matching_brace_valid(false) {
-  if (_encoding == nullptr)
+  if (_encoding == nullptr) {
     encoding = strdup_impl("UTF-8");
-  else
+  } else {
     encoding = strdup_impl(_encoding);
+}
   if (encoding == nullptr) throw std::bad_alloc();
 
   if (_name == nullptr) {
@@ -127,8 +128,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
             switch (state->bom_state) {
               case load_process_t::UNKNOWN:
                 if (state->wrapper->get_fill() >= 3 && transcript_equal(encoding(), "utf8") &&
-                    memcmp(state->wrapper->get_buffer(), "\xef\xbb\xbf", 3) == 0)
+                    memcmp(state->wrapper->get_buffer(), "\xef\xbb\xbf", 3) == 0) {
                   return rw_result_t(rw_result_t::BOM_FOUND);
+}
                 break;
               case load_process_t::PRESERVE_BOM:
                 encoding = strdup_impl("X-UTF-8-BOM");
@@ -229,8 +231,9 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
          However, this may cause issues with NFS, which is known to have isues with this. */
       if (stat(state->real_name, &state->file_info) < 0) {
         if (errno == ENOENT) {
-          if ((state->fd = creat(state->real_name, CREATE_MODE)) < 0)
+          if ((state->fd = creat(state->real_name, CREATE_MODE)) < 0) {
             return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+}
         } else {
           return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
         }
@@ -242,15 +245,17 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
            duplication and other hacks. */
         case save_as_process_t::ALLOW_OVERWRITE:
           state->state = save_as_process_t::ALLOW_OVERWRITE_READONLY;
-          if (access(state->save_name, W_OK) != 0)
+          if (access(state->save_name, W_OK) != 0) {
             return rw_result_t(rw_result_t::FILE_EXISTS_READONLY);
+}
         case save_as_process_t::ALLOW_OVERWRITE_READONLY:
           std::string temp_name_str = state->real_name.get();
 
-          if ((idx = temp_name_str.rfind('/')) == std::string::npos)
+          if ((idx = temp_name_str.rfind('/')) == std::string::npos) {
             idx = 0;
-          else
+          } else {
             idx++;
+}
 
           temp_name_str.erase(idx);
           try {
@@ -261,8 +266,9 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
 
           /* Unfortunately, we can't pass the c_str result to mkstemp as we are not allowed
              to change that string. So we'll just have to strdup it :-( */
-          if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == nullptr)
+          if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == nullptr) {
             return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+}
           /* Attempt to create a temporary file. If this fails, just write the file
              directly. The latter has some risk (e.g. file truncation due to full disk,
              or corruption due to computer crashes), but these are so small that it is
@@ -292,13 +298,15 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         transcript_error_t error;
         if (!state->encoding.empty()) {
           if ((handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0,
-                                                  &error)) == nullptr)
+                                                  &error)) == nullptr) {
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
+}
           /* encoding is a cleanup ptr. */
           encoding = strdup_impl(state->encoding.c_str());
         } else if (strcmp(encoding, "UTF-8") != 0) {
-          if ((handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error)) == nullptr)
+          if ((handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error)) == nullptr) {
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
+}
         } else {
           handle = nullptr;
         }
@@ -336,8 +344,9 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
           unlink(backup_name.c_str());
           link(state->real_name, backup_name.c_str());
         }
-        if (rename(state->temp_name, state->real_name) < 0)
+        if (rename(state->temp_name, state->real_name) < 0) {
           return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+}
       }
 
       if (!state->name.empty()) {
@@ -646,10 +655,11 @@ bool file_buffer_t::update_matching_brace() {
 }
 
 void file_buffer_t::set_line_comment(const char *text) {
-  if (text == nullptr)
+  if (text == nullptr) {
     line_comment.clear();
-  else
+  } else {
     line_comment = text;
+}
 }
 
 int starts_with_comment(const std::string *text, const std::string *line_comment) {
@@ -671,8 +681,9 @@ void file_buffer_t::toggle_line_comment() {
       text_coordinate_t saved_cursor = cursor;
       delete_block(text_coordinate_t(cursor.line, comment_start),
                    text_coordinate_t(cursor.line, comment_start + line_comment.size()));
-      if (comment_start < saved_cursor.pos)
+      if (comment_start < saved_cursor.pos) {
         saved_cursor.pos -= std::min<int>(line_comment.size(), saved_cursor.pos - comment_start);
+}
       cursor.pos = saved_cursor.pos;
     } else {
       text_coordinate_t saved_cursor = cursor;
@@ -700,12 +711,14 @@ void file_buffer_t::toggle_line_comment() {
       for (i = first_line; i <= last_line; i++) {
         const std::string *text = get_line_data(i)->get_data();
         int comment_start = starts_with_comment(text, &line_comment);
-        if (i == selection_start.line && comment_start < selection_start.pos)
+        if (i == selection_start.line && comment_start < selection_start.pos) {
           selection_start.pos -=
               std::min<int>(line_comment.size(), selection_start.pos - comment_start);
-        if (i == selection_end.line && comment_start < selection_end.pos)
+}
+        if (i == selection_end.line && comment_start < selection_end.pos) {
           selection_end.pos -=
               std::min<int>(line_comment.size(), selection_end.pos - comment_start);
+}
         if (i == first_line) {
           cursor.line = i;
           cursor.pos = comment_start + line_comment.size();
