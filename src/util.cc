@@ -152,7 +152,7 @@ void printf_into(std::string *message, const char *format, ...) {
   va_start(args, format);
 
   if (message_buffer == nullptr) {
-    if ((message_buffer = (char *)malloc(BUFFER_START_SIZE)) == nullptr) {
+    if ((message_buffer = reinterpret_cast<char *>(malloc(BUFFER_START_SIZE))) == nullptr) {
       va_end(args);
       return;
     }
@@ -167,7 +167,8 @@ void printf_into(std::string *message, const char *format, ...) {
 
   result = std::min(BUFFER_MAX - 1, result);
   if (result < message_buffer_size ||
-      (new_message_buffer = (char *)realloc(message_buffer, result + 1)) == nullptr) {
+      (new_message_buffer = reinterpret_cast<char *>(realloc(message_buffer, result + 1))) ==
+          nullptr) {
     *message = message_buffer;
     va_end(args);
     return;
@@ -188,14 +189,14 @@ int map_highlight(void *data, const char *name) {
 
   (void)data;
 
-  for (i = 0; (size_t)i < ARRAY_SIZE(highlight_names); i++) {
+  for (i = 0; static_cast<size_t>(i) < ARRAY_SIZE(highlight_names); i++) {
     if (strcmp(name, highlight_names[i]) == 0) return i;
   }
   return 0;
 }
 
 const char *reverse_map_highlight(int idx) {
-  if (idx < 0 || (size_t)idx >= ARRAY_SIZE(highlight_names)) return nullptr;
+  if (idx < 0 || static_cast<size_t>(idx) >= ARRAY_SIZE(highlight_names)) return nullptr;
   return highlight_names[idx];
 }
 

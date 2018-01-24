@@ -75,7 +75,7 @@ class version_t {
       value = INT_MIN;
     } else {
       value++;
-}
+    }
     return value;
   }
   operator int() const { return value; }

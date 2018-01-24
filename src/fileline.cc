@@ -39,18 +39,19 @@ int file_line_t::get_highlight_idx(int i) {
   if (file == nullptr || file->highlight_info == nullptr) return -1;
 
   str = get_data();
-  if ((size_t)i >= str->size()) return -1;
+  if (static_cast<size_t>(i) >= str->size()) return -1;
 
-  if (file->match_line != this || (size_t)i < t3_highlight_get_start(file->last_match)) {
+  if (file->match_line != this ||
+      static_cast<size_t>(i) < t3_highlight_get_start(file->last_match)) {
     file->match_line = this;
     t3_highlight_reset(file->last_match, highlight_start_state);
   }
 
-  while (t3_highlight_get_end(file->last_match) <= (size_t)i) {
+  while (t3_highlight_get_end(file->last_match) <= static_cast<size_t>(i)) {
     t3_highlight_match(file->last_match, str->data(), str->size());
-}
+  }
 
-  return (size_t)i < t3_highlight_get_match_start(file->last_match)
+  return static_cast<size_t>(i) < t3_highlight_get_match_start(file->last_match)
              ? t3_highlight_get_begin_attr(file->last_match)
              : t3_highlight_get_match_attr(file->last_match);
 }
@@ -64,7 +65,7 @@ t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
       (i == info->cursor || (this == file->get_line_data(file->matching_brace_coordinate.line) &&
                              i == file->matching_brace_coordinate.pos))) {
     result = t3_term_combine_attrs(result, option.brace_highlight);
-}
+  }
 
   return result;
 }

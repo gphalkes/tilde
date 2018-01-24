@@ -67,7 +67,7 @@ file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
   if (start != nullptr) {
     for (; current != files.end() && *current != start; current++) {
     }
-}
+  }
 
   for (iter = current; iter != files.end(); iter++) {
     if (!(*iter)->get_has_window()) return *iter;
@@ -85,7 +85,7 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
   if (start != nullptr) {
     for (; current != files.rend() && *current != start; current++) {
     }
-}
+  }
 
   for (iter = current; iter != files.rend(); iter++) {
     if (!(*iter)->get_has_window()) return *iter;

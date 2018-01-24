@@ -58,7 +58,7 @@ class rw_result_t {
       : reason(_reason), transcript_error(_transcript_error) {}
   int get_errno_error() { return errno_error; }
   transcript_error_t get_transcript_error() { return transcript_error; }
-  operator int() const { return (int)reason; }
+  operator int() const { return static_cast<int>(reason); }
 };
 
 class load_process_t : public stepped_process_t {

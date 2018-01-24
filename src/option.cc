@@ -82,7 +82,8 @@ static const char base_config_schema[] = {
 
 static t3_bool find_term_config(const t3_config_t *config, const void *data) {
   if (t3_config_get_type(config) != T3_CONFIG_SECTION) return t3_false;
-  return strcmp((const char *)data, t3_config_get_string(t3_config_get(config, "name"))) == 0;
+  return strcmp(reinterpret_cast<const char *>(data),
+                t3_config_get_string(t3_config_get(config, "name"))) == 0;
 }
 
 static t3_attr_t attribute_string_to_bin(const char *attr) {
@@ -101,7 +102,7 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
     foreground = false;
   } else {
     return 0;
-}
+  }
 
   color = strtol(attr + 3, &endptr, 0);
   if (*endptr != 0) return 0;
@@ -121,7 +122,7 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
     if (t3_config_get_type(attr_config) == T3_CONFIG_STRING) {
       accumulated_attr = t3_term_combine_attrs(
           attribute_string_to_bin(t3_config_get_string(attr_config)), accumulated_attr);
-}
+    }
   }
 
   *attr = accumulated_attr;
@@ -224,7 +225,7 @@ static void read_base_config() {
     const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
     if (name != nullptr && line_comment != nullptr) {
       option.line_comment_map[std::string(name)] = line_comment;
-}
+    }
   }
 }
 
@@ -240,7 +241,7 @@ static void read_config() {
     config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   } else {
     config_file = fopen(cli_option.config_file, "r");
-}
+  }
 
   if (config_file == nullptr) {
     if (errno != ENOENT) {
@@ -299,7 +300,7 @@ static void read_config() {
     const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
     if (name != nullptr && line_comment != nullptr) {
       option.line_comment_map[std::string(name)] = line_comment;
-}
+    }
   }
 
   if ((term_specific_config = t3_config_get(config, "terminals")) == nullptr) return;
@@ -308,12 +309,12 @@ static void read_config() {
     term = cli_option.term;
   } else if ((term = getenv("TERM")) == nullptr) {
     return;
-}
+  }
 
   if ((term_specific_config =
            t3_config_find(term_specific_config, find_term_config, term, nullptr)) != nullptr) {
     read_term_config_part(term_specific_config, &term_specific_option);
-}
+  }
 }
 
 #define SET_OPT_FROM_FILE(name, deflt)                                        \
@@ -339,7 +340,7 @@ static void post_process_options() {
     option.color = cli_option.color;
   } else {
     SET_OPT_FROM_FILE(color, true);
-}
+  }
 
   SET_OPT_FROM_DFLT(tab_spaces, false);
   SET_OPT_FROM_DFLT(auto_indent, true);
@@ -352,7 +353,7 @@ static void post_process_options() {
 
   if (!cli_option.ask_input_method && term_specific_option.key_timeout.is_valid()) {
     option.key_timeout = term_specific_option.key_timeout;
-}
+  }
 
   SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "comment")], get_default_attr(COMMENT));
   SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "comment-keyword")],
@@ -546,7 +547,7 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
         sprintf(color_name_buffer, "fg %d", (search >> T3_ATTR_COLOR_SHIFT) - 1);
       } else {
         sprintf(color_name_buffer, "bg %d", (search >> (T3_ATTR_COLOR_SHIFT + 9)) - 1);
-}
+      }
       t3_config_add_string(config, nullptr, color_name_buffer);
     }
   }
@@ -590,16 +591,16 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
   const char *highlight_name;
   for (i = 1; (highlight_name = reverse_map_highlight(i)) != nullptr; i++) {
     SET_HL_ATTRIBUTE(i, highlight_name);
-}
+  }
 
   SET_ATTRIBUTE(brace_highlight);
 
   if (t3_config_get(t3_config_get(config, "highlight_attributes"), nullptr) == nullptr) {
     t3_config_erase(config, "highlight_attributes");
-}
+  }
   if (t3_config_get(t3_config_get(config, "attributes"), nullptr) == nullptr) {
     t3_config_erase(config, "attributes");
-}
+  }
 }
 
 bool write_config() {
@@ -616,13 +617,13 @@ bool write_config() {
   if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), nullptr,
                                              nullptr)) == nullptr) {
     return false;
-}
+  }
 
   if (cli_option.config_file == nullptr) {
     config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   } else {
     config_file = fopen(cli_option.config_file, "r");
-}
+  }
 
   if (config_file != nullptr) {
     /* Start by reading the existing configuration. */
@@ -670,13 +671,13 @@ bool write_config() {
     term = cli_option.term;
   } else {
     term = getenv("TERM");
-}
+  }
 
   if (term != nullptr) {
     if ((terminals = t3_config_get(config, "terminals")) == nullptr ||
         !t3_config_is_list(terminals)) {
       terminals = t3_config_add_plist(config, "terminals", nullptr);
-}
+    }
 
     terminal_config = t3_config_find(terminals, find_term_config, term, nullptr);
     if (terminal_config == nullptr) {
@@ -699,7 +700,7 @@ bool write_config() {
     new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   } else {
     new_config_file = t3_config_open_write(cli_option.config_file);
-}
+  }
 
   if (new_config_file == nullptr) {
     lprintf("Could not open config file for writing: %m\n");
@@ -709,7 +710,7 @@ bool write_config() {
 
   if (t3_config_write_file(config, t3_config_get_write_file(new_config_file)) == T3_ERR_SUCCESS) {
     return t3_config_close_write(new_config_file, t3_false, t3_true);
-}
+  }
 
   t3_config_close_write(new_config_file, t3_true, t3_true);
 

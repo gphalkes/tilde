@@ -42,13 +42,13 @@ void lprintf(const char *fmt, ...) {
 
 void ldumpstr(const char *str, int length) {
   for (; length > 0; length--, str++) {
-    if ((unsigned int)*str < 32) {
+    if (static_cast<unsigned int>(*str) < 32) {
       fprintf(log_file, "\\x%02X", *str);
     } else if (*str == '\\') {
       fprintf(log_file, "\\\\");
     } else {
       fputc(*str, log_file);
-}
+    }
   }
   fflush(log_file);
 }

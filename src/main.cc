@@ -579,7 +579,7 @@ void main_t::set_highlight(t3_highlight_t *highlight, const char *name) {
       get_current()->get_text()->set_line_comment(nullptr);
     } else {
       get_current()->get_text()->set_line_comment(iter->second.c_str());
-}
+    }
   }
   get_current()->force_redraw();
 }
@@ -588,7 +588,7 @@ void main_t::save_as_done(stepped_process_t *process) {
   get_current()->draw_info_window();
   if (reinterpret_cast<save_as_process_t *>(process)->get_highlight_changed()) {
     get_current()->force_redraw();
-}
+  }
 }
 
 static void configure_input(bool cancel_selects_default) {
@@ -651,7 +651,7 @@ static char *get_run_file_name() {
   for (size_t i = 0; i < ttyname_len; i++) {
     if (ttyname_str[i] < 32 || strchr(ILLEGAL_CHARS, ttyname_str[i]) != nullptr) {
       ttyname_len_encoded += 2;
-}
+    }
   }
 
   linkname_len = ttyname_len_encoded + strlen(hostname) + 1;
@@ -660,10 +660,10 @@ static char *get_run_file_name() {
   if (path == nullptr) {
     char uid_str[16];
     sprintf(uid_str, "%u", (unsigned int)geteuid());
-    if ((path = (char *)malloc(strlen(TMP_DIR_BASE) + strlen(uid_str) + 3 + linkname_len)) ==
-        nullptr) {
+    if ((path = reinterpret_cast<char *>(
+             malloc(strlen(TMP_DIR_BASE) + strlen(uid_str) + 3 + linkname_len))) == nullptr) {
       goto return_error;
-}
+    }
     sprintf(path, "%s-%s", TMP_DIR_BASE, uid_str);
   }
 

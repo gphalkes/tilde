@@ -188,7 +188,7 @@ void encoding_dialog_t::selection_changed() {
     manual_entry->show();
   } else {
     manual_entry->hide();
-}
+  }
 }
 
 void encoding_dialog_t::set_encoding(const char *encoding) {

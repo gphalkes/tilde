@@ -34,7 +34,7 @@ bool read_buffer_t::fill_buffer(int used) {
 
   if ((retval = nosig_read(fd, buffer + fill, FILE_BUFFER_SIZE - fill)) < 0) {
     throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-}
+  }
 
   fill += retval;
   return fill > 0;
@@ -129,8 +129,8 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
 
   // Convert to NFC before writing
   // FIXME: check return value
-  nfc_output =
-      (char *)u8_normalize(UNINORM_NFC, (const uint8_t *)buffer, bytes, nullptr, &nfc_output_len);
+  nfc_output = reinterpret_cast<char *>(u8_normalize(
+      UNINORM_NFC, reinterpret_cast<const uint8_t *>(buffer), bytes, nullptr, &nfc_output_len));
   if (handle == nullptr) {
     if (nosig_write(fd, nfc_output, nfc_output_len) < 0) {
       throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
@@ -165,7 +165,7 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
       conversion_flags &= ~TRANSCRIPT_FILE_START;
       if (nosig_write(fd, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0) {
         throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-}
+      }
     }
   }
 
