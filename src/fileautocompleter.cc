@@ -33,13 +33,17 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     current_list = nullptr;
   }
 
-  if (text->cursor.pos == 0) return nullptr;
+  if (text->cursor.pos == 0) {
+    return nullptr;
+  }
 
   line = text->get_line_data(text->cursor.line);
 
   for (completion_start = line->adjust_position(text->cursor.pos, -1); completion_start > 0;
        completion_start = line->adjust_position(completion_start, -1)) {
-    if (!line->is_alnum(completion_start)) break;
+    if (!line->is_alnum(completion_start)) {
+      break;
+    }
   }
   if (!line->is_alnum(completion_start)) {
     completion_start = line->adjust_position(completion_start, 1);
@@ -77,7 +81,9 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     start.pos = find_result.end.pos;
   }
 
-  if (result_set.empty()) return nullptr;
+  if (result_set.empty()) {
+    return nullptr;
+  }
 
   try {
     current_list = new string_list_t();
@@ -86,7 +92,9 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     return nullptr;
   }
 
-  for (std::string *result : result_set) current_list->push_back(result);
+  for (std::string *result : result_set) {
+    current_list->push_back(result);
+  }
   *position = completion_start;
 
   return current_list;

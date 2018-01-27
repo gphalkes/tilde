@@ -60,7 +60,9 @@ bool transcript_buffer_t::fill_buffer(int used) {
     buffer_index = 0;
   }
 
-  if (buffer_index >= wrapped_buffer->get_fill()) return false;
+  if (buffer_index >= wrapped_buffer->get_fill()) {
+    return false;
+  }
 
   inbuf = wrapped_buffer->get_buffer() + buffer_index;
   outbuf = buffer + fill;
@@ -94,7 +96,9 @@ bool transcript_buffer_t::fill_buffer(int used) {
     default:
       throw rw_result_t(rw_result_t::CONVERSION_ERROR);
   }
-  if (buffer_index > 0) conversion_flags &= ~TRANSCRIPT_FILE_START;
+  if (buffer_index > 0) {
+    conversion_flags &= ~TRANSCRIPT_FILE_START;
+  }
   return fill > 0;
 }
 
@@ -169,10 +173,13 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
     }
   }
 
-  if (imprecise) throw rw_result_t(rw_result_t::CONVERSION_IMPRECISE);
-  return;
+  if (imprecise) {
+    throw rw_result_t(rw_result_t::CONVERSION_IMPRECISE);
+  }
 }
 
 file_write_wrapper_t::~file_write_wrapper_t() {
-  if (handle != nullptr) transcript_close_converter(handle);
+  if (handle != nullptr) {
+    transcript_close_converter(handle);
+  }
 }

@@ -174,7 +174,9 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 bool attributes_dialog_t::set_size(optint height, optint width) {
   bool result = true;
   (void)height;
-  if (!width.is_valid()) return true;
+  if (!width.is_valid()) {
+    return true;
+  }
 
   result &= interface->set_size(None, width);
   result &= text_area->set_size(None, width);
@@ -336,7 +338,9 @@ void attributes_dialog_t::set_default_options_from_values() {
   term_specific_option.meta_text = nullopt;
   term_specific_option.background = nullopt;
 
-  for (optional<t3_attr_t> &highlight : term_specific_option.highlights) highlight = nullopt;
+  for (optional<t3_attr_t> &highlight : term_specific_option.highlights) {
+    highlight = nullopt;
+  }
   term_specific_option.brace_highlight = nullopt;
 }
 

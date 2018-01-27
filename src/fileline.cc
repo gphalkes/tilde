@@ -36,10 +36,14 @@ int file_line_t::get_highlight_idx(int i) {
   const std::string *str;
   file_buffer_t *file = static_cast<file_line_factory_t *>(factory)->get_file_buffer();
 
-  if (file == nullptr || file->highlight_info == nullptr) return -1;
+  if (file == nullptr || file->highlight_info == nullptr) {
+    return -1;
+  }
 
   str = get_data();
-  if (static_cast<size_t>(i) >= str->size()) return -1;
+  if (static_cast<size_t>(i) >= str->size()) {
+    return -1;
+  }
 
   if (file->match_line != this ||
       static_cast<size_t>(i) < t3_highlight_get_start(file->last_match)) {
@@ -76,7 +80,9 @@ int file_line_t::get_highlight_end() {
   const std::string *str;
 
   file_buffer_t *file = static_cast<file_line_factory_t *>(factory)->get_file_buffer();
-  if (file == nullptr || file->highlight_info == nullptr) return 0;
+  if (file == nullptr || file->highlight_info == nullptr) {
+    return 0;
+  }
 
   if (file->match_line != this) {
     file->match_line = this;

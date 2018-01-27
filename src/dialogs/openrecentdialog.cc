@@ -68,5 +68,7 @@ void open_recent_dialog_t::show() {
 
 void open_recent_dialog_t::ok_activated() {
   hide();
-  if (list->size() > 0) file_selected(recent_files.get_info(list->get_current()));
+  if (list->size() > 0) {
+    file_selected(recent_files.get_info(list->get_current()));
+  }
 }

@@ -44,12 +44,16 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
   } else {
     encoding = strdup_impl(_encoding);
   }
-  if (encoding == nullptr) throw std::bad_alloc();
+  if (encoding == nullptr) {
+    throw std::bad_alloc();
+  }
 
   if (_name == nullptr) {
     name_line.set_text("(Untitled)");
   } else {
-    if ((name = strdup_impl(_name)) == nullptr) throw std::bad_alloc();
+    if ((name = strdup_impl(_name)) == nullptr) {
+      throw std::bad_alloc();
+    }
 
     std::string converted_name;
     convert_lang_codeset(name, &converted_name, true);
@@ -81,7 +85,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
   t3_bool success = t3_false;
   int i;
 
-  if (state->file != this) PANIC();
+  if (state->file != this) {
+    PANIC();
+  }
 
   switch (state->state) {
     case load_process_t::INITIAL_MISSING_OK:
@@ -92,7 +98,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
       transcript_error_t error;
 
       if ((_name = canonicalize_path(name)) == nullptr) {
-        if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) break;
+        if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) {
+          break;
+        }
         return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
       }
 
@@ -102,7 +110,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
       name_line.set_text(&converted_name);
 
       if ((state->fd = open(name, O_RDONLY)) < 0) {
-        if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) break;
+        if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) {
+          break;
+        }
         return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
       }
 
@@ -110,7 +120,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
         lprintf("Using encoding %s to read %s\n", encoding(), name());
 
         handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
-        if (handle == nullptr) return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
+        if (handle == nullptr) {
+          return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
+        }
         // FIXME: if the new fails, the handle will remain open!
         state->wrapper = new file_read_wrapper_t(state->fd, handle);
 
@@ -201,7 +213,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
                                   T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, nullptr);
     set_highlight(highlight);
     std::map<std::string, std::string>::iterator iter = option.line_comment_map.find(lang.name);
-    if (iter != option.line_comment_map.end()) set_line_comment(iter->second.c_str());
+    if (iter != option.line_comment_map.end()) {
+      set_line_comment(iter->second.c_str());
+    }
     t3_highlight_free_lang(lang);
   }
   return rw_result_t(rw_result_t::SUCCESS);
@@ -211,19 +225,25 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 rw_result_t file_buffer_t::save(save_as_process_t *state) {
   size_t idx;
 
-  if (state->file != this) PANIC();
+  if (state->file != this) {
+    PANIC();
+  }
 
   switch (state->state) {
     case save_as_process_t::INITIAL:
       if (state->name.empty()) {
-        if (name == nullptr) PANIC();
+        if (name == nullptr) {
+          PANIC();
+        }
         state->save_name = name;
       } else {
         state->save_name = state->name.c_str();
       }
 
       if ((state->real_name = canonicalize_path(state->save_name)) == nullptr) {
-        if (errno != ENOENT) return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+        if (errno != ENOENT) {
+          return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+        }
         state->real_name = strdup_impl(state->save_name);
       }
 
@@ -239,7 +259,9 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         }
       } else {
         state->state = save_as_process_t::ALLOW_OVERWRITE;
-        if (!state->name.empty()) return rw_result_t(rw_result_t::FILE_EXISTS);
+        if (!state->name.empty()) {
+          return rw_result_t(rw_result_t::FILE_EXISTS);
+        }
         /* Note that we have a new case in the middle of the else statement
            here. It is an ugly hack, but it does prevent a lot of code
            duplication and other hacks. */
@@ -285,7 +307,6 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
             fchown(state->fd, -1, state->file_info.st_gid);
             fchown(state->fd, state->file_info.st_uid, -1);
           } else {
-            free(state->temp_name);
             state->temp_name = nullptr;
             if ((state->fd = open(state->real_name, O_WRONLY | O_CREAT, CREATE_MODE)) < 0) {
               return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
@@ -318,11 +339,15 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         state->state = save_as_process_t::WRITING;
       }
     case save_as_process_t::WRITING: {
-      if (strip_spaces.is_valid() ? strip_spaces() : option.strip_spaces) do_strip_spaces();
+      if (strip_spaces.is_valid() ? strip_spaces() : option.strip_spaces) {
+        do_strip_spaces();
+      }
       try {
         for (; state->i < size(); state->i++) {
           const std::string *data;
-          if (state->i != 0) state->wrapper->write("\n", 1);
+          if (state->i != 0) {
+            state->wrapper->write("\n", 1);
+          }
           data = get_line_data(state->i)->get_data();
           state->wrapper->write(data->data(), data->size());
         }
@@ -333,7 +358,9 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       // If the file is being overwritten, truncate it to the written size.
       if (state->temp_name == nullptr) {
         off_t curr_pos = lseek(state->fd, 0, SEEK_CUR);
-        if (curr_pos >= 0) ftruncate(state->fd, curr_pos);
+        if (curr_pos >= 0) {
+          ftruncate(state->fd, curr_pos);
+        }
       }
       fsync(state->fd);
       close(state->fd);
@@ -379,7 +406,9 @@ const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters() con
 void file_buffer_t::prepare_paint_line(int line) {
   int i;
 
-  if (highlight_info == nullptr || highlight_valid >= line) return;
+  if (highlight_info == nullptr || highlight_valid >= line) {
+    return;
+  }
 
   for (i = highlight_valid >= 0 ? highlight_valid + 1 : 1; i <= line; i++) {
     int state = static_cast<file_line_t *>(get_line_data_nonconst(i - 1))->get_highlight_end();
@@ -396,13 +425,17 @@ bool file_buffer_t::get_has_window() const { return has_window; }
 void file_buffer_t::invalidate_highlight(rewrap_type_t type, int line, int pos) {
   (void)type;
   (void)pos;
-  if (line <= highlight_valid) highlight_valid = line - 1;
+  if (line <= highlight_valid) {
+    highlight_valid = line - 1;
+  }
 }
 
 t3_highlight_t *file_buffer_t::get_highlight() { return highlight_info; }
 
 void file_buffer_t::set_highlight(t3_highlight_t *highlight) {
-  if (highlight_info != nullptr) t3_highlight_free(highlight_info);
+  if (highlight_info != nullptr) {
+    t3_highlight_free(highlight_info);
+  }
   highlight_info = highlight;
 
   if (last_match != nullptr) {
@@ -413,11 +446,15 @@ void file_buffer_t::set_highlight(t3_highlight_t *highlight) {
   match_line = nullptr;
   highlight_valid = 0;
 
-  if (highlight_info != nullptr) last_match = t3_highlight_new_match(highlight_info);
+  if (highlight_info != nullptr) {
+    last_match = t3_highlight_new_match(highlight_info);
+  }
 }
 
 bool file_buffer_t::get_strip_spaces() const {
-  if (strip_spaces.is_valid()) return strip_spaces;
+  if (strip_spaces.is_valid()) {
+    return strip_spaces;
+  }
   return option.strip_spaces;
 }
 
@@ -441,9 +478,13 @@ void file_buffer_t::do_strip_spaces() {
     const char *data = str->data();
     strip_start = str->size();
     for (idx = strip_start; idx > 0; idx--) {
-      if ((data[idx - 1] & 0xC0) == 0x80) continue;
+      if ((data[idx - 1] & 0xC0) == 0x80) {
+        continue;
+      }
 
-      if (!line->is_space(idx - 1)) break;
+      if (!line->is_space(idx - 1)) {
+        break;
+      }
 
       strip_start = idx - 1;
     }
@@ -459,19 +500,24 @@ void file_buffer_t::do_strip_spaces() {
       end.pos = str->size();
       delete_block_internal(start, end, get_undo(UNDO_DELETE_BLOCK, start, end));
 
-      if (cursor.line == i && static_cast<size_t>(cursor.pos) > strip_start)
+      if (cursor.line == i && static_cast<size_t>(cursor.pos) > strip_start) {
         cursor.pos = strip_start;
+      }
     }
   }
 
-  if (undo_started) end_undo_block();
+  if (undo_started) {
+    end_undo_block();
+  }
 
   cursor = saved_cursor;
-  if (cursor.pos > get_line_max(cursor.line)) cursor.pos = get_line_max(cursor.line);
+  if (cursor.pos > get_line_max(cursor.line)) {
+    cursor.pos = get_line_max(cursor.line);
+  }
 }
 
 bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
-  file_line_t *line = (file_line_t *)get_line_data(cursor.line);
+  file_line_t *line = static_cast<file_line_t *>(get_mutable_line_data(cursor.line));
   char c = (*(line->get_data()))[cursor.pos];
   char c_close, check_c;
   bool forward;
@@ -504,7 +550,9 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
 
   prepare_paint_line(cursor.line);
   /* If the current character is highlighted, it is not considered for brace matching. */
-  if (line->get_highlight_idx(cursor.pos) > 0) return false;
+  if (line->get_highlight_idx(cursor.pos) > 0) {
+    return false;
+  }
 
   if (forward) {
     current_line = cursor.line;
@@ -516,12 +564,14 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
     goto start_search;
 
     for (; current_line < size(); current_line++) {
-      line = (file_line_t *)get_line_data(current_line);
+      line = static_cast<file_line_t *>(get_mutable_line_data(current_line));
       prepare_paint_line(current_line);
       for (i = 0; i < line->get_length(); i = line->adjust_position(i, 1)) {
       start_search:
         check_c = (*(line->get_data()))[i];
-        if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) continue;
+        if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
+          continue;
+        }
 
         if (check_c == c) {
           count++;
@@ -556,11 +606,15 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
     */
     for (i = 0; i < cursor.pos; i = line->adjust_position(i, 1)) {
       check_c = (*(line->get_data()))[i];
-      if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) continue;
+      if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
+        continue;
+      }
 
       if (check_c == c) {
         count--;
-        if (open_surplus > 0) open_surplus--;
+        if (open_surplus > 0) {
+          open_surplus--;
+        }
       } else {
         count++;
         open_surplus++;
@@ -577,15 +631,19 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
       int local_count;
 
       for (current_line--; current_line >= 0; current_line--) {
-        line = (file_line_t *)get_line_data(current_line);
+        line = static_cast<file_line_t *>(get_mutable_line_data(current_line));
         /* No need to call prepare_paint_line here because we're going backwards. */
         for (i = 0, local_count = 0, open_surplus = 0; i < line->get_length(); i++) {
           check_c = (*(line->get_data()))[i];
-          if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) continue;
+          if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
+            continue;
+          }
 
           if (check_c == c) {
             local_count--;
-            if (open_surplus > 0) open_surplus--;
+            if (open_surplus > 0) {
+              open_surplus--;
+            }
           } else {
             local_count++;
             open_surplus++;
@@ -598,7 +656,9 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
         }
         count += local_count;
       }
-      if (current_line < 0) return false;
+      if (current_line < 0) {
+        return false;
+      }
       match_max = line->get_length();
     } else {
       match_max = cursor.pos;
@@ -618,12 +678,16 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
     count = -count;
     for (i = 0; i < match_max; i = line->adjust_position(i, 1)) {
       check_c = (*(line->get_data()))[i];
-      if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) continue;
+      if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
+        continue;
+      }
 
       if (check_c == c) {
         count--;
       } else {
-        if (count++ == 0) marked_pos = i;
+        if (count++ == 0) {
+          marked_pos = i;
+        }
       }
     }
     /* As a safety measure, we ensure that last_match has actually been set. */
@@ -667,14 +731,20 @@ void file_buffer_t::set_line_comment(const char *text) {
 int starts_with_comment(const std::string *text, const std::string *line_comment) {
   size_t i;
   for (i = 0; i < text->size(); i++) {
-    if (text->at(i) != ' ' && text->at(i) != '\t') break;
+    if (text->at(i) != ' ' && text->at(i) != '\t') {
+      break;
+    }
   }
-  if (text->compare(i, line_comment->size(), *line_comment) == 0) return i;
+  if (text->compare(i, line_comment->size(), *line_comment) == 0) {
+    return i;
+  }
   return -1;
 }
 
 void file_buffer_t::toggle_line_comment() {
-  if (line_comment.empty()) return;
+  if (line_comment.empty()) {
+    return;
+  }
 
   if (get_selection_mode() == selection_mode_t::NONE) {
     const std::string *text = get_line_data(cursor.line)->get_data();
@@ -704,7 +774,9 @@ void file_buffer_t::toggle_line_comment() {
     for (i = first_line; i <= last_line; i++) {
       const std::string *text = get_line_data(i)->get_data();
       int comment_start = starts_with_comment(text, &line_comment);
-      if (comment_start < 0) break;
+      if (comment_start < 0) {
+        break;
+      }
     }
     selection_mode_t old_mode = get_selection_mode();
     // FIXME: The code below contains some hideous hacks to make sure the cursor positioning
@@ -733,7 +805,9 @@ void file_buffer_t::toggle_line_comment() {
       for (i = first_line; i <= last_line; i++) {
         cursor.line = i;
         cursor.pos = 0;
-        if (i == first_line) start_undo_block();
+        if (i == first_line) {
+          start_undo_block();
+        }
         insert_block(&line_comment);
       }
       selection_start.pos += line_comment.size();

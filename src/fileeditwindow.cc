@@ -16,7 +16,9 @@
 
 file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
   text_buffer_t *old_text = get_text();
-  if (_text == nullptr) _text = new file_buffer_t();
+  if (_text == nullptr) {
+    _text = new file_buffer_t();
+  }
 
   _text->set_has_window(true);
   rewrap_connection = _text->connect_rewrap_required(
@@ -120,7 +122,9 @@ void file_edit_window_t::update_contents() {
      old and new matching brace positions. That would allow more localized
      updates.
   */
-  if (get_text()->update_matching_brace()) update_repaint_lines(0, INT_MAX);
+  if (get_text()->update_matching_brace()) {
+    update_repaint_lines(0, INT_MAX);
+  }
   edit_window_t::update_contents();
 }
 

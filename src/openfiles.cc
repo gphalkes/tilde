@@ -38,7 +38,9 @@ open_files_t::iterator open_files_t::contains(const char *name) {
   /* FIXME: this should really check for ino+dev equality to see if the file
      is already open. */
   for (std::vector<file_buffer_t *>::iterator iter = files.begin(); iter != files.end(); iter++) {
-    if ((*iter)->get_name() != nullptr && strcmp(name, (*iter)->get_name()) == 0) return iter;
+    if ((*iter)->get_name() != nullptr && strcmp(name, (*iter)->get_name()) == 0) {
+      return iter;
+    }
   }
   return files.end();
 }
@@ -70,11 +72,15 @@ file_buffer_t *open_files_t::next_buffer(file_buffer_t *start) {
   }
 
   for (iter = current; iter != files.end(); iter++) {
-    if (!(*iter)->get_has_window()) return *iter;
+    if (!(*iter)->get_has_window()) {
+      return *iter;
+    }
   }
 
   for (iter = files.begin(); iter != current; iter++) {
-    if (!(*iter)->get_has_window()) return *iter;
+    if (!(*iter)->get_has_window()) {
+      return *iter;
+    }
   }
   return start;
 }
@@ -88,41 +94,48 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
   }
 
   for (iter = current; iter != files.rend(); iter++) {
-    if (!(*iter)->get_has_window()) return *iter;
+    if (!(*iter)->get_has_window()) {
+      return *iter;
+    }
   }
 
   for (iter = files.rbegin(); iter != current; iter++) {
-    if (!(*iter)->get_has_window()) return *iter;
+    if (!(*iter)->get_has_window()) {
+      return *iter;
+    }
   }
   return start;
 }
 
 void open_files_t::cleanup() {
-  while (!files.empty()) delete files.front();
+  while (!files.empty()) {
+    delete files.front();
+  }
 }
 
 recent_file_info_t::recent_file_info_t(file_buffer_t *file) {
-  if ((name = strdup_impl(file->get_name())) == nullptr) throw std::bad_alloc();
+  if ((name = strdup_impl(file->get_name())) == nullptr) {
+    throw std::bad_alloc();
+  }
   if ((encoding = strdup_impl(file->get_encoding())) == nullptr) {
-    free(name);
+    name = nullptr;
     throw std::bad_alloc();
   }
 }
 
-recent_file_info_t::~recent_file_info_t() {
-  free(name);
-  free(encoding);
-}
+const char *recent_file_info_t::get_name() const { return name.get(); }
 
-const char *recent_file_info_t::get_name() const { return name; }
-
-const char *recent_file_info_t::get_encoding() const { return encoding; }
+const char *recent_file_info_t::get_encoding() const { return encoding.get(); }
 
 void recent_files_t::push_front(file_buffer_t *text) {
-  if (text->get_name() == nullptr) return;
+  if (text->get_name() == nullptr) {
+    return;
+  }
 
   for (recent_file_info_t *name : names) {
-    if (strcmp(name->get_name(), text->get_name()) == 0) return;
+    if (strcmp(name->get_name(), text->get_name()) == 0) {
+      return;
+    }
   }
 
   version++;

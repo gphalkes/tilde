@@ -62,7 +62,7 @@ for i in makesys transcript t3shared t3window t3widget t3key t3config t3highligh
     git clone https://github.com/gphalkes/$i.git
 done
 ```
-3. Build all packages: `./t3shared/doall make -C src`
+3. Build all packages: `./t3shared/doall --skip-non-source --stop-on-error make -C src`
 
 Once the build is complete, `tilde/src/.objects/edit` is the newly compiled
 tilde. If the [termdebug](https://os.ghalkes.nl/termdebug.html) suite of tools

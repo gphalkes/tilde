@@ -1,0 +1,1 @@
+Checks: '*,-clang-analyzer-core.NonNullParamChecker,-google-global-names-in-headers,-readability-implicit-bool-cast,-google-build-using-namespace,-llvm-header-guard,-modernize-use-auto,-cppcoreguidelines-pro-*,-clang-analyzer-unix.Malloc,-cert-err58-cpp,-modernize-raw-string-literal,-readability-else-after-return,-cert-dcl50-cpp'

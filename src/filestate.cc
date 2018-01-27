@@ -151,7 +151,9 @@ void load_process_t::file_selected(const std::string *name) {
 void load_process_t::encoding_selected(const std::string *_encoding) { encoding = *_encoding; }
 
 file_buffer_t *load_process_t::get_file_buffer() {
-  if (result) return file;
+  if (result) {
+    return file;
+  }
   return nullptr;
 }
 
@@ -160,7 +162,9 @@ load_process_t::~load_process_t() {
   ASSERT(result || file == nullptr);
 #endif
   delete wrapper;
-  if (fd >= 0) close(fd);
+  if (fd >= 0) {
+    close(fd);
+  }
 }
 
 void load_process_t::preserve_bom() {
@@ -190,7 +194,6 @@ save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file,
       highlight_changed(false),
       save_name(nullptr),
       real_name(nullptr),
-      temp_name(nullptr),
       fd(-1),
       wrapper(nullptr) {}
 
@@ -247,14 +250,18 @@ bool save_as_process_t::step() {
       error_dialog->show();
       break;
     case rw_result_t::CONVERSION_ERROR:
-      if (encoding.empty()) encoding = file->get_encoding();
+      if (encoding.empty()) {
+        encoding = file->get_encoding();
+      }
       printf_into(&message, "Could not save file in encoding %s: %s", encoding.c_str(),
                   transcript_strerror(rw_result.get_transcript_error()));
       error_dialog->set_message(&message);
       error_dialog->show();
       break;
     case rw_result_t::CONVERSION_IMPRECISE:
-      if (encoding.empty()) encoding = file->get_encoding();
+      if (encoding.empty()) {
+        encoding = file->get_encoding();
+      }
       i++;
       printf_into(&message, "Conversion into encoding %s is irreversible", encoding.c_str());
       connections.push_back(continue_abort_dialog->connect_activate(
@@ -290,7 +297,6 @@ save_as_process_t::~save_as_process_t() {
     close(fd);
     if (temp_name != nullptr) {
       unlink(temp_name);
-      free(temp_name);
     } else {
       unlink(name.c_str());
     }
@@ -306,7 +312,9 @@ bool save_as_process_t::get_highlight_changed() const { return highlight_changed
 
 save_process_t::save_process_t(const callback_t &cb, file_buffer_t *_file)
     : save_as_process_t(cb, _file, false) {
-  if (file->get_name() != nullptr) state = INITIAL;
+  if (file->get_name() != nullptr) {
+    state = INITIAL;
+  }
 }
 
 void save_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
@@ -316,13 +324,17 @@ void save_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
 close_process_t::close_process_t(const callback_t &cb, file_buffer_t *_file)
     : save_process_t(cb, _file) {
   state = file->is_modified() ? CONFIRM_CLOSE : CLOSE;
-  if (!_file->is_modified()) state = CLOSE;
+  if (!_file->is_modified()) {
+    state = CLOSE;
+  }
 }
 
 bool close_process_t::step() {
   if (state < CONFIRM_CLOSE) {
     if (save_process_t::step()) {
-      if (!result) return true;
+      if (!result) {
+        return true;
+      }
       state = CLOSE;
     } else {
       return false;
@@ -444,7 +456,9 @@ void open_recent_process_t::recent_file_selected(recent_file_info_t *_info) {
 }
 
 open_recent_process_t::~open_recent_process_t() {
-  if (result) recent_files.erase(info);
+  if (result) {
+    recent_files.erase(info);
+  }
 }
 
 void open_recent_process_t::execute(const callback_t &cb) {
@@ -502,7 +516,9 @@ void load_cli_file_process_t::load_done(stepped_process_t *process) {
 
   in_load = false;
   iter++;
-  if (!in_step) run();
+  if (!in_step) {
+    run();
+  }
 }
 
 void load_cli_file_process_t::execute(const callback_t &cb) {
@@ -525,13 +541,19 @@ void load_cli_file_process_t::attempt_file_position_parse(std::string *filename,
   --idx;
 
   // Skip trailing colon. These will typically occur when copying error messages.
-  if ((*filename)[idx] == ':') --idx;
+  if ((*filename)[idx] == ':') {
+    --idx;
+  }
 
   while (idx > 0 && is_ascii_digit((*filename)[idx])) {
     --idx;
   }
-  if (idx == 0) return;
-  if ((*filename)[idx] != ':') return;
+  if (idx == 0) {
+    return;
+  }
+  if ((*filename)[idx] != ':') {
+    return;
+  }
 
   *line = atoi(filename->c_str() + idx + 1);
   filename->erase(idx);
@@ -540,7 +562,9 @@ void load_cli_file_process_t::attempt_file_position_parse(std::string *filename,
   while (idx > 0 && is_ascii_digit((*filename)[idx])) {
     --idx;
   }
-  if (idx == 0 || (*filename)[idx] != ':') return;
+  if (idx == 0 || (*filename)[idx] != ':') {
+    return;
+  }
   *pos = *line;
   *line = atoi(filename->c_str() + idx + 1);
   filename->erase(idx);

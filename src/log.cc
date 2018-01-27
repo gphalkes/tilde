@@ -25,7 +25,9 @@ static void close_log() { fclose(log_file); }
 void init_log() {
   if (log_file == nullptr) {
     log_file = fopen("log.txt", "a");
-    if (log_file) atexit(close_log);
+    if (log_file) {
+      atexit(close_log);
+    }
   }
 }
 
@@ -56,10 +58,14 @@ void ldumpstr(const char *str, int length) {
 void logkeyseq(const char *keys) {
   size_t i;
 
-  if (!log_file) return;
+  if (!log_file) {
+    return;
+  }
 
   fprintf(log_file, "Unknown key sequence:");
-  for (i = 0; i < strlen(keys); i++) fprintf(log_file, " %d", keys[i]);
+  for (i = 0; i < strlen(keys); i++) {
+    fprintf(log_file, " %d", keys[i]);
+  }
   fprintf(log_file, "\n");
   fflush(log_file);
 }

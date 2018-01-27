@@ -81,7 +81,9 @@ static const char base_config_schema[] = {
 };
 
 static t3_bool find_term_config(const t3_config_t *config, const void *data) {
-  if (t3_config_get_type(config) != T3_CONFIG_SECTION) return t3_false;
+  if (t3_config_get_type(config) != T3_CONFIG_SECTION) {
+    return t3_false;
+  }
   return strcmp(reinterpret_cast<const char *>(data),
                 t3_config_get_string(t3_config_get(config, "name"))) == 0;
 }
@@ -93,7 +95,9 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
   int color;
 
   for (i = 0; i < ARRAY_SIZE(attribute_map); i++) {
-    if (strcmp(attr, attribute_map[i].string) == 0) return attribute_map[i].attr;
+    if (strcmp(attr, attribute_map[i].string) == 0) {
+      return attribute_map[i].attr;
+    }
   }
 
   if (strncmp(attr, "fg ", 3) == 0) {
@@ -105,8 +109,12 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
   }
 
   color = strtol(attr + 3, &endptr, 0);
-  if (*endptr != 0) return 0;
-  if (color < 0 || color > 255) return 0;
+  if (*endptr != 0) {
+    return 0;
+  }
+  if (color < 0 || color > 255) {
+    return 0;
+  }
   return foreground ? T3_ATTR_FG(color) : T3_ATTR_BG(color);
 }
 
@@ -115,7 +123,9 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
   t3_config_t *attr_config;
   t3_attr_t accumulated_attr = 0;
 
-  if ((attr_config = t3_config_get(config, name)) == nullptr) return;
+  if ((attr_config = t3_config_get(config, name)) == nullptr) {
+    return;
+  }
 
   for (attr_config = t3_config_get(attr_config, nullptr); attr_config != nullptr;
        attr_config = t3_config_get_next(attr_config)) {
@@ -303,7 +313,9 @@ static void read_config() {
     }
   }
 
-  if ((term_specific_config = t3_config_get(config, "terminals")) == nullptr) return;
+  if ((term_specific_config = t3_config_get(config, "terminals")) == nullptr) {
+    return;
+  }
 
   if (cli_option.term != nullptr) {
     term = cli_option.term;
@@ -518,7 +530,9 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 
   if ((attributes = t3_config_get(config, section_name)) == nullptr ||
       t3_config_get_type(attributes) != T3_CONFIG_SECTION) {
-    if (!attr.is_valid()) return;
+    if (!attr.is_valid()) {
+      return;
+    }
     attributes = t3_config_add_section(config, section_name, nullptr);
   }
 
@@ -531,7 +545,9 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 
   for (i = 0; i < ARRAY_SIZE(attribute_masks); i++) {
     t3_attr_t search = attr & attribute_masks[i];
-    if (search == 0) continue;
+    if (search == 0) {
+      continue;
+    }
 
     for (j = 0; j < ARRAY_SIZE(attribute_map); j++) {
       if (attribute_map[j].attr == search) {
@@ -643,7 +659,9 @@ bool write_config() {
     /* Don't overwrite config files with newer config version. */
     return false;
   } else {
-    if (!t3_config_validate(config, schema, nullptr, 0)) return false;
+    if (!t3_config_validate(config, schema, nullptr, 0)) {
+      return false;
+    }
   }
 
   default_option.term_options.key_timeout.unset();

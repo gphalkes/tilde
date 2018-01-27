@@ -75,7 +75,7 @@ class main_t : public main_window_base_t {
   void load_cli_files_done(stepped_process_t *process);
 
  private:
-  file_edit_window_t *get_current() { return (file_edit_window_t *)split->get_current(); }
+  file_edit_window_t *get_current() { return static_cast<file_edit_window_t *>(split->get_current()); }
   void menu_activated(int id);
   void switch_buffer(file_buffer_t *buffer);
   void switch_to_new_buffer(stepped_process_t *process);
@@ -92,6 +92,7 @@ class main_t : public main_window_base_t {
 };
 
 static main_t *main_window;
+
 key_bindings_t<action_id_t> main_t::key_bindings{
     {action_id_t::FILE_NEW, "FileNew", {EKEY_CTRL | 'n'}},
     {action_id_t::FILE_OPEN, "FileOpen", {EKEY_CTRL | 'o'}},
@@ -299,9 +300,9 @@ bool main_t::set_size(optint height, optint width) {
       dynamic_cast<input_selection_dialog_t *>(input_selection_dialog) != nullptr) {
     int is_width = std::min(std::max(width - 16, 40), 100);
     int is_height = std::min(std::max(height - 3, 15), 3200 / is_width);
-    input_selection_dialog->set_size(is_height, is_width);
+    result &= input_selection_dialog->set_size(is_height, is_width);
   }
-  return true;
+  return result;
 }
 
 void main_t::load_cli_files_done(stepped_process_t *process) {
@@ -452,7 +453,9 @@ void main_t::menu_activated(int id) {
         message_dialog->show();
       } else {
         file_buffer_t *text = widget->get_text();
-        if (text->get_name() == nullptr && !text->is_modified()) delete text;
+        if (text->get_name() == nullptr && !text->is_modified()) {
+          delete text;
+        }
         delete widget;
       }
       break;
@@ -505,7 +508,9 @@ void main_t::switch_buffer(file_buffer_t *buffer) {
   /* If the buffer is already opened in another file_edit_window_t, switch to that
      window. */
   if (buffer->get_has_window()) {
-    while (get_current()->get_text() != buffer) split->next();
+    while (get_current()->get_text() != buffer) {
+      split->next();
+    }
   } else {
     get_current()->set_text(buffer);
   }
@@ -515,28 +520,40 @@ void main_t::switch_to_new_buffer(stepped_process_t *process) {
   const file_buffer_t *text;
   file_buffer_t *buffer;
 
-  if (!process->get_result()) return;
+  if (!process->get_result()) {
+    return;
+  }
 
   buffer = ((load_process_t *)process)->get_file_buffer();
-  if (buffer->get_has_window()) return;
+  if (buffer->get_has_window()) {
+    return;
+  }
 
   text = get_current()->get_text();
   get_current()->set_text(buffer);
   // FIXME: buffer should not be closed if the user specifically created it by asking for a new
   // file!
-  if (text->get_name() == nullptr && !text->is_modified()) delete text;
+  if (text->get_name() == nullptr && !text->is_modified()) {
+    delete text;
+  }
 }
 
 void main_t::close_cb(stepped_process_t *process) {
   file_buffer_t *text;
 
-  if (!process->get_result()) return;
+  if (!process->get_result()) {
+    return;
+  }
 
   text = get_current()->get_text();
-  if (((close_process_t *)process)->get_file_buffer_ptr() != text) PANIC();
+  if (((close_process_t *)process)->get_file_buffer_ptr() != text) {
+    PANIC();
+  }
 
   menu_activated(action_id_t::WINDOWS_NEXT_BUFFER);
-  if (get_current()->get_text() == text) get_current()->set_text(new file_buffer_t());
+  if (get_current()->get_text() == text) {
+    get_current()->set_text(new file_buffer_t());
+  }
   delete text;
 }
 
@@ -625,7 +642,9 @@ static void input_selection_complete(bool selection_made) {
 
 static void sync_updates() {
   if (!discard_list.empty()) {
-    for (window_component_t *iter : discard_list) delete iter;
+    for (window_component_t *iter : discard_list) {
+      delete iter;
+    }
     discard_list.clear();
   }
 }
@@ -641,10 +660,14 @@ static char *get_run_file_name() {
   char *path = nullptr;
   char *insert_ptr;
 
-  if (gethostname(hostname, sizeof(hostname)) == -1) goto return_error;
+  if (gethostname(hostname, sizeof(hostname)) == -1) {
+    goto return_error;
+  }
   /* Ensure that the hostname string is terminated. */
   hostname[sizeof(hostname) - 1] = 0;
-  if ((ttyname_str = ttyname(STDIN_FILENO)) == nullptr) goto return_error;
+  if ((ttyname_str = ttyname(STDIN_FILENO)) == nullptr) {
+    goto return_error;
+  }
   ttyname_str = strdup_impl(ttyname_str);
   ttyname_len = strlen(ttyname_str);
   ttyname_len_encoded = ttyname_len;
@@ -698,10 +721,14 @@ static void check_if_already_running() {
   char pid_str[16];
   ssize_t readlink_result;
 
-  if (cli_option.ignore_running) return;
+  if (cli_option.ignore_running) {
+    return;
+  }
 
   name = get_run_file_name();
-  if (name == nullptr) return;
+  if (name == nullptr) {
+    return;
+  }
 
   if ((readlink_result = readlink(name, pid_str, sizeof(pid_str) - 1)) > 0) {
     char *endptr;
@@ -771,7 +798,9 @@ int main(int argc, char *argv[]) {
   check_if_already_running();
 
 #ifdef DEBUG
-  if (cli_option.start_debugger_on_segfault) enable_debugger_on_segfault(argv[0]);
+  if (cli_option.start_debugger_on_segfault) {
+    enable_debugger_on_segfault(argv[0]);
+  }
 
   set_limits();
   if (cli_option.wait) {

@@ -49,8 +49,12 @@ select_buffer_dialog_t::select_buffer_dialog_t(int height, int width)
 bool select_buffer_dialog_t::set_size(optint height, optint width) {
   bool result = true;
 
-  if (!height.is_valid()) height = t3_win_get_height(window);
-  if (!width.is_valid()) width = t3_win_get_width(window);
+  if (!height.is_valid()) {
+    height = t3_win_get_height(window);
+  }
+  if (!width.is_valid()) {
+    width = t3_win_get_width(window);
+  }
 
   result &= dialog_t::set_size(height, width);
 
@@ -81,7 +85,9 @@ void select_buffer_dialog_t::show() {
       bullet = new bullet_t(signals::mem_fun(open_file, &file_buffer_t::get_has_window));
       multi_widget->push_back(bullet, -1, true, false);
       name = open_file->get_name();
-      if (name == nullptr) name = "(Untitled)";
+      if (name == nullptr) {
+        name = "(Untitled)";
+      }
       label = new label_t(name);
       label->set_anchor(bullet, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);

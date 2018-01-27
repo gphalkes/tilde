@@ -46,13 +46,17 @@ stepped_process_t::stepped_process_t() : result(true) {}
 stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(false) {}
 
 void stepped_process_t::run() {
-  if (step()) done(result);
+  if (step()) {
+    done(result);
+  }
 }
 
 void stepped_process_t::abort() { done(false); }
 
 void stepped_process_t::disconnect() {
-  for (t3_widget::signals::connection &iter : connections) iter.disconnect();
+  for (t3_widget::signals::connection &iter : connections) {
+    iter.disconnect();
+  }
   connections.clear();
 }
 
@@ -92,7 +96,9 @@ void enable_debugger_on_segfault(const char *_executable) {
 }
 
 void set_limits() {
-  if (cli_option.vm_limit < 0) return;
+  if (cli_option.vm_limit < 0) {
+    return;
+  }
 
   int mb = cli_option.vm_limit == 0 ? 250 : cli_option.vm_limit;
   struct rlimit vm_limit;
@@ -131,7 +137,9 @@ char *canonicalize_path(const char *path) {
   */
   if (result == nullptr && path != nullptr && errno == EINVAL) {
     char store_path[PATH_MAX];
-    if (realpath(path, store_path) != nullptr) return nullptr;
+    if (realpath(path, store_path) != nullptr) {
+      return nullptr;
+    }
     return strdup_impl(store_path);
   }
 #endif
@@ -178,10 +186,11 @@ void printf_into(std::string *message, const char *format, ...) {
   message_buffer_size = result + 1;
   result = vsnprintf(message_buffer, message_buffer_size, format, args);
   va_end(args);
-  if (result < 0) return;
+  if (result < 0) {
+    return;
+  }
 
   *message = message_buffer;
-  return;
 }
 
 int map_highlight(void *data, const char *name) {
@@ -190,13 +199,17 @@ int map_highlight(void *data, const char *name) {
   (void)data;
 
   for (i = 0; static_cast<size_t>(i) < ARRAY_SIZE(highlight_names); i++) {
-    if (strcmp(name, highlight_names[i]) == 0) return i;
+    if (strcmp(name, highlight_names[i]) == 0) {
+      return i;
+    }
   }
   return 0;
 }
 
 const char *reverse_map_highlight(int idx) {
-  if (idx < 0 || static_cast<size_t>(idx) >= ARRAY_SIZE(highlight_names)) return nullptr;
+  if (idx < 0 || static_cast<size_t>(idx) >= ARRAY_SIZE(highlight_names)) {
+    return nullptr;
+  }
   return highlight_names[idx];
 }
 

@@ -152,8 +152,12 @@ encoding_dialog_t::encoding_dialog_t(int height, int width)
 bool encoding_dialog_t::set_size(optint height, optint width) {
   bool result = true;
 
-  if (!height.is_valid()) height = t3_win_get_height(window);
-  if (!width.is_valid()) width = t3_win_get_width(window);
+  if (!height.is_valid()) {
+    height = t3_win_get_height(window);
+  }
+  if (!width.is_valid()) {
+    width = t3_win_get_width(window);
+  }
 
   result &= dialog_t::set_size(height, width);
   result &= list->set_size(height - 4, width - 2);
@@ -195,7 +199,9 @@ void encoding_dialog_t::set_encoding(const char *encoding) {
   charset_descs_t::const_iterator iter;
   int i;
 
-  if (encoding == nullptr) encoding = "UTF-8";
+  if (encoding == nullptr) {
+    encoding = "UTF-8";
+  }
 
   for (iter = available_charsets.begin(), i = 0; iter != available_charsets.end(); iter++, i++) {
     if (transcript_equal(encoding, iter->tag)) {
