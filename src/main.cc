@@ -14,6 +14,7 @@
 
 #include <csignal>
 #include <cstdlib>
+#include <memory.h>
 #include <t3widget/key_binding.h>
 #include <t3widget/widget.h>
 
@@ -29,6 +30,7 @@
 #include "log.h"
 #include "openfiles.h"
 #include "option.h"
+#include "string_util.h"
 
 using namespace t3_widget;
 
@@ -48,7 +50,7 @@ static dialog_t *input_selection_dialog;
 
 static std::list<window_component_t *> discard_list;
 
-static char *runfile_name;
+static std::string runfile_name;
 
 static void input_selection_complete(bool selection_made);
 static void configure_input(bool cancel_selects_default);
@@ -75,7 +77,9 @@ class main_t : public main_window_base_t {
   void load_cli_files_done(stepped_process_t *process);
 
  private:
-  file_edit_window_t *get_current() { return static_cast<file_edit_window_t *>(split->get_current()); }
+  file_edit_window_t *get_current() {
+    return static_cast<file_edit_window_t *>(split->get_current());
+  }
   void menu_activated(int id);
   void switch_buffer(file_buffer_t *buffer);
   void switch_to_new_buffer(stepped_process_t *process);
@@ -420,12 +424,12 @@ void main_t::menu_activated(int id) {
       break;
 
     case action_id_t::WINDOWS_NEXT_BUFFER: {
-      file_edit_window_t *current = (file_edit_window_t *)split->get_current();
+      file_edit_window_t *current = static_cast<file_edit_window_t *>(split->get_current());
       current->set_text(open_files.next_buffer(current->get_text()));
       break;
     }
     case action_id_t::WINDOWS_PREV_BUFFER: {
-      file_edit_window_t *current = (file_edit_window_t *)split->get_current();
+      file_edit_window_t *current = static_cast<file_edit_window_t *>(split->get_current());
       current->set_text(open_files.previous_buffer(current->get_text()));
       break;
     }
@@ -446,7 +450,7 @@ void main_t::menu_activated(int id) {
       split->previous();
       break;
     case action_id_t::WINDOWS_MERGE: {
-      file_edit_window_t *widget = (file_edit_window_t *)split->unsplit();
+      file_edit_window_t *widget = static_cast<file_edit_window_t *>(split->unsplit());
       if (widget == nullptr) {
         message_dialog->set_message("Can not close the last window.");
         message_dialog->center_over(this);
@@ -524,7 +528,7 @@ void main_t::switch_to_new_buffer(stepped_process_t *process) {
     return;
   }
 
-  buffer = ((load_process_t *)process)->get_file_buffer();
+  buffer = static_cast<load_process_t *>(process)->get_file_buffer();
   if (buffer->get_has_window()) {
     return;
   }
@@ -649,75 +653,54 @@ static void sync_updates() {
   }
 }
 
-static char *get_run_file_name() {
+static std::string escape_illegal_chars(const std::string &str) {
   static const char *ILLEGAL_CHARS = "%<>:\"'/\\|?*'";
+  std::string result;
+  result.reserve(str.size());
+  for (char c : str) {
+    if (strchr(ILLEGAL_CHARS, c) != nullptr) {
+      char buffer[4];
+      sprintf(buffer, "%%%02X", c);
+      result.append(buffer);
+    } else {
+      result.append(1, c);
+    }
+  }
+  return result;
+}
+
+static std::string get_run_file_name() {
   static const char *TMP_DIR_BASE = "/tmp/tilde-";
   char hostname[128];
-  char *ttyname_str = nullptr;
-  size_t ttyname_len;
-  size_t ttyname_len_encoded;
-  size_t linkname_len;
-  char *path = nullptr;
-  char *insert_ptr;
+  std::string linkname;
+  cleanup_free_ptr<char>::t path;
+  char *ttyname_str;
 
   if (gethostname(hostname, sizeof(hostname)) == -1) {
-    goto return_error;
+    return "";
   }
   /* Ensure that the hostname string is terminated. */
   hostname[sizeof(hostname) - 1] = 0;
   if ((ttyname_str = ttyname(STDIN_FILENO)) == nullptr) {
-    goto return_error;
-  }
-  ttyname_str = strdup_impl(ttyname_str);
-  ttyname_len = strlen(ttyname_str);
-  ttyname_len_encoded = ttyname_len;
-  for (size_t i = 0; i < ttyname_len; i++) {
-    if (ttyname_str[i] < 32 || strchr(ILLEGAL_CHARS, ttyname_str[i]) != nullptr) {
-      ttyname_len_encoded += 2;
-    }
+    return "";
   }
 
-  linkname_len = ttyname_len_encoded + strlen(hostname) + 1;
+  path = t3_config_xdg_get_path(T3_CONFIG_XDG_RUNTIME_DIR, "tilde", 0);
 
-  path = t3_config_xdg_get_path(T3_CONFIG_XDG_RUNTIME_DIR, "tilde", linkname_len);
   if (path == nullptr) {
-    char uid_str[16];
-    sprintf(uid_str, "%u", (unsigned int)geteuid());
-    if ((path = reinterpret_cast<char *>(
-             malloc(strlen(TMP_DIR_BASE) + strlen(uid_str) + 3 + linkname_len))) == nullptr) {
-      goto return_error;
-    }
-    sprintf(path, "%s-%s", TMP_DIR_BASE, uid_str);
+    linkname = strings::Cat(TMP_DIR_BASE, "-", geteuid());
+  } else {
+    linkname = path;
   }
 
   mkdir(path, S_IRWXU);
 
-  insert_ptr = path + strlen(path);
-  strcat(insert_ptr, "/");
-  strcat(insert_ptr, hostname);
-  strcat(insert_ptr, ":");
-
-  insert_ptr = path + strlen(path);
-  for (size_t i = 0; i < ttyname_len; i++) {
-    if (ttyname_str[i] < 32 || strchr(ILLEGAL_CHARS, ttyname_str[i]) != nullptr) {
-      sprintf(insert_ptr, "%%%02X", ttyname_str[i]);
-      insert_ptr += 3;
-    } else {
-      *insert_ptr++ = ttyname_str[i];
-    }
-  }
-  *insert_ptr = 0;
-
-  free(ttyname_str);
-  return path;
-return_error:
-  free(ttyname_str);
-  free(path);
-  return nullptr;
+  strings::Append(&linkname, "/", hostname, ":", escape_illegal_chars(ttyname_str));
+  return linkname;
 }
 
 static void check_if_already_running() {
-  char *name;
+  std::string name;
   char pid_str[16];
   ssize_t readlink_result;
 
@@ -726,11 +709,11 @@ static void check_if_already_running() {
   }
 
   name = get_run_file_name();
-  if (name == nullptr) {
+  if (name.empty()) {
     return;
   }
 
-  if ((readlink_result = readlink(name, pid_str, sizeof(pid_str) - 1)) > 0) {
+  if ((readlink_result = readlink(name.c_str(), pid_str, sizeof(pid_str) - 1)) > 0) {
     char *endptr;
     pid_str[readlink_result] = 0;
     int other_pid = strtol(pid_str, &endptr, 10);
@@ -746,12 +729,11 @@ static void check_if_already_running() {
   }
 
   sprintf(pid_str, "%u", getpid());
-  unlink(name);
-  if (symlink(pid_str, name) == 0) {
+  unlink(name.c_str());
+  if (symlink(pid_str, name.c_str()) == 0) {
     runfile_name = name;
     return;
   }
-  free(name);
 }
 
 static void terminate_handler(int sig) {
@@ -786,7 +768,7 @@ static void setup_signal_handlers() {
 
 int main(int argc, char *argv[]) {
   complex_error_t result;
-  init_parameters_t *params = init_parameters_t::create();
+  std::unique_ptr<init_parameters_t> params(init_parameters_t::create());
   std::string config_file_name;
 
   init_log();
@@ -817,13 +799,13 @@ int main(int argc, char *argv[]) {
     t3_widget::set_primary_selection_mode(false);
   }
 
-  if (!(result = init(params)).get_success()) {
+  if (!(result = init(params.get())).get_success()) {
     fprintf(stderr, "Error: %s\n", result.get_string());
     fprintf(stderr, "init failed\n");
     exit(EXIT_FAILURE);
   }
 
-  delete params;
+  params.reset();
 
   connect_update_notification(signals::ptr_fun(sync_updates));
 
@@ -839,21 +821,19 @@ int main(int argc, char *argv[]) {
     set_key_timeout(option.key_timeout);
   } else if (config_read_error) {
     std::string message = "Error loading configuration file ";
-    if (cli_option.config_file == nullptr) {
-      char *file_name = t3_config_xdg_get_path(T3_CONFIG_XDG_CONFIG_HOME, "tilde", 5);
-      strcat(file_name, "/config");
-      cli_option.config_file = file_name;
+    if (!cli_option.config_file.is_valid()) {
+      cleanup_free_ptr<char>::t file_name(
+          t3_config_xdg_get_path(T3_CONFIG_XDG_CONFIG_HOME, "tilde", 0));
+      cli_option.config_file = strings::Cat(file_name.get(), "/config");
     }
 
-    message += cli_option.config_file;
-    message += ": ";
-    message += config_read_error_string;
+    strings::Append(&message, cli_option.config_file, ": ", config_read_error_string);
     if (config_read_error_line != 0) {
-      char line_number_buffer[100];
-      sprintf(line_number_buffer, " at line %d", config_read_error_line);
-      message += line_number_buffer;
+      strings::Append(&message, " at line ", config_read_error_line);
     }
-    message += ".\nInput handling and all other settings have been set to their defaults.";
+    message +=
+        ".\nInput handling and all other settings have been set to their defaults for this "
+        "session.";
     set_key_timeout(-1000);
 
     /* For parse errors, duplicate keys, invalid keys, constraint violations,
@@ -862,7 +842,7 @@ int main(int argc, char *argv[]) {
     */
     if (config_read_error_line != 0) {
       cli_option.files.clear();
-      cli_option.files.push_back(cli_option.config_file);
+      cli_option.files.push_back(cli_option.config_file().c_str());
     }
 
     message_dialog->set_message(&message);
@@ -906,9 +886,8 @@ int main(int argc, char *argv[]) {
   cleanup();
   transcript_finalize();
 #endif
-  if (runfile_name != nullptr) {
-    unlink(runfile_name);
-    free(runfile_name);
+  if (runfile_name.empty()) {
+    unlink(runfile_name.c_str());
   }
   if (retval > 128) {
     fprintf(stderr, "Killed by signal %d\n", retval - 128);

@@ -247,10 +247,10 @@ static void read_config() {
   t3_config_t *term_specific_config;
   const char *term;
 
-  if (cli_option.config_file == nullptr) {
-    config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
+  if (cli_option.config_file.is_valid()) {
+    config_file = fopen(cli_option.config_file().c_str(), "r");
   } else {
-    config_file = fopen(cli_option.config_file, "r");
+    config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   }
 
   if (config_file == nullptr) {
@@ -635,10 +635,10 @@ bool write_config() {
     return false;
   }
 
-  if (cli_option.config_file == nullptr) {
-    config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
+  if (cli_option.config_file.is_valid()) {
+    config_file = fopen(cli_option.config_file().c_str(), "r");
   } else {
-    config_file = fopen(cli_option.config_file, "r");
+    config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   }
 
   if (config_file != nullptr) {
@@ -714,10 +714,10 @@ bool write_config() {
     return false;
   }
 
-  if (cli_option.config_file == nullptr) {
-    new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
+  if (cli_option.config_file.is_valid()) {
+    new_config_file = t3_config_open_write(cli_option.config_file().c_str());
   } else {
-    new_config_file = t3_config_open_write(cli_option.config_file);
+    new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   }
 
   if (new_config_file == nullptr) {
