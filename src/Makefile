@@ -11,7 +11,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#COMPILER := gcc
 SOURCES..objects/edit := \
 	fileautocompleter.cc \
 	filebuffer.cc \
@@ -42,9 +41,6 @@ include ../../makesys/rules.mk
 LDLIBS += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
 LDFLAGS += $(call L, ../include/t3widget/.libs ../include/t3window/.libs ../include/transcript/.libs ../include/t3config/.libs ../include/t3highlight/.libs)
 LDLIBS += -lunistring
-ifndef CPP11
-LDLIBS += `pkg-config --libs sigc++-2.0`
-endif
 LDLIBS += -lacl
 LDLIBS += -lattr
 CXXFLAGS.option = -I.objects
