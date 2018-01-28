@@ -32,7 +32,7 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 file_edit_window_t::~file_edit_window_t() {
   file_buffer_t *_text = static_cast<file_buffer_t *>(text);
   _text->set_has_window(false);
-  save_view_parameters(_text->view_parameters);
+  save_view_parameters(_text->view_parameters.get());
   rewrap_connection.disconnect();
 }
 
@@ -70,7 +70,7 @@ void file_edit_window_t::draw_info_window() {
 void file_edit_window_t::set_text(file_buffer_t *_text) {
   file_buffer_t *old_text = static_cast<file_buffer_t *>(edit_window_t::get_text());
   old_text->set_has_window(false);
-  save_view_parameters(old_text->view_parameters);
+  save_view_parameters(old_text->view_parameters.get());
   rewrap_connection.disconnect();
   _text->set_has_window(true);
   rewrap_connection = _text->connect_rewrap_required(

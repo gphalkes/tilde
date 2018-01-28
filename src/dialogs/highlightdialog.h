@@ -19,11 +19,15 @@
 
 using namespace t3_widget;
 
-using cleanup_lang_t = cleanup_func_ptr<t3_highlight_lang_t, t3_highlight_free_list>::t;
+struct t3_highlight_lang_deleter {
+  void operator()(t3_highlight_lang_t *lang) { t3_highlight_free_list(lang); }
+};
+
+using unique_lang_t = std::unique_ptr<t3_highlight_lang_t, t3_highlight_lang_deleter>;
 
 class highlight_dialog_t : public dialog_t {
  private:
-  cleanup_lang_t names;
+  unique_lang_t names;
   list_pane_t *list;
 
  public:

@@ -14,6 +14,8 @@
 #ifndef ATTRIBUTES_DIALOG_H
 #define ATTRIBUTES_DIALOG_H
 
+#include <memory>
+
 #include <t3widget/widget.h>
 
 #include "option.h"
@@ -36,8 +38,8 @@ class attributes_dialog_t : public dialog_t {
       addition, deletion;
   expander_t *interface, *text_area, *syntax_highlight;
   checkbox_t *color_box;
-  cleanup_ptr<expander_group_t>::t expander_group;
-  cleanup_ptr<attribute_picker_dialog_t>::t picker;
+  std::unique_ptr<expander_group_t> expander_group;
+  std::unique_ptr<attribute_picker_dialog_t> picker;
   attribute_key_t change_attribute;
 
   void change_button_activated(attribute_key_t attribute);

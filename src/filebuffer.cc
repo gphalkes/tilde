@@ -39,24 +39,19 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
       match_line(nullptr),
       last_match(nullptr),
       matching_brace_valid(false) {
-  if (_encoding == nullptr) {
-    encoding = strdup_impl("UTF-8");
+  if (_encoding == nullptr || strlen(_encoding) == 0) {
+    encoding = "UTF-8";
   } else {
-    encoding = strdup_impl(_encoding);
-  }
-  if (encoding == nullptr) {
-    throw std::bad_alloc();
+    encoding = _encoding;
   }
 
-  if (_name == nullptr) {
+  if (_name == nullptr || strlen(_name) == 0) {
     name_line.set_text("(Untitled)");
   } else {
-    if ((name = strdup_impl(_name)) == nullptr) {
-      throw std::bad_alloc();
-    }
+    name = _name;
 
     std::string converted_name;
-    convert_lang_codeset(name, &converted_name, true);
+    convert_lang_codeset(&name, &converted_name, true);
     name_line.set_text(&converted_name);
   }
 
@@ -97,7 +92,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
       transcript_t *handle;
       transcript_error_t error;
 
-      if ((_name = canonicalize_path(name)) == nullptr) {
+      if ((_name = canonicalize_path(name.c_str())) == nullptr) {
         if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) {
           break;
         }
@@ -106,10 +101,10 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 
       /* name is a cleanup ptr. */
       name = _name;
-      convert_lang_codeset(name, &converted_name, true);
+      convert_lang_codeset(&name, &converted_name, true);
       name_line.set_text(&converted_name);
 
-      if ((state->fd = open(name, O_RDONLY)) < 0) {
+      if ((state->fd = open(name.c_str(), O_RDONLY)) < 0) {
         if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) {
           break;
         }
@@ -117,9 +112,9 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
       }
 
       try {
-        lprintf("Using encoding %s to read %s\n", encoding(), name());
+        lprintf("Using encoding %s to read %s\n", encoding.c_str(), name.c_str());
 
-        handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error);
+        handle = transcript_open_converter(encoding.c_str(), TRANSCRIPT_UTF8, 0, &error);
         if (handle == nullptr) {
           return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR, error);
         }
@@ -139,13 +134,13 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
           if (state->state == load_process_t::READING_FIRST) {
             switch (state->bom_state) {
               case load_process_t::UNKNOWN:
-                if (state->wrapper->get_fill() >= 3 && transcript_equal(encoding(), "utf8") &&
+                if (state->wrapper->get_fill() >= 3 && transcript_equal(encoding.c_str(), "utf8") &&
                     memcmp(state->wrapper->get_buffer(), "\xef\xbb\xbf", 3) == 0) {
                   return rw_result_t(rw_result_t::BOM_FOUND);
                 }
                 break;
               case load_process_t::PRESERVE_BOM:
-                encoding = strdup_impl("X-UTF-8-BOM");
+                encoding = "X-UTF-8-BOM";
               /* FALLTHROUGH */
               case load_process_t::REMOVE_BOM:
                 try {
@@ -206,7 +201,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
         t3_highlight_detect(line->data(), line->size(), true, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   if (!success) {
-    success = t3_highlight_lang_by_filename(name, T3_HIGHLIGHT_UTF8, &lang, nullptr);
+    success = t3_highlight_lang_by_filename(name.c_str(), T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   if (success) {
     highlight = t3_highlight_load(lang.lang_file, map_highlight, nullptr,
@@ -232,10 +227,10 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
   switch (state->state) {
     case save_as_process_t::INITIAL:
       if (state->name.empty()) {
-        if (name == nullptr) {
+        if (name.empty()) {
           PANIC();
         }
-        state->save_name = name;
+        state->save_name = name.c_str();
       } else {
         state->save_name = state->name.c_str();
       }
@@ -323,9 +318,9 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
           }
           /* encoding is a cleanup ptr. */
-          encoding = strdup_impl(state->encoding.c_str());
-        } else if (strcmp(encoding, "UTF-8") != 0) {
-          if ((handle = transcript_open_converter(encoding, TRANSCRIPT_UTF8, 0, &error)) ==
+          encoding = state->encoding.c_str();
+        } else if (strcmp(encoding.c_str(), "UTF-8") != 0) {
+          if ((handle = transcript_open_converter(encoding.c_str(), TRANSCRIPT_UTF8, 0, &error)) ==
               nullptr) {
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
           }
@@ -380,8 +375,8 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       if (!state->name.empty()) {
         std::string converted_name;
         /* name is a cleanup ptr. */
-        name = strdup_impl(state->name.c_str());
-        convert_lang_codeset(name, &converted_name, true);
+        name = state->name.c_str();
+        convert_lang_codeset(&name, &converted_name, true);
         name_line.set_text(&converted_name);
       }
       set_undo_mark();
@@ -393,14 +388,14 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
   return rw_result_t(rw_result_t::SUCCESS);
 }
 
-const char *file_buffer_t::get_name() const { return name(); }
+const char *file_buffer_t::get_name() const { return name.c_str(); }
 
-const char *file_buffer_t::get_encoding() const { return encoding(); }
+const char *file_buffer_t::get_encoding() const { return encoding.c_str(); }
 
 text_line_t *file_buffer_t::get_name_line() { return &name_line; }
 
 const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters() const {
-  return view_parameters();
+  return view_parameters.get();
 }
 
 void file_buffer_t::prepare_paint_line(int line) {

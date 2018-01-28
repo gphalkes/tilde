@@ -28,7 +28,6 @@ static bool cmp_lang_names(t3_highlight_lang_t a, t3_highlight_lang_t b) {
 highlight_dialog_t::highlight_dialog_t(int height, int width)
     : dialog_t(height, width, "Highlighting Language") {
   button_t *ok_button, *cancel_button;
-  t3_highlight_lang_t *ptr;
   label_t *label;
   t3_highlight_error_t error;
 
@@ -40,16 +39,18 @@ highlight_dialog_t::highlight_dialog_t(int height, int width)
   label = new label_t("Plain Text");
   list->push_back(label);
 
-  if ((names = t3_highlight_list(0, &error)) == nullptr) {
+  names.reset(t3_highlight_list(0, &error));
+  if (names == nullptr) {
     if (error.error == T3_ERR_OUT_OF_MEMORY) {
       throw std::bad_alloc();
     }
   } else {
-    for (ptr = names; ptr->name != nullptr; ptr++) {
+    t3_highlight_lang_t *ptr;
+    for (ptr = names.get(); ptr->name != nullptr; ptr++) {
     }
-    std::sort((t3_highlight_lang_t *)names, ptr, cmp_lang_names);
+    std::sort(names.get(), ptr, cmp_lang_names);
 
-    for (ptr = names; ptr->name != nullptr; ptr++) {
+    for (ptr = names.get(); ptr->name != nullptr; ptr++) {
       label = new label_t(ptr->name);
       list->push_back(label);
     }
@@ -103,7 +104,7 @@ void highlight_dialog_t::ok_activated() {
     return;
   }
 
-  if ((highlight = t3_highlight_load(names[idx - 1].lang_file, map_highlight, nullptr,
+  if ((highlight = t3_highlight_load(names.get()[idx - 1].lang_file, map_highlight, nullptr,
                                      T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, &error)) ==
       nullptr) {
     std::string message(_("Error loading highlighting patterns: "));
@@ -114,7 +115,7 @@ void highlight_dialog_t::ok_activated() {
     return;
   }
   hide();
-  language_selected(highlight, names[idx - 1].name);
+  language_selected(highlight, names.get()[idx - 1].name);
 }
 
 void highlight_dialog_t::set_selected(const char *lang_file) {
@@ -126,7 +127,7 @@ void highlight_dialog_t::set_selected(const char *lang_file) {
     return;
   }
 
-  for (ptr = names, idx = 1; ptr->name != nullptr; ptr++, idx++) {
+  for (ptr = names.get(), idx = 1; ptr->name != nullptr; ptr++, idx++) {
     if (strcmp(lang_file, ptr->lang_file) == 0) {
       list->set_current(idx);
       return;

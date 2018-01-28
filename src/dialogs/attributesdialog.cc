@@ -68,7 +68,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
   color_box->connect_activate(signals::mem_fun(this, &attributes_dialog_t::handle_activate));
   color_box->connect_toggled(signals::mem_fun(this, &attributes_dialog_t::update_attribute_lines));
 
-  expander_group = new expander_group_t();
+  expander_group.reset(new expander_group_t());
 
   START_WIDGET_GROUP
   ADD_ATTRIBUTE_ENTRY("Dialog", DIALOG, dialog_line);
@@ -163,7 +163,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
   push_back(save_defaults_button);
   push_back(cancel_button);
 
-  picker = new attribute_picker_dialog_t();
+  picker.reset(new attribute_picker_dialog_t());
   picker->center_over(this);
   picker->connect_attribute_selected(
       signals::mem_fun(this, &attributes_dialog_t::attribute_selected));

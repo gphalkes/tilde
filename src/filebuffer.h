@@ -14,6 +14,8 @@
 #ifndef FILE_BUFFER_H
 #define FILE_BUFFER_H
 
+#include <memory>
+
 #include <t3highlight/highlight.h>
 #include <t3widget/widget.h>
 
@@ -28,9 +30,9 @@ class file_buffer_t : public text_buffer_t {
   friend class file_line_t;
 
  private:
-  cleanup_free_ptr<char>::t name, encoding;
+  std::string name, encoding;
   text_line_t name_line;
-  cleanup_ptr<edit_window_t::view_parameters_t>::t view_parameters;
+  std::unique_ptr<edit_window_t::view_parameters_t> view_parameters;
   bool has_window;
   int highlight_valid;
   optional<bool> strip_spaces;
