@@ -122,8 +122,8 @@ void fatal(const char *fmt, ...) {
   exit(EXIT_FAILURE);
 }
 
-char *canonicalize_path(const char *path) {
-  char *result = realpath(path, nullptr);
+std::string canonicalize_path(const char *path) {
+  char *realpath_result = realpath(path, nullptr);
 
 #ifdef PATH_MAX
   /* realpath in the POSIX.1-2001 and 2004 specifications is broken, in that
@@ -135,14 +135,19 @@ char *canonicalize_path(const char *path) {
      is broken by design, as that leaves no correct way to allocate a buffer
      with the correct size to store the result.
   */
-  if (result == nullptr && path != nullptr && errno == EINVAL) {
+  if (realpath_result == nullptr && path != nullptr && errno == EINVAL) {
     char store_path[PATH_MAX];
     if (realpath(path, store_path) != nullptr) {
-      return nullptr;
+      return "";
     }
-    return strdup_impl(store_path);
+    return store_path;
   }
 #endif
+  if (realpath_result == nullptr) {
+	  return "";
+  }
+  std::string result = realpath_result;
+  free(realpath_result);
   return result;
 }
 

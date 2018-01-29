@@ -193,7 +193,6 @@ save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file,
       allow_highlight_change(_allow_highlight_change),
       highlight_changed(false),
       save_name(nullptr),
-      real_name(nullptr),
       fd(-1),
       wrapper(nullptr) {}
 

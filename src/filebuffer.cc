@@ -88,18 +88,18 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
     case load_process_t::INITIAL_MISSING_OK:
     case load_process_t::INITIAL: {
       std::string converted_name;
-      char *_name;
+      std::string _name;
       transcript_t *handle;
       transcript_error_t error;
 
-      if ((_name = canonicalize_path(name.c_str())) == nullptr) {
+      _name = canonicalize_path(name.c_str());
+      if (_name.empty()) {
         if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) {
           break;
         }
         return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
       }
 
-      /* name is a cleanup ptr. */
       name = _name;
       convert_lang_codeset(&name, &converted_name, true);
       name_line.set_text(&converted_name);
@@ -235,18 +235,19 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         state->save_name = state->name.c_str();
       }
 
-      if ((state->real_name = canonicalize_path(state->save_name)) == nullptr) {
+      state->real_name = canonicalize_path(state->save_name);
+      if (state->real_name.empty()) {
         if (errno != ENOENT) {
           return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
         }
-        state->real_name = strdup_impl(state->save_name);
+        state->real_name = state->save_name;
       }
 
       /* FIXME: to avoid race conditions, it is probably better to try open with O_CREAT|O_EXCL
          However, this may cause issues with NFS, which is known to have isues with this. */
-      if (stat(state->real_name, &state->file_info) < 0) {
+      if (stat(state->real_name.c_str(), &state->file_info) < 0) {
         if (errno == ENOENT) {
-          if ((state->fd = creat(state->real_name, CREATE_MODE)) < 0) {
+          if ((state->fd = creat(state->real_name.c_str(), CREATE_MODE)) < 0) {
             return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
           }
         } else {
@@ -266,7 +267,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
             return rw_result_t(rw_result_t::FILE_EXISTS_READONLY);
           }
         case save_as_process_t::ALLOW_OVERWRITE_READONLY:
-          std::string temp_name_str = state->real_name.get();
+          std::string temp_name_str = state->real_name;
 
           if ((idx = temp_name_str.rfind('/')) == std::string::npos) {
             idx = 0;
@@ -293,17 +294,17 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
           if ((state->fd = mkstemp(state->temp_name)) >= 0) {
 // Preserve ownership and attributes
 #ifdef HAS_LIBATTR
-            attr_copy_file(state->real_name, state->temp_name, nullptr, nullptr);
+            attr_copy_file(state->real_name.c_str(), state->temp_name, nullptr, nullptr);
 #endif
 #ifdef HAS_LIBACL
-            perm_copy_file(state->real_name, state->temp_name, nullptr);
+            perm_copy_file(state->real_name.c_str(), state->temp_name, nullptr);
 #endif
             fchmod(state->fd, state->file_info.st_mode);
             fchown(state->fd, -1, state->file_info.st_gid);
             fchown(state->fd, state->file_info.st_uid, -1);
           } else {
             state->temp_name = nullptr;
-            if ((state->fd = open(state->real_name, O_WRONLY | O_CREAT, CREATE_MODE)) < 0) {
+            if ((state->fd = open(state->real_name.c_str(), O_WRONLY | O_CREAT, CREATE_MODE)) < 0) {
               return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
             }
           }
@@ -317,8 +318,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
                                                   &error)) == nullptr) {
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
           }
-          /* encoding is a cleanup ptr. */
-          encoding = state->encoding.c_str();
+          encoding = state->encoding;
         } else if (strcmp(encoding.c_str(), "UTF-8") != 0) {
           if ((handle = transcript_open_converter(encoding.c_str(), TRANSCRIPT_UTF8, 0, &error)) ==
               nullptr) {
@@ -362,20 +362,19 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       state->fd = -1;
       if (state->temp_name != nullptr) {
         if (option.make_backup) {
-          std::string backup_name = state->real_name.get();
+          std::string backup_name = state->real_name;
           backup_name += '~';
           unlink(backup_name.c_str());
-          link(state->real_name, backup_name.c_str());
+          link(state->real_name.c_str(), backup_name.c_str());
         }
-        if (rename(state->temp_name, state->real_name) < 0) {
+        if (rename(state->temp_name, state->real_name.c_str()) < 0) {
           return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
         }
       }
 
       if (!state->name.empty()) {
         std::string converted_name;
-        /* name is a cleanup ptr. */
-        name = state->name.c_str();
+        name = state->name;
         convert_lang_codeset(&name, &converted_name, true);
         name_line.set_text(&converted_name);
       }

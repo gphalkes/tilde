@@ -106,7 +106,7 @@ class stepped_process_t {
 void enable_debugger_on_segfault(const char *_executable);
 void set_limits();
 
-char *canonicalize_path(const char *path);
+std::string canonicalize_path(const char *path);
 void printf_into(std::string *message, const char *format, ...);
 
 #define MAX_HIGHLIGHTS 20
