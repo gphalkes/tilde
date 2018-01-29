@@ -283,27 +283,28 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
           }
 
           /* Unfortunately, we can't pass the c_str result to mkstemp as we are not allowed
-             to change that string. So we'll just have to strdup it :-( */
-          if ((state->temp_name = strdup_impl(temp_name_str.c_str())) == nullptr) {
-            return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-          }
+             to change that string. So we'll just have to copy it into a vector :-( */
+          std::vector<char> temp_name(temp_name_str.begin(), temp_name_str.end());
+          // Ensure nul termination.
+          temp_name.push_back(0);
           /* Attempt to create a temporary file. If this fails, just write the file
              directly. The latter has some risk (e.g. file truncation due to full disk,
              or corruption due to computer crashes), but these are so small that it is
              worth permitting this if we can't create the temporary file. */
-          if ((state->fd = mkstemp(state->temp_name)) >= 0) {
+          if ((state->fd = mkstemp(temp_name.data())) >= 0) {
+            state->temp_name = temp_name.data();
 // Preserve ownership and attributes
 #ifdef HAS_LIBATTR
-            attr_copy_file(state->real_name.c_str(), state->temp_name, nullptr, nullptr);
+            attr_copy_file(state->real_name.c_str(), state->temp_name.c_str(), nullptr, nullptr);
 #endif
 #ifdef HAS_LIBACL
-            perm_copy_file(state->real_name.c_str(), state->temp_name, nullptr);
+            perm_copy_file(state->real_name.c_str(), state->temp_name.c_str(), nullptr);
 #endif
             fchmod(state->fd, state->file_info.st_mode);
             fchown(state->fd, -1, state->file_info.st_gid);
             fchown(state->fd, state->file_info.st_uid, -1);
           } else {
-            state->temp_name = nullptr;
+            state->temp_name.clear();
             if ((state->fd = open(state->real_name.c_str(), O_WRONLY | O_CREAT, CREATE_MODE)) < 0) {
               return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
             }
@@ -351,7 +352,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       }
 
       // If the file is being overwritten, truncate it to the written size.
-      if (state->temp_name == nullptr) {
+      if (state->temp_name.empty()) {
         off_t curr_pos = lseek(state->fd, 0, SEEK_CUR);
         if (curr_pos >= 0) {
           ftruncate(state->fd, curr_pos);
@@ -360,14 +361,14 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       fsync(state->fd);
       close(state->fd);
       state->fd = -1;
-      if (state->temp_name != nullptr) {
+      if (!state->temp_name.empty()) {
         if (option.make_backup) {
           std::string backup_name = state->real_name;
           backup_name += '~';
           unlink(backup_name.c_str());
           link(state->real_name.c_str(), backup_name.c_str());
         }
-        if (rename(state->temp_name, state->real_name.c_str()) < 0) {
+        if (rename(state->temp_name.c_str(), state->real_name.c_str()) < 0) {
           return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
         }
       }

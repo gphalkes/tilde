@@ -294,10 +294,10 @@ void save_as_process_t::encoding_selected(const std::string *_encoding) { encodi
 save_as_process_t::~save_as_process_t() {
   if (fd >= 0) {
     close(fd);
-    if (temp_name != nullptr) {
-      unlink(temp_name);
-    } else {
+    if (temp_name.empty()) {
       unlink(name.c_str());
+    } else {
+      unlink(temp_name.c_str());
     }
   }
   delete wrapper;

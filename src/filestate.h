@@ -112,7 +112,7 @@ class save_as_process_t : public stepped_process_t {
   // State for save file_buffer_t::save function
   const char *save_name;
   std::string real_name;
-  cleanup_free_ptr<char>::t temp_name;
+  std::string temp_name;
   int fd;
   int i;
   file_write_wrapper_t *wrapper;

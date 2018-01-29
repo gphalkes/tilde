@@ -144,7 +144,7 @@ std::string canonicalize_path(const char *path) {
   }
 #endif
   if (realpath_result == nullptr) {
-	  return "";
+    return "";
   }
   std::string result = realpath_result;
   free(realpath_result);
