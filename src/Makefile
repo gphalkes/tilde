@@ -56,8 +56,8 @@ CXXFLAGS += -DCXX11SWITCH=1
 CXXFLAGS += -DDATADIR='"$(CURDIR)"'
 
 clean-logs:
-	@find .recordings/ -name "record-*" -mtime +7 | xargs -r rm
-	@find .recordings/ -name "record-*" -mtime +1 | egrep -v '\.bz2$$' | xargs -r bzip2 -9 || true
+	@if [ -d .recordings ] ; then find .recordings/ -name "record-*" -mtime +7 | xargs -r rm ; fi
+	@if [ -d .recordings ] ; then find .recordings/ -name "record-*" -mtime +1 | egrep -v '\.bz2$$' | xargs -r bzip2 -9 || true ; fi
 
 linecount:
 	@echo "WARNING: this doesn't count the header files, only .c files!"
