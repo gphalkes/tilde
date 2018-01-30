@@ -483,7 +483,7 @@ bool load_cli_file_process_t::step() {
         encoding_dialog->show();
         return false;
       } else {
-        encoding = strdup_impl(cli_option.encoding);
+        encoding = cli_option.encoding;
       }
     }
   }
@@ -499,7 +499,7 @@ bool load_cli_file_process_t::step() {
 
     in_load = true;
     load_process_t::execute(signals::mem_fun(this, &load_cli_file_process_t::load_done),
-                            filename.c_str(), encoding, true);
+                            filename.c_str(), encoding.c_str(), true);
     if (in_load) {
       in_step = false;
       return false;
@@ -525,7 +525,7 @@ void load_cli_file_process_t::execute(const callback_t &cb) {
 }
 
 void load_cli_file_process_t::encoding_selection_done(const std::string *_encoding) {
-  encoding = strdup_impl(_encoding->c_str());
+  encoding = _encoding->c_str();
   run();
 }
 

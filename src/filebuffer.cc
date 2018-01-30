@@ -320,7 +320,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
           }
           encoding = state->encoding;
-        } else if (strcmp(encoding.c_str(), "UTF-8") != 0) {
+        } else if (encoding != "UTF-8") {
           if ((handle = transcript_open_converter(encoding.c_str(), TRANSCRIPT_UTF8, 0, &error)) ==
               nullptr) {
             return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
