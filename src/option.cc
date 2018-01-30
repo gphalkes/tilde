@@ -33,6 +33,18 @@ using namespace t3_widget;
 #define INT_TYPE long
 #endif
 
+struct fclose_deleter {
+  void operator()(FILE *file) { fclose(file); }
+};
+
+struct t3_config_deleter {
+  void operator()(t3_config_t *config) { t3_config_delete(config); }
+};
+
+struct t3_schema_deleter {
+  void operator()(t3_config_schema_t *schema) { t3_config_delete_schema(schema); }
+};
+
 cli_options_t cli_option;
 runtime_options_t option; /* Merged version of all possible sources. */
 
@@ -138,10 +150,10 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
   *attr = accumulated_attr;
 }
 
-#define GET_OPT(name, TYPE, type)                                                             \
-  do {                                                                                        \
-    t3_config_t *tmp;                                                                         \
-    if ((tmp = t3_config_get(config, #name)) != NULL) opts->name = t3_config_get_##type(tmp); \
+#define GET_OPT(name, TYPE, type)                                                               \
+  do {                                                                                          \
+    t3_config_t *tmp;                                                                           \
+    if ((tmp = t3_config_get(&*config, #name)) != NULL) opts->name = t3_config_get_##type(tmp); \
   } while (false)
 #define GET_ATTRIBUTE(name) read_config_attribute(attributes, #name, &opts->name)
 #define GET_HL_ATTRIBUTE(name) \
@@ -197,40 +209,39 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
 }
 
 static void read_base_config() {
-  cleanup_func2_ptr<FILE, int, fclose>::t config_file;
+  std::unique_ptr<FILE, fclose_deleter> config_file;
   t3_config_error_t error;
-  cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
-  cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema>::t schema;
+  std::unique_ptr<t3_config_t, t3_config_deleter> config;
+  std::unique_ptr<t3_config_schema_t, t3_schema_deleter> schema;
 
-  if ((config_file = fopen(DATADIR "/"
-                                   "base.config",
-                           "r")) == nullptr) {
-    lprintf("Failed to open file: %s %m\n", DATADIR
-            "/"
-            "base.config");
+  config_file.reset(fopen(DATADIR "/base.config", "r"));
+  if (config_file == nullptr) {
+    lprintf("Failed to open file: %s %m\n", DATADIR "/base.config");
     return;
   }
 
-  if ((config = t3_config_read_file(config_file, &error, nullptr)) == nullptr) {
+  config.reset(t3_config_read_file(config_file.get(), &error, nullptr));
+  if (config == nullptr) {
     lprintf("Error loading base config: %d: %s\n", error.line_number,
             t3_config_strerror(error.error));
     return;
   }
 
-  if ((schema = t3_config_read_schema_buffer(base_config_schema, sizeof(base_config_schema), &error,
-                                             nullptr)) == nullptr) {
+  schema.reset(t3_config_read_schema_buffer(base_config_schema, sizeof(base_config_schema), &error,
+                                            nullptr));
+  if (schema == nullptr) {
     lprintf("Error loading schema: %d: %s\n", error.line_number, t3_config_strerror(error.error));
     return;
   }
 
-  if (!t3_config_validate(config, schema, &error, 0)) {
+  if (!t3_config_validate(config.get(), schema.get(), &error, 0)) {
     lprintf("Error validating base config: %d: %s\n", error.line_number,
             t3_config_strerror(error.error));
     return;
   }
 
-  for (t3_config_t *lang = t3_config_get(t3_config_get(config, "lang"), nullptr); lang != nullptr;
-       lang = t3_config_get_next(lang)) {
+  for (t3_config_t *lang = t3_config_get(t3_config_get(config.get(), "lang"), nullptr);
+       lang != nullptr; lang = t3_config_get_next(lang)) {
     const char *name = t3_config_get_string(t3_config_get(lang, "name"));
     const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
     if (name != nullptr && line_comment != nullptr) {
@@ -240,17 +251,17 @@ static void read_base_config() {
 }
 
 static void read_config() {
-  cleanup_func2_ptr<FILE, int, fclose>::t config_file;
+  std::unique_ptr<FILE, fclose_deleter> config_file;
   t3_config_error_t error;
-  cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
-  cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema>::t schema;
+  std::unique_ptr<t3_config_t, t3_config_deleter> config;
+  std::unique_ptr<t3_config_schema_t, t3_schema_deleter> schema;
   t3_config_t *term_specific_config;
   const char *term;
 
   if (cli_option.config_file.is_valid()) {
-    config_file = fopen(cli_option.config_file().c_str(), "r");
+    config_file.reset(fopen(cli_option.config_file().c_str(), "r"));
   } else {
-    config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
+    config_file.reset(t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config"));
   }
 
   if (config_file == nullptr) {
@@ -262,15 +273,16 @@ static void read_config() {
     return;
   }
 
-  if ((config = t3_config_read_file(config_file, &error, nullptr)) == nullptr) {
+  config.reset(t3_config_read_file(config_file.get(), &error, nullptr));
+  if (config == nullptr) {
     config_read_error = true;
     config_read_error_string = t3_config_strerror(error.error);
     config_read_error_line = error.line_number;
     return;
   }
 
-  if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), &error,
-                                             nullptr)) == nullptr) {
+  schema.reset(t3_config_read_schema_buffer(config_schema, sizeof(config_schema), &error, nullptr));
+  if (schema == nullptr) {
     config_read_error = true;
     lprintf("Error loading schema: %d: %s\n", error.line_number, t3_config_strerror(error.error));
     config_read_error_string = t3_config_strerror(
@@ -279,14 +291,14 @@ static void read_config() {
     return;
   }
 
-  if (!t3_config_validate(config, schema, &error, 0)) {
+  if (!t3_config_validate(config.get(), schema.get(), &error, 0)) {
     config_read_error = true;
     config_read_error_string = t3_config_strerror(error.error);
     config_read_error_line = error.line_number;
     return;
   }
 
-  read_term_config_part(config, &default_option.term_options);
+  read_term_config_part(config.get(), &default_option.term_options);
 
 #define opts (&default_option)
   GET_OPT(wrap, BOOL, bool);
@@ -304,8 +316,8 @@ static void read_config() {
   GET_OPT(max_recent_files, INT, int);
 #undef opts
 
-  for (t3_config_t *lang = t3_config_get(t3_config_get(config, "lang"), nullptr); lang != nullptr;
-       lang = t3_config_get_next(lang)) {
+  for (t3_config_t *lang = t3_config_get(t3_config_get(config.get(), "lang"), nullptr);
+       lang != nullptr; lang = t3_config_get_next(lang)) {
     const char *name = t3_config_get_string(t3_config_get(lang, "name"));
     const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
     if (name != nullptr && line_comment != nullptr) {
@@ -313,7 +325,7 @@ static void read_config() {
     }
   }
 
-  if ((term_specific_config = t3_config_get(config, "terminals")) == nullptr) {
+  if ((term_specific_config = t3_config_get(config.get(), "terminals")) == nullptr) {
     return;
   }
 
@@ -569,12 +581,12 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
   }
 }
 
-#define SET_OPTION(name, type)                         \
-  do {                                                 \
-    if (opts->name.is_valid())                         \
-      t3_config_add_##type(config, #name, opts->name); \
-    else                                               \
-      t3_config_erase(config, #name);                  \
+#define SET_OPTION(name, type)                           \
+  do {                                                   \
+    if (opts->name.is_valid())                           \
+      t3_config_add_##type(&*config, #name, opts->name); \
+    else                                                 \
+      t3_config_erase(&*config, #name);                  \
   } while (false)
 #define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, opts->name)
 #define SET_HL_ATTRIBUTE(x, name) \
@@ -620,52 +632,52 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
 }
 
 bool write_config() {
-  FILE *config_file;
+  std::unique_ptr<FILE, fclose_deleter> config_file;
   t3_config_write_file_t *new_config_file;
   const char *term;
-  cleanup_func_ptr<t3_config_t, t3_config_delete>::t config;
+  std::unique_ptr<t3_config_t, t3_config_deleter> config;
   t3_config_t *terminals, *terminal_config;
-  cleanup_func_ptr<t3_config_schema_t, t3_config_delete_schema>::t schema;
+  std::unique_ptr<t3_config_schema_t, t3_schema_deleter> schema;
   int version;
 
   // FIXME: verify return values
 
-  if ((schema = t3_config_read_schema_buffer(config_schema, sizeof(config_schema), nullptr,
-                                             nullptr)) == nullptr) {
+  schema.reset(
+      t3_config_read_schema_buffer(config_schema, sizeof(config_schema), nullptr, nullptr));
+  if (schema == nullptr) {
     return false;
   }
 
   if (cli_option.config_file.is_valid()) {
-    config_file = fopen(cli_option.config_file().c_str(), "r");
+    config_file.reset(fopen(cli_option.config_file().c_str(), "r"));
   } else {
-    config_file = t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
+    config_file.reset(t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config"));
   }
 
   if (config_file != nullptr) {
     /* Start by reading the existing configuration. */
     t3_config_error_t error;
-    config = t3_config_read_file(config_file, &error, nullptr);
-    fclose(config_file);
+    config.reset(t3_config_read_file(config_file.get(), &error, nullptr));
+    config_file.reset();
   } else if (errno != ENOENT) {
     return false;
   }
 
   if (config == nullptr ||
-      (version = t3_config_get_int(t3_config_get(config, "config_version"))) < 1) {
+      (version = t3_config_get_int(t3_config_get(config.get(), "config_version"))) < 1) {
     /* Clean-out config, because it is an old version. */
-    t3_config_delete(config);
-    config = t3_config_new();
+    config.reset(t3_config_new());
   } else if (version > 1) {
     /* Don't overwrite config files with newer config version. */
     return false;
   } else {
-    if (!t3_config_validate(config, schema, nullptr, 0)) {
+    if (!t3_config_validate(config.get(), schema.get(), nullptr, 0)) {
       return false;
     }
   }
 
   default_option.term_options.key_timeout.unset();
-  set_term_config_options(config, &default_option.term_options);
+  set_term_config_options(config.get(), &default_option.term_options);
 
 #define opts (&default_option)
   SET_OPTION(wrap, bool);
@@ -683,7 +695,7 @@ bool write_config() {
   SET_OPTION(max_recent_files, int);
 #undef opts
 
-  t3_config_add_int(config, "config_version", 1);
+  t3_config_add_int(config.get(), "config_version", 1);
 
   if (cli_option.term != nullptr) {
     term = cli_option.term;
@@ -692,9 +704,9 @@ bool write_config() {
   }
 
   if (term != nullptr) {
-    if ((terminals = t3_config_get(config, "terminals")) == nullptr ||
+    if ((terminals = t3_config_get(config.get(), "terminals")) == nullptr ||
         !t3_config_is_list(terminals)) {
-      terminals = t3_config_add_plist(config, "terminals", nullptr);
+      terminals = t3_config_add_plist(config.get(), "terminals", nullptr);
     }
 
     terminal_config = t3_config_find(terminals, find_term_config, term, nullptr);
@@ -709,8 +721,7 @@ bool write_config() {
   /* Validate config using schema, such that we can be sure that we won't
      say it is invalid when reading. That would fit nicely into the
      "bad things" category. */
-  if (!t3_config_validate(config, schema, nullptr, 0)) {
-    t3_config_delete(config);
+  if (!t3_config_validate(config.get(), schema.get(), nullptr, 0)) {
     return false;
   }
 
@@ -722,11 +733,11 @@ bool write_config() {
 
   if (new_config_file == nullptr) {
     lprintf("Could not open config file for writing: %m\n");
-    t3_config_delete(config);
     return false;
   }
 
-  if (t3_config_write_file(config, t3_config_get_write_file(new_config_file)) == T3_ERR_SUCCESS) {
+  if (t3_config_write_file(config.get(), t3_config_get_write_file(new_config_file)) ==
+      T3_ERR_SUCCESS) {
     return t3_config_close_write(new_config_file, t3_false, t3_true);
   }
 
