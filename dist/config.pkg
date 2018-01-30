@@ -173,17 +173,6 @@ EOF
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
-#include <string.h>
-
-int main(int argc, char *argv[]) {
-	strdup(argv[0]);
-	return 0;
-}
-EOF
-	test_link_cxx "strdup" && CONFIGFLAGS="${CONFIGFLAGS} -DHAS_STRDUP"
-
-	clean_cxx
-	cat > .configcxx.cc <<EOF
 #include <stdlib.h>
 #include <attr/libattr.h>
 

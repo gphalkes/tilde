@@ -31,7 +31,7 @@ using namespace t3_widget;
 
 #ifdef DEBUG
 static char debug_buffer[1024];
-static const char *executable;
+static const std::string *executable;
 #endif
 
 /* The 'normal' attributes should always be the first in this list. Other code
@@ -85,12 +85,12 @@ static void start_debugger_on_segfault(int sig) {
   getrlimit(RLIMIT_AS, &vm_limit);
   vm_limit.rlim_cur = vm_limit.rlim_max;
   setrlimit(RLIMIT_AS, &vm_limit);
-  sprintf(debug_buffer, "DISPLAY=:0.0 ddd %s %d", executable, getpid());
+  sprintf(debug_buffer, "DISPLAY=:0.0 ddd %s %d", executable->c_str(), getpid());
   system(debug_buffer);
 }
 
 void enable_debugger_on_segfault(const char *_executable) {
-  executable = strdup_impl(_executable);
+  executable = new std::string(_executable);
   signal(SIGSEGV, start_debugger_on_segfault);
   signal(SIGABRT, start_debugger_on_segfault);
 }
@@ -204,14 +204,3 @@ const char *reverse_map_highlight(int idx) {
   }
   return highlight_names[idx];
 }
-
-#ifndef HAS_STRDUP
-char *strdup_impl(const char *str) {
-  char *result;
-  size_t len = strlen(str) + 1;
-
-  if ((result = (char *)malloc(len)) == NULL) return NULL;
-  memcpy(result, str, len);
-  return result;
-}
-#endif
