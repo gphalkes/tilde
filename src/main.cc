@@ -334,9 +334,9 @@ void main_t::menu_activated(int id) {
     }
 
     case action_id_t::FILE_OPEN: {
-      const char *name = get_current()->get_text()->get_name();
-      if (name != nullptr) {
-        open_file_dialog->set_file(name);
+      const std::string &name = get_current()->get_text()->get_name();
+      if (!name.empty()) {
+        open_file_dialog->set_file(name.c_str());
         // Because set_file also selects the named file if possible, we need to reset the dialog
         open_file_dialog->reset();
       }
@@ -457,7 +457,7 @@ void main_t::menu_activated(int id) {
         message_dialog->show();
       } else {
         file_buffer_t *text = widget->get_text();
-        if (text->get_name() == nullptr && !text->is_modified()) {
+        if (text->get_name().empty() && !text->is_modified()) {
           delete text;
         }
         delete widget;
@@ -537,7 +537,7 @@ void main_t::switch_to_new_buffer(stepped_process_t *process) {
   get_current()->set_text(buffer);
   // FIXME: buffer should not be closed if the user specifically created it by asking for a new
   // file!
-  if (text->get_name() == nullptr && !text->is_modified()) {
+  if (text->get_name().empty() && !text->is_modified()) {
     delete text;
   }
 }

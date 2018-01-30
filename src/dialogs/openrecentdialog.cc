@@ -57,7 +57,7 @@ void open_recent_dialog_t::show() {
     }
 
     for (recent_file_info_t *recent_file : recent_files) {
-      label_t *label = new label_t(recent_file->get_name());
+      label_t *label = new label_t(recent_file->get_name().c_str());
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
       list->push_back(label);
     }

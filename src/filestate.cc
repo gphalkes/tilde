@@ -69,7 +69,7 @@ bool load_process_t::step() {
       result = true;
       break;
     case rw_result_t::ERRNO_ERROR:
-      printf_into(&message, "Could not load file '%s': %s", file->get_name(),
+      printf_into(&message, "Could not load file '%s': %s", file->get_name().c_str(),
                   strerror(rw_result.get_errno_error()));
       error_dialog->set_message(&message);
       error_dialog->show();
@@ -201,7 +201,7 @@ bool save_as_process_t::step() {
   rw_result_t rw_result;
 
   if (state == SELECT_FILE) {
-    const char *current_name = file->get_name();
+    const char *current_name = file->get_name().c_str();
 
     connections.push_back(save_as_dialog->connect_file_selected(
         signals::mem_fun(this, &save_as_process_t::file_selected)));
@@ -311,7 +311,7 @@ bool save_as_process_t::get_highlight_changed() const { return highlight_changed
 
 save_process_t::save_process_t(const callback_t &cb, file_buffer_t *_file)
     : save_as_process_t(cb, _file, false) {
-  if (file->get_name() != nullptr) {
+  if (!file->get_name().empty()) {
     state = INITIAL;
   }
 }
@@ -352,7 +352,7 @@ bool close_process_t::step() {
   } else if (state == CONFIRM_CLOSE) {
     std::string message;
     printf_into(&message, "Save changes to '%s'",
-                file->get_name() == nullptr ? "(Untitled)" : file->get_name());
+                file->get_name().empty() ? "(Untitled)" : file->get_name().c_str());
     connections.push_back(close_confirm_dialog->connect_activate(
         signals::mem_fun(this, &close_process_t::do_save), 0));
     connections.push_back(close_confirm_dialog->connect_activate(
@@ -370,7 +370,7 @@ bool close_process_t::step() {
 }
 
 void close_process_t::do_save() {
-  state = file->get_name() == nullptr ? SELECT_FILE : INITIAL;
+  state = file->get_name().empty() ? SELECT_FILE : INITIAL;
   run();
 }
 
@@ -393,7 +393,7 @@ bool exit_process_t::step() {
     if ((*iter)->is_modified()) {
       std::string message;
       printf_into(&message, "Save changes to '%s'",
-                  (*iter)->get_name() == nullptr ? "(Untitled)" : (*iter)->get_name());
+                  (*iter)->get_name().empty() ? "(Untitled)" : (*iter)->get_name().c_str());
       connections.push_back(close_confirm_dialog->connect_activate(
           signals::mem_fun(this, &exit_process_t::do_save), 0));
       connections.push_back(close_confirm_dialog->connect_activate(
@@ -449,7 +449,7 @@ bool open_recent_process_t::step() {
 
 void open_recent_process_t::recent_file_selected(recent_file_info_t *_info) {
   info = _info;
-  file = new file_buffer_t(info->get_name(), info->get_encoding());
+  file = new file_buffer_t(info->get_name().c_str(), info->get_encoding());
   state = INITIAL;
   run();
 }

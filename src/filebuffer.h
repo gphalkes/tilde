@@ -55,7 +55,7 @@ class file_buffer_t : public text_buffer_t {
   rw_result_t load(load_process_t *state);
   rw_result_t save(save_as_process_t *state);
 
-  const char *get_name() const;
+  const std::string &get_name() const;
   const char *get_encoding() const;
   const edit_window_t::view_parameters_t *get_view_parameters() const;
   text_line_t *get_name_line();

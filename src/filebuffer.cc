@@ -388,7 +388,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
   return rw_result_t(rw_result_t::SUCCESS);
 }
 
-const char *file_buffer_t::get_name() const { return name.c_str(); }
+const std::string &file_buffer_t::get_name() const { return name; }
 
 const char *file_buffer_t::get_encoding() const { return encoding.c_str(); }
 

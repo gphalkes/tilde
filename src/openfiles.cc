@@ -38,7 +38,7 @@ open_files_t::iterator open_files_t::contains(const char *name) {
   /* FIXME: this should really check for ino+dev equality to see if the file
      is already open. */
   for (std::vector<file_buffer_t *>::iterator iter = files.begin(); iter != files.end(); iter++) {
-    if ((*iter)->get_name() != nullptr && strcmp(name, (*iter)->get_name()) == 0) {
+    if (!(*iter)->get_name().empty() && (*iter)->get_name() == name) {
       return iter;
     }
   }
@@ -113,27 +113,20 @@ void open_files_t::cleanup() {
   }
 }
 
-recent_file_info_t::recent_file_info_t(file_buffer_t *file) {
-  if ((name = strdup_impl(file->get_name())) == nullptr) {
-    throw std::bad_alloc();
-  }
-  if ((encoding = strdup_impl(file->get_encoding())) == nullptr) {
-    name = nullptr;
-    throw std::bad_alloc();
-  }
-}
+recent_file_info_t::recent_file_info_t(file_buffer_t *file)
+    : name(file->get_name()), encoding(file->get_encoding()) {}
 
-const char *recent_file_info_t::get_name() const { return name.get(); }
+const std::string &recent_file_info_t::get_name() const { return name; }
 
-const char *recent_file_info_t::get_encoding() const { return encoding.get(); }
+const char *recent_file_info_t::get_encoding() const { return encoding.c_str(); }
 
 void recent_files_t::push_front(file_buffer_t *text) {
-  if (text->get_name() == nullptr) {
+  if (text->get_name().empty()) {
     return;
   }
 
   for (recent_file_info_t *name : names) {
-    if (strcmp(name->get_name(), text->get_name()) == 0) {
+    if (name->get_name() == text->get_name()) {
       return;
     }
   }

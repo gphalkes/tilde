@@ -52,13 +52,13 @@ class open_files_t {
 
 class recent_file_info_t {
  private:
-  cleanup_free_ptr<char>::t name;
-  cleanup_free_ptr<char>::t encoding;
+  std::string name;
+  std::string encoding;
 
  public:
   explicit recent_file_info_t(file_buffer_t *file);
 
-  const char *get_name() const;
+  const std::string &get_name() const;
   const char *get_encoding() const;
 };
 

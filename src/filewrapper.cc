@@ -124,7 +124,7 @@ int file_read_wrapper_t::get_fill() { return buffer->get_fill(); }
 bool file_read_wrapper_t::fill_buffer(int used) { return buffer->fill_buffer(used); }
 
 void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
-  cleanup_free_ptr<char>::t nfc_output;
+  std::unique_ptr<char, free_deleter> nfc_output;
   size_t nfc_output_len;
 
   char transcript_buffer[FILE_BUFFER_SIZE], *transcript_buffer_ptr;
@@ -133,18 +133,18 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
 
   // Convert to NFC before writing
   // FIXME: check return value
-  nfc_output = reinterpret_cast<char *>(u8_normalize(
-      UNINORM_NFC, reinterpret_cast<const uint8_t *>(buffer), bytes, nullptr, &nfc_output_len));
+  nfc_output.reset(reinterpret_cast<char *>(u8_normalize(
+      UNINORM_NFC, reinterpret_cast<const uint8_t *>(buffer), bytes, nullptr, &nfc_output_len)));
   if (handle == nullptr) {
-    if (nosig_write(fd, nfc_output, nfc_output_len) < 0) {
+    if (nosig_write(fd, nfc_output.get(), nfc_output_len) < 0) {
       throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
     }
     return;
   }
 
   transcript_buffer_end = transcript_buffer + FILE_BUFFER_SIZE;
-  buffer = nfc_output;
-  buffer_end = nfc_output + nfc_output_len;
+  buffer = nfc_output.get();
+  buffer_end = nfc_output.get() + nfc_output_len;
 
   while (buffer < buffer_end) {
     transcript_buffer_ptr = transcript_buffer;

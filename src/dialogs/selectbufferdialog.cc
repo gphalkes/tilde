@@ -84,8 +84,8 @@ void select_buffer_dialog_t::show() {
       multi_widget->show();
       bullet = new bullet_t(signals::mem_fun(open_file, &file_buffer_t::get_has_window));
       multi_widget->push_back(bullet, -1, true, false);
-      name = open_file->get_name();
-      if (name == nullptr) {
+      name = open_file->get_name().c_str();
+      if (name[0] == 0) {
         name = "(Untitled)";
       }
       label = new label_t(name);
