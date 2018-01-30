@@ -673,7 +673,7 @@ static std::string get_run_file_name() {
   static const char *TMP_DIR_BASE = "/tmp/tilde-";
   char hostname[128];
   std::string linkname;
-  cleanup_free_ptr<char>::t path;
+  std::unique_ptr<char, free_deleter> path;
   char *ttyname_str;
 
   if (gethostname(hostname, sizeof(hostname)) == -1) {
@@ -685,15 +685,15 @@ static std::string get_run_file_name() {
     return "";
   }
 
-  path = t3_config_xdg_get_path(T3_CONFIG_XDG_RUNTIME_DIR, "tilde", 0);
+  path.reset(t3_config_xdg_get_path(T3_CONFIG_XDG_RUNTIME_DIR, "tilde", 0));
 
   if (path == nullptr) {
     linkname = strings::Cat(TMP_DIR_BASE, "-", geteuid());
   } else {
-    linkname = path;
+    linkname = path.get();
   }
 
-  mkdir(path, S_IRWXU);
+  mkdir(linkname.c_str(), S_IRWXU);
 
   strings::Append(&linkname, "/", hostname, ":", escape_illegal_chars(ttyname_str));
   return linkname;
@@ -822,7 +822,7 @@ int main(int argc, char *argv[]) {
   } else if (config_read_error) {
     std::string message = "Error loading configuration file ";
     if (!cli_option.config_file.is_valid()) {
-      cleanup_free_ptr<char>::t file_name(
+      std::unique_ptr<char, free_deleter> file_name(
           t3_config_xdg_get_path(T3_CONFIG_XDG_CONFIG_HOME, "tilde", 0));
       cli_option.config_file = strings::Cat(file_name.get(), "/config");
     }

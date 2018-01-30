@@ -154,48 +154,35 @@ std::string canonicalize_path(const char *path) {
 #define BUFFER_START_SIZE 256
 #define BUFFER_MAX 4096
 void printf_into(std::string *message, const char *format, ...) {
-  static cleanup_free_ptr<char>::t message_buffer;
-  static int message_buffer_size;
+  static std::vector<char> message_buffer(BUFFER_START_SIZE);
 
-  char *new_message_buffer;
   int result;
   va_list args;
 
   message->clear();
   va_start(args, format);
 
-  if (message_buffer == nullptr) {
-    if ((message_buffer = reinterpret_cast<char *>(malloc(BUFFER_START_SIZE))) == nullptr) {
-      va_end(args);
-      return;
-    }
-    message_buffer_size = BUFFER_START_SIZE;
-  }
-
-  result = vsnprintf(message_buffer, message_buffer_size, format, args);
+  result = vsnprintf(message_buffer.data(), message_buffer.size(), format, args);
   if (result < 0) {
     va_end(args);
     return;
   }
 
   result = std::min(BUFFER_MAX - 1, result);
-  if (result < message_buffer_size ||
-      (new_message_buffer = reinterpret_cast<char *>(realloc(message_buffer, result + 1))) ==
-          nullptr) {
-    *message = message_buffer;
+  if (result < static_cast<int>(message_buffer.size())) {
+    *message = message_buffer.data();
     va_end(args);
     return;
   }
 
-  message_buffer = new_message_buffer;
-  message_buffer_size = result + 1;
-  result = vsnprintf(message_buffer, message_buffer_size, format, args);
+  message_buffer.resize(result + 1);
+  result = vsnprintf(message_buffer.data(), message_buffer.size(), format, args);
   va_end(args);
   if (result < 0) {
     return;
   }
 
-  *message = message_buffer;
+  *message = message_buffer.data();
 }
 
 int map_highlight(void *data, const char *name) {
