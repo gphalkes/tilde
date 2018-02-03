@@ -38,6 +38,7 @@ static int (*real_unlink)(const char *pathname);
 static int (*real_mkstemp)(char *template);
 static int (*real___xstat)(int ver, const char *path, struct stat *buf);
 static int (*real_creat)(const char *name, mode_t mode);
+static int (*real_access)(const char *name, int mode);
 
 #define FATAL(...) fatal(__LINE__, __VA_ARGS__)
 #ifdef __GNUC__
@@ -266,6 +267,16 @@ int creat(const char *name, mode_t mode) {
 	return result;
 }
 
+int access(const char *name, int mode) {
+	char *real_name;
+	int result;
+
+	real_name = get_real_name(name);
+	result = real_access(real_name, mode);
+	free(real_name);
+	return result;
+}
+
 /*=============== library initialization and clean up ===============*/
 /* For gcc (and compatible compilers) we use the __attribute__ method of
    defining constructor and destructor. For all others, we hope that the _init
@@ -295,6 +306,7 @@ void lib_init(void) {
 	INIT_LIBC_FUNC(unlink, 0);
 	INIT_LIBC_FUNC(mkstemp, 0);
 	INIT_LIBC_FUNC(creat, 0);
+	INIT_LIBC_FUNC(access, 0);
 
 	INIT_LIBC_FUNC(stat, 1);
 	INIT_LIBC_FUNC(__xstat, 1);
