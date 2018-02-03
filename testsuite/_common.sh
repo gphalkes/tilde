@@ -12,6 +12,7 @@ cd_workdir() {
 }
 
 setup_TEST() {
+	make --no-print-directory --quiet -C mockdir
 	if [ "${1#/}" = "$1" ] && [ "${1#~/}" = "$1" ] ; then
 		TEST="$PWD/$1"
 	elif [ "${1#~/}" != "$1" ] ; then
