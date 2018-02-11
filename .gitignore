@@ -22,3 +22,4 @@
 /testsuite/mockdir/work
 /man/output
 src/.clang-tidy-opts
+/tilde-*.tar.bz2

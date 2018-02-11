@@ -72,7 +72,7 @@ G.P. Halkes <tilde@ghalkes.nl>
 COPYRIGHT
 =========
 
-Copyright \(co 2011-2016 G.P. Halkes +
+Copyright \(co 2011-2016,2018 G.P. Halkes +
 Tilde is licensed under the GNU General Public License version 3. +
 For more details on the license, see the file COPYING in the documentation
 directory. On Un*x systems this is usually /usr/share/doc/tilde.

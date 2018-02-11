@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2012 G.P. Halkes
+/* Copyright (C) 2011-2012,2018 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -417,7 +417,7 @@ static void print_help() {
 static void print_version() {
   printf(
       "Tilde version <VERSION>\n"
-      "Copyright (c) 2011-2017 G.P. Halkes\n"  // @copyright
+      "Copyright (c) 2011-2018 G.P. Halkes\n"  // @copyright
       "Tilde is licensed under the GNU General Public License version 3\n");
   printf(
       "Library versions:\n"
