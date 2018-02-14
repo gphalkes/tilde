@@ -439,69 +439,71 @@ static void print_version() {
   exit(EXIT_SUCCESS);
 }
 
+// clang-format off
 PARSE_FUNCTION(parse_args)
-OPTIONS
-OPTION('h', "help", NO_ARG)
-print_help();
-END_OPTION
-OPTION('V', "version", NO_ARG)
-print_version();
-END_OPTION
-OPTION('T', "term", REQUIRED_ARG)
-cli_option.term = optArg;
-END_OPTION
-OPTION('b', "black-white", NO_ARG)
-cli_option.color = false;
-END_OPTION
-OPTION('c', "color", NO_ARG)
-cli_option.color = true;
-END_OPTION
-OPTION('I', "select-input-method", NO_ARG)
-cli_option.ask_input_method = true;
-END_OPTION
-OPTION('x', "no-ext-clipboard", NO_ARG)
-cli_option.disable_external_clipboard = true;
-END_OPTION
-OPTION('P', "no-primary-selection", NO_ARG)
-cli_option.disable_primary_selection = true;
-END_OPTION
-OPTION('C', "config", REQUIRED_ARG)
-cli_option.config_file = optArg;
-END_OPTION
-OPTION('e', "encoding", OPTIONAL_ARG)
-cli_option.encoding = optArg;
-END_OPTION
-LONG_OPTION("ignore-running", NO_ARG)
-cli_option.ignore_running = true;
-END_OPTION
-OPTION('J', "no-parse-file-position", NO_ARG)
-cli_option.disable_file_position_parsing = true;
-END_OPTION
+  OPTIONS
+    OPTION('h', "help", NO_ARG)
+      print_help();
+    END_OPTION
+    OPTION('V', "version", NO_ARG)
+      print_version();
+    END_OPTION
+    OPTION('T', "term", REQUIRED_ARG)
+      cli_option.term = optArg;
+    END_OPTION
+    OPTION('b', "black-white", NO_ARG)
+      cli_option.color = false;
+    END_OPTION
+    OPTION('c', "color", NO_ARG)
+      cli_option.color = true;
+    END_OPTION
+    OPTION('I', "select-input-method", NO_ARG)
+      cli_option.ask_input_method = true;
+    END_OPTION
+    OPTION('x', "no-ext-clipboard", NO_ARG)
+      cli_option.disable_external_clipboard = true;
+    END_OPTION
+    OPTION('P', "no-primary-selection", NO_ARG)
+      cli_option.disable_primary_selection = true;
+    END_OPTION
+    OPTION('C', "config", REQUIRED_ARG)
+      cli_option.config_file = optArg;
+    END_OPTION
+    OPTION('e', "encoding", OPTIONAL_ARG)
+      cli_option.encoding = optArg;
+    END_OPTION
+    LONG_OPTION("ignore-running", NO_ARG)
+      cli_option.ignore_running = true;
+    END_OPTION
+    OPTION('J', "no-parse-file-position", NO_ARG)
+      cli_option.disable_file_position_parsing = true;
+    END_OPTION
 #ifdef DEBUG
-LONG_OPTION("W", NO_ARG)
-cli_option.wait = true;
-END_OPTION
-LONG_OPTION("L", REQUIRED_ARG)
-PARSE_INT(cli_option.vm_limit, -1, INT_MAX / (1024 * 1024));
-END_OPTION
-LONG_OPTION("D", NO_ARG)
-cli_option.start_debugger_on_segfault = true;
-END_OPTION
+    LONG_OPTION("W", NO_ARG)
+      cli_option.wait = true;
+    END_OPTION
+    LONG_OPTION("L", REQUIRED_ARG)
+      PARSE_INT(cli_option.vm_limit, -1, INT_MAX / (1024 * 1024));
+    END_OPTION
+    LONG_OPTION("D", NO_ARG)
+      cli_option.start_debugger_on_segfault = true;
+    END_OPTION
 #endif
-DOUBLE_DASH
-NO_MORE_OPTIONS;
-END_OPTION
+    DOUBLE_DASH
+      NO_MORE_OPTIONS;
+    END_OPTION
 
-fatal("No such option " OPTFMT "\n", OPTPRARG);
-NO_OPTION
-cli_option.files.push_back(optcurrent);
-END_OPTIONS
+    fatal("No such option " OPTFMT "\n", OPTPRARG);
+  NO_OPTION
+    cli_option.files.push_back(optcurrent);
+  END_OPTIONS
 
-read_base_config();
-read_config();
+  read_base_config();
+  read_config();
 
-post_process_options();
+  post_process_options();
 END_FUNCTION
+// clang-format on
 
 #define SET_ATTR_FROM_FILE(name, const_name)                       \
   do {                                                             \

@@ -51,6 +51,11 @@ Tilde accepts the following options:
 *-e* _encoding_, *--encoding*=_encoding_::
 	Open any files named on the command line using character encoding
 	_encoding_, instead of the default UTF-8 encoding.
+*-P*, *--no-primary-selection*::
+	Disable the use of the primary selection mechanism (a.k.a. "middle-button
+	paste") for the external clipboard. This can be useful for using Tilde over
+	SSH connections in combination with a Clipboard Manager which can result in
+	slow-downs when selecting text.
 
 To stop Tilde from interpreting file names that start with a dash as options,
 one can specify a double dash (--) after which Tilde will interpret any
