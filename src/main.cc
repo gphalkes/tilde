@@ -232,11 +232,13 @@ main_t::main_t() {
   about_dialog->center_over(this);
   about_dialog->set_max_text_height(13);
   about_dialog->set_message(
-      "Tilde - The intuitive text editor\n\nVersion <VERSION>\nCopyright (c) 2011-2017 G.P. "
-      "Halkes\n\n"  // @copyright
+      // clang-format off
+      "Tilde - The intuitive text editor\n\nVersion <VERSION>\n"
+      "Copyright (c) 2011-2018 G.P. Halkes\n\n"  // @copyright
       "The Tilde text editor is licensed under the GNU General Public License version 3. "
       "You should have received a copy of the GNU General Public License along with this program. "
       "If not, see <http://www.gnu.org/licenses/>.");
+  // clang-format on
 
   buffer_options_dialog = new buffer_options_dialog_t("Current Buffer");
   buffer_options_dialog->center_over(this);
