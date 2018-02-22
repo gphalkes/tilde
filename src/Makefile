@@ -37,15 +37,15 @@ EXTRATARGETS := clean-logs
 #================================================#
 include ../../makesys/rules.mk
 #================================================#
+include ../../t3shared/rules-base.mk
 
 LDLIBS += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
-LDFLAGS += $(call L, ../include/t3widget/.libs ../include/t3window/.libs ../include/transcript/.libs ../include/t3config/.libs ../include/t3highlight/.libs)
+LDFLAGS += $(T3LDFLAGS.t3widget) $(T3LDFLAGS.t3window) $(T3LDFLAGS.transcript) $(T3LDFLAGS.t3config) $(T3LDFLAGS.t3highlight)
 LDLIBS += -lunistring
 LDLIBS += -lacl
 LDLIBS += -lattr
 CXXFLAGS.option = -I.objects
 
-CXXFLAGS += -I../include
 CXXFLAGS += -DTILDE_DEBUG
 CXXFLAGS += -DHAS_STRDUP
 CXXFLAGS += -DHAS_LIBACL
@@ -70,7 +70,7 @@ xgettext: all
 
 .objects/%.bytes: %.schema
 	$(GENOBJDIR)
-	$(_VERBOSE_GEN) ../include/t3config/data2bytes -s -- $< > $@
+	$(_VERBOSE_GEN) ../../t3config/src/data2bytes -s -- $< > $@
 
 .objects/option.o: .objects/config.bytes .objects/base_config.bytes
 
