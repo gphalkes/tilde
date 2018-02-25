@@ -83,7 +83,7 @@ class version_t {
 
 class stepped_process_t {
  protected:
-  std::list<t3_widget::signals::connection> connections;
+  std::list<t3_widget::connection_t> connections;
   using callback_t = std::function<void(stepped_process_t *)>;
   callback_t done_cb;
   bool result;

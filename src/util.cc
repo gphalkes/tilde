@@ -54,7 +54,7 @@ void stepped_process_t::run() {
 void stepped_process_t::abort() { done(false); }
 
 void stepped_process_t::disconnect() {
-  for (t3_widget::signals::connection &iter : connections) {
+  for (t3_widget::connection_t &iter : connections) {
     iter.disconnect();
   }
   connections.clear();
