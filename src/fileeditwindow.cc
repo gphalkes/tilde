@@ -40,13 +40,13 @@ void file_edit_window_t::draw_info_window() {
   file_buffer_t *_text = static_cast<file_buffer_t *>(text);
   text_line_t *name_line = _text->get_name_line();
   text_line_t::paint_info_t paint_info;
-  int name_width = t3_win_get_width(info_window);
+  int name_width = info_window.get_width();
 
-  t3_win_set_paint(info_window, 0, 0);
-  t3_win_set_default_attrs(info_window, get_attribute(attribute_t::MENUBAR));
+  info_window.set_paint(0, 0);
+  info_window.set_default_attrs(get_attribute(attribute_t::MENUBAR));
 
   if (name_line->calculate_screen_width(0, name_line->get_length(), 1) > name_width) {
-    t3_win_addstr(info_window, "..", 0);
+    info_window.addstr("..", 0);
     paint_info.start = name_line->adjust_position(name_line->get_length(), -(name_width - 2));
     paint_info.size = name_width - 2;
   } else {
@@ -63,8 +63,8 @@ void file_edit_window_t::draw_info_window() {
   paint_info.normal_attr = 0;
   paint_info.selected_attr = 0;
 
-  name_line->paint_line(info_window, &paint_info);
-  t3_win_clrtoeol(info_window);
+  name_line->paint_line(&info_window, &paint_info);
+  info_window.clrtoeol();
 }
 
 void file_edit_window_t::set_text(file_buffer_t *_text) {

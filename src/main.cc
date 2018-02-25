@@ -112,7 +112,7 @@ main_t::main_t() {
   file_edit_window_t *edit;
 
   menu = new menu_bar_t(option.hide_menubar);
-  menu->set_size(None, t3_win_get_width(window));
+  menu->set_size(None, window.get_width());
   push_back(menu);
   menu->connect_activate(signals::mem_fun(this, &main_t::menu_activated));
 
@@ -188,10 +188,10 @@ main_t::main_t() {
   edit = new file_edit_window_t();
   split = new split_t(edit);
   split->set_position(!option.hide_menubar, 0);
-  split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
+  split->set_size(window.get_height() - !option.hide_menubar, window.get_width());
   push_back(split);
 
-  select_buffer_dialog = new select_buffer_dialog_t(11, t3_win_get_width(window) - 4);
+  select_buffer_dialog = new select_buffer_dialog_t(11, window.get_width() - 4);
   select_buffer_dialog->center_over(this);
   select_buffer_dialog->connect_activate(signals::mem_fun(this, &main_t::switch_buffer));
 
@@ -199,20 +199,17 @@ main_t::main_t() {
       new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Continue", "_Abort", NULL);
   continue_abort_dialog->center_over(this);
 
-  encoding_dialog =
-      new encoding_dialog_t(t3_win_get_height(window) - 8, t3_win_get_width(window) - 8);
+  encoding_dialog = new encoding_dialog_t(window.get_height() - 8, window.get_width() - 8);
   encoding_dialog->center_over(this);
 
-  open_file_dialog =
-      new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
+  open_file_dialog = new open_file_dialog_t(window.get_height() - 4, window.get_width() - 4);
   open_file_dialog->center_over(this);
   open_file_dialog->set_file(nullptr);
   encoding_button = new button_t("_Encoding");
   encoding_button->connect_activate(signals::mem_fun(encoding_dialog, &encoding_dialog_t::show));
   open_file_dialog->set_options_widget(encoding_button);
 
-  save_as_dialog =
-      new save_as_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
+  save_as_dialog = new save_as_dialog_t(window.get_height() - 4, window.get_width() - 4);
   save_as_dialog->center_over(this);
   encoding_button = new button_t("_Encoding");
   encoding_button->connect_activate(signals::mem_fun(encoding_dialog, &encoding_dialog_t::show));
@@ -225,7 +222,7 @@ main_t::main_t() {
   error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Close", NULL);
   error_dialog->center_over(this);
 
-  open_recent_dialog = new open_recent_dialog_t(11, t3_win_get_width(window) - 4);
+  open_recent_dialog = new open_recent_dialog_t(11, window.get_width() - 4);
   open_recent_dialog->center_over(this);
 
   about_dialog = new message_dialog_t(45, "About", "Close", NULL);
@@ -252,7 +249,7 @@ main_t::main_t() {
   misc_options_dialog->center_over(this);
   misc_options_dialog->connect_activate(signals::mem_fun(this, &main_t::set_misc_options));
 
-  highlight_dialog = new highlight_dialog_t(t3_win_get_height(window) - 4, 40);
+  highlight_dialog = new highlight_dialog_t(window.get_height() - 4, 40);
   highlight_dialog->center_over(this);
   highlight_dialog->connect_language_selected(signals::mem_fun(this, &main_t::set_highlight));
 
@@ -586,7 +583,7 @@ void main_t::set_default_interface_options() {
 
 void main_t::set_misc_options() {
   misc_options_dialog->set_options_from_values();
-  split->set_size(t3_win_get_height(window) - !option.hide_menubar, None);
+  split->set_size(window.get_height() - !option.hide_menubar, None);
   split->set_position(!option.hide_menubar, 0);
   menu->set_hidden(option.hide_menubar);
   write_config();

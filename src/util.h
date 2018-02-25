@@ -19,7 +19,6 @@
 #include <list>
 #include <string>
 #include <t3widget/signals.h>
-#include <t3window/window.h>
 
 #ifdef __GNUC__
 void fatal(const char *fmt, ...) __attribute__((format(printf, 1, 2))) __attribute__((noreturn));

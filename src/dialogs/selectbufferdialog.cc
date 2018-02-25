@@ -50,10 +50,10 @@ bool select_buffer_dialog_t::set_size(optint height, optint width) {
   bool result = true;
 
   if (!height.is_valid()) {
-    height = t3_win_get_height(window);
+    height = window.get_height();
   }
   if (!width.is_valid()) {
-    width = t3_win_get_width(window);
+    width = window.get_width();
   }
 
   result &= dialog_t::set_size(height, width);
@@ -66,7 +66,7 @@ void select_buffer_dialog_t::show() {
   if (open_files.get_version() != known_version) {
     multi_widget_t *multi_widget;
     known_version = open_files.get_version();
-    int width = t3_win_get_width(window);
+    int width = window.get_width();
 
     while (!list->empty()) {
       multi_widget = (multi_widget_t *)list->back();

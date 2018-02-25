@@ -153,10 +153,10 @@ bool encoding_dialog_t::set_size(optint height, optint width) {
   bool result = true;
 
   if (!height.is_valid()) {
-    height = t3_win_get_height(window);
+    height = window.get_height();
   }
   if (!width.is_valid()) {
-    width = t3_win_get_width(window);
+    width = window.get_width();
   }
 
   result &= dialog_t::set_size(height, width);
