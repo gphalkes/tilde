@@ -55,7 +55,7 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
     name_line.set_text(&converted_name);
   }
 
-  connect_rewrap_required(signals::mem_fun(this, &file_buffer_t::invalidate_highlight));
+  connect_rewrap_required(bind_front(&file_buffer_t::invalidate_highlight, this));
 
   view_parameters->set_tabsize(option.tabsize);
   view_parameters->set_wrap(option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE);

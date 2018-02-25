@@ -114,7 +114,7 @@ main_t::main_t() {
   menu = new menu_bar_t(option.hide_menubar);
   menu->set_size(None, window.get_width());
   push_back(menu);
-  menu->connect_activate(signals::mem_fun(this, &main_t::menu_activated));
+  menu->connect_activate(bind_front(&main_t::menu_activated, this));
 
   panel = new menu_panel_t("_File", menu);
   panel->add_item("_New", "^N", action_id_t::FILE_NEW);
@@ -193,7 +193,7 @@ main_t::main_t() {
 
   select_buffer_dialog = new select_buffer_dialog_t(11, window.get_width() - 4);
   select_buffer_dialog->center_over(this);
-  select_buffer_dialog->connect_activate(signals::mem_fun(this, &main_t::switch_buffer));
+  select_buffer_dialog->connect_activate(bind_front(&main_t::switch_buffer, this));
 
   continue_abort_dialog =
       new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Continue", "_Abort", NULL);
@@ -206,13 +206,13 @@ main_t::main_t() {
   open_file_dialog->center_over(this);
   open_file_dialog->set_file(nullptr);
   encoding_button = new button_t("_Encoding");
-  encoding_button->connect_activate(signals::mem_fun(encoding_dialog, &encoding_dialog_t::show));
+  encoding_button->connect_activate([] { encoding_dialog->show(); });
   open_file_dialog->set_options_widget(encoding_button);
 
   save_as_dialog = new save_as_dialog_t(window.get_height() - 4, window.get_width() - 4);
   save_as_dialog->center_over(this);
   encoding_button = new button_t("_Encoding");
-  encoding_button->connect_activate(signals::mem_fun(encoding_dialog, &encoding_dialog_t::show));
+  encoding_button->connect_activate([] { encoding_dialog->show(); });
   save_as_dialog->set_options_widget(encoding_button);
 
   close_confirm_dialog =
@@ -239,19 +239,19 @@ main_t::main_t() {
 
   buffer_options_dialog = new buffer_options_dialog_t("Current Buffer");
   buffer_options_dialog->center_over(this);
-  buffer_options_dialog->connect_activate(signals::mem_fun(this, &main_t::set_buffer_options));
+  buffer_options_dialog->connect_activate([this] { set_buffer_options(); });
 
   default_options_dialog = new buffer_options_dialog_t("Buffer Defaults");
   default_options_dialog->center_over(this);
-  default_options_dialog->connect_activate(signals::mem_fun(this, &main_t::set_default_options));
+  default_options_dialog->connect_activate([this] { set_default_options(); });
 
   misc_options_dialog = new misc_options_dialog_t("Miscellaneous");
   misc_options_dialog->center_over(this);
-  misc_options_dialog->connect_activate(signals::mem_fun(this, &main_t::set_misc_options));
+  misc_options_dialog->connect_activate([this] { set_misc_options(); });
 
   highlight_dialog = new highlight_dialog_t(window.get_height() - 4, 40);
   highlight_dialog->center_over(this);
-  highlight_dialog->connect_language_selected(signals::mem_fun(this, &main_t::set_highlight));
+  highlight_dialog->connect_language_selected(bind_front(&main_t::set_highlight, this));
 
   preserve_bom_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Yes", "_No", NULL);
   preserve_bom_dialog->set_message(
@@ -262,9 +262,8 @@ main_t::main_t() {
 
   attributes_dialog = new attributes_dialog_t(ATTRIBUTES_DIALOG_WIDTH);
   attributes_dialog->center_over(this);
-  attributes_dialog->connect_activate(signals::mem_fun(this, &main_t::set_interface_options));
-  attributes_dialog->connect_save_defaults(
-      signals::mem_fun(this, &main_t::set_default_interface_options));
+  attributes_dialog->connect_activate([this] { set_interface_options(); });
+  attributes_dialog->connect_save_defaults([this] { set_default_interface_options(); });
 }
 
 main_t::~main_t() {
@@ -339,24 +338,22 @@ void main_t::menu_activated(int id) {
         // Because set_file also selects the named file if possible, we need to reset the dialog
         open_file_dialog->reset();
       }
-      load_process_t::execute(signals::mem_fun(this, &main_t::switch_to_new_buffer));
+      load_process_t::execute(bind_front(&main_t::switch_to_new_buffer, this));
       break;
     }
 
     case action_id_t::FILE_CLOSE:
-      close_process_t::execute(signals::mem_fun(this, &main_t::close_cb),
-                               get_current()->get_text());
+      close_process_t::execute(bind_front(&main_t::close_cb, this), get_current()->get_text());
       break;
     case action_id_t::FILE_SAVE:
-      save_process_t::execute(signals::mem_fun(this, &main_t::save_as_done),
-                              get_current()->get_text());
+      save_process_t::execute(bind_front(&main_t::save_as_done, this), get_current()->get_text());
       break;
     case action_id_t::FILE_SAVE_AS:
-      save_as_process_t::execute(signals::mem_fun(this, &main_t::save_as_done),
+      save_as_process_t::execute(bind_front(&main_t::save_as_done, this),
                                  get_current()->get_text());
       break;
     case action_id_t::FILE_OPEN_RECENT:
-      open_recent_process_t::execute(signals::mem_fun(this, &main_t::switch_to_new_buffer));
+      open_recent_process_t::execute(bind_front(&main_t::switch_to_new_buffer, this));
       break;
     case action_id_t::FILE_REPAINT:
       t3_widget::redraw();
@@ -366,7 +363,7 @@ void main_t::menu_activated(int id) {
       break;
 
     case action_id_t::FILE_EXIT:
-      exit_process_t::execute(signals::ptr_fun(stepped_process_t::ignore_result));
+      exit_process_t::execute(stepped_process_t::ignore_result);
       break;
 
     case action_id_t::EDIT_UNDO:
@@ -623,10 +620,9 @@ static void configure_input(bool cancel_selects_default) {
   is_height = std::min(std::max(height - 3, 15), 3200 / is_width);
 
   input_selection = new input_selection_dialog_t(is_height, is_width);
-  input_selection->connect_activate(
-      signals::bind(signals::ptr_fun(input_selection_complete), true));
+  input_selection->connect_activate([] { input_selection_complete(true); });
   input_selection->connect_closed(
-      signals::bind(signals::ptr_fun(input_selection_complete), cancel_selects_default));
+      [cancel_selects_default] { input_selection_complete(cancel_selects_default); });
   input_selection->center_over(main_window);
   input_selection->show();
   input_selection_dialog = input_selection;
@@ -806,7 +802,7 @@ int main(int argc, char *argv[]) {
 
   params.reset();
 
-  connect_update_notification(signals::ptr_fun(sync_updates));
+  connect_update_notification(sync_updates);
 
   init_charsets();
   main_window = new main_t();
@@ -858,16 +854,15 @@ int main(int argc, char *argv[]) {
         "- must press escape twice to close a menu or dialog\n\n"
         "You can change the input handling by selecting the \"Options\" menu "
         "and choosing \"Input Handling\", or by choosing \"Configure\" below.");
-    input_message->connect_activate(signals::bind(signals::ptr_fun(input_selection_complete), true),
-                                    0);
-    input_message->connect_activate(signals::bind(signals::ptr_fun(configure_input), true), 1);
-    input_message->connect_closed(signals::bind(signals::ptr_fun(input_selection_complete), true));
+    input_message->connect_activate([] { input_selection_complete(true); }, 0);
+    input_message->connect_activate([] { configure_input(true); }, 1);
+    input_message->connect_closed([] { input_selection_complete(true); });
     input_message->center_over(main_window);
     input_message->show();
     input_selection_dialog = input_message;
   }
 
-  load_cli_file_process_t::execute(signals::mem_fun(main_window, &main_t::load_cli_files_done));
+  load_cli_file_process_t::execute(bind_front(&main_t::load_cli_files_done, main_window));
   setup_signal_handlers();
   int retval = main_loop();
 #ifdef TILDE_DEBUG

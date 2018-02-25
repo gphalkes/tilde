@@ -18,37 +18,34 @@
   {                                                      \
     widget_group_t *widget_group = new widget_group_t(); \
     int widget_count = 0;
-#define END_WIDGET_GROUP(name, var)                                                         \
-  widget_group->set_size(widget_count, width - 4);                                          \
-  var = new expander_t(name);                                                               \
-  var->set_child(widget_group);                                                             \
-  var->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous)); \
-  var->connect_move_focus_down(signals::mem_fun(this, &attributes_dialog_t::focus_next));   \
-  expander_group->add_expander(var);                                                        \
+#define END_WIDGET_GROUP(name, var)                         \
+  widget_group->set_size(widget_count, width - 4);          \
+  var = new expander_t(name);                               \
+  var->set_child(widget_group);                             \
+  var->connect_move_focus_up([this] { focus_previous(); }); \
+  var->connect_move_focus_down([this] { focus_next(); });   \
+  expander_group->add_expander(var);                        \
   }
 
-#define ADD_ATTRIBUTE_ENTRY(name, sym, widget_name)                                          \
-  do {                                                                                       \
-    label = new smart_label_t(name);                                                         \
-    label->set_position(widget_count, 0);                                                    \
-    widget_group->add_child(label);                                                          \
-    change_button = new button_t("Change");                                                  \
-    change_button->set_anchor(widget_group,                                                  \
-                              T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT)); \
-    change_button->set_position(widget_count, 0);                                            \
-    change_button->connect_activate(signals::bind(                                           \
-        signals::mem_fun(this, &attributes_dialog_t::change_button_activated), sym));        \
-    change_button->connect_move_focus_up(                                                    \
-        signals::mem_fun(widget_group, &widget_group_t::focus_previous));                    \
-    change_button->connect_move_focus_down(                                                  \
-        signals::mem_fun(widget_group, &widget_group_t::focus_next));                        \
-    widget_group->add_child(change_button);                                                  \
-    widget_name = new attribute_test_line_t();                                               \
-    widget_name->set_anchor(change_button,                                                   \
-                            T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));    \
-    widget_name->set_position(0, -2);                                                        \
-    widget_group->add_child(widget_name);                                                    \
-    widget_count++;                                                                          \
+#define ADD_ATTRIBUTE_ENTRY(name, sym, widget_name)                                           \
+  do {                                                                                        \
+    label = new smart_label_t(name);                                                          \
+    label->set_position(widget_count, 0);                                                     \
+    widget_group->add_child(label);                                                           \
+    change_button = new button_t("Change");                                                   \
+    change_button->set_anchor(widget_group,                                                   \
+                              T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));  \
+    change_button->set_position(widget_count, 0);                                             \
+    change_button->connect_activate([this] { change_button_activated(sym); });                \
+    change_button->connect_move_focus_up([widget_group] { widget_group->focus_previous(); }); \
+    change_button->connect_move_focus_down([widget_group] { widget_group->focus_next(); });   \
+    widget_group->add_child(change_button);                                                   \
+    widget_name = new attribute_test_line_t();                                                \
+    widget_name->set_anchor(change_button,                                                    \
+                            T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));     \
+    widget_name->set_position(0, -2);                                                         \
+    widget_group->add_child(widget_name);                                                     \
+    widget_count++;                                                                           \
   } while (false)
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
@@ -63,10 +60,10 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
   color_box->set_label(label);
   color_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   color_box->set_position(1, -2);
-  color_box->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  color_box->connect_move_focus_down(signals::mem_fun(this, &attributes_dialog_t::focus_next));
-  color_box->connect_activate(signals::mem_fun(this, &attributes_dialog_t::handle_activate));
-  color_box->connect_toggled(signals::mem_fun(this, &attributes_dialog_t::update_attribute_lines));
+  color_box->connect_move_focus_up([this] { focus_previous(); });
+  color_box->connect_move_focus_down([this] { focus_next(); });
+  color_box->connect_activate([this] { handle_activate(); });
+  color_box->connect_toggled([this] { update_attribute_lines(); });
 
   expander_group.reset(new expander_group_t());
 
@@ -115,45 +112,35 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
                                T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
   syntax_highlight->set_position(0, 0);
 
-  expander_group->connect_expanded(
-      signals::mem_fun(this, &attributes_dialog_t::expander_size_change));
+  expander_group->connect_expanded([this](bool expanded) { expander_size_change(expanded); });
 
   cancel_button = new button_t("_Cancel");
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
-  cancel_button->connect_activate(signals::mem_fun(this, &attributes_dialog_t::close));
-  cancel_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  cancel_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  cancel_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  cancel_button->connect_move_focus_left(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
+  cancel_button->connect_activate([this] { close(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_left([this] { focus_previous(); });
 
   save_defaults_button = new button_t("Save as _defaults");
   save_defaults_button->set_anchor(cancel_button,
                                    T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   save_defaults_button->set_position(0, -2);
-  save_defaults_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  save_defaults_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  save_defaults_button->connect_move_focus_left(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  save_defaults_button->connect_move_focus_right(
-      signals::mem_fun(this, &attributes_dialog_t::focus_next));
-  save_defaults_button->connect_activate(
-      signals::mem_fun(this, &attributes_dialog_t::handle_save_defaults));
+  save_defaults_button->connect_move_focus_up([this] { focus_previous(); });
+  save_defaults_button->connect_move_focus_up([this] { focus_previous(); });
+  save_defaults_button->connect_move_focus_left([this] { focus_previous(); });
+  save_defaults_button->connect_move_focus_right([this] { focus_next(); });
+  save_defaults_button->connect_activate([this] { handle_save_defaults(); });
 
   ok_button = new button_t("_Ok", true);
   ok_button->set_anchor(save_defaults_button,
                         T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
-  ok_button->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  ok_button->connect_move_focus_right(signals::mem_fun(this, &attributes_dialog_t::focus_next));
-  ok_button->connect_activate(signals::mem_fun(this, &attributes_dialog_t::handle_activate));
+  ok_button->connect_move_focus_up([this] { focus_previous(); });
+  ok_button->connect_move_focus_right([this] { focus_next(); });
+  ok_button->connect_activate([this] { handle_activate(); });
 
   push_back(color_box);
   push_back(interface);
@@ -165,10 +152,8 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
 
   picker.reset(new attribute_picker_dialog_t());
   picker->center_over(this);
-  picker->connect_attribute_selected(
-      signals::mem_fun(this, &attributes_dialog_t::attribute_selected));
-  picker->connect_default_selected(
-      signals::mem_fun(this, &attributes_dialog_t::default_attribute_selected));
+  picker->connect_attribute_selected(bind_front(&attributes_dialog_t::attribute_selected, this));
+  picker->connect_default_selected([this] { default_attribute_selected(); });
 }
 
 bool attributes_dialog_t::set_size(optint height, optint width) {

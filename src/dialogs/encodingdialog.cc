@@ -110,8 +110,8 @@ encoding_dialog_t::encoding_dialog_t(int height, int width)
   list = new list_pane_t(true);
   list->set_size(height - 4, width - 2);
   list->set_position(1, 1);
-  list->connect_activate(signals::mem_fun(this, &encoding_dialog_t::ok_activated));
-  list->connect_selection_changed(signals::mem_fun(this, &encoding_dialog_t::selection_changed));
+  list->connect_activate([this] { ok_activated(); });
+  list->connect_selection_changed([this] { selection_changed(); });
 
   for (charset_descs_t::const_iterator iter = available_charsets.begin();
        iter != available_charsets.end(); iter++) {
@@ -129,18 +129,18 @@ encoding_dialog_t::encoding_dialog_t(int height, int width)
   manual_entry->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_BOTTOMLEFT));
   manual_entry->set_position(-1, 2);
   manual_entry->set_size(1, 25);
-  manual_entry->connect_activate(signals::mem_fun(this, &encoding_dialog_t::ok_activated));
+  manual_entry->connect_activate([this] { ok_activated(); });
   manual_entry->hide();
 
   cancel_button = new button_t("_Cancel", false);
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
-  cancel_button->connect_activate(signals::mem_fun(this, &encoding_dialog_t::close));
+  cancel_button->connect_activate([this] { close(); });
   ok_button = new button_t("_OK", true);
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
-  ok_button->connect_activate(signals::mem_fun(this, &encoding_dialog_t::ok_activated));
+  ok_button->connect_activate([this] { ok_activated(); });
 
   push_back(list);
   push_back(horizontal_separator);
