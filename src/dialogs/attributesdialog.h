@@ -59,8 +59,8 @@ class attributes_dialog_t : public dialog_t {
   void set_default_options_from_values();
   void set_options_from_values(term_options_t *term_options);
 
-  T3_WIDGET_SIGNAL(activate, void);
-  T3_WIDGET_SIGNAL(save_defaults, void);
+  T3_WIDGET_SIGNAL(activate, void());
+  T3_WIDGET_SIGNAL(save_defaults, void());
 };
 
 #endif

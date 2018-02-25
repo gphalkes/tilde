@@ -37,7 +37,7 @@ class buffer_options_dialog_t : public dialog_t {
   void set_options_from_values();
   void handle_activate();
 
-  T3_WIDGET_SIGNAL(activate, void);
+  T3_WIDGET_SIGNAL(activate, void());
 };
 
 class misc_options_dialog_t : public dialog_t {
@@ -52,7 +52,7 @@ class misc_options_dialog_t : public dialog_t {
   void set_options_from_values();
   void handle_activate();
 
-  T3_WIDGET_SIGNAL(activate, void);
+  T3_WIDGET_SIGNAL(activate, void());
 };
 
 #endif

@@ -30,7 +30,7 @@ class open_recent_dialog_t : public dialog_t {
   void show() override;
   virtual void ok_activated();
 
-  T3_WIDGET_SIGNAL(file_selected, void, recent_file_info_t *);
+  T3_WIDGET_SIGNAL(file_selected, void(recent_file_info_t *));
 };
 
 #endif
