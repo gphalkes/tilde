@@ -38,7 +38,7 @@ class encoding_dialog_t : public dialog_t {
 
   void set_encoding(const char *encoding);
 
-  T3_WIDGET_SIGNAL(activate, void(const std::string *));
+  T3_WIDGET_SIGNAL(activate, const std::string *);
 };
 
 #endif

@@ -30,7 +30,7 @@ class select_buffer_dialog_t : public dialog_t {
   void show() override;
   virtual void ok_activated();
 
-  T3_WIDGET_SIGNAL(activate, void(file_buffer_t *));
+  T3_WIDGET_SIGNAL(activate, file_buffer_t *);
 };
 
 #endif
