@@ -52,7 +52,7 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
 
     std::string converted_name;
     convert_lang_codeset(&name, &converted_name, true);
-    name_line.set_text(&converted_name);
+    name_line.set_text(converted_name);
   }
 
   connect_rewrap_required(bind_front(&file_buffer_t::invalidate_highlight, this));
@@ -102,7 +102,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
 
       name = _name;
       convert_lang_codeset(&name, &converted_name, true);
-      name_line.set_text(&converted_name);
+      name_line.set_text(converted_name);
 
       if ((state->fd = open(name.c_str(), O_RDONLY)) < 0) {
         if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) {
@@ -377,7 +377,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         std::string converted_name;
         name = state->name;
         convert_lang_codeset(&name, &converted_name, true);
-        name_line.set_text(&converted_name);
+        name_line.set_text(converted_name);
       }
       set_undo_mark();
       break;

@@ -26,9 +26,7 @@ class file_line_t : public text_line_t {
 
  public:
   file_line_t(int buffersize = BUFFERSIZE, file_line_factory_t *_factory = nullptr);
-  file_line_t(const char *_buffer, file_line_factory_t *_factory = nullptr);
-  file_line_t(const char *_buffer, int length, file_line_factory_t *_factory = nullptr);
-  file_line_t(const std::string *str, file_line_factory_t *_factory = nullptr);
+  file_line_t(string_view _buffer, file_line_factory_t *_factory = nullptr);
 
   void set_highlight_start(int state);
   int get_highlight_end();
@@ -45,9 +43,7 @@ class file_line_factory_t : public text_line_factory_t {
  public:
   file_line_factory_t(file_buffer_t *_file_buffer);
   text_line_t *new_text_line_t(int buffersize = BUFFERSIZE) override;
-  text_line_t *new_text_line_t(const char *_buffer) override;
-  text_line_t *new_text_line_t(const char *_buffer, int length) override;
-  text_line_t *new_text_line_t(const std::string *str) override;
+  text_line_t *new_text_line_t(string_view _buffer) override;
   file_buffer_t *get_file_buffer() const;
 };
 

@@ -20,16 +20,8 @@ file_line_t::file_line_t(int buffersize, file_line_factory_t *_factory)
     : text_line_t(buffersize, _factory == nullptr ? &default_file_line_factory : _factory),
       highlight_start_state(0) {}
 
-file_line_t::file_line_t(const char *_buffer, file_line_factory_t *_factory)
+file_line_t::file_line_t(string_view _buffer, file_line_factory_t *_factory)
     : text_line_t(_buffer, _factory == nullptr ? &default_file_line_factory : _factory),
-      highlight_start_state(0) {}
-
-file_line_t::file_line_t(const char *_buffer, int length, file_line_factory_t *_factory)
-    : text_line_t(_buffer, length, _factory == nullptr ? &default_file_line_factory : _factory),
-      highlight_start_state(0) {}
-
-file_line_t::file_line_t(const std::string *str, file_line_factory_t *_factory)
-    : text_line_t(str, _factory == nullptr ? &default_file_line_factory : _factory),
       highlight_start_state(0) {}
 
 int file_line_t::get_highlight_idx(int i) {
@@ -106,16 +98,8 @@ text_line_t *file_line_factory_t::new_text_line_t(int buffersize) {
   return new file_line_t(buffersize, this);
 }
 
-text_line_t *file_line_factory_t::new_text_line_t(const char *_buffer) {
+text_line_t *file_line_factory_t::new_text_line_t(string_view _buffer) {
   return new file_line_t(_buffer, this);
-}
-
-text_line_t *file_line_factory_t::new_text_line_t(const char *_buffer, int length) {
-  return new file_line_t(_buffer, length, this);
-}
-
-text_line_t *file_line_factory_t::new_text_line_t(const std::string *str) {
-  return new file_line_t(str, this);
 }
 
 file_buffer_t *file_line_factory_t::get_file_buffer() const { return file_buffer; }
