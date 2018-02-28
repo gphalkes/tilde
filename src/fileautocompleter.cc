@@ -29,8 +29,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   std::string current_word;
 
   if (current_list != nullptr) {
-    delete current_list;
-    current_list = nullptr;
+    current_list.reset();
   }
 
   if (text->cursor.pos == 0) {
@@ -86,9 +85,8 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   }
 
   try {
-    current_list = new string_list_t();
+    current_list.reset(new string_list_t());
   } catch (const std::bad_alloc &) {
-    current_list = nullptr;
     return nullptr;
   }
 
@@ -97,12 +95,11 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   }
   *position = completion_start;
 
-  return current_list;
+  return current_list.get();
 }
 
 void file_autocompleter_t::autocomplete(text_buffer_t *text, size_t idx) {
   text_coordinate_t start(text->cursor.line, completion_start);
   text->replace_block(start, text->cursor, (*current_list)[idx]);
-  delete current_list;
-  current_list = nullptr;
+  current_list.reset();
 }

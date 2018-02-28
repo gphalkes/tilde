@@ -20,7 +20,7 @@ using namespace t3_widget;
 
 class file_autocompleter_t : public autocompleter_t {
  private:
-  string_list_t *current_list = nullptr;
+  std::unique_ptr<string_list_t> current_list;
   int completion_start = 0;
 
  public:
