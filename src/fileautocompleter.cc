@@ -17,11 +17,6 @@
 #include "fileautocompleter.h"
 #include "log.h"
 
-static bool compare_strings(std::string *a, std::string *b) { return a->compare(*b) < 0; }
-
-using comparator_t = bool (*)(std::string *, std::string *);
-using result_set_t = std::set<std::string *, comparator_t>;
-
 string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buffer_t *text,
                                                                   int *position) {
   const text_line_t *line;
@@ -59,8 +54,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   std::string needle(*line->get_data(), completion_start, text->cursor.pos - completion_start);
   finder_t finder(&needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
   find_result_t find_result;
-  result_set_t result_set(compare_strings);
-  std::string word;
+  std::set<std::string> result_set;
 
   while (text->find_limited(&finder, start, eof, &find_result)) {
     line = text->get_line_data(find_result.start.line);
@@ -69,10 +63,10 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     }
 
     if (find_result.end.pos - find_result.start.pos != text->cursor.pos - completion_start) {
-      word = line->get_data()->substr(find_result.start.pos,
-                                      find_result.end.pos - find_result.start.pos);
-      if (result_set.count(&word) == 0 && word != current_word) {
-        result_set.insert(new std::string(word));
+      string_view word(*line->get_data());
+      word = word.substr(find_result.start.pos, find_result.end.pos - find_result.start.pos);
+      if (word != current_word) {
+        result_set.insert(to_string(word));
       }
     }
 
@@ -90,8 +84,9 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     return nullptr;
   }
 
-  for (std::string *result : result_set) {
-    current_list->push_back(result);
+  for (std::set<std::string>::iterator iter = result_set.begin(); iter != result_set.end();
+       ++iter) {
+    current_list->push_back(std::move(*iter));
   }
   *position = completion_start;
 

@@ -33,10 +33,8 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
   tabsize_field->set_size(1, 5);
   tabsize_field->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   tabsize_field->set_position(1, -2);
-  tabsize_field->connect_move_focus_down(
-      [this] { focus_next(); });
-  tabsize_field->connect_activate(
-      [this] { handle_activate(); });
+  tabsize_field->connect_move_focus_down([this] { focus_next(); });
+  tabsize_field->connect_activate([this] { handle_activate(); });
   push_back(tabsize_field);
 
   width = label->get_width() + 2 + 5;
@@ -48,12 +46,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
   tab_spaces_box->set_label(label);
   tab_spaces_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   tab_spaces_box->set_position(2, -2);
-  tab_spaces_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  tab_spaces_box->connect_move_focus_down(
-      [this] { focus_next(); });
-  tab_spaces_box->connect_activate(
-      [this] { handle_activate(); });
+  tab_spaces_box->connect_move_focus_up([this] { focus_previous(); });
+  tab_spaces_box->connect_move_focus_down([this] { focus_next(); });
+  tab_spaces_box->connect_activate([this] { handle_activate(); });
   push_back(tab_spaces_box);
 
   width = std::max(label->get_width() + 2 + 3, width);
@@ -79,12 +74,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
   auto_indent_box->set_label(label);
   auto_indent_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   auto_indent_box->set_position(4, -2);
-  auto_indent_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  auto_indent_box->connect_move_focus_down(
-      [this] { focus_next(); });
-  auto_indent_box->connect_activate(
-      [this] { handle_activate(); });
+  auto_indent_box->connect_move_focus_up([this] { focus_previous(); });
+  auto_indent_box->connect_move_focus_down([this] { focus_next(); });
+  auto_indent_box->connect_activate([this] { handle_activate(); });
   push_back(auto_indent_box);
 
   width = std::max(label->get_width() + 2 + 3, width);
@@ -97,12 +89,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
   indent_aware_home_box->set_anchor(this,
                                     T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   indent_aware_home_box->set_position(5, -2);
-  indent_aware_home_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  indent_aware_home_box->connect_move_focus_down(
-      [this] { focus_next(); });
-  indent_aware_home_box->connect_activate(
-      [this] { handle_activate(); });
+  indent_aware_home_box->connect_move_focus_up([this] { focus_previous(); });
+  indent_aware_home_box->connect_move_focus_down([this] { focus_next(); });
+  indent_aware_home_box->connect_activate([this] { handle_activate(); });
   push_back(indent_aware_home_box);
 
   width = std::max(label->get_width() + 2 + 3, width);
@@ -114,12 +103,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
   show_tabs_box->set_label(label);
   show_tabs_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   show_tabs_box->set_position(6, -2);
-  show_tabs_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  show_tabs_box->connect_move_focus_down(
-      [this] { focus_next(); });
-  show_tabs_box->connect_activate(
-      [this] { handle_activate(); });
+  show_tabs_box->connect_move_focus_up([this] { focus_previous(); });
+  show_tabs_box->connect_move_focus_down([this] { focus_next(); });
+  show_tabs_box->connect_activate([this] { handle_activate(); });
   push_back(show_tabs_box);
 
   width = std::max(label->get_width() + 2 + 3, width);
@@ -131,12 +117,9 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
   strip_spaces_box->set_label(label);
   strip_spaces_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   strip_spaces_box->set_position(7, -2);
-  strip_spaces_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  strip_spaces_box->connect_move_focus_down(
-      [this] { focus_next(); });
-  strip_spaces_box->connect_activate(
-      [this] { handle_activate(); });
+  strip_spaces_box->connect_move_focus_up([this] { focus_previous(); });
+  strip_spaces_box->connect_move_focus_down([this] { focus_next(); });
+  strip_spaces_box->connect_activate([this] { handle_activate(); });
   push_back(strip_spaces_box);
 
   width = std::max(label->get_width() + 2 + 3, width);
@@ -146,18 +129,14 @@ buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
   cancel_button->connect_activate([this] { close(); });
-  cancel_button->connect_move_focus_up(
-      [this] { focus_previous(); });
-  cancel_button->connect_move_focus_up(
-      [this] { focus_previous(); });
-  cancel_button->connect_move_focus_left(
-      [this] { focus_previous(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_left([this] { focus_previous(); });
 
   ok_button = new button_t("_Ok", true);
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
-  ok_button->connect_move_focus_up(
-      [this] { focus_previous(); });
+  ok_button->connect_move_focus_up([this] { focus_previous(); });
   ok_button->connect_move_focus_right([this] { focus_next(); });
   ok_button->connect_activate([this] { handle_activate(); });
 
@@ -247,10 +226,8 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 2
   hide_menu_box->set_label(label);
   hide_menu_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   hide_menu_box->set_position(1, -2);
-  hide_menu_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  hide_menu_box->connect_move_focus_down(
-      [this] { focus_next(); });
+  hide_menu_box->connect_move_focus_up([this] { focus_previous(); });
+  hide_menu_box->connect_move_focus_down([this] { focus_next(); });
   hide_menu_box->connect_activate([this] { handle_activate(); });
   push_back(hide_menu_box);
 
@@ -263,12 +240,9 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 2
   save_backup_box->set_label(label);
   save_backup_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   save_backup_box->set_position(2, -2);
-  save_backup_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  save_backup_box->connect_move_focus_down(
-      [this] { focus_next(); });
-  save_backup_box->connect_activate(
-      [this] { handle_activate(); });
+  save_backup_box->connect_move_focus_up([this] { focus_previous(); });
+  save_backup_box->connect_move_focus_down([this] { focus_next(); });
+  save_backup_box->connect_activate([this] { handle_activate(); });
   push_back(save_backup_box);
 
   width = std::max(label->get_width() + 2 + 3, width);
@@ -281,12 +255,9 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 2
   parse_file_positions_box->set_anchor(
       this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   parse_file_positions_box->set_position(3, -2);
-  parse_file_positions_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  parse_file_positions_box->connect_move_focus_down(
-      [this] { focus_next(); });
-  parse_file_positions_box->connect_activate(
-      [this] { handle_activate(); });
+  parse_file_positions_box->connect_move_focus_up([this] { focus_previous(); });
+  parse_file_positions_box->connect_move_focus_down([this] { focus_next(); });
+  parse_file_positions_box->connect_activate([this] { handle_activate(); });
   push_back(parse_file_positions_box);
 
   width = std::max(label->get_width() + 2 + 3, width);
@@ -299,12 +270,9 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 2
   disable_selection_over_ssh_box->set_anchor(
       this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   disable_selection_over_ssh_box->set_position(4, -2);
-  disable_selection_over_ssh_box->connect_move_focus_up(
-      [this] { focus_previous(); });
-  disable_selection_over_ssh_box->connect_move_focus_down(
-      [this] { focus_next(); });
-  disable_selection_over_ssh_box->connect_activate(
-      [this] { handle_activate(); });
+  disable_selection_over_ssh_box->connect_move_focus_up([this] { focus_previous(); });
+  disable_selection_over_ssh_box->connect_move_focus_down([this] { focus_next(); });
+  disable_selection_over_ssh_box->connect_activate([this] { handle_activate(); });
   push_back(disable_selection_over_ssh_box);
 
   width = std::max(label->get_width() + 2 + 3, width);
@@ -314,12 +282,9 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 2
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
   cancel_button->connect_activate([this] { close(); });
-  cancel_button->connect_move_focus_up(
-      [this] { focus_previous(); });
-  cancel_button->connect_move_focus_up(
-      [this] { focus_previous(); });
-  cancel_button->connect_move_focus_left(
-      [this] { focus_previous(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_left([this] { focus_previous(); });
 
   ok_button = new button_t("_Ok", true);
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
