@@ -54,7 +54,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   std::string needle(*line->get_data(), completion_start, text->cursor.pos - completion_start);
   finder_t finder(&needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
   find_result_t find_result;
-  std::set<std::string> result_set;
+  std::set<string_view> result_set;
 
   while (text->find_limited(&finder, start, eof, &find_result)) {
     line = text->get_line_data(find_result.start.line);
@@ -66,7 +66,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
       string_view word(*line->get_data());
       word = word.substr(find_result.start.pos, find_result.end.pos - find_result.start.pos);
       if (word != current_word) {
-        result_set.insert(to_string(word));
+        result_set.insert(word);
       }
     }
 
@@ -84,9 +84,8 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     return nullptr;
   }
 
-  for (std::set<std::string>::iterator iter = result_set.begin(); iter != result_set.end();
-       ++iter) {
-    current_list->push_back(std::move(*iter));
+  for (string_view word : result_set) {
+    current_list->push_back(to_string(word));
   }
   *position = completion_start;
 
