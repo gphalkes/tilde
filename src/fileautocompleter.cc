@@ -94,6 +94,6 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 
 void file_autocompleter_t::autocomplete(text_buffer_t *text, size_t idx) {
   text_coordinate_t start(text->cursor.line, completion_start);
-  text->replace_block(start, text->cursor, (*current_list)[idx]);
+  text->replace_block(start, text->cursor, &(*current_list)[idx]);
   current_list.reset();
 }
