@@ -52,7 +52,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   text_coordinate_t start(0, 0);
   text_coordinate_t eof(INT_MAX, INT_MAX);
   std::string needle(*line->get_data(), completion_start, text->cursor.pos - completion_start);
-  finder_t finder(&needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
+  finder_t finder(needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
   find_result_t find_result;
   std::set<string_view> result_set;
 
