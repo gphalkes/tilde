@@ -785,7 +785,9 @@ int main(int argc, char *argv[]) {
     getchar();
   }
 #endif
-  params->term = cli_option.term;
+  if (cli_option.term != nullptr) {
+    params->term = std::string(cli_option.term);
+  }
   params->program_name = "Tilde";
   params->disable_external_clipboard = cli_option.disable_external_clipboard;
   if ((default_option.disable_primary_selection_over_ssh.value_or_default(false) &&
@@ -840,7 +842,7 @@ int main(int argc, char *argv[]) {
       cli_option.files.push_back(cli_option.config_file().c_str());
     }
 
-    message_dialog->set_message(&message);
+    message_dialog->set_message(message);
     message_dialog->center_over(main_window);
     message_dialog->show();
   } else {

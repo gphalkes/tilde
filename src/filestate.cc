@@ -70,7 +70,7 @@ bool load_process_t::step() {
     case rw_result_t::ERRNO_ERROR:
       printf_into(&message, "Could not load file '%s': %s", file->get_name().c_str(),
                   strerror(rw_result.get_errno_error()));
-      error_dialog->set_message(&message);
+      error_dialog->set_message(message);
       error_dialog->show();
       result = true;
       break;
@@ -79,7 +79,7 @@ bool load_process_t::step() {
                   transcript_strerror(rw_result.get_transcript_error()));
       delete file;
       file = nullptr;
-      error_dialog->set_message(&message);
+      error_dialog->set_message(message);
       error_dialog->show();
       break;
     case rw_result_t::CONVERSION_ERROR:
@@ -87,7 +87,7 @@ bool load_process_t::step() {
                   transcript_strerror(rw_result.get_transcript_error()));
       delete file;
       file = nullptr;
-      error_dialog->set_message(&message);
+      error_dialog->set_message(message);
       error_dialog->show();
       break;
     case rw_result_t::CONVERSION_IMPRECISE:
@@ -95,7 +95,7 @@ bool load_process_t::step() {
       connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
       connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
       connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
-      continue_abort_dialog->set_message(&message);
+      continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
     case rw_result_t::CONVERSION_ILLEGAL:
@@ -104,13 +104,13 @@ bool load_process_t::step() {
       connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
       connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
       connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
-      continue_abort_dialog->set_message(&message);
+      continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
     case rw_result_t::CONVERSION_TRUNCATED:
       printf_into(&message, "File appears to be truncated");
       result = true;
-      error_dialog->set_message(&message);
+      error_dialog->set_message(message);
       error_dialog->show();
       break;
     case rw_result_t::BOM_FOUND:
@@ -215,7 +215,7 @@ bool save_as_process_t::step() {
       connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
       connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
       connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
-      continue_abort_dialog->set_message(&message);
+      continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
     case rw_result_t::FILE_EXISTS_READONLY:
@@ -223,12 +223,12 @@ bool save_as_process_t::step() {
       connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
       connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
       connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
-      continue_abort_dialog->set_message(&message);
+      continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
     case rw_result_t::ERRNO_ERROR:
       printf_into(&message, "Could not save file: %s", strerror(rw_result.get_errno_error()));
-      error_dialog->set_message(&message);
+      error_dialog->set_message(message);
       error_dialog->show();
       break;
     case rw_result_t::CONVERSION_ERROR:
@@ -237,7 +237,7 @@ bool save_as_process_t::step() {
       }
       printf_into(&message, "Could not save file in encoding %s: %s", encoding.c_str(),
                   transcript_strerror(rw_result.get_transcript_error()));
-      error_dialog->set_message(&message);
+      error_dialog->set_message(message);
       error_dialog->show();
       break;
     case rw_result_t::CONVERSION_IMPRECISE:
@@ -249,7 +249,7 @@ bool save_as_process_t::step() {
       connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
       connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
       connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
-      continue_abort_dialog->set_message(&message);
+      continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
     default:
@@ -337,7 +337,7 @@ bool close_process_t::step() {
     connections.push_back(close_confirm_dialog->connect_activate([this] { dont_save(); }, 1));
     connections.push_back(close_confirm_dialog->connect_activate([this] { abort(); }, 2));
     connections.push_back(close_confirm_dialog->connect_closed([this] { abort(); }));
-    close_confirm_dialog->set_message(&message);
+    close_confirm_dialog->set_message(message);
     close_confirm_dialog->show();
   } else {
     PANIC();
@@ -374,7 +374,7 @@ bool exit_process_t::step() {
       connections.push_back(close_confirm_dialog->connect_activate([this] { dont_save(); }, 1));
       connections.push_back(close_confirm_dialog->connect_activate([this] { abort(); }, 2));
       connections.push_back(close_confirm_dialog->connect_closed([this] { abort(); }));
-      close_confirm_dialog->set_message(&message);
+      close_confirm_dialog->set_message(message);
       close_confirm_dialog->show();
       return false;
     }

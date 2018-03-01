@@ -144,7 +144,8 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
               /* FALLTHROUGH */
               case load_process_t::REMOVE_BOM:
                 try {
-                  append_text(state->wrapper->get_buffer() + 3, state->wrapper->get_fill() - 3);
+                  append_text(string_view(state->wrapper->get_buffer() + 3,
+                                          state->wrapper->get_fill() - 3));
                   state->buffer_used = true;
                 } catch (...) {
                   return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
@@ -158,7 +159,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
           }
 
           try {
-            append_text(state->wrapper->get_buffer(), state->wrapper->get_fill());
+            append_text(string_view(state->wrapper->get_buffer(), state->wrapper->get_fill()));
             state->buffer_used = true;
           } catch (...) {
             return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);

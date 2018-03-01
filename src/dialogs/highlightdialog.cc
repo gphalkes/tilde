@@ -109,7 +109,7 @@ void highlight_dialog_t::ok_activated() {
       nullptr) {
     std::string message(_("Error loading highlighting patterns: "));
     message += t3_highlight_strerror(error.error);
-    error_dialog->set_message(&message);
+    error_dialog->set_message(message);
     error_dialog->center_over(this);
     error_dialog->show();
     return;

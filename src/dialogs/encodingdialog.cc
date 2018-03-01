@@ -175,7 +175,7 @@ void encoding_dialog_t::ok_activated() {
     lprintf("Testing encoding name: %s\n", encoding.c_str());
     if (!transcript_probe_converter(encoding.c_str())) {
       std::string message = "Requested character set is not available";
-      message_dialog->set_message(&message);
+      message_dialog->set_message(message);
       message_dialog->center_over(this);
       message_dialog->show();
       return;
