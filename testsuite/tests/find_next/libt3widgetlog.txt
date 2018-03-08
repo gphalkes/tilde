@@ -1,0 +1,47 @@
+Setting wrap width: 49
+Starting X11 initialization
+X11 initialization failed!
+Failed to initialize external clipboard module
+Setting wrap width: 49
+Setting wrap width: 49
+Setting wrap width: 49
+Setting wrap width: 44
+Setting wrap width: 44
+Setting wrap width: 44
+Setting wrap width: 49
+Setting wrap width: 49
+Setting wrap width: 49
+New codeset: UTF-8
+Got key 111003
+Got key 10000072
+set focus 1
+Got key 0061
+Got key 0073
+Got key 0064
+Got key 0009
+set focus 0
+set focus 2
+Got key 0078
+Got key 0079
+Got key 007A
+Got key 0031
+Got key 0032
+Got key 0033
+Got key 20000075
+set focus 0
+Got key 11000B
+Got key 0009
+Got key 0009
+Got key 11000B
+Got key 40000009
+Got key 11000B
+Got key 0009
+Got key 11000B
+Got key 40000009
+Got key 11000B
+Got key 11000B
+Got key 0009
+Got key 0009
+Got key 11000B
+Got key 10000073
+Got key 10000071

@@ -1,0 +1,49 @@
+Adding character set Arabic (ISO-8859-6) with tag ISO-8859-6
+Adding character set Arabic (Windows-1256) with tag WINDOWS-1256
+Adding character set Baltic (Windows-1257) with tag WINDOWS-1257
+Adding character set Baltic (ISO-8859-13) with tag ISO-8859-13
+Adding character set Baltic (ISO-8859-4) with tag ISO-8859-4
+Unavailable: Central European (IBM-852)
+Adding character set Central European (ISO-8859-2) with tag ISO-8859-2
+Adding character set Central European (ISO-8859-3) with tag ISO-8859-3
+Adding character set Central European (Windows-1250) with tag WINDOWS-1250
+Adding character set Chinese Simplified (GB18030) with tag GB18030
+Adding character set Chinese Simplified (GB2312) with tag GB2312
+Adding character set Chinese Simplified (GBK) with tag GBK
+Adding character set Chinese Traditional (Big5) with tag BIG5
+Adding character set Chinese Traditional (Big5-HKSCS) with tag BIG5-HKSCS
+Adding character set Chinese Traditional (EUC-TW) with tag EUC-TW
+Unavailable: Cyrillic (IBM-866)
+Adding character set Cyrillic (ISO-8859-5) with tag ISO-8859-5
+Adding character set Cyrillic (KOI8-R) with tag KOI8-R
+Adding character set Cyrillic (KOI8-U) with tag KOI8-U
+Adding character set Cyrillic (Windows-1251) with tag WINDOWS-1251
+Adding character set Greek (ISO-8859-2) with tag ISO-8859-2
+Adding character set Greek (ISO-8859-7) with tag ISO-8859-7
+Adding character set Greek (Windows-1253) with tag WINDOWS-1253
+Adding character set Hebrew (ISO-8859-8) with tag ISO-8859-8
+Adding character set Hebrew (Windows-1255) with tag WINDOWS-1255
+Adding character set Japanese (EUC-JP) with tag EUC-JP
+Adding character set Japanese (ISO-2022-JP) with tag ISO-2022-JP
+Adding character set Japanese (Shift_JIS) with tag SHIFT_JIS
+Adding character set Korean (EUC-KR) with tag EUC-KR
+Adding character set Korean (ISO-2022-KR) with tag ISO-2022-KR
+Unavailable: Northern Saami (Winsami2)
+Adding character set South-Eastern European (ISO-8859-16) with tag ISO-8859-16
+Unavailable: Tamil (TSCII)
+Unavailable: Thai (Windows-874)
+Adding character set Thai (ISO-8859-11) with tag ISO-8859-11
+Unavailable: Thai (TIS-620)
+Unavailable: Thai (Windows-874)
+Adding character set Turkish (Windows-1254) with tag WINDOWS-1254
+Adding character set Turkish (ISO-8859-9) with tag ISO-8859-9
+Adding character set Unicode (UTF-8 with BOM) with tag X-UTF-8-BOM
+Adding character set Unicode (UTF-16) with tag UTF-16
+Adding character set Unicode (UTF-7) with tag UTF-7
+Adding character set Vietnamese (Windows-1258) with tag WINDOWS-1258
+Unavailable: Western European (IBM-850)
+Adding character set Western European (ISO-8859-1) with tag ISO-8859-1
+Adding character set Western European (ISO-8859-14) with tag ISO-8859-14
+Adding character set Western European (ISO-8859-15) with tag ISO-8859-15
+Adding character set Western European (Windows-1252) with tag WINDOWS-1252
+Using encoding UTF-8 to read /mockdir/test.txt
