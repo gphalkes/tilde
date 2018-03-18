@@ -399,15 +399,20 @@ static void post_process_options() {
 
 static void print_help() {
   printf(
-      "Usage: tilde [<OPTIONS>] [<FILE...>]\n"
+      "Usage: tilde [<OPTIONS>] [<FILE...>[:<LINE>[:<COLUMN>]]]\n"
       "  -b,--black-white            Request black & white mode, overriding config file\n"
       "  -c,--color                  Request color mode, overriding config file\n"
       "  -C<file>,--config=<file>    Use <file> as config file\n"
       "  -e<enc>, --encoding=<enc>   Use <enc> as the encoding for loading files from\n"
-      "                                  the command line\n"
+      "                                the command line\n"
       "  -h,--help                   Show this help message.\n"
       "  -I,--select-input-method    Ignore configured input handling method.\n"
       "  --ignore-running            Ignore instances already running on this terminal\n"
+      "  -J,--no-parse-file-position Do not attempt to parse line and column from file\n"
+      "                                names passed on the command line\n"
+      "  -P,--no-primary-selection   Disable the use of the primary selection (i.e.\n"
+      "                                middle mouse-button copy-paste) for external\n"
+      "                                clipboards like X11\n"
       "  -T<term>,--terminal=<term>  Use <term> instead of TERM variable\n"
       "  -V,--version                Show version and copyright information\n"
       "  -x,--no-ext-clipboard       Disable the external (X11) clipboard interface\n");

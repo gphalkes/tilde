@@ -9,7 +9,7 @@ tilde - an intuitive text editor for the console/terminal
 SYNOPSIS
 ========
 
-tilde [_OPTIONS_] [_FILE_]...
+tilde [_OPTIONS_] [_FILE_[:_LINE_[:_COLUMN_]]]...
 
 DESCRIPTION
 ===========
@@ -33,29 +33,35 @@ Tilde accepts the following options:
 	Request Tilde to use color mode. This option overrides the setting from the
 	configuration file. If the terminal does not support color, or does not
 	provide sufficient colors, this option will be ignored.
-*-h*, *--help*::
-  Display a short help message.
-*-I*, *--select-input-method*::
-	Ask the user to select the input handling method immediately after start-up,
-	as if the user had not previously selected one for the current terminal
-	type.
-*-T* _terminal_, *--terminal*=_terminal_::
-	Set the terminal type to terminal, overriding the TERM environment variable.
-*-V*, *--version*::
-	Print version and copyright information.
-*-x*, *--no-ext-clipboard*::
-	Tells Tilde not to attempt to connect to the X11 clipboard.
 *-C* _config_, *--config*=_config_::
 	Use configuration file _config_ instead of the default configuration file,
 	which is typically ~/.config/tilde/config.
 *-e* _encoding_, *--encoding*=_encoding_::
 	Open any files named on the command line using character encoding
 	_encoding_, instead of the default UTF-8 encoding.
+*-h*, *--help*::
+  Display a short help message.
+*-I*, *--select-input-method*::
+	Ask the user to select the input handling method immediately after start-up,
+	as if the user had not previously selected one for the current terminal
+	type.
+*-J*, *--no-parse-file-position*::
+	Do not attempt parse the line and column from the file names passed on the
+	command line. Without this option, if the file name ends in a colon followed
+	by a number, or two such numbers, they will be interpreted as the position
+	in the file to jump to. With this option, those colons and numbers will be
+	interpreted as part of the file name.
 *-P*, *--no-primary-selection*::
 	Disable the use of the primary selection mechanism (a.k.a. "middle-button
 	paste") for the external clipboard. This can be useful for using Tilde over
 	SSH connections in combination with a Clipboard Manager which can result in
 	slow-downs when selecting text.
+*-T* _terminal_, *--terminal*=_terminal_::
+	Set the terminal type to terminal, overriding the TERM environment variable.
+*-V*, *--version*::
+	Print version and copyright information.
+*-x*, *--no-ext-clipboard*::
+	Tells Tilde not to attempt to connect to the X11 clipboard.
 
 To stop Tilde from interpreting file names that start with a dash as options,
 one can specify a double dash (--) after which Tilde will interpret any
