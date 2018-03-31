@@ -1,5 +1,7 @@
 /src/config
 /testsuite/testlog*.txt
+/testsuite/tests/*/*log.txt
+/testsuite/tests/*/*.log
 /testsuite/work
 /src/helgrind.log
 /src/valgrind.log

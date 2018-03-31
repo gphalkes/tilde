@@ -177,14 +177,14 @@ void attributes_dialog_t::show() {
 void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
   t3_attr_t text_attr;
 
-  text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
+  text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
   change_attribute = attribute;
 
   switch (attribute) {
 #define SET_WITH_DEFAULT(name, attr)                                                         \
   case attr:                                                                                 \
     picker->set_base_attributes(0);                                                          \
-    picker->set_attribute(name.is_valid() ? name()                                           \
+    picker->set_attribute(name.is_valid() ? name.value()                                     \
                                           : get_default_attr(attr, color_box->get_state())); \
     break;
     SET_WITH_DEFAULT(dialog, DIALOG);
@@ -209,7 +209,7 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
 #define SET_WITH_DEFAULT(name, attr)                                                         \
   case attr:                                                                                 \
     picker->set_base_attributes(text_attr);                                                  \
-    picker->set_attribute(name.is_valid() ? name()                                           \
+    picker->set_attribute(name.is_valid() ? name.value()                                     \
                                           : get_default_attr(attr, color_box->get_state())); \
     break;
     SET_WITH_DEFAULT(meta_text, META_TEXT);
@@ -330,14 +330,14 @@ void attributes_dialog_t::set_default_options_from_values() {
 }
 
 void attributes_dialog_t::set_options_from_values(term_options_t *term_options) {
-  option.color = term_options->color = color_box->get_state();
+  term_options->color = option.color = color_box->get_state();
 
-#define SET_WITH_DEFAULT(name, attr)                                                        \
-  do {                                                                                      \
-    term_options->name = name;                                                              \
-    set_attribute(                                                                          \
-        attribute_t::attr,                                                                  \
-        name.is_valid() ? name() : get_default_attribute(attribute_t::attr, option.color)); \
+#define SET_WITH_DEFAULT(name, attr)                                                              \
+  do {                                                                                            \
+    term_options->name = name;                                                                    \
+    set_attribute(                                                                                \
+        attribute_t::attr,                                                                        \
+        name.is_valid() ? name.value() : get_default_attribute(attribute_t::attr, option.color)); \
   } while (false)
   SET_WITH_DEFAULT(dialog, DIALOG);
   SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
@@ -360,20 +360,20 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
 
   term_options->brace_highlight = brace_highlight;
   option.brace_highlight =
-      brace_highlight.is_valid() ? brace_highlight() : get_default_attr(BRACE_HIGHLIGHT);
+      brace_highlight.is_valid() ? brace_highlight.value() : get_default_attr(BRACE_HIGHLIGHT);
 
-#define SET_WITH_DEFAULT(name, attr)                                                      \
-  do {                                                                                    \
-    int highlight_idx = map_highlight(NULL, #name);                                       \
-    term_options->highlights[highlight_idx] = name;                                       \
-    option.highlights[highlight_idx] = name.is_valid() ? name() : get_default_attr(attr); \
+#define SET_WITH_DEFAULT(name, attr)                                                            \
+  do {                                                                                          \
+    int highlight_idx = map_highlight(NULL, #name);                                             \
+    term_options->highlights[highlight_idx] = name;                                             \
+    option.highlights[highlight_idx] = name.is_valid() ? name.value() : get_default_attr(attr); \
   } while (false)
   SET_WITH_DEFAULT(comment, COMMENT);
   {
     int highlight_idx = map_highlight(nullptr, "comment-keyword");
     term_options->highlights[highlight_idx] = comment_keyword;
     option.highlights[highlight_idx] =
-        comment_keyword.is_valid() ? comment_keyword() : get_default_attr(COMMENT_KEYWORD);
+        comment_keyword.is_valid() ? comment_keyword.value() : get_default_attr(COMMENT_KEYWORD);
   }
   SET_WITH_DEFAULT(keyword, KEYWORD);
   SET_WITH_DEFAULT(number, NUMBER);
@@ -382,7 +382,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
     int highlight_idx = map_highlight(nullptr, "string-escape");
     term_options->highlights[highlight_idx] = string_escape;
     option.highlights[highlight_idx] =
-        string_escape.is_valid() ? string_escape() : get_default_attr(STRING_ESCAPE);
+        string_escape.is_valid() ? string_escape.value() : get_default_attr(STRING_ESCAPE);
   }
   SET_WITH_DEFAULT(misc, MISC);
   SET_WITH_DEFAULT(variable, VARIABLE);
@@ -399,7 +399,7 @@ void attributes_dialog_t::update_attribute_lines() {
   bool color = color_box->get_state();
 
 #define SET_WITH_DEFAULT(name, attr) \
-  name##_line->set_attribute(name.is_valid() ? name() : get_default_attr(attr, color))
+  name##_line->set_attribute(name.is_valid() ? name.value() : get_default_attr(attr, color))
   SET_WITH_DEFAULT(dialog, DIALOG);
   SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
   SET_WITH_DEFAULT(shadow, SHADOW);
@@ -419,11 +419,11 @@ void attributes_dialog_t::update_attribute_lines() {
   SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
 #undef SET_WITH_DEFAULT
 
-  text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color);
+  text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color);
 
-#define SET_WITH_DEFAULT(name, attr) \
-  name##_line->set_attribute(        \
-      t3_term_combine_attrs(name.is_valid() ? name() : get_default_attr(attr, color), text_attr))
+#define SET_WITH_DEFAULT(name, attr)                \
+  name##_line->set_attribute(t3_term_combine_attrs( \
+      name.is_valid() ? name.value() : get_default_attr(attr, color), text_attr))
   SET_WITH_DEFAULT(meta_text, META_TEXT);
   SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
 
@@ -443,7 +443,7 @@ void attributes_dialog_t::update_attribute_lines() {
 
 void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
   t3_attr_t text_attr;
-  text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
+  text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
   switch (change_attribute) {
 #define SET_WITH_DEFAULT(name, attr)       \
@@ -504,13 +504,13 @@ void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
 
 void attributes_dialog_t::default_attribute_selected() {
   t3_attr_t text_attr;
-  text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
+  text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
   switch (change_attribute) {
 #define SET_DEFAULT(name, attr)                                                                   \
   case attr:                                                                                      \
     name = default_option.term_options.name;                                                      \
-    name##_line->set_attribute(name.is_valid() ? name()                                           \
+    name##_line->set_attribute(name.is_valid() ? name.value()                                     \
                                                : get_default_attr(attr, color_box->get_state())); \
     break;
     SET_DEFAULT(dialog, DIALOG);
@@ -535,7 +535,7 @@ void attributes_dialog_t::default_attribute_selected() {
 
 #define SET_DEFAULT(name, attr)                                                            \
   case attr:                                                                               \
-    name.unset();                                                                          \
+    name.reset();                                                                          \
     name##_line->set_attribute(                                                            \
         t3_term_combine_attrs(get_default_attr(attr, color_box->get_state()), text_attr)); \
     break;

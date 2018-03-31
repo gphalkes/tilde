@@ -336,7 +336,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         state->state = save_as_process_t::WRITING;
       }
     case save_as_process_t::WRITING: {
-      if (strip_spaces.is_valid() ? strip_spaces() : option.strip_spaces) {
+      if (strip_spaces.is_valid() ? strip_spaces.value() : option.strip_spaces) {
         do_strip_spaces();
       }
       try {
@@ -449,7 +449,7 @@ void file_buffer_t::set_highlight(t3_highlight_t *highlight) {
 
 bool file_buffer_t::get_strip_spaces() const {
   if (strip_spaces.is_valid()) {
-    return strip_spaces;
+    return strip_spaces.value();
   }
   return option.strip_spaces;
 }

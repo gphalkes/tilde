@@ -42,7 +42,7 @@ open_recent_dialog_t::open_recent_dialog_t(int height, int width)
 
 bool open_recent_dialog_t::set_size(optint height, optint width) {
   bool result = dialog_t::set_size(height, width);
-  result &= list->set_size(height - 3, width - 2);
+  result &= list->set_size(height.value() - 3, width.value() - 2);
   return result;
 }
 

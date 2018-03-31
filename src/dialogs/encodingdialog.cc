@@ -160,7 +160,7 @@ bool encoding_dialog_t::set_size(optint height, optint width) {
   }
 
   result &= dialog_t::set_size(height, width);
-  result &= list->set_size(height - 4, width - 2);
+  result &= list->set_size(height.value() - 4, width.value() - 2);
   return result;
 }
 

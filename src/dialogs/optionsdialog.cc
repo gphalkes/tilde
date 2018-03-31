@@ -190,14 +190,14 @@ void buffer_options_dialog_t::set_values_from_options() {
 void buffer_options_dialog_t::set_options_from_values() {
   int tabsize = atoi(tabsize_field->get_text()->c_str());
   if (tabsize > 0 || tabsize < 17) {
-    option.tabsize = default_option.tabsize = tabsize;
+    default_option.tabsize = option.tabsize = tabsize;
   }
-  option.wrap = default_option.wrap = wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE;
-  option.tab_spaces = default_option.tab_spaces = tab_spaces_box->get_state();
-  option.auto_indent = default_option.auto_indent = auto_indent_box->get_state();
-  option.indent_aware_home = default_option.indent_aware_home = indent_aware_home_box->get_state();
-  option.show_tabs = default_option.show_tabs = show_tabs_box->get_state();
-  option.strip_spaces = default_option.strip_spaces = strip_spaces_box->get_state();
+  default_option.wrap = option.wrap = wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE;
+  default_option.tab_spaces = option.tab_spaces = tab_spaces_box->get_state();
+  default_option.auto_indent = option.auto_indent = auto_indent_box->get_state();
+  default_option.indent_aware_home = option.indent_aware_home = indent_aware_home_box->get_state();
+  default_option.show_tabs = option.show_tabs = show_tabs_box->get_state();
+  default_option.strip_spaces = option.strip_spaces = strip_spaces_box->get_state();
 }
 
 void buffer_options_dialog_t::handle_activate() {
@@ -304,19 +304,19 @@ misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 2
 void misc_options_dialog_t::set_values_from_options() {
   hide_menu_box->set_state(option.hide_menubar);
   save_backup_box->set_state(option.make_backup);
-  parse_file_positions_box->set_state(default_option.parse_file_positions.value_or_default(true));
+  parse_file_positions_box->set_state(default_option.parse_file_positions.value_or(true));
   disable_selection_over_ssh_box->set_state(
-      default_option.disable_primary_selection_over_ssh.value_or_default(false));
+      default_option.disable_primary_selection_over_ssh.value_or(false));
 }
 
 void misc_options_dialog_t::set_options_from_values() {
-  option.hide_menubar = default_option.hide_menubar = hide_menu_box->get_state();
-  option.make_backup = default_option.make_backup = save_backup_box->get_state();
+  default_option.hide_menubar = option.hide_menubar = hide_menu_box->get_state();
+  default_option.make_backup = option.make_backup = save_backup_box->get_state();
   default_option.parse_file_positions = parse_file_positions_box->get_state();
   default_option.disable_primary_selection_over_ssh = disable_selection_over_ssh_box->get_state();
   if (!cli_option.disable_primary_selection && getenv("SSH_TTY") != nullptr) {
     t3_widget::set_primary_selection_mode(
-        !default_option.disable_primary_selection_over_ssh.value_or_default(false));
+        !default_option.disable_primary_selection_over_ssh.value_or(false));
   }
 }
 

@@ -280,7 +280,7 @@ main_t::~main_t() {
 bool main_t::process_key(t3_widget::key_t key) {
   optional<action_id_t> action = key_bindings.find_action(key);
   if (action.is_valid()) {
-    menu_activated(action());
+    menu_activated(action.value());
   } else {
     return main_window_base_t::process_key(key);
   }
@@ -291,17 +291,18 @@ bool main_t::set_size(optint height, optint width) {
   bool result;
 
   result = menu->set_size(None, width);
-  result &= split->set_size(height - !option.hide_menubar, width);
-  result &= select_buffer_dialog->set_size(None, width - 4);
-  result &= open_file_dialog->set_size(height - 4, width - 4);
-  result &= save_as_dialog->set_size(height - 4, width - 4);
-  result &= open_recent_dialog->set_size(11, width - 4);
-  result &= encoding_dialog->set_size(std::min(height - 8, 16), std::min(width - 8, 72));
-  result &= highlight_dialog->set_size(height - 4, None);
+  result &= split->set_size(height.value() - !option.hide_menubar, width.value());
+  result &= select_buffer_dialog->set_size(None, width.value() - 4);
+  result &= open_file_dialog->set_size(height.value() - 4, width.value() - 4);
+  result &= save_as_dialog->set_size(height.value() - 4, width.value() - 4);
+  result &= open_recent_dialog->set_size(11, width.value() - 4);
+  result &=
+      encoding_dialog->set_size(std::min(height.value() - 8, 16), std::min(width.value() - 8, 72));
+  result &= highlight_dialog->set_size(height.value() - 4, None);
   if (input_selection_dialog != nullptr &&
       dynamic_cast<input_selection_dialog_t *>(input_selection_dialog) != nullptr) {
-    int is_width = std::min(std::max(width - 16, 40), 100);
-    int is_height = std::min(std::max(height - 3, 15), 3200 / is_width);
+    int is_width = std::min(std::max(width.value() - 16, 40), 100);
+    int is_height = std::min(std::max(height.value() - 3, 15), 3200 / is_width);
     result &= input_selection_dialog->set_size(is_height, is_width);
   }
   return result;
@@ -790,7 +791,7 @@ int main(int argc, char *argv[]) {
   }
   params->program_name = "Tilde";
   params->disable_external_clipboard = cli_option.disable_external_clipboard;
-  if ((default_option.disable_primary_selection_over_ssh.value_or_default(false) &&
+  if ((default_option.disable_primary_selection_over_ssh.value_or(false) &&
        getenv("SSH_TTY") != nullptr) ||
       cli_option.disable_primary_selection) {
     t3_widget::set_primary_selection_mode(false);
@@ -815,7 +816,7 @@ int main(int argc, char *argv[]) {
   main_window->show();
 
   if (option.key_timeout.is_valid()) {
-    set_key_timeout(option.key_timeout);
+    set_key_timeout(option.key_timeout.value());
   } else if (config_read_error) {
     std::string message = "Error loading configuration file ";
     if (!cli_option.config_file.is_valid()) {
@@ -824,7 +825,7 @@ int main(int argc, char *argv[]) {
       cli_option.config_file = strings::Cat(file_name.get(), "/config");
     }
 
-    strings::Append(&message, cli_option.config_file, ": ", config_read_error_string);
+    strings::Append(&message, cli_option.config_file.value(), ": ", config_read_error_string);
     if (config_read_error_line != 0) {
       strings::Append(&message, " at line ", config_read_error_line);
     }
@@ -839,7 +840,7 @@ int main(int argc, char *argv[]) {
     */
     if (config_read_error_line != 0) {
       cli_option.files.clear();
-      cli_option.files.push_back(cli_option.config_file().c_str());
+      cli_option.files.push_back(cli_option.config_file.value().c_str());
     }
 
     message_dialog->set_message(message);

@@ -259,7 +259,7 @@ static void read_config() {
   const char *term;
 
   if (cli_option.config_file.is_valid()) {
-    config_file.reset(fopen(cli_option.config_file().c_str(), "r"));
+    config_file.reset(fopen(cli_option.config_file.value().c_str(), "r"));
   } else {
     config_file.reset(t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config"));
   }
@@ -341,17 +341,17 @@ static void read_config() {
   }
 }
 
-#define SET_OPT_FROM_FILE(name, deflt)                                        \
-  do {                                                                        \
-    if (term_specific_option.name.is_valid())                                 \
-      option.name = term_specific_option.name;                                \
-    else                                                                      \
-      option.name = default_option.term_options.name.value_or_default(deflt); \
+#define SET_OPT_FROM_FILE(name, deflt)                                \
+  do {                                                                \
+    if (term_specific_option.name.is_valid())                         \
+      option.name = term_specific_option.name.value();                \
+    else                                                              \
+      option.name = default_option.term_options.name.value_or(deflt); \
   } while (false)
 
-#define SET_OPT_FROM_DFLT(name, deflt)                         \
-  do {                                                         \
-    option.name = default_option.name.value_or_default(deflt); \
+#define SET_OPT_FROM_DFLT(name, deflt)                 \
+  do {                                                 \
+    option.name = default_option.name.value_or(deflt); \
   } while (false)
 
 static void post_process_options() {
@@ -361,7 +361,7 @@ static void post_process_options() {
   SET_OPT_FROM_DFLT(wrap, false);
 
   if (cli_option.color.is_valid()) {
-    option.color = cli_option.color;
+    option.color = cli_option.color.value();
   } else {
     SET_OPT_FROM_FILE(color, true);
   }
@@ -510,12 +510,12 @@ PARSE_FUNCTION(parse_args)
 END_FUNCTION
 // clang-format on
 
-#define SET_ATTR_FROM_FILE(name, const_name)                       \
-  do {                                                             \
-    if (term_specific_option.name.is_valid())                      \
-      set_attribute(const_name, term_specific_option.name);        \
-    else if (default_option.term_options.name.is_valid())          \
-      set_attribute(const_name, default_option.term_options.name); \
+#define SET_ATTR_FROM_FILE(name, const_name)                               \
+  do {                                                                     \
+    if (term_specific_option.name.is_valid())                              \
+      set_attribute(const_name, term_specific_option.name.value());        \
+    else if (default_option.term_options.name.is_valid())                  \
+      set_attribute(const_name, default_option.term_options.name.value()); \
   } while (false)
 
 void set_attributes() {
@@ -563,7 +563,7 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
   config = t3_config_add_list(attributes, name, nullptr);
 
   for (i = 0; i < ARRAY_SIZE(attribute_masks); i++) {
-    t3_attr_t search = attr & attribute_masks[i];
+    t3_attr_t search = attr.value() & attribute_masks[i];
     if (search == 0) {
       continue;
     }
@@ -588,12 +588,12 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
   }
 }
 
-#define SET_OPTION(name, type)                           \
-  do {                                                   \
-    if (opts->name.is_valid())                           \
-      t3_config_add_##type(&*config, #name, opts->name); \
-    else                                                 \
-      t3_config_erase(&*config, #name);                  \
+#define SET_OPTION(name, type)                                   \
+  do {                                                           \
+    if (opts->name.is_valid())                                   \
+      t3_config_add_##type(&*config, #name, opts->name.value()); \
+    else                                                         \
+      t3_config_erase(&*config, #name);                          \
   } while (false)
 #define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, opts->name)
 #define SET_HL_ATTRIBUTE(x, name) \
@@ -656,7 +656,7 @@ bool write_config() {
   }
 
   if (cli_option.config_file.is_valid()) {
-    config_file.reset(fopen(cli_option.config_file().c_str(), "r"));
+    config_file.reset(fopen(cli_option.config_file.value().c_str(), "r"));
   } else {
     config_file.reset(t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config"));
   }
@@ -683,7 +683,7 @@ bool write_config() {
     }
   }
 
-  default_option.term_options.key_timeout.unset();
+  default_option.term_options.key_timeout.reset();
   set_term_config_options(config.get(), &default_option.term_options);
 
 #define opts (&default_option)
@@ -733,7 +733,7 @@ bool write_config() {
   }
 
   if (cli_option.config_file.is_valid()) {
-    new_config_file = t3_config_open_write(cli_option.config_file().c_str());
+    new_config_file = t3_config_open_write(cli_option.config_file.value().c_str());
   } else {
     new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   }

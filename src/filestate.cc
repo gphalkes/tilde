@@ -446,7 +446,7 @@ bool load_cli_file_process_t::step() {
   if (!encoding_selected) {
     encoding_selected = true;
     if (cli_option.encoding.is_valid()) {
-      if (cli_option.encoding == nullptr) {
+      if (cli_option.encoding.value() == nullptr) {
         encoding_dialog->set_encoding("UTF-8");
         encoding_dialog->connect_activate(
             bind_front(&load_cli_file_process_t::encoding_selection_done, this));
@@ -454,7 +454,7 @@ bool load_cli_file_process_t::step() {
         encoding_dialog->show();
         return false;
       } else {
-        encoding = cli_option.encoding;
+        encoding = cli_option.encoding.value();
       }
     }
   }
@@ -463,7 +463,7 @@ bool load_cli_file_process_t::step() {
   while (iter != cli_option.files.end()) {
     int line = -1, pos = -1;
     std::string filename = *iter;
-    if (default_option.parse_file_positions.value_or_default(true) &&
+    if (default_option.parse_file_positions.value_or(true) &&
         !cli_option.disable_file_position_parsing) {
       attempt_file_position_parse(&filename, &line, &pos);
     }
