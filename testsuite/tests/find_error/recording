@@ -1,4 +1,5 @@
 # Recorded with working directory /home/gertjan/projects/tilde/tilde/testsuite/work/context
+require_version 2
 env "TERM" "xterm"
 env "LANG" "en_US.UTF-8"
 window_size 80 24

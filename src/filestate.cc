@@ -125,15 +125,15 @@ bool load_process_t::step() {
   return true;
 }
 
-void load_process_t::file_selected(const std::string *name) {
+void load_process_t::file_selected(const std::string &name) {
   open_files_t::iterator iter;
-  if ((iter = open_files.contains(name->c_str())) != open_files.end()) {
+  if ((iter = open_files.contains(name.c_str())) != open_files.end()) {
     file = *iter;
     done(true);
     return;
   }
 
-  file = new file_buffer_t(name->c_str(), encoding.c_str());
+  file = new file_buffer_t(name, encoding);
   state = INITIAL;
   run();
 }
@@ -258,8 +258,8 @@ bool save_as_process_t::step() {
   return true;
 }
 
-void save_as_process_t::file_selected(const std::string *_name) {
-  name = *_name;
+void save_as_process_t::file_selected(const std::string &_name) {
+  name = _name;
   state = INITIAL;
   if (allow_highlight_change) {
     highlight_changed = true;
@@ -420,7 +420,7 @@ bool open_recent_process_t::step() {
 
 void open_recent_process_t::recent_file_selected(recent_file_info_t *_info) {
   info = _info;
-  file = new file_buffer_t(info->get_name().c_str(), info->get_encoding());
+  file = new file_buffer_t(info->get_name(), info->get_encoding());
   state = INITIAL;
   run();
 }

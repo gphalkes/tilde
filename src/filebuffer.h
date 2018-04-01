@@ -50,7 +50,7 @@ class file_buffer_t : public text_buffer_t {
   bool find_matching_brace(text_coordinate_t &match_location);
 
  public:
-  explicit file_buffer_t(const char *_name = nullptr, const char *_encoding = nullptr);
+  explicit file_buffer_t(string_view _name = {"", 0}, string_view _encoding = {"", 0});
   ~file_buffer_t() override;
   rw_result_t load(load_process_t *state);
   rw_result_t save(save_as_process_t *state);

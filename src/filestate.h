@@ -83,7 +83,7 @@ class load_process_t : public stepped_process_t {
   load_process_t(const callback_t &cb, const char *name, const char *_encoding, bool missing_ok);
   void abort();
   bool step() override;
-  virtual void file_selected(const std::string *name);
+  virtual void file_selected(const std::string &name);
   virtual void encoding_selected(const std::string *_encoding);
   ~load_process_t() override;
   void preserve_bom();
@@ -121,7 +121,7 @@ class save_as_process_t : public stepped_process_t {
   save_as_process_t(const callback_t &cb, file_buffer_t *_file,
                     bool _allow_highlight_change = true);
   bool step() override;
-  virtual void file_selected(const std::string *_name);
+  virtual void file_selected(const std::string &_name);
   virtual void encoding_selected(const std::string *_encoding);
   ~save_as_process_t() override;
 

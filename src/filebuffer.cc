@@ -30,7 +30,7 @@
 
 #define CREATE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
 
-file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
+file_buffer_t::file_buffer_t(string_view _name, string_view _encoding)
     : text_buffer_t(new file_line_factory_t(this)),
       view_parameters(new edit_window_t::view_parameters_t()),
       has_window(false),
@@ -39,16 +39,16 @@ file_buffer_t::file_buffer_t(const char *_name, const char *_encoding)
       match_line(nullptr),
       last_match(nullptr),
       matching_brace_valid(false) {
-  if (_encoding == nullptr || strlen(_encoding) == 0) {
+  if (_encoding.size() == 0) {
     encoding = "UTF-8";
   } else {
-    encoding = _encoding;
+    encoding = to_string(_encoding);
   }
 
-  if (_name == nullptr || strlen(_name) == 0) {
+  if (_name.size() == 0) {
     name_line.set_text("(Untitled)");
   } else {
-    name = _name;
+    name = to_string(_name);
 
     std::string converted_name;
     convert_lang_codeset(&name, &converted_name, true);
