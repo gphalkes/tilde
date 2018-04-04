@@ -42,16 +42,15 @@ file_buffer_t::file_buffer_t(string_view _name, string_view _encoding)
   if (_encoding.size() == 0) {
     encoding = "UTF-8";
   } else {
-    encoding = to_string(_encoding);
+    encoding = as_string(_encoding);
   }
 
   if (_name.size() == 0) {
     name_line.set_text("(Untitled)");
   } else {
-    name = to_string(_name);
+    name = as_string(_name);
 
-    std::string converted_name;
-    convert_lang_codeset(&name, &converted_name, true);
+    std::string converted_name = convert_lang_codeset(name, true);
     name_line.set_text(converted_name);
   }
 
@@ -87,12 +86,10 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
   switch (state->state) {
     case load_process_t::INITIAL_MISSING_OK:
     case load_process_t::INITIAL: {
-      std::string converted_name;
-      std::string _name;
       transcript_t *handle;
       transcript_error_t error;
 
-      _name = canonicalize_path(name.c_str());
+      std::string _name = canonicalize_path(name.c_str());
       if (_name.empty()) {
         if (errno == ENOENT && state->state == load_process_t::INITIAL_MISSING_OK) {
           break;
@@ -101,7 +98,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
       }
 
       name = _name;
-      convert_lang_codeset(&name, &converted_name, true);
+      std::string converted_name = convert_lang_codeset(name, true);
       name_line.set_text(converted_name);
 
       if ((state->fd = open(name.c_str(), O_RDONLY)) < 0) {
@@ -375,9 +372,8 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       }
 
       if (!state->name.empty()) {
-        std::string converted_name;
         name = state->name;
-        convert_lang_codeset(&name, &converted_name, true);
+        std::string converted_name = convert_lang_codeset(name, true);
         name_line.set_text(converted_name);
       }
       set_undo_mark();

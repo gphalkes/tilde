@@ -86,7 +86,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   }
 
   for (string_view word : result_set) {
-    current_list->push_back(to_string(word));
+    current_list->push_back(as_string(word));
   }
   *position = completion_start;
 
