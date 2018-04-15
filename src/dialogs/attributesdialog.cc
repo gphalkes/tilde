@@ -49,7 +49,7 @@
   } while (false)
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
-attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interface") {
+attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Interface")) {
   smart_label_t *label;
   button_t *change_button, *ok_button, *cancel_button, *save_defaults_button;
 

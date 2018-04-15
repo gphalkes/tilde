@@ -17,7 +17,7 @@
 #include "openfiles.h"
 
 open_recent_dialog_t::open_recent_dialog_t(int height, int width)
-    : dialog_t(height, width, "Open Recent"), known_version(INT_MIN) {
+    : dialog_t(height, width, _("Open Recent")), known_version(INT_MIN) {
   button_t *ok_button, *cancel_button;
 
   list = new list_pane_t(true);

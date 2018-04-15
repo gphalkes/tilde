@@ -19,7 +19,8 @@
 
 static t3_widget::key_t number_keys[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
-buffer_options_dialog_t::buffer_options_dialog_t(const char *_title) : dialog_t(10, 25, _title) {
+buffer_options_dialog_t::buffer_options_dialog_t(optional<std::string> _title)
+    : dialog_t(10, 25, std::move(_title)) {
   smart_label_t *label;
   int width;
   button_t *ok_button, *cancel_button;
@@ -154,7 +155,7 @@ void buffer_options_dialog_t::set_values_from_view(file_edit_window_t *view) {
   tabsize_field->set_text(tabsize_text);
 
   tab_spaces_box->set_state(view->get_tab_spaces());
-  wrap_box->set_state(view->get_wrap());
+  wrap_box->set_state(view->get_wrap() != wrap_type_t::NONE);
   auto_indent_box->set_state(view->get_auto_indent());
   indent_aware_home_box->set_state(view->get_indent_aware_home());
   show_tabs_box->set_state(view->get_show_tabs());
@@ -192,7 +193,7 @@ void buffer_options_dialog_t::set_options_from_values() {
   if (tabsize > 0 || tabsize < 17) {
     default_option.tabsize = option.tabsize = tabsize;
   }
-  default_option.wrap = option.wrap = wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE;
+  default_option.wrap = option.wrap = wrap_box->get_state();
   default_option.tab_spaces = option.tab_spaces = tab_spaces_box->get_state();
   default_option.auto_indent = option.auto_indent = auto_indent_box->get_state();
   default_option.indent_aware_home = option.indent_aware_home = indent_aware_home_box->get_state();
@@ -214,7 +215,8 @@ void buffer_options_dialog_t::handle_activate() {
 
 //===============================================================
 
-misc_options_dialog_t::misc_options_dialog_t(const char *_title) : dialog_t(7, 26, _title) {
+misc_options_dialog_t::misc_options_dialog_t(optional<std::string> _title)
+    : dialog_t(7, 26, std::move(_title)) {
   smart_label_t *label;
   int width = 0;
   button_t *ok_button, *cancel_button;

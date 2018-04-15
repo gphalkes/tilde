@@ -15,7 +15,7 @@
 #include "openfiles.h"
 
 select_buffer_dialog_t::select_buffer_dialog_t(int height, int width)
-    : dialog_t(height, width, "Select Buffer"), known_version(INT_MIN) {
+    : dialog_t(height, width, _("Select Buffer")), known_version(INT_MIN) {
   button_t *ok_button, *cancel_button;
 
   list = new list_pane_t(true);

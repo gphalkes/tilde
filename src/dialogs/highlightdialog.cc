@@ -26,7 +26,7 @@ static bool cmp_lang_names(t3_highlight_lang_t a, t3_highlight_lang_t b) {
 }
 
 highlight_dialog_t::highlight_dialog_t(int height, int width)
-    : dialog_t(height, width, "Highlighting Language") {
+    : dialog_t(height, width, _("Highlighting Language")) {
   button_t *ok_button, *cancel_button;
   label_t *label;
   t3_highlight_error_t error;

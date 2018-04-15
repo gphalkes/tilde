@@ -19,6 +19,7 @@
 
 #include "encodingdialog.h"
 #include "log.h"
+#include "util.h"
 
 struct charset_desc_t {
   const char *name;  // Display name for this character set
@@ -104,7 +105,7 @@ void init_charsets() {
 }
 
 encoding_dialog_t::encoding_dialog_t(int height, int width)
-    : dialog_t(height, width, "Encoding"), selected(-1), saved_tag(nullptr) {
+    : dialog_t(height, width, _("Encoding")), selected(-1), saved_tag(nullptr) {
   button_t *ok_button, *cancel_button;
 
   list = new list_pane_t(true);
