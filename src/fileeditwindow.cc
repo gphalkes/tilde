@@ -90,12 +90,12 @@ bool file_edit_window_t::process_key(t3_widget::key_t key) {
       case EKEY_CTRL | ']':
         if (get_text()->goto_matching_brace()) {
           ensure_cursor_on_screen();
-          redraw = true;
+          force_redraw();
         }
         return true;
       case EKEY_CTRL | '_':
         get_text()->toggle_line_comment();
-        redraw = true;
+        force_redraw();
         return true;
       default:
         break;
@@ -107,7 +107,7 @@ bool file_edit_window_t::process_key(t3_widget::key_t key) {
 void file_edit_window_t::goto_matching_brace() {
   if (get_text()->goto_matching_brace()) {
     ensure_cursor_on_screen();
-    redraw = true;
+    force_redraw();
   }
 }
 
