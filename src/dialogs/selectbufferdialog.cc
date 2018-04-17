@@ -87,6 +87,7 @@ void select_buffer_dialog_t::show() {
       label = new label_t(name);
       label->set_anchor(bullet, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
+      label->set_accepts_focus(true);
       multi_widget->push_back(label, 1, true, false);
       list->push_back(multi_widget);
     }
