@@ -116,8 +116,7 @@ encoding_dialog_t::encoding_dialog_t(int height, int width)
 
   for (charset_descs_t::const_iterator iter = available_charsets.begin();
        iter != available_charsets.end(); iter++) {
-    label_t *label = new label_t(iter->name);
-    list->push_back(label);
+    list->push_back(make_unique<label_t>(iter->name));
   }
 
   horizontal_separator = new separator_t();

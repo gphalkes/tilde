@@ -51,15 +51,13 @@ void open_recent_dialog_t::show() {
     known_version = recent_files.get_version();
 
     while (!list->empty()) {
-      widget_t *widget = list->back();
       list->pop_back();
-      delete widget;
     }
 
     for (recent_file_info_t *recent_file : recent_files) {
-      label_t *label = new label_t(recent_file->get_name().c_str());
+      std::unique_ptr<label_t> label(new label_t(recent_file->get_name().c_str()));
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
-      list->push_back(label);
+      list->push_back(std::move(label));
     }
   }
   list->reset();

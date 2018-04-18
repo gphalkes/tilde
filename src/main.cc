@@ -109,7 +109,6 @@ key_bindings_t<action_id_t> main_t::key_bindings{
 
 main_t::main_t() {
   button_t *encoding_button;
-  file_edit_window_t *edit;
 
   menu = new menu_bar_t(option.hide_menubar);
   menu->set_size(None, window.get_width());
@@ -185,8 +184,7 @@ main_t::main_t() {
   //~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
   panel->add_item("_About", nullptr, action_id_t::HELP_ABOUT);
 
-  edit = new file_edit_window_t();
-  split = new split_t(edit);
+  split = new split_t(make_unique<file_edit_window_t>());
   split->set_position(!option.hide_menubar, 0);
   split->set_size(window.get_height() - !option.hide_menubar, window.get_width());
   push_back(split);
@@ -437,7 +435,7 @@ void main_t::menu_activated(int id) {
     case action_id_t::WINDOWS_VSPLIT: {
       file_buffer_t *new_file = open_files.next_buffer(nullptr);
       // If new_file is NULL, a new file_buffer_t will be created
-      split->split(new file_edit_window_t(new_file), id == action_id_t::WINDOWS_HSPLIT);
+      split->split(make_unique<file_edit_window_t>(new_file), id == action_id_t::WINDOWS_HSPLIT);
       break;
     }
     case action_id_t::WINDOWS_NEXT_WINDOW:
@@ -447,17 +445,17 @@ void main_t::menu_activated(int id) {
       split->previous();
       break;
     case action_id_t::WINDOWS_MERGE: {
-      file_edit_window_t *widget = static_cast<file_edit_window_t *>(split->unsplit());
+      file_edit_window_t *widget = static_cast<file_edit_window_t *>(split->unsplit().release());
       if (widget == nullptr) {
         message_dialog->set_message("Can not close the last window.");
         message_dialog->center_over(this);
         message_dialog->show();
       } else {
         file_buffer_t *text = widget->get_text();
+        delete widget;
         if (text->get_name().empty() && !text->is_modified()) {
           delete text;
         }
-        delete widget;
       }
       break;
     }

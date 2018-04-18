@@ -29,29 +29,29 @@
 
 #define ADD_ATTRIBUTE_ENTRY(name, sym, widget_name)                                           \
   do {                                                                                        \
-    label = new smart_label_t(name);                                                          \
-    label->set_position(widget_count, 0);                                                     \
-    widget_group->add_child(label);                                                           \
-    change_button = new button_t("Change");                                                   \
+    std::unique_ptr<smart_label_t> attribute_label(new smart_label_t(name));                  \
+    attribute_label->set_position(widget_count, 0);                                           \
+    widget_group->add_child(std::move(attribute_label));                                      \
+    std::unique_ptr<button_t> change_button(new button_t("Change"));                          \
     change_button->set_anchor(widget_group,                                                   \
                               T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));  \
     change_button->set_position(widget_count, 0);                                             \
     change_button->connect_activate([this] { change_button_activated(sym); });                \
     change_button->connect_move_focus_up([widget_group] { widget_group->focus_previous(); }); \
     change_button->connect_move_focus_down([widget_group] { widget_group->focus_next(); });   \
-    widget_group->add_child(change_button);                                                   \
     widget_name = new attribute_test_line_t();                                                \
-    widget_name->set_anchor(change_button,                                                    \
+    widget_name->set_anchor(change_button.get(),                                              \
                             T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));     \
     widget_name->set_position(0, -2);                                                         \
-    widget_group->add_child(widget_name);                                                     \
+    widget_group->add_child(std::move(change_button));                                        \
+    widget_group->add_child(wrap_unique(widget_name));                                        \
     widget_count++;                                                                           \
   } while (false)
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
 attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Interface")) {
   smart_label_t *label;
-  button_t *change_button, *ok_button, *cancel_button, *save_defaults_button;
+  button_t *ok_button, *cancel_button, *save_defaults_button;
 
   label = new smart_label_t(_("Color _mode"));
   label->set_position(1, 2);

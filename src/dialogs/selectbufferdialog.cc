@@ -60,14 +60,11 @@ bool select_buffer_dialog_t::set_size(optint height, optint width) {
 
 void select_buffer_dialog_t::show() {
   if (open_files.get_version() != known_version) {
-    multi_widget_t *multi_widget;
     known_version = open_files.get_version();
     int width = window.get_width();
 
     while (!list->empty()) {
-      multi_widget = (multi_widget_t *)list->back();
       list->pop_back();
-      delete multi_widget;
     }
 
     for (file_buffer_t *open_file : open_files) {
@@ -75,7 +72,7 @@ void select_buffer_dialog_t::show() {
       label_t *label;
       const char *name;
 
-      multi_widget = new multi_widget_t();
+      std::unique_ptr<multi_widget_t> multi_widget(new multi_widget_t());
       multi_widget->set_size(None, width - 5);
       multi_widget->show();
       bullet = new bullet_t([open_file] { return open_file->get_has_window(); });
@@ -89,7 +86,7 @@ void select_buffer_dialog_t::show() {
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
       label->set_accepts_focus(true);
       multi_widget->push_back(label, 1, true, false);
-      list->push_back(multi_widget);
+      list->push_back(std::move(multi_widget));
     }
   }
   list->reset();

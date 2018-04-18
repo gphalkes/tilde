@@ -28,7 +28,6 @@ static bool cmp_lang_names(t3_highlight_lang_t a, t3_highlight_lang_t b) {
 highlight_dialog_t::highlight_dialog_t(int height, int width)
     : dialog_t(height, width, _("Highlighting Language")) {
   button_t *ok_button, *cancel_button;
-  label_t *label;
   t3_highlight_error_t error;
 
   list = new list_pane_t(true);
@@ -36,8 +35,7 @@ highlight_dialog_t::highlight_dialog_t(int height, int width)
   list->set_position(1, 1);
   list->connect_activate([this] { ok_activated(); });
 
-  label = new label_t("Plain Text");
-  list->push_back(label);
+  list->push_back(make_unique<label_t>("Plain Text"));
 
   names.reset(t3_highlight_list(0, &error));
   if (names == nullptr) {
@@ -51,8 +49,7 @@ highlight_dialog_t::highlight_dialog_t(int height, int width)
     std::sort(names.get(), ptr, cmp_lang_names);
 
     for (ptr = names.get(); ptr->name != nullptr; ptr++) {
-      label = new label_t(ptr->name);
-      list->push_back(label);
+      list->push_back(make_unique<label_t>(ptr->name));
     }
   }
 
