@@ -58,7 +58,7 @@ t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t *info) {
   t3_attr_t result = idx < 0 ? info->normal_attr : option.highlights[idx];
 
   if (file->matching_brace_valid &&
-      (i == info->cursor || (this == file->get_line_data(file->matching_brace_coordinate.line) &&
+      (i == info->cursor || (this == &file->get_line_data(file->matching_brace_coordinate.line) &&
                              i == file->matching_brace_coordinate.pos))) {
     result = t3_term_combine_attrs(result, option.brace_highlight);
   }

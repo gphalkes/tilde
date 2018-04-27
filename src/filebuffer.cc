@@ -184,17 +184,17 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
      any autodetection based on the first line or the file name.
   */
   for (i = 0; i < size() && i < 5 && !success; i++) {
-    line = get_line_data(i)->get_data();
+    line = get_line_data(i).get_data();
     success =
         t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   for (i = size() - 1; i >= 5 && !success; i--) {
-    line = get_line_data(i)->get_data();
+    line = get_line_data(i).get_data();
     success =
         t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   if (!success) {
-    line = get_line_data(0)->get_data();
+    line = get_line_data(0).get_data();
     success =
         t3_highlight_detect(line->data(), line->size(), true, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
@@ -342,7 +342,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
           if (state->i != 0) {
             state->wrapper->write("\n", 1);
           }
-          data = get_line_data(state->i)->get_data();
+          data = get_line_data(state->i).get_data();
           state->wrapper->write(data->data(), data->size());
         }
       } catch (rw_result_t error) {
@@ -403,8 +403,8 @@ void file_buffer_t::prepare_paint_line(int line) {
   }
 
   for (i = highlight_valid >= 0 ? highlight_valid + 1 : 1; i <= line; i++) {
-    int state = static_cast<file_line_t *>(get_line_data_nonconst(i - 1))->get_highlight_end();
-    static_cast<file_line_t *>(get_line_data_nonconst(i))->set_highlight_start(state);
+    int state = static_cast<file_line_t *>(get_mutable_line_data(i - 1))->get_highlight_end();
+    static_cast<file_line_t *>(get_mutable_line_data(i))->set_highlight_start(state);
   }
   highlight_valid = line;
   match_line = nullptr;
@@ -465,8 +465,8 @@ void file_buffer_t::do_strip_spaces() {
      we have to implement undo/redo separately. */
 
   for (i = 0; i < size(); i++) {
-    const text_line_t *line = get_line_data(i);
-    const std::string *str = line->get_data();
+    const text_line_t &line = get_line_data(i);
+    const std::string *str = line.get_data();
     const char *data = str->data();
     strip_start = str->size();
     for (idx = strip_start; idx > 0; idx--) {
@@ -474,7 +474,7 @@ void file_buffer_t::do_strip_spaces() {
         continue;
       }
 
-      if (!line->is_space(idx - 1)) {
+      if (!line.is_space(idx - 1)) {
         break;
       }
 
@@ -739,7 +739,7 @@ void file_buffer_t::toggle_line_comment() {
   }
 
   if (get_selection_mode() == selection_mode_t::NONE) {
-    const std::string *text = get_line_data(cursor.line)->get_data();
+    const std::string *text = get_line_data(cursor.line).get_data();
     int comment_start = starts_with_comment(text, &line_comment);
     if (comment_start >= 0) {
       text_coordinate_t saved_cursor = cursor;
@@ -754,7 +754,7 @@ void file_buffer_t::toggle_line_comment() {
       // FIXME: this causes the cursor position to be recorded incorrectly in the undo information.
       // although one could argue this is to some extent better as it shows the actual edit.
       cursor.pos = 0;
-      insert_block(&line_comment);
+      insert_block(line_comment);
       cursor.pos = saved_cursor.pos + line_comment.size();
     }
   } else {
@@ -764,7 +764,7 @@ void file_buffer_t::toggle_line_comment() {
     int last_line = std::max(selection_start.line, selection_end.line);
     int i;
     for (i = first_line; i <= last_line; i++) {
-      const std::string *text = get_line_data(i)->get_data();
+      const std::string *text = get_line_data(i).get_data();
       int comment_start = starts_with_comment(text, &line_comment);
       if (comment_start < 0) {
         break;
@@ -775,7 +775,7 @@ void file_buffer_t::toggle_line_comment() {
     // for undos is as expected. Ideally we'd just call start_undo_block here.
     if (i > last_line) {
       for (i = first_line; i <= last_line; i++) {
-        const std::string *text = get_line_data(i)->get_data();
+        const std::string *text = get_line_data(i).get_data();
         int comment_start = starts_with_comment(text, &line_comment);
         if (i == selection_start.line && comment_start < selection_start.pos) {
           selection_start.pos -=
@@ -800,7 +800,7 @@ void file_buffer_t::toggle_line_comment() {
         if (i == first_line) {
           start_undo_block();
         }
-        insert_block(&line_comment);
+        insert_block(line_comment);
       }
       selection_start.pos += line_comment.size();
       selection_end.pos += line_comment.size();
