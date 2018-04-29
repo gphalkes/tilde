@@ -161,8 +161,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
             return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
           }
         }
-        cursor.pos = 0;
-        cursor.line = 0;
+        set_cursor({0, 0});
       } catch (rw_result_t &result) {
         return result;
       }
@@ -453,7 +452,7 @@ void file_buffer_t::set_strip_spaces(bool _strip_spaces) { strip_spaces = _strip
 void file_buffer_t::do_strip_spaces() {
   size_t idx, strip_start;
   bool undo_started = false;
-  text_coordinate_t saved_cursor = cursor;
+  const text_coordinate_t saved_cursor = get_cursor();
   int i;
 
   /*FIXME: a better way to do this would be to store the stripped spaces for
@@ -490,8 +489,9 @@ void file_buffer_t::do_strip_spaces() {
       end.pos = str.size();
       delete_block_internal(start, end, get_undo(UNDO_DELETE_BLOCK, start, end));
 
+      const text_coordinate_t cursor = get_cursor();
       if (cursor.line == i && static_cast<size_t>(cursor.pos) > strip_start) {
-        cursor.pos = strip_start;
+        set_cursor_pos(strip_start);
       }
     }
   }
@@ -500,13 +500,14 @@ void file_buffer_t::do_strip_spaces() {
     end_undo_block();
   }
 
-  cursor = saved_cursor;
-  if (cursor.pos > get_line_max(cursor.line)) {
-    cursor.pos = get_line_max(cursor.line);
+  set_cursor(saved_cursor);
+  if (saved_cursor.pos > get_line_max(saved_cursor.line)) {
+    set_cursor_pos(get_line_max(saved_cursor.line));
   }
 }
 
 bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
+  const text_coordinate_t cursor = get_cursor();
   file_line_t *line = static_cast<file_line_t *>(get_mutable_line_data(cursor.line));
   char c = line->get_data()[cursor.pos];
   char c_close, check_c;
@@ -694,7 +695,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
 bool file_buffer_t::goto_matching_brace() {
   text_coordinate_t match_coordinate;
   if (find_matching_brace(match_coordinate)) {
-    cursor = match_coordinate;
+    set_cursor(match_coordinate);
     return true;
   }
   return false;
@@ -737,22 +738,22 @@ void file_buffer_t::toggle_line_comment() {
   }
 
   if (get_selection_mode() == selection_mode_t::NONE) {
-    int comment_start = starts_with_comment(get_line_data(cursor.line).get_data(), line_comment);
+    const text_coordinate_t saved_cursor = get_cursor();
+    int comment_start = starts_with_comment(get_line_data(saved_cursor.line).get_data(), line_comment);
     if (comment_start >= 0) {
-      text_coordinate_t saved_cursor = cursor;
-      delete_block(text_coordinate_t(cursor.line, comment_start),
-                   text_coordinate_t(cursor.line, comment_start + line_comment.size()));
-      if (comment_start < saved_cursor.pos) {
-        saved_cursor.pos -= std::min<int>(line_comment.size(), saved_cursor.pos - comment_start);
+      delete_block(text_coordinate_t(saved_cursor.line, comment_start),
+                   text_coordinate_t(saved_cursor.line, comment_start + line_comment.size()));
+      int new_pos = saved_cursor.pos;
+      if (comment_start < new_pos) {
+        new_pos -= std::min<int>(line_comment.size(), new_pos - comment_start);
       }
-      cursor.pos = saved_cursor.pos;
+      set_cursor_pos(new_pos);
     } else {
-      text_coordinate_t saved_cursor = cursor;
       // FIXME: this causes the cursor position to be recorded incorrectly in the undo information.
       // although one could argue this is to some extent better as it shows the actual edit.
-      cursor.pos = 0;
+      set_cursor_pos(0);
       insert_block(line_comment);
-      cursor.pos = saved_cursor.pos + line_comment.size();
+      set_cursor_pos(saved_cursor.pos + line_comment.size());
     }
   } else {
     text_coordinate_t selection_start = get_selection_start();
@@ -781,8 +782,7 @@ void file_buffer_t::toggle_line_comment() {
               std::min<int>(line_comment.size(), selection_end.pos - comment_start);
         }
         if (i == first_line) {
-          cursor.line = i;
-          cursor.pos = comment_start + line_comment.size();
+          set_cursor({i, static_cast<int>(comment_start + line_comment.size())});
           start_undo_block();
         }
         delete_block(text_coordinate_t(i, comment_start),
@@ -790,8 +790,7 @@ void file_buffer_t::toggle_line_comment() {
       }
     } else {
       for (i = first_line; i <= last_line; i++) {
-        cursor.line = i;
-        cursor.pos = 0;
+        set_cursor({i, 0});
         if (i == first_line) {
           start_undo_block();
         }
@@ -802,9 +801,9 @@ void file_buffer_t::toggle_line_comment() {
     }
     end_undo_block();
     set_selection_mode(selection_mode_t::NONE);
-    cursor = selection_start;
+    set_cursor(selection_start);
     set_selection_mode(old_mode);
-    cursor = selection_end;
+    set_cursor(selection_end);
     set_selection_end();
   }
 }

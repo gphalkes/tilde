@@ -25,13 +25,14 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     current_list.reset();
   }
 
-  if (text->cursor.pos == 0) {
+  const text_coordinate_t cursor = text->get_cursor();
+  if (cursor.pos == 0) {
     return nullptr;
   }
 
-  const text_line_t &line = text->get_line_data(text->cursor.line);
+  const text_line_t &line = text->get_line_data(cursor.line);
 
-  for (completion_start = line.adjust_position(text->cursor.pos, -1); completion_start > 0;
+  for (completion_start = line.adjust_position(cursor.pos, -1); completion_start > 0;
        completion_start = line.adjust_position(completion_start, -1)) {
     if (!line.is_alnum(completion_start)) {
       break;
@@ -50,7 +51,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 
   text_coordinate_t start(0, 0);
   text_coordinate_t eof(INT_MAX, INT_MAX);
-  std::string needle(line.get_data(), completion_start, text->cursor.pos - completion_start);
+  std::string needle(line.get_data(), completion_start, cursor.pos - completion_start);
   std::unique_ptr<finder_t> finder =
       finder_t::create(needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
   find_result_t find_result;
@@ -63,7 +64,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
          find_result.end.pos = matching_line.adjust_position(find_result.end.pos, 1)) {
     }
 
-    if (find_result.end.pos - find_result.start.pos != text->cursor.pos - completion_start) {
+    if (find_result.end.pos - find_result.start.pos != cursor.pos - completion_start) {
       string_view word(matching_line.get_data());
       word = word.substr(find_result.start.pos, find_result.end.pos - find_result.start.pos);
       if (word != current_word) {
@@ -94,7 +95,8 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 }
 
 void file_autocompleter_t::autocomplete(text_buffer_t *text, size_t idx) {
-  text_coordinate_t start(text->cursor.line, completion_start);
-  text->replace_block(start, text->cursor, (*current_list)[idx]);
+  const text_coordinate_t cursor = text->get_cursor();
+  const text_coordinate_t start(cursor.line, completion_start);
+  text->replace_block(start, cursor, (*current_list)[idx]);
   current_list.reset();
 }
