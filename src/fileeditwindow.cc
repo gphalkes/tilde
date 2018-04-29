@@ -63,7 +63,7 @@ void file_edit_window_t::draw_info_window() {
   paint_info.normal_attr = 0;
   paint_info.selected_attr = 0;
 
-  name_line->paint_line(&info_window, &paint_info);
+  name_line->paint_line(&info_window, paint_info);
   info_window.clrtoeol();
 }
 

@@ -33,7 +33,7 @@ class file_line_t : public text_line_t {
   int get_highlight_idx(int i);
 
  protected:
-  t3_attr_t get_base_attr(int i, const paint_info_t *info) override;
+  t3_attr_t get_base_attr(int i, const paint_info_t &info) override;
 };
 
 class file_line_factory_t : public text_line_factory_t {
