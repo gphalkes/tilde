@@ -170,7 +170,7 @@ void encoding_dialog_t::ok_activated() {
 
   if (idx + 1 == list->size()) {
     // User specified character set
-    encoding = *manual_entry->get_text();
+    encoding = manual_entry->get_text();
 
     lprintf("Testing encoding name: %s\n", encoding.c_str());
     if (!transcript_probe_converter(encoding.c_str())) {

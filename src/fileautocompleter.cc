@@ -20,7 +20,6 @@
 string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buffer_t *text,
                                                                   int *position) {
   int completion_end;
-  std::string current_word;
 
   if (current_list != nullptr) {
     current_list.reset();
@@ -46,11 +45,12 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
        completion_end < line.get_length() && line.is_alnum(completion_end);
        completion_end = line.adjust_position(completion_end, 1)) {
   }
-  current_word = line.get_data()->substr(completion_start, completion_end - completion_start);
+  string_view current_word =
+      string_view(line.get_data()).substr(completion_start, completion_end - completion_start);
 
   text_coordinate_t start(0, 0);
   text_coordinate_t eof(INT_MAX, INT_MAX);
-  std::string needle(*line.get_data(), completion_start, text->cursor.pos - completion_start);
+  std::string needle(line.get_data(), completion_start, text->cursor.pos - completion_start);
   std::unique_ptr<finder_t> finder =
       finder_t::create(needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
   find_result_t find_result;
@@ -64,7 +64,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
     }
 
     if (find_result.end.pos - find_result.start.pos != text->cursor.pos - completion_start) {
-      string_view word(*matching_line.get_data());
+      string_view word(matching_line.get_data());
       word = word.substr(find_result.start.pos, find_result.end.pos - find_result.start.pos);
       if (word != current_word) {
         result_set.insert(word);

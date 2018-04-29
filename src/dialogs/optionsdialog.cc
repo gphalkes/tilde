@@ -163,7 +163,7 @@ void buffer_options_dialog_t::set_values_from_view(file_edit_window_t *view) {
 }
 
 void buffer_options_dialog_t::set_view_values(file_edit_window_t *view) {
-  int tabsize = atoi(tabsize_field->get_text()->c_str());
+  int tabsize = atoi(tabsize_field->get_text().c_str());
   if (tabsize > 0 || tabsize < 17) {
     view->set_tabsize(tabsize);
   }
@@ -189,7 +189,7 @@ void buffer_options_dialog_t::set_values_from_options() {
 }
 
 void buffer_options_dialog_t::set_options_from_values() {
-  int tabsize = atoi(tabsize_field->get_text()->c_str());
+  int tabsize = atoi(tabsize_field->get_text().c_str());
   if (tabsize > 0 || tabsize < 17) {
     default_option.tabsize = option.tabsize = tabsize;
   }
@@ -202,7 +202,7 @@ void buffer_options_dialog_t::set_options_from_values() {
 }
 
 void buffer_options_dialog_t::handle_activate() {
-  int tabsize = atoi(tabsize_field->get_text()->c_str());
+  int tabsize = atoi(tabsize_field->get_text().c_str());
   if (tabsize < 1 || tabsize > 16) {
     error_dialog->set_message(_("Tab size out of range (must be between 1 and 16 inclusive)."));
     error_dialog->center_over(this);

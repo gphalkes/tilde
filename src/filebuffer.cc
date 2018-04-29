@@ -73,7 +73,6 @@ file_buffer_t::~file_buffer_t() {
 }
 
 rw_result_t file_buffer_t::load(load_process_t *state) {
-  const std::string *line;
   t3_highlight_t *highlight = nullptr;
   t3_highlight_lang_t lang;
   t3_bool success = t3_false;
@@ -184,19 +183,19 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
      any autodetection based on the first line or the file name.
   */
   for (i = 0; i < size() && i < 5 && !success; i++) {
-    line = get_line_data(i).get_data();
+    const std::string &line = get_line_data(i).get_data();
     success =
-        t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, nullptr);
+        t3_highlight_detect(line.data(), line.size(), false, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   for (i = size() - 1; i >= 5 && !success; i--) {
-    line = get_line_data(i).get_data();
+    const std::string &line = get_line_data(i).get_data();
     success =
-        t3_highlight_detect(line->data(), line->size(), false, T3_HIGHLIGHT_UTF8, &lang, nullptr);
+        t3_highlight_detect(line.data(), line.size(), false, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   if (!success) {
-    line = get_line_data(0).get_data();
+    const std::string &line = get_line_data(0).get_data();
     success =
-        t3_highlight_detect(line->data(), line->size(), true, T3_HIGHLIGHT_UTF8, &lang, nullptr);
+        t3_highlight_detect(line.data(), line.size(), true, T3_HIGHLIGHT_UTF8, &lang, nullptr);
   }
   if (!success) {
     success = t3_highlight_lang_by_filename(name.c_str(), T3_HIGHLIGHT_UTF8, &lang, nullptr);
@@ -338,12 +337,11 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       }
       try {
         for (; state->i < size(); state->i++) {
-          const std::string *data;
           if (state->i != 0) {
             state->wrapper->write("\n", 1);
           }
-          data = get_line_data(state->i).get_data();
-          state->wrapper->write(data->data(), data->size());
+          const std::string &data = get_line_data(state->i).get_data();
+          state->wrapper->write(data.data(), data.size());
         }
       } catch (rw_result_t error) {
         return error;
@@ -466,9 +464,9 @@ void file_buffer_t::do_strip_spaces() {
 
   for (i = 0; i < size(); i++) {
     const text_line_t &line = get_line_data(i);
-    const std::string *str = line.get_data();
-    const char *data = str->data();
-    strip_start = str->size();
+    const std::string &str = line.get_data();
+    const char *data = str.data();
+    strip_start = str.size();
     for (idx = strip_start; idx > 0; idx--) {
       if ((data[idx - 1] & 0xC0) == 0x80) {
         continue;
@@ -481,7 +479,7 @@ void file_buffer_t::do_strip_spaces() {
       strip_start = idx - 1;
     }
 
-    if (strip_start != str->size()) {
+    if (strip_start != str.size()) {
       text_coordinate_t start, end;
       if (!undo_started) {
         start_undo_block();
@@ -489,7 +487,7 @@ void file_buffer_t::do_strip_spaces() {
       }
       start.line = end.line = i;
       start.pos = strip_start;
-      end.pos = str->size();
+      end.pos = str.size();
       delete_block_internal(start, end, get_undo(UNDO_DELETE_BLOCK, start, end));
 
       if (cursor.line == i && static_cast<size_t>(cursor.pos) > strip_start) {
@@ -510,7 +508,7 @@ void file_buffer_t::do_strip_spaces() {
 
 bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
   file_line_t *line = static_cast<file_line_t *>(get_mutable_line_data(cursor.line));
-  char c = (*(line->get_data()))[cursor.pos];
+  char c = line->get_data()[cursor.pos];
   char c_close, check_c;
   bool forward;
   int current_line, i, count;
@@ -560,7 +558,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
       prepare_paint_line(current_line);
       for (i = 0; i < line->get_length(); i = line->adjust_position(i, 1)) {
       start_search:
-        check_c = (*(line->get_data()))[i];
+        check_c = line->get_data()[i];
         if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
           continue;
         }
@@ -597,7 +595,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
        including, the closing brace here).
     */
     for (i = 0; i < cursor.pos; i = line->adjust_position(i, 1)) {
-      check_c = (*(line->get_data()))[i];
+      check_c = line->get_data()[i];
       if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
         continue;
       }
@@ -626,7 +624,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
         line = static_cast<file_line_t *>(get_mutable_line_data(current_line));
         /* No need to call prepare_paint_line here because we're going backwards. */
         for (i = 0, local_count = 0, open_surplus = 0; i < line->get_length(); i++) {
-          check_c = (*(line->get_data()))[i];
+          check_c = line->get_data()[i];
           if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
             continue;
           }
@@ -669,7 +667,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
     */
     count = -count;
     for (i = 0; i < match_max; i = line->adjust_position(i, 1)) {
-      check_c = (*(line->get_data()))[i];
+      check_c = line->get_data()[i];
       if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
         continue;
       }
@@ -720,14 +718,14 @@ void file_buffer_t::set_line_comment(const char *text) {
   }
 }
 
-int starts_with_comment(const std::string *text, const std::string *line_comment) {
+int starts_with_comment(const std::string &text, const std::string &line_comment) {
   size_t i;
-  for (i = 0; i < text->size(); i++) {
-    if (text->at(i) != ' ' && text->at(i) != '\t') {
+  for (i = 0; i < text.size(); i++) {
+    if (text.at(i) != ' ' && text.at(i) != '\t') {
       break;
     }
   }
-  if (text->compare(i, line_comment->size(), *line_comment) == 0) {
+  if (text.compare(i, line_comment.size(), line_comment) == 0) {
     return i;
   }
   return -1;
@@ -739,8 +737,7 @@ void file_buffer_t::toggle_line_comment() {
   }
 
   if (get_selection_mode() == selection_mode_t::NONE) {
-    const std::string *text = get_line_data(cursor.line).get_data();
-    int comment_start = starts_with_comment(text, &line_comment);
+    int comment_start = starts_with_comment(get_line_data(cursor.line).get_data(), line_comment);
     if (comment_start >= 0) {
       text_coordinate_t saved_cursor = cursor;
       delete_block(text_coordinate_t(cursor.line, comment_start),
@@ -764,8 +761,7 @@ void file_buffer_t::toggle_line_comment() {
     int last_line = std::max(selection_start.line, selection_end.line);
     int i;
     for (i = first_line; i <= last_line; i++) {
-      const std::string *text = get_line_data(i).get_data();
-      int comment_start = starts_with_comment(text, &line_comment);
+      int comment_start = starts_with_comment(get_line_data(i).get_data(), line_comment);
       if (comment_start < 0) {
         break;
       }
@@ -775,8 +771,7 @@ void file_buffer_t::toggle_line_comment() {
     // for undos is as expected. Ideally we'd just call start_undo_block here.
     if (i > last_line) {
       for (i = first_line; i <= last_line; i++) {
-        const std::string *text = get_line_data(i).get_data();
-        int comment_start = starts_with_comment(text, &line_comment);
+        int comment_start = starts_with_comment(get_line_data(i).get_data(), line_comment);
         if (i == selection_start.line && comment_start < selection_start.pos) {
           selection_start.pos -=
               std::min<int>(line_comment.size(), selection_start.pos - comment_start);

@@ -42,8 +42,8 @@ class file_line_factory_t : public text_line_factory_t {
 
  public:
   file_line_factory_t(file_buffer_t *_file_buffer);
-  text_line_t *new_text_line_t(int buffersize = BUFFERSIZE) override;
-  text_line_t *new_text_line_t(string_view _buffer) override;
+  std::unique_ptr<text_line_t> new_text_line_t(int buffersize = BUFFERSIZE) override;
+  std::unique_ptr<text_line_t> new_text_line_t(string_view _buffer) override;
   file_buffer_t *get_file_buffer() const;
 };
 
