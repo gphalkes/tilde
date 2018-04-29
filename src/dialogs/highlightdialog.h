@@ -17,6 +17,8 @@
 #include <t3highlight/highlight.h>
 #include <t3widget/widget.h>
 
+#include "util.h"
+
 using namespace t3_widget;
 
 struct t3_highlight_lang_deleter {
@@ -36,7 +38,7 @@ class highlight_dialog_t : public dialog_t {
   void ok_activated();
   void set_selected(const char *lang_file);
 
-  T3_WIDGET_SIGNAL(language_selected, t3_highlight_t *, const char *);
+  DEFINE_SIGNAL(language_selected, t3_highlight_t *, const char *);
 };
 
 #endif

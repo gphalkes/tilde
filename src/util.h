@@ -114,4 +114,14 @@ int map_highlight(void *data, const char *name);
 const char *reverse_map_highlight(int idx);
 
 #define ARRAY_SIZE(_x) (sizeof(_x) / sizeof(_x[0]))
+
+#define DEFINE_SIGNAL(_name, ...)                                        \
+ protected:                                                              \
+  signal_t<__VA_ARGS__> _name;                                           \
+                                                                         \
+ public:                                                                 \
+  connection_t connect_##_name(std::function<void(__VA_ARGS__)> _slot) { \
+    return _name.connect(_slot);                                         \
+  }
+
 #endif
