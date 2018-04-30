@@ -487,7 +487,7 @@ void file_buffer_t::do_strip_spaces() {
       start.line = end.line = i;
       start.pos = strip_start;
       end.pos = str.size();
-      delete_block_internal(start, end, get_undo(UNDO_DELETE_BLOCK, start, end));
+      delete_block(start, end);
 
       const text_coordinate_t cursor = get_cursor();
       if (cursor.line == i && static_cast<size_t>(cursor.pos) > strip_start) {
