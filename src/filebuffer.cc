@@ -42,13 +42,13 @@ file_buffer_t::file_buffer_t(string_view _name, string_view _encoding)
   if (_encoding.size() == 0) {
     encoding = "UTF-8";
   } else {
-    encoding = as_string(_encoding);
+    encoding = std::string(_encoding);
   }
 
   if (_name.size() == 0) {
     name_line.set_text("(Untitled)");
   } else {
-    name = as_string(_name);
+    name = std::string(_name);
 
     std::string converted_name = convert_lang_codeset(name, true);
     name_line.set_text(converted_name);
@@ -739,7 +739,8 @@ void file_buffer_t::toggle_line_comment() {
 
   if (get_selection_mode() == selection_mode_t::NONE) {
     const text_coordinate_t saved_cursor = get_cursor();
-    int comment_start = starts_with_comment(get_line_data(saved_cursor.line).get_data(), line_comment);
+    int comment_start =
+        starts_with_comment(get_line_data(saved_cursor.line).get_data(), line_comment);
     if (comment_start >= 0) {
       delete_block(text_coordinate_t(saved_cursor.line, comment_start),
                    text_coordinate_t(saved_cursor.line, comment_start + line_comment.size()));
