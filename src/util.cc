@@ -27,7 +27,7 @@
 #include "option.h"
 #include "static_assert.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 #ifdef DEBUG
 static char debug_buffer[1024];
@@ -54,7 +54,7 @@ void stepped_process_t::run() {
 void stepped_process_t::abort() { done(false); }
 
 void stepped_process_t::disconnect() {
-  for (t3_widget::connection_t &iter : connections) {
+  for (t3widget::connection_t &iter : connections) {
     iter.disconnect();
   }
   connections.clear();

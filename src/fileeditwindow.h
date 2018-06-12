@@ -17,7 +17,7 @@
 #include "filebuffer.h"
 #include <t3widget/widget.h>
 
-using namespace t3_widget;
+using namespace t3widget;
 
 class file_edit_window_t : public edit_window_t {
  private:
@@ -28,7 +28,7 @@ class file_edit_window_t : public edit_window_t {
   explicit file_edit_window_t(file_buffer_t *_text = nullptr);
   ~file_edit_window_t() override;
   void draw_info_window() override;
-  bool process_key(t3_widget::key_t key) override;
+  bool process_key(t3widget::key_t key) override;
   void update_contents() override;
 
   void set_text(file_buffer_t *_text);

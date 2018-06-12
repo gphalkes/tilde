@@ -19,7 +19,7 @@
 
 #include "util.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 struct t3_highlight_lang_deleter {
   void operator()(t3_highlight_lang_t *lang) { t3_highlight_free_list(lang); }

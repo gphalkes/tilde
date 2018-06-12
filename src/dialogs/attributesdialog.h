@@ -20,7 +20,7 @@
 
 #include "option.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 class attributes_dialog_t : public dialog_t {
  private:

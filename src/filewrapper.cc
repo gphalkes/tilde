@@ -17,7 +17,7 @@
 #include <t3widget/widget.h>
 #include <uninorm.h>
 
-using namespace t3_widget;
+using namespace t3widget;
 
 #include "filestate.h"
 #include "filewrapper.h"

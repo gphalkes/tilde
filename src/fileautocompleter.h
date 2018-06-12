@@ -16,7 +16,7 @@
 
 #include <t3widget/widget.h>
 
-using namespace t3_widget;
+using namespace t3widget;
 
 class file_autocompleter_t : public autocompleter_t {
  private:

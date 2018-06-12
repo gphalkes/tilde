@@ -23,7 +23,7 @@
 #include "optionMacros.h"
 #include "util.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 #define MAX_TAB 16
 
@@ -433,9 +433,9 @@ static void print_version() {
       t3_config_get_version() >> 16, (t3_config_get_version() >> 8) & 0xff,
       t3_config_get_version() & 0xff, t3_highlight_get_version() >> 16,
       (t3_highlight_get_version() >> 8) & 0xff, t3_highlight_get_version() & 0xff,
-      t3_widget::get_libt3key_version() >> 16, (t3_widget::get_libt3key_version() >> 8) & 0xff,
-      t3_widget::get_libt3key_version() & 0xff, t3_widget::get_version() >> 16,
-      (t3_widget::get_version() >> 8) & 0xff, t3_widget::get_version() & 0xff,
+      t3widget::get_libt3key_version() >> 16, (t3widget::get_libt3key_version() >> 8) & 0xff,
+      t3widget::get_libt3key_version() & 0xff, t3widget::get_version() >> 16,
+      (t3widget::get_version() >> 8) & 0xff, t3widget::get_version() & 0xff,
       t3_window_get_version() >> 16, (t3_window_get_version() >> 8) & 0xff,
       t3_window_get_version() & 0xff, transcript_get_version() >> 16,
       (transcript_get_version() >> 8) & 0xff, transcript_get_version() & 0xff,

@@ -19,7 +19,7 @@
 #include <t3highlight/highlight.h>
 #include <t3widget/widget.h>
 
-using namespace t3_widget;
+using namespace t3widget;
 
 #include "filestate.h"
 

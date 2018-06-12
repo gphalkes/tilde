@@ -15,7 +15,7 @@
 #define MAIN_H
 
 #include <t3widget/widget.h>
-using namespace t3_widget;
+using namespace t3widget;
 
 #include "dialogs/encodingdialog.h"
 #include "dialogs/openrecentdialog.h"

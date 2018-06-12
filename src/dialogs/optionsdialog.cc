@@ -17,7 +17,7 @@
 #include "main.h"
 #include "option.h"
 
-static t3_widget::key_t number_keys[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+static t3widget::key_t number_keys[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
 buffer_options_dialog_t::buffer_options_dialog_t(optional<std::string> _title)
     : dialog_t(10, 25, std::move(_title)) {
@@ -317,7 +317,7 @@ void misc_options_dialog_t::set_options_from_values() {
   default_option.parse_file_positions = parse_file_positions_box->get_state();
   default_option.disable_primary_selection_over_ssh = disable_selection_over_ssh_box->get_state();
   if (!cli_option.disable_primary_selection && getenv("SSH_TTY") != nullptr) {
-    t3_widget::set_primary_selection_mode(
+    t3widget::set_primary_selection_mode(
         !default_option.disable_primary_selection_over_ssh.value_or(false));
   }
 }

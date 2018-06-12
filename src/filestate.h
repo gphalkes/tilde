@@ -23,7 +23,7 @@
 #include "openfiles.h"
 #include "util.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 class file_buffer_t;
 

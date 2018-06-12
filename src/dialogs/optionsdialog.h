@@ -18,7 +18,7 @@
 
 #include "fileeditwindow.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 void init_charsets();
 

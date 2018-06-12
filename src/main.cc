@@ -32,7 +32,7 @@
 #include "option.h"
 #include "string_util.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 #define MESSAGE_DIALOG_WIDTH 50
 #define ATTRIBUTES_DIALOG_WIDTH 50
@@ -72,7 +72,7 @@ class main_t : public main_window_base_t {
  public:
   main_t();
   ~main_t() override;
-  bool process_key(t3_widget::key_t key) override;
+  bool process_key(t3widget::key_t key) override;
   bool set_size(optint height, optint width) override;
   void load_cli_files_done(stepped_process_t *process);
 
@@ -275,7 +275,7 @@ main_t::~main_t() {
 #endif
 }
 
-bool main_t::process_key(t3_widget::key_t key) {
+bool main_t::process_key(t3widget::key_t key) {
   optional<action_id_t> action = key_bindings.find_action(key);
   if (action.is_valid()) {
     menu_activated(action.value());
@@ -355,7 +355,7 @@ void main_t::menu_activated(int id) {
       open_recent_process_t::execute(bind_front(&main_t::switch_to_new_buffer, this));
       break;
     case action_id_t::FILE_REPAINT:
-      t3_widget::redraw();
+      t3widget::redraw();
       break;
     case action_id_t::FILE_SUSPEND:
       suspend();
@@ -732,7 +732,7 @@ static void check_if_already_running() {
 
 static void terminate_handler(int sig) {
   lprintf("received signal %d\n", sig);
-  t3_widget::async_safe_exit_main_loop(sig + 128);
+  t3widget::async_safe_exit_main_loop(sig + 128);
 }
 
 static void setup_term_signal_handler(int sig) {
@@ -792,7 +792,7 @@ int main(int argc, char *argv[]) {
   if ((default_option.disable_primary_selection_over_ssh.value_or(false) &&
        getenv("SSH_TTY") != nullptr) ||
       cli_option.disable_primary_selection) {
-    t3_widget::set_primary_selection_mode(false);
+    t3widget::set_primary_selection_mode(false);
   }
 
   if (!(result = init(params.get())).get_success()) {

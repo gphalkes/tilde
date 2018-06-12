@@ -82,7 +82,7 @@ file_buffer_t *file_edit_window_t::get_text() const {
   return static_cast<file_buffer_t *>(edit_window_t::get_text());
 }
 
-bool file_edit_window_t::process_key(t3_widget::key_t key) {
+bool file_edit_window_t::process_key(t3widget::key_t key) {
   bool result = edit_window_t::process_key(key);
 
   if (!result) {
