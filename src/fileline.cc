@@ -11,8 +11,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "fileline.h"
-#include "option.h"
+#include "tilde/fileline.h"
+#include "tilde/option.h"
 
 static file_line_factory_t default_file_line_factory(nullptr);
 

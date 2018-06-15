@@ -15,7 +15,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "log.h"
+#include "tilde/log.h"
 
 #ifdef DEBUG
 static FILE *log_file;

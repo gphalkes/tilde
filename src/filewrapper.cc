@@ -19,8 +19,8 @@
 
 using namespace t3widget;
 
-#include "filestate.h"
-#include "filewrapper.h"
+#include "tilde/filestate.h"
+#include "tilde/filewrapper.h"
 
 bool read_buffer_t::fill_buffer(int used) {
   ssize_t retval;

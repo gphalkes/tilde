@@ -14,8 +14,8 @@
 #include <set>
 #include <string>
 
-#include "fileautocompleter.h"
-#include "log.h"
+#include "tilde/fileautocompleter.h"
+#include "tilde/log.h"
 
 string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buffer_t *text,
                                                                   int *position) {

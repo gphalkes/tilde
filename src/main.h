@@ -17,8 +17,8 @@
 #include <t3widget/widget.h>
 using namespace t3widget;
 
-#include "dialogs/encodingdialog.h"
-#include "dialogs/openrecentdialog.h"
+#include "tilde/dialogs/encodingdialog.h"
+#include "tilde/dialogs/openrecentdialog.h"
 
 extern message_dialog_t *continue_abort_dialog;
 extern open_file_dialog_t *open_file_dialog;

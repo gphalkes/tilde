@@ -18,19 +18,19 @@
 #include <t3widget/key_binding.h>
 #include <t3widget/widget.h>
 
-#include "action.h"
-#include "dialogs/attributesdialog.h"
-#include "dialogs/encodingdialog.h"
-#include "dialogs/highlightdialog.h"
-#include "dialogs/openrecentdialog.h"
-#include "dialogs/optionsdialog.h"
-#include "dialogs/selectbufferdialog.h"
-#include "filebuffer.h"
-#include "fileeditwindow.h"
-#include "log.h"
-#include "openfiles.h"
-#include "option.h"
-#include "string_util.h"
+#include "tilde/action.h"
+#include "tilde/dialogs/attributesdialog.h"
+#include "tilde/dialogs/encodingdialog.h"
+#include "tilde/dialogs/highlightdialog.h"
+#include "tilde/dialogs/openrecentdialog.h"
+#include "tilde/dialogs/optionsdialog.h"
+#include "tilde/dialogs/selectbufferdialog.h"
+#include "tilde/filebuffer.h"
+#include "tilde/fileeditwindow.h"
+#include "tilde/log.h"
+#include "tilde/openfiles.h"
+#include "tilde/option.h"
+#include "tilde/string_util.h"
 
 using namespace t3widget;
 

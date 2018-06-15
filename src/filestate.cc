@@ -13,11 +13,11 @@
 */
 #include <cstring>
 
-#include "filebuffer.h"
-#include "filestate.h"
-#include "main.h"
-#include "openfiles.h"
-#include "option.h"
+#include "tilde/filebuffer.h"
+#include "tilde/filestate.h"
+#include "tilde/main.h"
+#include "tilde/openfiles.h"
+#include "tilde/option.h"
 
 load_process_t::load_process_t(const callback_t &cb)
     : stepped_process_t(cb),

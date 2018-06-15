@@ -36,8 +36,8 @@ EXTRATARGETS := clean-logs
 # NO RULES SHOULD BE DEFINED BEFORE THIS INCLUDE #
 #================================================#
 include ../../makesys/rules.mk
-#================================================#
 include ../../t3shared/rules-base.mk
+#================================================#
 
 LDLIBS += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
 LDFLAGS += $(T3LDFLAGS.t3widget) $(T3LDFLAGS.t3window) $(T3LDFLAGS.transcript) $(T3LDFLAGS.t3config) $(T3LDFLAGS.t3highlight)

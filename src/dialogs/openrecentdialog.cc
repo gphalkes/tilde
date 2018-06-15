@@ -13,8 +13,8 @@
 */
 #include <climits>
 
-#include "dialogs/openrecentdialog.h"
-#include "openfiles.h"
+#include "tilde/dialogs/openrecentdialog.h"
+#include "tilde/openfiles.h"
 
 open_recent_dialog_t::open_recent_dialog_t(int height, int width)
     : dialog_t(height, width, _("Open Recent")), known_version(INT_MIN) {

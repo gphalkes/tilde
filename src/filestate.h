@@ -19,9 +19,9 @@
 #include <t3widget/widget.h>
 #include <transcript/transcript.h>
 
-#include "filewrapper.h"
-#include "openfiles.h"
-#include "util.h"
+#include "tilde/filewrapper.h"
+#include "tilde/openfiles.h"
+#include "tilde/util.h"
 
 using namespace t3widget;
 

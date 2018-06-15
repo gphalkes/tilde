@@ -21,12 +21,12 @@
 #include <acl/libacl.h>
 #endif
 
-#include "filebuffer.h"
-#include "fileline.h"
-#include "filestate.h"
-#include "log.h"
-#include "openfiles.h"
-#include "option.h"
+#include "tilde/filebuffer.h"
+#include "tilde/fileline.h"
+#include "tilde/filestate.h"
+#include "tilde/log.h"
+#include "tilde/openfiles.h"
+#include "tilde/option.h"
 
 #define CREATE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
 
