@@ -11,8 +11,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "dialogs/selectbufferdialog.h"
-#include "openfiles.h"
+#include "tilde/dialogs/selectbufferdialog.h"
+#include "tilde/openfiles.h"
 
 select_buffer_dialog_t::select_buffer_dialog_t(int height, int width)
     : dialog_t(height, width, "Select Buffer"), known_version(INT_MIN) {

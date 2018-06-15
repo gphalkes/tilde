@@ -16,7 +16,7 @@
 
 #include <t3widget/textline.h>
 
-#include "filebuffer.h"
+#include "tilde/filebuffer.h"
 
 class file_line_factory_t;
 

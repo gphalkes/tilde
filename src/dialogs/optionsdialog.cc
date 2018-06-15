@@ -13,9 +13,9 @@
 */
 #include <algorithm>
 
-#include "dialogs/optionsdialog.h"
-#include "main.h"
-#include "option.h"
+#include "tilde/dialogs/optionsdialog.h"
+#include "tilde/main.h"
+#include "tilde/option.h"
 
 static t3_widget::key_t number_keys[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 

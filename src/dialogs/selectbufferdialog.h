@@ -17,7 +17,7 @@
 #include <t3widget/widget.h>
 using namespace t3_widget;
 
-#include "filebuffer.h"
+#include "tilde/filebuffer.h"
 
 class select_buffer_dialog_t : public dialog_t {
  private:

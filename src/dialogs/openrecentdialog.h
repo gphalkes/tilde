@@ -17,7 +17,7 @@
 #include <t3widget/widget.h>
 using namespace t3_widget;
 
-#include "openfiles.h"
+#include "tilde/openfiles.h"
 
 class open_recent_dialog_t : public dialog_t {
  private:

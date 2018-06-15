@@ -12,7 +12,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "dialogs/attributesdialog.h"
+#include "tilde/dialogs/attributesdialog.h"
 
 #define START_WIDGET_GROUP                               \
   {                                                      \

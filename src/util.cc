@@ -24,8 +24,8 @@
 
 #include <t3widget/widget.h>
 
-#include "option.h"
-#include "static_assert.h"
+#include "tilde/option.h"
+#include "tilde/static_assert.h"
 
 using namespace t3_widget;
 

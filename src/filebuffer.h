@@ -21,7 +21,7 @@
 
 using namespace t3_widget;
 
-#include "filestate.h"
+#include "tilde/filestate.h"
 
 class file_edit_window_t;
 

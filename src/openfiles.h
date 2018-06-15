@@ -17,7 +17,7 @@
 #include <deque>
 #include <vector>
 
-#include "util.h"
+#include "tilde/util.h"
 
 class file_buffer_t;
 

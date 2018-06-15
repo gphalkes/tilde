@@ -17,9 +17,9 @@
 #include <new>
 #include <t3highlight/highlight.h>
 
-#include "dialogs/highlightdialog.h"
-#include "main.h"
-#include "util.h"
+#include "tilde/dialogs/highlightdialog.h"
+#include "tilde/main.h"
+#include "tilde/util.h"
 
 static bool cmp_lang_names(t3_highlight_lang_t a, t3_highlight_lang_t b) {
   return strcmp(a.name, b.name) < 0;

@@ -18,7 +18,7 @@
 
 #include <t3widget/widget.h>
 
-#include "option.h"
+#include "tilde/option.h"
 
 using namespace t3_widget;
 

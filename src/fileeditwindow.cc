@@ -11,8 +11,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "fileeditwindow.h"
-#include "fileautocompleter.h"
+#include "tilde/fileeditwindow.h"
+#include "tilde/fileautocompleter.h"
 
 file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
   text_buffer_t *old_text = get_text();

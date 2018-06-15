@@ -13,9 +13,9 @@
 */
 #include <cstring>
 
-#include "filebuffer.h"
-#include "openfiles.h"
-#include "option.h"
+#include "tilde/filebuffer.h"
+#include "tilde/openfiles.h"
+#include "tilde/option.h"
 
 open_files_t open_files;
 recent_files_t recent_files;

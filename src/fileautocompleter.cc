@@ -14,8 +14,8 @@
 #include <set>
 #include <string>
 
-#include "fileautocompleter.h"
-#include "log.h"
+#include "tilde/fileautocompleter.h"
+#include "tilde/log.h"
 
 static bool compare_strings(std::string *a, std::string *b) { return a->compare(*b) < 0; }
 

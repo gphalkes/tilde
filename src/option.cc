@@ -18,10 +18,10 @@
 #include <transcript/transcript.h>
 #include <unistring/version.h>
 
-#include "log.h"
-#include "option.h"
-#include "optionMacros.h"
-#include "util.h"
+#include "tilde/log.h"
+#include "tilde/option.h"
+#include "tilde/optionMacros.h"
+#include "tilde/util.h"
 
 using namespace t3_widget;
 
@@ -89,7 +89,7 @@ static const char config_schema[] = {
 };
 
 static const char base_config_schema[] = {
-#include "config.bytes"
+#include "base_config.bytes"
 };
 
 static t3_bool find_term_config(const t3_config_t *config, const void *data) {

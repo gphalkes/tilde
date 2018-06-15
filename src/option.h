@@ -21,7 +21,7 @@
 #include <t3widget/util.h>
 #include <t3window/window.h>
 
-#include "util.h"
+#include "tilde/util.h"
 
 using namespace t3_widget;
 

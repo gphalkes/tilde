@@ -16,7 +16,7 @@
 
 #include <t3widget/widget.h>
 
-#include "fileeditwindow.h"
+#include "tilde/fileeditwindow.h"
 
 using namespace t3_widget;
 

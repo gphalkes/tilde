@@ -17,8 +17,8 @@
 #include <t3widget/widget.h>
 #include <transcript/transcript.h>
 
-#include "encodingdialog.h"
-#include "log.h"
+#include "tilde/dialogs/encodingdialog.h"
+#include "tilde/log.h"
 
 struct charset_desc_t {
   const char *name;  // Display name for this character set

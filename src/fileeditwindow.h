@@ -14,7 +14,7 @@
 #ifndef FILE_EDIT_WINDOW_T
 #define FILE_EDIT_WINDOW_T
 
-#include "filebuffer.h"
+#include "tilde/filebuffer.h"
 #include <t3widget/widget.h>
 
 using namespace t3_widget;
