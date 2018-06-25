@@ -13,8 +13,10 @@
 */
 #ifndef FILESTATE_H
 #define FILESTATE_H
+#include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
+
 #include <t3widget/signals.h>
 #include <t3widget/widget.h>
 #include <transcript/transcript.h>
@@ -185,7 +187,7 @@ class load_cli_file_process_t : public stepped_process_t {
   void attempt_file_position_parse(std::string *filename, int *line, int *pos);
 
  protected:
-  std::list<const char *>::const_iterator iter;
+  std::list<std::string>::const_iterator iter;
   bool in_load, in_step, encoding_selected;
   std::string encoding;
 

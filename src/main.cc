@@ -194,7 +194,7 @@ main_t::main_t() {
   select_buffer_dialog->connect_activate(bind_front(&main_t::switch_buffer, this));
 
   continue_abort_dialog =
-      new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Continue", "_Abort", NULL);
+      new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", {"_Continue", "_Abort"});
   continue_abort_dialog->center_over(this);
 
   encoding_dialog = new encoding_dialog_t(window.get_height() - 8, window.get_width() - 8);
@@ -214,16 +214,16 @@ main_t::main_t() {
   save_as_dialog->set_options_widget(encoding_button);
 
   close_confirm_dialog =
-      new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", "_Yes", "_No", "_Cancel", NULL);
+      new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", {"_Yes", "_No", "_Cancel"});
   close_confirm_dialog->center_over(this);
 
-  error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Close", NULL);
+  error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", {"Close"});
   error_dialog->center_over(this);
 
   open_recent_dialog = new open_recent_dialog_t(11, window.get_width() - 4);
   open_recent_dialog->center_over(this);
 
-  about_dialog = new message_dialog_t(45, "About", "Close", NULL);
+  about_dialog = new message_dialog_t(45, "About", {"Close"});
   about_dialog->center_over(this);
   about_dialog->set_max_text_height(13);
   about_dialog->set_message(
@@ -251,7 +251,7 @@ main_t::main_t() {
   highlight_dialog->center_over(this);
   highlight_dialog->connect_language_selected(bind_front(&main_t::set_highlight, this));
 
-  preserve_bom_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Yes", "_No", NULL);
+  preserve_bom_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", {"_Yes", "_No"});
   preserve_bom_dialog->set_message(
       "The file starts with a Byte Order Mark (BOM). "
       "This is used on some platforms to recognise UTF-8 encoded files. On Unix-like systems "
@@ -434,7 +434,7 @@ void main_t::menu_activated(int id) {
     case action_id_t::WINDOWS_HSPLIT:
     case action_id_t::WINDOWS_VSPLIT: {
       file_buffer_t *new_file = open_files.next_buffer(nullptr);
-      // If new_file is NULL, a new file_buffer_t will be created
+      // If new_file is nullptr, a new file_buffer_t will be created
       split->split(make_unique<file_edit_window_t>(new_file), id == action_id_t::WINDOWS_HSPLIT);
       break;
     }
@@ -847,7 +847,7 @@ int main(int argc, char *argv[]) {
   } else {
     set_key_timeout(-1000);
     message_dialog_t *input_message =
-        new message_dialog_t(70, _("Input Handling"), _("Close"), _("Configure"), NULL);
+        new message_dialog_t(70, _("Input Handling"), {_("Close"), _("Configure")});
     input_message->set_message(
         "You have not configured the input handling for this terminal type yet. "
         "This means you:\n"

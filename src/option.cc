@@ -150,14 +150,14 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
   *attr = accumulated_attr;
 }
 
-#define GET_OPT(name, TYPE, type)                                                               \
-  do {                                                                                          \
-    t3_config_t *tmp;                                                                           \
-    if ((tmp = t3_config_get(&*config, #name)) != NULL) opts->name = t3_config_get_##type(tmp); \
+#define GET_OPT(name, TYPE, type)                                                                  \
+  do {                                                                                             \
+    t3_config_t *tmp;                                                                              \
+    if ((tmp = t3_config_get(&*config, #name)) != nullptr) opts->name = t3_config_get_##type(tmp); \
   } while (false)
 #define GET_ATTRIBUTE(name) read_config_attribute(attributes, #name, &opts->name)
 #define GET_HL_ATTRIBUTE(name) \
-  read_config_attribute(attributes, name, &opts->highlights[map_highlight(NULL, name)])
+  read_config_attribute(attributes, name, &opts->highlights[map_highlight(nullptr, name)])
 
 static void read_term_config_part(const t3_config_t *config, term_options_t *opts) {
   t3_config_t *attributes;
@@ -475,7 +475,11 @@ PARSE_FUNCTION(parse_args)
       cli_option.config_file = optArg;
     END_OPTION
     OPTION('e', "encoding", OPTIONAL_ARG)
-      cli_option.encoding = optArg;
+      if (!optArg) {
+        cli_option.encoding = "";
+      } else {
+        cli_option.encoding = optArg;
+      }
     END_OPTION
     LONG_OPTION("ignore-running", NO_ARG)
       cli_option.ignore_running = true;

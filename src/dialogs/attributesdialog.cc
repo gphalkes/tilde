@@ -273,11 +273,11 @@ void attributes_dialog_t::set_values_from_options() {
   SET_OPTION_VALUE(brace_highlight);
 #undef SET_OPTION_VALUE
 
-#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                                  \
-  do {                                                                                    \
-    name = term_specific_option.highlights[map_highlight(NULL, highlight_name)];          \
-    if (!name.is_valid())                                                                 \
-      name = default_option.term_options.highlights[map_highlight(NULL, highlight_name)]; \
+#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                                     \
+  do {                                                                                       \
+    name = term_specific_option.highlights[map_highlight(nullptr, highlight_name)];          \
+    if (!name.is_valid())                                                                    \
+      name = default_option.term_options.highlights[map_highlight(nullptr, highlight_name)]; \
   } while (false)
   SET_HIGHLIGHT_OPTION_VALUE(comment, "comment");
   SET_HIGHLIGHT_OPTION_VALUE(comment_keyword, "comment-keyword");
@@ -364,7 +364,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
 
 #define SET_WITH_DEFAULT(name, attr)                                                            \
   do {                                                                                          \
-    int highlight_idx = map_highlight(NULL, #name);                                             \
+    int highlight_idx = map_highlight(nullptr, #name);                                          \
     term_options->highlights[highlight_idx] = name;                                             \
     option.highlights[highlight_idx] = name.is_valid() ? name.value() : get_default_attr(attr); \
   } while (false)

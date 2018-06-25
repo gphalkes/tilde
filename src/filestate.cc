@@ -446,7 +446,7 @@ bool load_cli_file_process_t::step() {
   if (!encoding_selected) {
     encoding_selected = true;
     if (cli_option.encoding.is_valid()) {
-      if (cli_option.encoding.value() == nullptr) {
+      if (cli_option.encoding.value().empty()) {
         encoding_dialog->set_encoding("UTF-8");
         encoding_dialog->connect_activate(
             bind_front(&load_cli_file_process_t::encoding_selection_done, this));

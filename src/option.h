@@ -32,7 +32,7 @@ struct cli_options_t {
   const char *term;
   bool ask_input_method;
 
-  std::list<const char *> files;
+  std::list<std::string> files;
   bool disable_external_clipboard;
   bool disable_primary_selection;
 
@@ -42,7 +42,7 @@ struct cli_options_t {
   bool start_debugger_on_segfault;
 #endif
   optional<std::string> config_file;
-  optional<const char *> encoding;
+  optional<std::string> encoding;
   bool ignore_running;
   bool disable_file_position_parsing;
 };
