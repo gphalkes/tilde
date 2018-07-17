@@ -199,6 +199,54 @@ EOF
 		CONFIGLIBS="${CONFIGLIBS} -lacl"
 	fi
 
+  clean_cxx
+  cat > .configcxx.cc <<EOF
+#include <linux/fs.h>
+#include <sys/ioctl.h>
+
+#if !defined(FICLONE) && defined(BTRFS_IOC_CLONE)
+#define FICLONE BTRFS_IOC_CLONE
+#endif
+
+int main() {
+  int fd;
+  ioctl(fd, FICLONE, fd);
+}
+EOF
+  if test_link_cxx "ficlone ioctl" ; then
+    CONFIGFLAGS="${CONFIGFLAGS} -DHAS_FICLONE"
+  fi
+
+  clean_cxx
+  cat > .configcxx.cc <<EOF
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <unistd.h>
+
+int main() {
+  copy_file_range(0, nullptr, 1, nullptr, 1, 0);
+}
+EOF
+  if test_link_cxx "copy_file_range" ; then
+    CONFIGFLAGS="${CONFIGFLAGS} -DHAS_COPY_FILE_RANGE"
+  fi
+
+  clean_cxx
+  cat > .configcxx.cc <<EOF
+#include <sys/sendfile.h>
+#if !defined(__linux__)
+#error sendfile is only supported on linux.
+#endif
+
+int main() {
+  sendfile(0, 1, nullptr, 2);
+}
+EOF
+  if test_link_cxx "copy_file_range" ; then
+    CONFIGFLAGS="${CONFIGFLAGS} -DHAS_SENDFILE"
+  fi
+
 	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3CONFIG_FLAGS} ${LIBT3HIGHLIGHT_FLAGS}" \
 		"CONFIGLIBS=${CONFIGLIBS} ${LIBTRANSCRIPT_LIBS} -lunistring ${LIBT3WIDGET_LIBS} ${LIBT3CONFIG_LIBS} ${LIBT3HIGHLIGHT_LIBS}"
 }
