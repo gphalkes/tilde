@@ -599,7 +599,8 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
        opening brace is on this line (because we count up to, but not
        including, the closing brace here).
     */
-    for (i = 0; i < cursor.pos; i = line->adjust_position(i, 1)) {
+    const int max = std::max(cursor.pos, line->get_length());
+    for (i = 0; i < max; i = line->adjust_position(i, 1)) {
       check_c = (*(line->get_data()))[i];
       if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
         continue;
