@@ -23,4 +23,3 @@
 /man/output
 src/.clang-tidy-opts
 /tilde-*.tar.bz2
-/unittests/copy_file_test
