@@ -796,7 +796,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (!(result = init(params.get())).get_success()) {
-    fprintf(stderr, "Error: %s\n", result.get_string());
+    fprintf(stderr, "Error: %s\n", result.get_string().c_str());
     fprintf(stderr, "init failed\n");
     exit(EXIT_FAILURE);
   }
