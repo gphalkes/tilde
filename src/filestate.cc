@@ -191,13 +191,11 @@ bool save_as_process_t::step() {
   rw_result_t rw_result;
 
   if (state == SELECT_FILE) {
-    const char *current_name = file->get_name().c_str();
-
     connections.push_back(
         save_as_dialog->connect_file_selected(bind_front(&save_as_process_t::file_selected, this)));
     connections.push_back(save_as_dialog->connect_closed([this] { abort(); }));
 
-    save_as_dialog->set_file(current_name);
+    save_as_dialog->set_file(file->get_name());
     save_as_dialog->show();
     connections.push_back(
         encoding_dialog->connect_activate(bind_front(&save_as_process_t::encoding_selected, this)));

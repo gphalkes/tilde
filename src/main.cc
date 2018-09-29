@@ -118,13 +118,13 @@ main_t::main_t() {
   panel = new menu_panel_t("_File", menu);
   panel->add_item("_New", "^N", action_id_t::FILE_NEW);
   panel->add_item("_Open...", "^O", action_id_t::FILE_OPEN);
-  panel->add_item("Open _Recent...", nullptr, action_id_t::FILE_OPEN_RECENT);
+  panel->add_item("Open _Recent...", "", action_id_t::FILE_OPEN_RECENT);
   panel->add_item("_Close", "^W", action_id_t::FILE_CLOSE);
   panel->add_item("_Save", "^S", action_id_t::FILE_SAVE);
-  panel->add_item("Save _As...", nullptr, action_id_t::FILE_SAVE_AS);
+  panel->add_item("Save _As...", "", action_id_t::FILE_SAVE_AS);
   panel->add_separator();
-  panel->add_item("Re_draw Screen", nullptr, action_id_t::FILE_REPAINT);
-  panel->add_item("S_uspend", nullptr, action_id_t::FILE_SUSPEND);
+  panel->add_item("Re_draw Screen", "", action_id_t::FILE_REPAINT);
+  panel->add_item("S_uspend", "", action_id_t::FILE_SUSPEND);
   panel->add_item("E_xit", "^Q", action_id_t::FILE_EXIT);
 
   panel = new menu_panel_t("_Edit", menu);
@@ -155,34 +155,34 @@ main_t::main_t() {
   panel = new menu_panel_t("_Window", menu);
   panel->add_item("_Next Buffer", "F6", action_id_t::WINDOWS_NEXT_BUFFER);
   panel->add_item("_Previous Buffer", "S-F6", action_id_t::WINDOWS_PREV_BUFFER);
-  panel->add_item("_Select Buffer...", nullptr, action_id_t::WINDOWS_SELECT);
+  panel->add_item("_Select Buffer...", "", action_id_t::WINDOWS_SELECT);
   panel->add_separator();
-  panel->add_item("Split _Horizontal", nullptr, action_id_t::WINDOWS_HSPLIT);
-  panel->add_item("Split _Vertical", nullptr, action_id_t::WINDOWS_VSPLIT);
-  panel->add_item("_Close Window", nullptr, action_id_t::WINDOWS_MERGE);
+  panel->add_item("Split _Horizontal", "", action_id_t::WINDOWS_HSPLIT);
+  panel->add_item("Split _Vertical", "", action_id_t::WINDOWS_VSPLIT);
+  panel->add_item("_Close Window", "", action_id_t::WINDOWS_MERGE);
   panel->add_item("Next Window", "F8", action_id_t::WINDOWS_NEXT_WINDOW);
   panel->add_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
   panel = new menu_panel_t("_Tools", menu);
-  panel->add_item("_Highlighting...", nullptr, action_id_t::TOOLS_HIGHLIGHTING);
-  panel->add_item("_Strip trailing spaces", nullptr, action_id_t::TOOLS_STRIP_SPACES);
+  panel->add_item("_Highlighting...", "", action_id_t::TOOLS_HIGHLIGHTING);
+  panel->add_item("_Strip trailing spaces", "", action_id_t::TOOLS_STRIP_SPACES);
   panel->add_item("_Autocomplete", "C-Space", action_id_t::TOOLS_AUTOCOMPLETE);
   panel->add_item("_Toggle line comment", "C-/", action_id_t::TOOLS_TOGGLE_LINE_COMMENT);
   panel->add_item("_Indent Selection", "Tab", action_id_t::TOOLS_INDENT_SELECTION);
   panel->add_item("_Unindent Selection", "S-Tab", action_id_t::TOOLS_UNINDENT_SELECTION);
 
   panel = new menu_panel_t("_Options", menu);
-  panel->add_item("Input _Handling...", nullptr, action_id_t::OPTIONS_INPUT);
-  panel->add_item("_Current Buffer...", nullptr, action_id_t::OPTIONS_BUFFER);
-  panel->add_item("Buffer _Defaults...", nullptr, action_id_t::OPTIONS_DEFAULTS);
-  panel->add_item("_Interface...", nullptr, action_id_t::OPTIONS_INTERFACE);
+  panel->add_item("Input _Handling...", "", action_id_t::OPTIONS_INPUT);
+  panel->add_item("_Current Buffer...", "", action_id_t::OPTIONS_BUFFER);
+  panel->add_item("Buffer _Defaults...", "", action_id_t::OPTIONS_DEFAULTS);
+  panel->add_item("_Interface...", "", action_id_t::OPTIONS_INTERFACE);
 
-  panel->add_item("_Miscellaneous...", nullptr, action_id_t::OPTIONS_MISC);
+  panel->add_item("_Miscellaneous...", "", action_id_t::OPTIONS_MISC);
 
   panel = new menu_panel_t("_Help", menu);
   // FIXME: reinstate when help is actually available.
   //~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
-  panel->add_item("_About", nullptr, action_id_t::HELP_ABOUT);
+  panel->add_item("_About", "", action_id_t::HELP_ABOUT);
 
   split = new split_t(make_unique<file_edit_window_t>());
   split->set_position(!option.hide_menubar, 0);
@@ -202,7 +202,7 @@ main_t::main_t() {
 
   open_file_dialog = new open_file_dialog_t(window.get_height() - 4, window.get_width() - 4);
   open_file_dialog->center_over(this);
-  open_file_dialog->set_file(nullptr);
+  open_file_dialog->set_file(string_view());
   encoding_button = new button_t("_Encoding");
   encoding_button->connect_activate([] { encoding_dialog->show(); });
   open_file_dialog->set_options_widget(encoding_button);
@@ -333,7 +333,7 @@ void main_t::menu_activated(int id) {
     case action_id_t::FILE_OPEN: {
       const std::string &name = get_current()->get_text()->get_name();
       if (!name.empty()) {
-        open_file_dialog->set_file(name.c_str());
+        open_file_dialog->set_file(name);
         // Because set_file also selects the named file if possible, we need to reset the dialog
         open_file_dialog->reset();
       }
