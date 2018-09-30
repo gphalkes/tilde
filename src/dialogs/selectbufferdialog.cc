@@ -16,30 +16,25 @@
 
 select_buffer_dialog_t::select_buffer_dialog_t(int height, int width)
     : dialog_t(height, width, _("Select Buffer")), known_version(INT_MIN) {
-  button_t *ok_button, *cancel_button;
-
-  list = new list_pane_t(true);
+  list = emplace_back<list_pane_t>(true);
   list->set_size(height - 3, width - 2);
   list->set_position(1, 1);
   list->connect_activate([this] { ok_activated(); });
 
-  cancel_button = new button_t("_Cancel", false);
+  button_t *ok_button = emplace_back<button_t>("_OK", true);
+  button_t *cancel_button = emplace_back<button_t>("_Cancel", false);
+
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
   cancel_button->connect_activate([this] { close(); });
   cancel_button->connect_move_focus_left([this] { focus_previous(); });
   cancel_button->connect_move_focus_up([this] { set_child_focus(list); });
-  ok_button = new button_t("_OK", true);
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
   ok_button->connect_activate([this] { ok_activated(); });
   cancel_button->connect_move_focus_right([this] { focus_next(); });
   cancel_button->connect_move_focus_up([this] { focus_previous(); });
-
-  push_back(list);
-  push_back(ok_button);
-  push_back(cancel_button);
 }
 
 bool select_buffer_dialog_t::set_size(optint height, optint width) {

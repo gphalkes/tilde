@@ -27,10 +27,9 @@ static bool cmp_lang_names(t3_highlight_lang_t a, t3_highlight_lang_t b) {
 
 highlight_dialog_t::highlight_dialog_t(int height, int width)
     : dialog_t(height, width, _("Highlighting Language")) {
-  button_t *ok_button, *cancel_button;
   t3_highlight_error_t error;
 
-  list = new list_pane_t(true);
+  list = emplace_back<list_pane_t>(true);
   list->set_size(height - 3, width - 2);
   list->set_position(1, 1);
   list->connect_activate([this] { ok_activated(); });
@@ -57,19 +56,17 @@ highlight_dialog_t::highlight_dialog_t(int height, int width)
      dialog allows. */
   dialog_t::set_size(height, width);
 
-  cancel_button = new button_t("_Cancel", false);
+  button_t *ok_button = emplace_back<button_t>("_OK", true);
+  button_t *cancel_button = emplace_back<button_t>("_Cancel", false);
+
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
   cancel_button->connect_activate([this] { close(); });
-  ok_button = new button_t("_OK", true);
+
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
   ok_button->connect_activate([this] { ok_activated(); });
-
-  push_back(list);
-  push_back(ok_button);
-  push_back(cancel_button);
 }
 
 bool highlight_dialog_t::set_size(optint height, optint width) {

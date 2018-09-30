@@ -106,9 +106,7 @@ void init_charsets() {
 
 encoding_dialog_t::encoding_dialog_t(int height, int width)
     : dialog_t(height, width, _("Encoding")), selected(-1), saved_tag(nullptr) {
-  button_t *ok_button, *cancel_button;
-
-  list = new list_pane_t(true);
+  list = emplace_back<list_pane_t>(true);
   list->set_size(height - 4, width - 2);
   list->set_position(1, 1);
   list->connect_activate([this] { ok_activated(); });
@@ -119,34 +117,30 @@ encoding_dialog_t::encoding_dialog_t(int height, int width)
     list->push_back(make_unique<label_t>(iter->name));
   }
 
-  horizontal_separator = new separator_t();
+  horizontal_separator = emplace_back<separator_t>();
   horizontal_separator->set_anchor(
       this, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_BOTTOMLEFT));
   horizontal_separator->set_position(-2, 1);
   horizontal_separator->set_size(None, width - 2);
 
-  manual_entry = new text_field_t();
+  manual_entry = emplace_back<text_field_t>();
   manual_entry->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_BOTTOMLEFT));
   manual_entry->set_position(-1, 2);
   manual_entry->set_size(1, 25);
   manual_entry->connect_activate([this] { ok_activated(); });
   manual_entry->hide();
 
-  cancel_button = new button_t("_Cancel", false);
+  button_t *ok_button = emplace_back<button_t>("_OK", true);
+  button_t *cancel_button = emplace_back<button_t>("_Cancel", false);
+
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
   cancel_button->connect_activate([this] { close(); });
-  ok_button = new button_t("_OK", true);
+
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
   ok_button->connect_activate([this] { ok_activated(); });
-
-  push_back(list);
-  push_back(horizontal_separator);
-  push_back(manual_entry);
-  push_back(ok_button);
-  push_back(cancel_button);
 }
 
 bool encoding_dialog_t::set_size(optint height, optint width) {

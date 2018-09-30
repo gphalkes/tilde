@@ -108,11 +108,8 @@ key_bindings_t<action_id_t> main_t::key_bindings{
 };
 
 main_t::main_t() {
-  button_t *encoding_button;
-
-  menu = new menu_bar_t(option.hide_menubar);
+  menu = emplace_back<menu_bar_t>(option.hide_menubar);
   menu->set_size(None, window.get_width());
-  push_back(menu);
   menu->connect_activate(bind_front(&main_t::menu_activated, this));
 
   panel = new menu_panel_t("_File", menu);
@@ -184,10 +181,9 @@ main_t::main_t() {
   //~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
   panel->add_item("_About", "", action_id_t::HELP_ABOUT);
 
-  split = new split_t(make_unique<file_edit_window_t>());
+  split = emplace_back<split_t>(make_unique<file_edit_window_t>());
   split->set_position(!option.hide_menubar, 0);
   split->set_size(window.get_height() - !option.hide_menubar, window.get_width());
-  push_back(split);
 
   select_buffer_dialog = new select_buffer_dialog_t(11, window.get_width() - 4);
   select_buffer_dialog->center_over(this);
@@ -203,15 +199,15 @@ main_t::main_t() {
   open_file_dialog = new open_file_dialog_t(window.get_height() - 4, window.get_width() - 4);
   open_file_dialog->center_over(this);
   open_file_dialog->set_file(string_view());
-  encoding_button = new button_t("_Encoding");
+  std::unique_ptr<button_t> encoding_button = make_unique<button_t>("_Encoding");
   encoding_button->connect_activate([] { encoding_dialog->show(); });
-  open_file_dialog->set_options_widget(encoding_button);
+  open_file_dialog->set_options_widget(std::move(encoding_button));
 
   save_as_dialog = new save_as_dialog_t(window.get_height() - 4, window.get_width() - 4);
   save_as_dialog->center_over(this);
-  encoding_button = new button_t("_Encoding");
+  encoding_button = make_unique<button_t>("_Encoding");
   encoding_button->connect_activate([] { encoding_dialog->show(); });
-  save_as_dialog->set_options_widget(encoding_button);
+  save_as_dialog->set_options_widget(std::move(encoding_button));
 
   close_confirm_dialog =
       new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", {"_Yes", "_No", "_Cancel"});

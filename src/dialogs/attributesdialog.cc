@@ -20,7 +20,7 @@
     int widget_count = 0;
 #define END_WIDGET_GROUP(name, var)                         \
   widget_group->set_size(widget_count, width - 4);          \
-  var = new expander_t(name);                               \
+  var = emplace_back<expander_t>(name);                     \
   var->set_child(widget_group);                             \
   var->connect_move_focus_up([this] { focus_previous(); }); \
   var->connect_move_focus_down([this] { focus_next(); });   \
@@ -50,13 +50,9 @@
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
 attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Interface")) {
-  smart_label_t *label;
-  button_t *ok_button, *cancel_button, *save_defaults_button;
-
-  label = new smart_label_t(_("Color _mode"));
+  smart_label_t *label = emplace_back<smart_label_t>(_("Color _mode"));
   label->set_position(1, 2);
-  push_back(label);
-  color_box = new checkbox_t();
+  color_box = emplace_back<checkbox_t>();
   color_box->set_label(label);
   color_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   color_box->set_position(1, -2);
@@ -114,7 +110,10 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Inte
 
   expander_group->connect_expanded([this](bool expanded) { expander_size_change(expanded); });
 
-  cancel_button = new button_t("_Cancel");
+  button_t *ok_button = emplace_back<button_t>("_Ok", true);
+  button_t *save_defaults_button = emplace_back<button_t>("Save as _defaults");
+  button_t *cancel_button = emplace_back<button_t>("_Cancel");
+
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
@@ -124,7 +123,6 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Inte
   cancel_button->connect_move_focus_up([this] { focus_previous(); });
   cancel_button->connect_move_focus_left([this] { focus_previous(); });
 
-  save_defaults_button = new button_t("Save as _defaults");
   save_defaults_button->set_anchor(cancel_button,
                                    T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   save_defaults_button->set_position(0, -2);
@@ -134,21 +132,12 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Inte
   save_defaults_button->connect_move_focus_right([this] { focus_next(); });
   save_defaults_button->connect_activate([this] { handle_save_defaults(); });
 
-  ok_button = new button_t("_Ok", true);
   ok_button->set_anchor(save_defaults_button,
                         T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
   ok_button->connect_move_focus_up([this] { focus_previous(); });
   ok_button->connect_move_focus_right([this] { focus_next(); });
   ok_button->connect_activate([this] { handle_activate(); });
-
-  push_back(color_box);
-  push_back(interface);
-  push_back(text_area);
-  push_back(syntax_highlight);
-  push_back(ok_button);
-  push_back(save_defaults_button);
-  push_back(cancel_button);
 
   picker.reset(new attribute_picker_dialog_t());
   picker->center_over(this);
