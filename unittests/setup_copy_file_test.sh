@@ -29,15 +29,15 @@ mkfs.xfs -p /tmp/proto -m reflink=1 /tmp/copy_file_test_btrfs
 
 set -o pipefail
 
-NONREFLINK_LOOP=$(udisksctl loop-setup --file /tmp/copy_file_test_ext3 | egrep -o '/dev/loop[0-9]+')
+EXT3_LOOP=$(udisksctl loop-setup --file /tmp/copy_file_test_ext3 | egrep -o '/dev/loop[0-9]+')
 [[ $? -eq 0 ]] || fail "Could not set up loop device"
-REFLINK_LOOP=$(udisksctl loop-setup --file /tmp/copy_file_test_btrfs | egrep -o '/dev/loop[0-9]+')
+BTRFS_LOOP=$(udisksctl loop-setup --file /tmp/copy_file_test_btrfs | egrep -o '/dev/loop[0-9]+')
 [[ $? -eq 0 ]] || fail "Could not set up loop device"
-NONREFLINK_MOUNT=$(udisksctl mount --block-device ${NONREFLINK_LOOP} | egrep -o '/media/[^.]+')
+EXT3_MOUNT=$(udisksctl mount --block-device ${EXT3_LOOP} | egrep -o '/media/[^.]+')
 [[ $? -eq 0 ]] || fail "Could not mount loop device"
-REFLINK_MOUNT=$(udisksctl mount --block-device ${REFLINK_LOOP} | egrep -o '/media/[^.]+')
+BTRFS_MOUNT=$(udisksctl mount --block-device ${BTRFS_LOOP} | egrep -o '/media/[^.]+')
 [[ $? -eq 0 ]] || fail "Could not mount loop device"
 
-echo "export NONREFLINK_LOOP=$NONREFLINK_LOOP REFLINK_LOOP=$REFLINK_LOOP NONREFLINK_MOUNT=$NONREFLINK_MOUNT REFLINK_MOUNT=$REFLINK_MOUNT"
+echo "export EXT3_LOOP=$EXT3_LOOP BTRFS_LOOP=$BTRFS_LOOP EXT3_MOUNT=$EXT3_MOUNT BTRFS_MOUNT=$BTRFS_MOUNT"
 
 } | egrep '^export ' )
