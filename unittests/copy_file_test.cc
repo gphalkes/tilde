@@ -283,16 +283,16 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   google::ParseCommandLineFlags(&argc, &argv, true);
   if (FLAGS_reflink_fs_dir.empty()) {
-    const char *env = getenv("BTRFS_MOUNT");
+    const char *env = getenv("REFLINK_MOUNT");
     if (env) FLAGS_reflink_fs_dir = env;
   }
   if (FLAGS_non_reflink_fs_dir.empty()) {
-    const char *env = getenv("EXT3_MOUNT");
+    const char *env = getenv("NONREFLINK_MOUNT");
     if (env) FLAGS_non_reflink_fs_dir = env;
   }
 
-  QCHECK(!FLAGS_reflink_fs_dir.empty()) << "--reflink_fs_dir or BTRFS_MOUNT must be set";
-  QCHECK(!FLAGS_non_reflink_fs_dir.empty()) << "--non_reflink_fs_dir or EXT3_MOUNT must be set";
+  QCHECK(!FLAGS_reflink_fs_dir.empty()) << "--reflink_fs_dir or REFLINK_MOUNT must be set";
+  QCHECK(!FLAGS_non_reflink_fs_dir.empty()) << "--non_reflink_fs_dir or NONREFLINK_MOUNT must be set";
 
   struct stat reflink_stat;
   struct stat non_reflink_stat;
