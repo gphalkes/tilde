@@ -48,7 +48,7 @@ int copy_file_by_sendfile(int src_fd, int dest_fd, size_t bytes_to_copy) {
 #if defined(TILDE_UNITTEST) && defined(__linux__)
 #error Please define HAS_SENDFILE in unit tests
 #endif
-int copy_file_by_sendfile(int, int) {
+int copy_file_by_sendfile(int, int, size_t) {
   return ENOTSUP;
 }
 #endif
@@ -78,7 +78,7 @@ int copy_file_by_copy_file_range(int src_fd, int dest_fd, size_t bytes_to_copy) 
 #if defined(TILDE_UNITTEST) && defined(__linux__)
 #error Please define HAS_COPY_FILE_RANGE in unit tests
 #endif
-int copy_file_by_copy_file_range(int, int) {
+int copy_file_by_copy_file_range(int, int, size_t) {
   return ENOTSUP;
 }
 #endif
