@@ -112,74 +112,77 @@ main_t::main_t() {
   menu->set_size(None, window.get_width());
   menu->connect_activate(bind_front(&main_t::menu_activated, this));
 
-  panel = menu->add_menu("_File");
-  panel->insert_item("_New", "^N", action_id_t::FILE_NEW);
-  panel->insert_item("_Open...", "^O", action_id_t::FILE_OPEN);
-  panel->insert_item("Open _Recent...", "", action_id_t::FILE_OPEN_RECENT);
-  panel->insert_item("_Close", "^W", action_id_t::FILE_CLOSE);
-  panel->insert_item("_Save", "^S", action_id_t::FILE_SAVE);
-  panel->insert_item("Save _As...", "", action_id_t::FILE_SAVE_AS);
+  panel = menu->insert_menu(nullptr, "_File");
+  panel->insert_item(nullptr, "_New", "^N", action_id_t::FILE_NEW);
+  panel->insert_item(nullptr, "_Open...", "^O", action_id_t::FILE_OPEN);
+  panel->insert_item(nullptr, "Open _Recent...", "", action_id_t::FILE_OPEN_RECENT);
+  panel->insert_item(nullptr, "_Close", "^W", action_id_t::FILE_CLOSE);
+  panel->insert_item(nullptr, "_Save", "^S", action_id_t::FILE_SAVE);
+  panel->insert_item(nullptr, "Save _As...", "", action_id_t::FILE_SAVE_AS);
   panel->insert_separator();
-  panel->insert_item("Re_draw Screen", "", action_id_t::FILE_REPAINT);
-  panel->insert_item("S_uspend", "", action_id_t::FILE_SUSPEND);
-  panel->insert_item("E_xit", "^Q", action_id_t::FILE_EXIT);
+  panel->insert_item(nullptr, "Re_draw Screen", "", action_id_t::FILE_REPAINT);
+  panel->insert_item(nullptr, "S_uspend", "", action_id_t::FILE_SUSPEND);
+  panel->insert_item(nullptr, "E_xit", "^Q", action_id_t::FILE_EXIT);
 
-  panel = menu->add_menu("_Edit");
-  panel->insert_item("_Undo", "^Z", action_id_t::EDIT_UNDO);
-  panel->insert_item("_Redo", "^Y", action_id_t::EDIT_REDO);
+  panel = menu->insert_menu(nullptr, "_Edit");
+  panel->insert_item(nullptr, "_Undo", "^Z", action_id_t::EDIT_UNDO);
+  panel->insert_item(nullptr, "_Redo", "^Y", action_id_t::EDIT_REDO);
   panel->insert_separator();
-  panel->insert_item("Cu_t", "^X", action_id_t::EDIT_CUT);
-  panel->insert_item("_Copy", "^C", action_id_t::EDIT_COPY);
-  panel->insert_item("_Paste", "^V", action_id_t::EDIT_PASTE);
+  panel->insert_item(nullptr, "Cu_t", "^X", action_id_t::EDIT_CUT);
+  panel->insert_item(nullptr, "_Copy", "^C", action_id_t::EDIT_COPY);
+  panel->insert_item(nullptr, "_Paste", "^V", action_id_t::EDIT_PASTE);
   panel->insert_separator();
-  panel->insert_item("Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
-  panel->insert_item("_Mark Selection", "^T", action_id_t::EDIT_MARK);
-  panel->insert_item("Paste _Selection", "S-Ins", action_id_t::EDIT_PASTE_SELECTION);
+  panel->insert_item(nullptr, "Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
+  panel->insert_item(nullptr, "_Mark Selection", "^T", action_id_t::EDIT_MARK);
+  panel->insert_item(nullptr, "Paste _Selection", "S-Ins", action_id_t::EDIT_PASTE_SELECTION);
   panel->insert_separator();
-  panel->insert_item("_Delete Line", "^K", action_id_t::EDIT_DELETE_LINE);
-  panel->insert_item("Insert C_haracter...", "F9", action_id_t::EDIT_INSERT_CHAR);
-  panel->insert_item("T_oggle INS/OVR", "Ins", action_id_t::EDIT_TOGGLE_INSERT);
+  panel->insert_item(nullptr, "_Delete Line", "^K", action_id_t::EDIT_DELETE_LINE);
+  panel->insert_item(nullptr, "Insert C_haracter...", "F9", action_id_t::EDIT_INSERT_CHAR);
+  panel->insert_item(nullptr, "T_oggle INS/OVR", "Ins", action_id_t::EDIT_TOGGLE_INSERT);
 
-  panel = menu->add_menu("_Search");
-  panel->insert_item("_Find...", "^F", action_id_t::SEARCH_SEARCH);
-  panel->insert_item("Find _Next", "F3", action_id_t::SEARCH_AGAIN);
-  panel->insert_item("Find _Previous", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
-  panel->insert_item("_Replace...", "^R", action_id_t::SEARCH_REPLACE);
+  panel = menu->insert_menu(nullptr, "_Search");
+  panel->insert_item(nullptr, "_Find...", "^F", action_id_t::SEARCH_SEARCH);
+  panel->insert_item(nullptr, "Find _Next", "F3", action_id_t::SEARCH_AGAIN);
+  panel->insert_item(nullptr, "Find _Previous", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
+  panel->insert_item(nullptr, "_Replace...", "^R", action_id_t::SEARCH_REPLACE);
   panel->insert_separator();
-  panel->insert_item("_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
-  panel->insert_item("Go to matching _brace", "^]", action_id_t::SEARCH_GOTO_MATCHING_BRACE);
+  panel->insert_item(nullptr, "_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
+  panel->insert_item(nullptr, "Go to matching _brace", "^]",
+                     action_id_t::SEARCH_GOTO_MATCHING_BRACE);
 
-  panel = menu->add_menu("_Window");
-  panel->insert_item("_Next Buffer", "F6", action_id_t::WINDOWS_NEXT_BUFFER);
-  panel->insert_item("_Previous Buffer", "S-F6", action_id_t::WINDOWS_PREV_BUFFER);
-  panel->insert_item("_Select Buffer...", "", action_id_t::WINDOWS_SELECT);
+  panel = menu->insert_menu(nullptr, "_Window");
+  panel->insert_item(nullptr, "_Next Buffer", "F6", action_id_t::WINDOWS_NEXT_BUFFER);
+  panel->insert_item(nullptr, "_Previous Buffer", "S-F6", action_id_t::WINDOWS_PREV_BUFFER);
+  panel->insert_item(nullptr, "_Select Buffer...", "", action_id_t::WINDOWS_SELECT);
   panel->insert_separator();
-  panel->insert_item("Split _Horizontal", "", action_id_t::WINDOWS_HSPLIT);
-  panel->insert_item("Split _Vertical", "", action_id_t::WINDOWS_VSPLIT);
-  panel->insert_item("_Close Window", "", action_id_t::WINDOWS_MERGE);
-  panel->insert_item("Next Window", "F8", action_id_t::WINDOWS_NEXT_WINDOW);
-  panel->insert_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
+  panel->insert_item(nullptr, "Split _Horizontal", "", action_id_t::WINDOWS_HSPLIT);
+  panel->insert_item(nullptr, "Split _Vertical", "", action_id_t::WINDOWS_VSPLIT);
+  panel->insert_item(nullptr, "_Close Window", "", action_id_t::WINDOWS_MERGE);
+  panel->insert_item(nullptr, "Next Window", "F8", action_id_t::WINDOWS_NEXT_WINDOW);
+  panel->insert_item(nullptr, "Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
-  panel = menu->add_menu("_Tools");
-  panel->insert_item("_Highlighting...", "", action_id_t::TOOLS_HIGHLIGHTING);
-  panel->insert_item("_Strip trailing spaces", "", action_id_t::TOOLS_STRIP_SPACES);
-  panel->insert_item("_Autocomplete", "C-Space", action_id_t::TOOLS_AUTOCOMPLETE);
-  panel->insert_item("_Toggle line comment", "C-/", action_id_t::TOOLS_TOGGLE_LINE_COMMENT);
-  panel->insert_item("_Indent Selection", "Tab", action_id_t::TOOLS_INDENT_SELECTION);
-  panel->insert_item("_Unindent Selection", "S-Tab", action_id_t::TOOLS_UNINDENT_SELECTION);
+  panel = menu->insert_menu(nullptr, "_Tools");
+  panel->insert_item(nullptr, "_Highlighting...", "", action_id_t::TOOLS_HIGHLIGHTING);
+  panel->insert_item(nullptr, "_Strip trailing spaces", "", action_id_t::TOOLS_STRIP_SPACES);
+  panel->insert_item(nullptr, "_Autocomplete", "C-Space", action_id_t::TOOLS_AUTOCOMPLETE);
+  panel->insert_item(nullptr, "_Toggle line comment", "C-/",
+                     action_id_t::TOOLS_TOGGLE_LINE_COMMENT);
+  panel->insert_item(nullptr, "_Indent Selection", "Tab", action_id_t::TOOLS_INDENT_SELECTION);
+  panel->insert_item(nullptr, "_Unindent Selection", "S-Tab",
+                     action_id_t::TOOLS_UNINDENT_SELECTION);
 
-  panel = menu->add_menu("_Options");
-  panel->insert_item("Input _Handling...", "", action_id_t::OPTIONS_INPUT);
-  panel->insert_item("_Current Buffer...", "", action_id_t::OPTIONS_BUFFER);
-  panel->insert_item("Buffer _Defaults...", "", action_id_t::OPTIONS_DEFAULTS);
-  panel->insert_item("_Interface...", "", action_id_t::OPTIONS_INTERFACE);
+  panel = menu->insert_menu(nullptr, "_Options");
+  panel->insert_item(nullptr, "Input _Handling...", "", action_id_t::OPTIONS_INPUT);
+  panel->insert_item(nullptr, "_Current Buffer...", "", action_id_t::OPTIONS_BUFFER);
+  panel->insert_item(nullptr, "Buffer _Defaults...", "", action_id_t::OPTIONS_DEFAULTS);
+  panel->insert_item(nullptr, "_Interface...", "", action_id_t::OPTIONS_INTERFACE);
 
-  panel->insert_item("_Miscellaneous...", "", action_id_t::OPTIONS_MISC);
+  panel->insert_item(nullptr, "_Miscellaneous...", "", action_id_t::OPTIONS_MISC);
 
-  panel = menu->add_menu("_Help");
+  panel = menu->insert_menu(nullptr, "_Help");
   // FIXME: reinstate when help is actually available.
-  //~ panel->insert_item("_Help", "F1", action_id_t::HELP_HELP);
-  panel->insert_item("_About", "", action_id_t::HELP_ABOUT);
+  //~ panel->insert_item(nullptr, "_Help", "F1", action_id_t::HELP_HELP);
+  panel->insert_item(nullptr, "_About", "", action_id_t::HELP_ABOUT);
 
   split = emplace_back<split_t>(make_unique<file_edit_window_t>());
   split->set_position(!option.hide_menubar, 0);
