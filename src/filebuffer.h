@@ -34,7 +34,7 @@ class file_buffer_t : public text_buffer_t {
   text_line_t name_line;
   std::unique_ptr<edit_window_t::view_parameters_t> view_parameters;
   bool has_window;
-  int highlight_valid;
+  text_pos_t highlight_valid;
   optional<bool> strip_spaces;
   t3_highlight_t *highlight_info;
   text_line_t *match_line;
@@ -44,9 +44,9 @@ class file_buffer_t : public text_buffer_t {
   std::string line_comment;
 
  private:
-  void prepare_paint_line(int line) override;
+  void prepare_paint_line(text_pos_t line) override;
   void set_has_window(bool _has_window);
-  void invalidate_highlight(rewrap_type_t type, int line, int pos);
+  void invalidate_highlight(rewrap_type_t type, text_pos_t line, text_pos_t pos);
   bool find_matching_brace(text_coordinate_t &match_location);
 
  public:

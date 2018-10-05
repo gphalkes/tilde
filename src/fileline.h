@@ -30,10 +30,10 @@ class file_line_t : public text_line_t {
 
   void set_highlight_start(int state);
   int get_highlight_end();
-  int get_highlight_idx(int i);
+  int get_highlight_idx(text_pos_t i);
 
  protected:
-  t3_attr_t get_base_attr(int i, const paint_info_t &info) override;
+  t3_attr_t get_base_attr(text_pos_t i, const paint_info_t &info) override;
 };
 
 class file_line_factory_t : public text_line_factory_t {

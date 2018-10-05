@@ -54,7 +54,7 @@ void file_edit_window_t::draw_info_window() {
     paint_info.size = name_width;
   }
   paint_info.leftcol = 0;
-  paint_info.max = INT_MAX;
+  paint_info.max = std::numeric_limits<text_pos_t>::max();
   paint_info.tabsize = 1;
   paint_info.flags = text_line_t::TAB_AS_CONTROL | text_line_t::SPACECLEAR;
   paint_info.selection_start = -1;
@@ -123,13 +123,14 @@ void file_edit_window_t::update_contents() {
      updates.
   */
   if (get_text()->update_matching_brace()) {
-    update_repaint_lines(0, INT_MAX);
+    update_repaint_lines(0, std::numeric_limits<text_pos_t>::max());
   }
   edit_window_t::update_contents();
 }
 
-void file_edit_window_t::force_repaint_to_bottom(rewrap_type_t type, int line, int pos) {
+void file_edit_window_t::force_repaint_to_bottom(rewrap_type_t type, text_pos_t line,
+                                                 text_pos_t pos) {
   (void)type;
   (void)pos;
-  update_repaint_lines(line, INT_MAX);
+  update_repaint_lines(line, std::numeric_limits<text_pos_t>::max());
 }

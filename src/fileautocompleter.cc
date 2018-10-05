@@ -18,8 +18,8 @@
 #include "tilde/log.h"
 
 string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buffer_t *text,
-                                                                  int *position) {
-  int completion_end;
+                                                                  t3widget::text_pos_t *position) {
+  text_pos_t completion_end;
 
   if (current_list != nullptr) {
     current_list.reset();
@@ -50,7 +50,8 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
       string_view(line.get_data()).substr(completion_start, completion_end - completion_start);
 
   text_coordinate_t start(0, 0);
-  text_coordinate_t eof(INT_MAX, INT_MAX);
+  text_coordinate_t eof(std::numeric_limits<text_pos_t>::max(),
+                        std::numeric_limits<text_pos_t>::max());
   std::string needle(line.get_data(), completion_start, cursor.pos - completion_start);
   std::unique_ptr<finder_t> finder =
       finder_t::create(needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);

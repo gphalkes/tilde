@@ -24,7 +24,7 @@ file_line_t::file_line_t(string_view _buffer, file_line_factory_t *_factory)
     : text_line_t(_buffer, _factory == nullptr ? &default_file_line_factory : _factory),
       highlight_start_state(0) {}
 
-int file_line_t::get_highlight_idx(int i) {
+int file_line_t::get_highlight_idx(text_pos_t i) {
   file_buffer_t *file = static_cast<file_line_factory_t *>(factory)->get_file_buffer();
 
   if (file == nullptr || file->highlight_info == nullptr) {
@@ -51,7 +51,7 @@ int file_line_t::get_highlight_idx(int i) {
              : t3_highlight_get_match_attr(file->last_match);
 }
 
-t3_attr_t file_line_t::get_base_attr(int i, const paint_info_t &info) {
+t3_attr_t file_line_t::get_base_attr(text_pos_t i, const paint_info_t &info) {
   file_buffer_t *file = static_cast<file_line_factory_t *>(factory)->get_file_buffer();
   int idx = get_highlight_idx(i);
   t3_attr_t result = idx < 0 ? info.normal_attr : option.highlights[idx];

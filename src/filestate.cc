@@ -459,7 +459,7 @@ bool load_cli_file_process_t::step() {
 
   in_step = true;
   while (iter != cli_option.files.end()) {
-    int line = -1, pos = -1;
+    text_pos_t line = -1, pos = -1;
     std::string filename = *iter;
     if (default_option.parse_file_positions.value_or(true) &&
         !cli_option.disable_file_position_parsing) {
@@ -500,8 +500,8 @@ void load_cli_file_process_t::encoding_selection_done(const std::string *_encodi
 
 static bool is_ascii_digit(int c) { return c >= '0' && c <= '9'; }
 
-void load_cli_file_process_t::attempt_file_position_parse(std::string *filename, int *line,
-                                                          int *pos) {
+void load_cli_file_process_t::attempt_file_position_parse(std::string *filename, text_pos_t *line,
+                                                          text_pos_t *pos) {
   size_t idx = filename->size();
   if (idx < 3) {
     return;
@@ -523,7 +523,7 @@ void load_cli_file_process_t::attempt_file_position_parse(std::string *filename,
     return;
   }
 
-  *line = atoi(filename->c_str() + idx + 1);
+  *line = static_cast<text_pos_t>(std::atoll(filename->c_str() + idx + 1));
   filename->erase(idx);
 
   --idx;
@@ -534,6 +534,6 @@ void load_cli_file_process_t::attempt_file_position_parse(std::string *filename,
     return;
   }
   *pos = *line;
-  *line = atoi(filename->c_str() + idx + 1);
+  *line = static_cast<text_pos_t>(std::atoll(filename->c_str() + idx + 1));
   filename->erase(idx);
 }

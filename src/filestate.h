@@ -116,7 +116,7 @@ class save_as_process_t : public stepped_process_t {
   std::string real_name;
   std::string temp_name;
   int fd;
-  int i;
+  text_pos_t i;
   file_write_wrapper_t *wrapper;
   struct stat file_info;
 
@@ -184,7 +184,7 @@ class open_recent_process_t : public load_process_t {
 
 class load_cli_file_process_t : public stepped_process_t {
  private:
-  void attempt_file_position_parse(std::string *filename, int *line, int *pos);
+  void attempt_file_position_parse(std::string *filename, text_pos_t *line, text_pos_t *pos);
 
  protected:
   std::list<std::string>::const_iterator iter;

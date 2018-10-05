@@ -22,7 +22,7 @@ using namespace t3widget;
 class file_edit_window_t : public edit_window_t {
  private:
   connection_t rewrap_connection;
-  void force_repaint_to_bottom(rewrap_type_t type, int line, int pos);
+  void force_repaint_to_bottom(rewrap_type_t type, text_pos_t line, text_pos_t pos);
 
  public:
   explicit file_edit_window_t(file_buffer_t *_text = nullptr);
