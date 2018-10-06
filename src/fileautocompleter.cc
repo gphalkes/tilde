@@ -43,7 +43,7 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   }
 
   for (completion_end = completion_start;
-       completion_end < line.get_length() && line.is_alnum(completion_end);
+       completion_end < line.size() && line.is_alnum(completion_end);
        completion_end = line.adjust_position(completion_end, 1)) {
   }
   string_view current_word =
@@ -60,8 +60,8 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
 
   while (text->find_limited(finder.get(), start, eof, &find_result)) {
     const text_line_t &matching_line = text->get_line_data(find_result.start.line);
-    for (; find_result.end.pos < matching_line.get_length() &&
-           matching_line.is_alnum(find_result.end.pos);
+    for (;
+         find_result.end.pos < matching_line.size() && matching_line.is_alnum(find_result.end.pos);
          find_result.end.pos = matching_line.adjust_position(find_result.end.pos, 1)) {
     }
 

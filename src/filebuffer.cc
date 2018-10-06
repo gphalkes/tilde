@@ -500,8 +500,8 @@ void file_buffer_t::do_strip_spaces() {
   }
 
   set_cursor(saved_cursor);
-  if (saved_cursor.pos > get_line_max(saved_cursor.line)) {
-    set_cursor_pos(get_line_max(saved_cursor.line));
+  if (saved_cursor.pos > get_line_size(saved_cursor.line)) {
+    set_cursor_pos(get_line_size(saved_cursor.line));
   }
 }
 
@@ -556,7 +556,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
     for (; current_line < size(); current_line++) {
       line = static_cast<file_line_t *>(get_mutable_line_data(current_line));
       prepare_paint_line(current_line);
-      for (i = 0; i < line->get_length(); i = line->adjust_position(i, 1)) {
+      for (i = 0; i < line->size(); i = line->adjust_position(i, 1)) {
       start_search:
         check_c = line->get_data()[i];
         if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
@@ -624,7 +624,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
         line = static_cast<file_line_t *>(get_mutable_line_data(current_line));
         /* No need to call prepare_paint_line here because we're going backwards. */
         text_pos_t i;
-        for (i = 0, local_count = 0, open_surplus = 0; i < line->get_length(); i++) {
+        for (i = 0, local_count = 0, open_surplus = 0; i < line->size(); i++) {
           check_c = line->get_data()[i];
           if ((check_c != c && check_c != c_close) || line->get_highlight_idx(i) > 0) {
             continue;
@@ -650,7 +650,7 @@ bool file_buffer_t::find_matching_brace(text_coordinate_t &match_location) {
       if (current_line < 0) {
         return false;
       }
-      match_max = line->get_length();
+      match_max = line->size();
     } else {
       match_max = cursor.pos;
     }

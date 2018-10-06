@@ -44,7 +44,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(optional<std::string> _title)
   tab_spaces_box->connect_move_focus_down([this] { focus_next(); });
   tab_spaces_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   label = emplace_back<smart_label_t>(_("_Wrap text"));
   label->set_position(3, 2);
@@ -56,7 +56,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(optional<std::string> _title)
   wrap_box->connect_move_focus_down([this] { focus_next(); });
   wrap_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   label = emplace_back<smart_label_t>(_("_Automatic indentation"));
   label->set_position(4, 2);
@@ -68,7 +68,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(optional<std::string> _title)
   auto_indent_box->connect_move_focus_down([this] { focus_next(); });
   auto_indent_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   label = emplace_back<smart_label_t>(_("_Indent aware home key"));
   label->set_position(5, 2);
@@ -81,7 +81,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(optional<std::string> _title)
   indent_aware_home_box->connect_move_focus_down([this] { focus_next(); });
   indent_aware_home_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   label = emplace_back<smart_label_t>(_("S_how tabs"));
   label->set_position(6, 2);
@@ -93,7 +93,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(optional<std::string> _title)
   show_tabs_box->connect_move_focus_down([this] { focus_next(); });
   show_tabs_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   label = emplace_back<smart_label_t>(_("St_rip trailing spaces on save"));
   label->set_position(7, 2);
@@ -105,7 +105,7 @@ buffer_options_dialog_t::buffer_options_dialog_t(optional<std::string> _title)
   strip_spaces_box->connect_move_focus_down([this] { focus_next(); });
   strip_spaces_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   button_t *ok_button = emplace_back<button_t>("_Ok", true);
   button_t *cancel_button = emplace_back<button_t>("_Cancel");
@@ -210,7 +210,7 @@ misc_options_dialog_t::misc_options_dialog_t(optional<std::string> _title)
   hide_menu_box->connect_move_focus_down([this] { focus_next(); });
   hide_menu_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   label = emplace_back<smart_label_t>(_("_Make backup on save"));
   label->set_position(2, 2);
@@ -222,7 +222,7 @@ misc_options_dialog_t::misc_options_dialog_t(optional<std::string> _title)
   save_backup_box->connect_move_focus_down([this] { focus_next(); });
   save_backup_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   label = emplace_back<smart_label_t>(_("_Parse file positions"));
   label->set_position(3, 2);
@@ -235,7 +235,7 @@ misc_options_dialog_t::misc_options_dialog_t(optional<std::string> _title)
   parse_file_positions_box->connect_move_focus_down([this] { focus_next(); });
   parse_file_positions_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   label = emplace_back<smart_label_t>(_("Disable primary selection over _SSH"));
   label->set_position(4, 2);
@@ -248,7 +248,7 @@ misc_options_dialog_t::misc_options_dialog_t(optional<std::string> _title)
   disable_selection_over_ssh_box->connect_move_focus_down([this] { focus_next(); });
   disable_selection_over_ssh_box->connect_activate([this] { handle_activate(); });
 
-  width = std::max(label->get_width() + 2 + 3, width);
+  width = std::max<int>(label->get_width() + 2 + 3, width);
 
   button_t *ok_button = emplace_back<button_t>("_Ok", true);
   button_t *cancel_button = emplace_back<button_t>("_Cancel");

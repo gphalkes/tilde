@@ -37,7 +37,7 @@ class file_buffer_t : public text_buffer_t {
   text_pos_t highlight_valid;
   optional<bool> strip_spaces;
   t3_highlight_t *highlight_info;
-  text_line_t *match_line;
+  const text_line_t *match_line;
   t3_highlight_match_t *last_match;
   bool matching_brace_valid;
   text_coordinate_t matching_brace_coordinate;

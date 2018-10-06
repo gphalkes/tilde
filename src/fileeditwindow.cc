@@ -45,9 +45,9 @@ void file_edit_window_t::draw_info_window() {
   info_window.set_paint(0, 0);
   info_window.set_default_attrs(get_attribute(attribute_t::MENUBAR));
 
-  if (name_line->calculate_screen_width(0, name_line->get_length(), 1) > name_width) {
+  if (name_line->calculate_screen_width(0, name_line->size(), 1) > name_width) {
     info_window.addstr("..", 0);
-    paint_info.start = name_line->adjust_position(name_line->get_length(), -(name_width - 2));
+    paint_info.start = name_line->adjust_position(name_line->size(), -(name_width - 2));
     paint_info.size = name_width - 2;
   } else {
     paint_info.start = 0;
