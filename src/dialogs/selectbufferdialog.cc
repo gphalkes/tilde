@@ -63,24 +63,20 @@ void select_buffer_dialog_t::show() {
     }
 
     for (file_buffer_t *open_file : open_files) {
-      bullet_t *bullet;
-      label_t *label;
-      const char *name;
-
       std::unique_ptr<multi_widget_t> multi_widget(new multi_widget_t());
       multi_widget->set_size(None, width - 5);
       multi_widget->show();
-      bullet = new bullet_t([open_file] { return open_file->get_has_window(); });
-      multi_widget->push_back(bullet, -1, true, false);
-      name = open_file->get_name().c_str();
+      bullet_t *bullet = new bullet_t([open_file] { return open_file->get_has_window(); });
+      multi_widget->push_back(wrap_unique(bullet), -1, true, false);
+      const char *name = open_file->get_name().c_str();
       if (name[0] == 0) {
         name = "(Untitled)";
       }
-      label = new label_t(name);
+      label_t *label = new label_t(name);
       label->set_anchor(bullet, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
       label->set_accepts_focus(true);
-      multi_widget->push_back(label, 1, true, false);
+      multi_widget->push_back(wrap_unique(label), 1, true, false);
       list->push_back(std::move(multi_widget));
     }
   }
