@@ -201,7 +201,7 @@ main_t::main_t() {
 
   open_file_dialog = new open_file_dialog_t(window.get_height() - 4, window.get_width() - 4);
   open_file_dialog->center_over(this);
-  open_file_dialog->set_file(string_view());
+  open_file_dialog->set_from_file(string_view());
   std::unique_ptr<button_t> encoding_button = make_unique<button_t>("_Encoding");
   encoding_button->connect_activate([] { encoding_dialog->show(); });
   open_file_dialog->set_options_widget(std::move(encoding_button));
@@ -332,8 +332,9 @@ void main_t::menu_activated(int id) {
     case action_id_t::FILE_OPEN: {
       const std::string &name = get_current()->get_text()->get_name();
       if (!name.empty()) {
-        open_file_dialog->set_file(name);
-        // Because set_file also selects the named file if possible, we need to reset the dialog
+        open_file_dialog->set_from_file(name);
+        // Because set_from_file also selects the named file if possible, we need to reset the
+        // dialog.
         open_file_dialog->reset();
       }
       load_process_t::execute(bind_front(&main_t::switch_to_new_buffer, this));
