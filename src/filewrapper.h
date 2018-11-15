@@ -56,7 +56,7 @@ class transcript_buffer_t : public buffer_t {
   transcript_buffer_t(buffer_t *_buffer, transcript_t *_handle)
       : wrapped_buffer(_buffer),
         buffer_index(0),
-        conversion_flags(TRANSCRIPT_FILE_START),
+        conversion_flags(TRANSCRIPT_FILE_START | TRANSCRIPT_ALLOW_PRIVATE_USE),
         handle(_handle),
         at_eof(false) {}
   ~transcript_buffer_t() override;
@@ -82,7 +82,9 @@ class file_write_wrapper_t {
 
  public:
   explicit file_write_wrapper_t(int _fd, transcript_t *_handle = nullptr)
-      : fd(_fd), conversion_flags(TRANSCRIPT_FILE_START), handle(_handle) {}
+      : fd(_fd),
+        conversion_flags(TRANSCRIPT_FILE_START | TRANSCRIPT_ALLOW_PRIVATE_USE),
+        handle(_handle) {}
   ~file_write_wrapper_t();
   void write(const char *buffer, size_t bytes);
 };
