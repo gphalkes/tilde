@@ -79,6 +79,8 @@ class file_buffer_t : public text_buffer_t {
 
   void set_line_comment(const char *text);
   void toggle_line_comment();
+
+  const char *get_char_under_cursor(size_t *size) const;
 };
 
 #endif

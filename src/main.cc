@@ -20,6 +20,7 @@
 
 #include "tilde/action.h"
 #include "tilde/dialogs/attributesdialog.h"
+#include "tilde/dialogs/characterdetailsdialog.h"
 #include "tilde/dialogs/encodingdialog.h"
 #include "tilde/dialogs/highlightdialog.h"
 #include "tilde/dialogs/openrecentdialog.h"
@@ -45,6 +46,7 @@ message_dialog_t *error_dialog;
 open_recent_dialog_t *open_recent_dialog;
 encoding_dialog_t *encoding_dialog;
 message_dialog_t *preserve_bom_dialog;
+character_details_dialog_t *character_details_dialog;
 
 static dialog_t *input_selection_dialog;
 
@@ -141,6 +143,7 @@ main_t::main_t() {
   panel->add_item("Paste _Selection", "S-Ins", action_id_t::EDIT_PASTE_SELECTION);
   panel->add_separator();
   panel->add_item("_Delete Line", "^K", action_id_t::EDIT_DELETE_LINE);
+  panel->add_item("Character Detai_ls...", "F2", action_id_t::EDIT_CHAR_DETAILS);
   panel->add_item("Insert C_haracter...", "F9", action_id_t::EDIT_INSERT_CHAR);
   panel->add_item("T_oggle INS/OVR", "Ins", action_id_t::EDIT_TOGGLE_INSERT);
 
@@ -262,6 +265,9 @@ main_t::main_t() {
       "This is used on some platforms to recognise UTF-8 encoded files. On Unix-like systems "
       "however, the presence of the BOM is undesirable. Do you want to preserve the BOM?");
   preserve_bom_dialog->center_over(this);
+
+  character_details_dialog = new character_details_dialog_t(8, MESSAGE_DIALOG_WIDTH);
+  character_details_dialog->center_over(this);
 
   attributes_dialog = new attributes_dialog_t(ATTRIBUTES_DIALOG_WIDTH);
   attributes_dialog->center_over(this);
@@ -393,6 +399,9 @@ void main_t::menu_activated(int id) {
       break;
     case action_id_t::EDIT_PASTE_SELECTION:
       get_current()->paste_selection();
+      break;
+    case action_id_t::EDIT_CHAR_DETAILS:
+      get_current()->show_character_details();
       break;
     case action_id_t::EDIT_INSERT_CHAR:
       get_current()->insert_special();

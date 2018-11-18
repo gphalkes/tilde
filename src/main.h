@@ -17,6 +17,7 @@
 #include <t3widget/widget.h>
 using namespace t3_widget;
 
+#include "tilde/dialogs/characterdetailsdialog.h"
 #include "tilde/dialogs/encodingdialog.h"
 #include "tilde/dialogs/openrecentdialog.h"
 
@@ -28,4 +29,6 @@ extern message_dialog_t *error_dialog;
 extern open_recent_dialog_t *open_recent_dialog;
 extern encoding_dialog_t *encoding_dialog;
 extern message_dialog_t *preserve_bom_dialog;
+extern character_details_dialog_t *character_details_dialog;
+
 #endif
