@@ -1,3 +1,19 @@
+Version 0.4.3:
+  Bug fixes:
+  - Allow Private-Use Area characters in input and output without substituion.
+
+Version 0.4.2:
+	This release is a re-release of 0.4.1 which removes a non-functional file.
+
+Version 0.4.1:
+	Bug fixes:
+	- Rewrite files in place if the owner of the file would be changed by
+	  creating the file anew. This is a short-term solution for fixing
+	  accidental ownership changes due to the scheme used by Tilde to prevent
+	  file corruptions.
+	- Guard against off-of-line cursor positions in finding next brace. This
+	  could cause infinite loops in some cases.
+
 Version 0.4.0:
 	New features:
 	- Allow writing files if the directory they are in is not writable for the

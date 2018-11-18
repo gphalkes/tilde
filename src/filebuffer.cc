@@ -287,7 +287,8 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
              directly. The latter has some risk (e.g. file truncation due to full disk,
              or corruption due to computer crashes), but these are so small that it is
              worth permitting this if we can't create the temporary file. */
-          if ((state->fd = mkstemp(temp_name.data())) >= 0) {
+          if (geteuid() == state->file_info.st_uid &&
+              (state->fd = mkstemp(temp_name.data())) >= 0) {
             state->temp_name = temp_name.data();
 // Preserve ownership and attributes
 #ifdef HAS_LIBATTR
