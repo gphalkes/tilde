@@ -1,4 +1,7 @@
 Version 0.4.3:
+  New features:
+  - A new dialog is available that shows the codepoints under the cursor.
+
   Bug fixes:
   - Allow Private-Use Area characters in input and output without substituion.
 

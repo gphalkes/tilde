@@ -809,3 +809,18 @@ void file_buffer_t::toggle_line_comment() {
     set_selection_end();
   }
 }
+
+const char *file_buffer_t::get_char_under_cursor(size_t *size) const {
+  const text_coordinate_t cursor = get_cursor();
+  const text_line_t &line = get_line_data(cursor.line);
+  if (cursor.pos >= line.size()) {
+    *size = 1;
+    return "\n";
+  }
+  int end = line.adjust_position(cursor.pos, 1);
+  if (cursor.pos == end) {
+    return nullptr;
+  }
+  *size = end - cursor.pos;
+  return line.get_data().data() + cursor.pos;
+}

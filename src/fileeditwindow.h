@@ -34,6 +34,7 @@ class file_edit_window_t : public edit_window_t {
   void set_text(file_buffer_t *_text);
   file_buffer_t *get_text() const;
   void goto_matching_brace();
+  void show_character_details();
 };
 
 #endif

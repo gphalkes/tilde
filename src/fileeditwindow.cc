@@ -13,6 +13,7 @@
 */
 #include "tilde/fileeditwindow.h"
 #include "tilde/fileautocompleter.h"
+#include "tilde/main.h"
 
 file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
   text_buffer_t *old_text = get_text();
@@ -97,6 +98,9 @@ bool file_edit_window_t::process_key(t3widget::key_t key) {
         get_text()->toggle_line_comment();
         force_redraw();
         return true;
+      case EKEY_F2:
+        show_character_details();
+        return true;
       default:
         break;
     }
@@ -133,4 +137,13 @@ void file_edit_window_t::force_repaint_to_bottom(rewrap_type_t type, text_pos_t 
   (void)type;
   (void)pos;
   update_repaint_lines(line, std::numeric_limits<text_pos_t>::max());
+}
+
+void file_edit_window_t::show_character_details() {
+  size_t size;
+  const char *data = get_text()->get_char_under_cursor(&size);
+  if (data != nullptr) {
+    character_details_dialog->set_codepoints(data, size);
+    character_details_dialog->show();
+  }
 }
