@@ -76,18 +76,18 @@ int main(int argc, char *argv[]) {
 }
 EOF
 	test_link_cxx "libunistring" "TESTLIBS=-lunistring" || \
-		error "!! Can not find libunistring library. Libunistring is required to compile libt3window."
+		error "!! Can not find libunistring library. Libunistring is required to compile tilde."
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
 #include <t3widget/widget.h>
-using namespace t3_widget;
+using namespace t3widget;
 int main(int argc, char *argv[]) {
 	get_version();
 	return 0;
 }
 EOF
-	pkgconfig libt3widget/0.6.0 LIBT3WIDGET test_link_cxx_with_flags || \
+	pkgconfig libt3widget/1.0.0 LIBT3WIDGET test_link_cxx_with_flags || \
 		error "!! Can not find libt3widget. libt3widget is required to compile tilde."
 
 	clean_cxx

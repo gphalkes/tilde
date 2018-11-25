@@ -92,11 +92,11 @@ file_line_factory_t::file_line_factory_t(file_buffer_t *_file_buffer) {
 }
 
 std::unique_ptr<text_line_t> file_line_factory_t::new_text_line_t(int buffersize) {
-  return make_unique<file_line_t>(buffersize, this);
+  return t3widget::make_unique<file_line_t>(buffersize, this);
 }
 
 std::unique_ptr<text_line_t> file_line_factory_t::new_text_line_t(string_view _buffer) {
-  return make_unique<file_line_t>(_buffer, this);
+  return t3widget::make_unique<file_line_t>(_buffer, this);
 }
 
 file_buffer_t *file_line_factory_t::get_file_buffer() const { return file_buffer; }

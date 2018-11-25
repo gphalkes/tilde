@@ -1,5 +1,9 @@
+Version 1.0.0:
+	This release is the first based on libt3widget 1.0.0. It does not provide
+	new features.
+
 Version 0.4.3:
-	 New features:
+	New features:
 	- A new dialog is available that shows the codepoints under the cursor.
 
 	Bug fixes:
