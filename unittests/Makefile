@@ -11,12 +11,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+GTEST_DIR := $(shell if [ -d /usr/src/googletest/googletest ] ; then echo /usr/src/googletest/googletest ; else echo /usr/src/gtest ; fi )
+
 SOURCES.copy_file_test := \
   copy_file_test.cc \
   src/copy_file.cc \
-  /usr/src/googletest/googletest/src/gtest-all.cc
+  $(GTEST_DIR)/src/gtest-all.cc
 
-CXXFLAGS./usr/src/googletest/googletest/src/gtest-all := -I/usr/src/googletest/googletest
+CXXFLAGS.$(GTEST_DIR)/src/gtest-all := -I$(GTEST_DIR)
 LDLIBS.copy_file_test := -lgflags
 
 CXXTARGETS := copy_file_test
@@ -36,6 +38,8 @@ CXXFLAGS += -DHAS_SENDFILE
 CXXFLAGS += -DHAS_COPY_FILE_RANGE
 CXXFLAGS += -DHAS_FICLONE
 CXXFLAGS += -std=c++11
+CXXFLAGS += -pthread
+CXXFLAGS += -I$(GTEST_DIR)/include
 
 clang-format:
 	clang-format -i *.cc

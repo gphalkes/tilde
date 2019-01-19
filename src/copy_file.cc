@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <t3widget/util.h>
 
-using namespace t3_widget;
+using namespace t3widget;
 
 static bool rewind_files(int src_fd, int dest_fd) {
   if (lseek(src_fd, 0, SEEK_SET) == (off_t) -1) {

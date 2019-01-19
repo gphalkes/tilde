@@ -89,8 +89,8 @@ bool FileCopied(const std::string &a, const std::string &b) {
   char buffer_b[4096];
   size_t offset = 0;
   while (true) {
-    ssize_t read_a = t3_widget::nosig_read(fd_a, buffer_a, sizeof(buffer_a));
-    ssize_t read_b = t3_widget::nosig_read(fd_b, buffer_b, sizeof(buffer_b));
+    ssize_t read_a = t3widget::nosig_read(fd_a, buffer_a, sizeof(buffer_a));
+    ssize_t read_b = t3widget::nosig_read(fd_b, buffer_b, sizeof(buffer_b));
 
     if (read_a != read_b) {
       std::cerr << "File " << a << " and file " << b << " have different lengths. Read results at offset " << offset << ": a=" << read_a << " b=" << read_b << "\n";
@@ -124,7 +124,7 @@ std::pair<std::string, int> CreateFile(const std::string &dir) {
 std::pair<std::string, int> CreateFileWithContent(std::string content, const std::string &dir) {
   auto name_and_fd = CreateFile(dir);
 
-  QCHECK(t3_widget::nosig_write(name_and_fd.second, content.data(), content.size()) == static_cast<ssize_t>(content.size())) <<
+  QCHECK(t3widget::nosig_write(name_and_fd.second, content.data(), content.size()) == static_cast<ssize_t>(content.size())) <<
       "Failed to write full content to file (" << strerror(errno) << ", " << name_and_fd.first << ")";
   QCHECK(fsync(name_and_fd.second) == 0);
   return name_and_fd;
@@ -137,7 +137,7 @@ void FillWithRandomData(const std::pair<std::string, int> &name_and_fd, size_t s
       buffer[i] = std::rand();
     }
     size_t to_write = std::min(size, sizeof(buffer));
-    QCHECK(t3_widget::nosig_write(name_and_fd.second, buffer, to_write) == static_cast<ssize_t>(to_write)) <<
+    QCHECK(t3widget::nosig_write(name_and_fd.second, buffer, to_write) == static_cast<ssize_t>(to_write)) <<
         "Failed to write full content to file (" << strerror(errno) << ", " << name_and_fd.first << ")";
     size -= to_write;
   }
