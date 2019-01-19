@@ -7,6 +7,7 @@ if [ $# -ne 1 ] ; then
 	fail "Usage: runtest.sh <dir with test>"
 fi
 
+setup_vars
 setup_TEST "$1"
 cd_workdir
 

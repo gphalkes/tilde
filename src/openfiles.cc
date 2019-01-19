@@ -118,7 +118,7 @@ recent_file_info_t::recent_file_info_t(file_buffer_t *file)
 
 const std::string &recent_file_info_t::get_name() const { return name; }
 
-const char *recent_file_info_t::get_encoding() const { return encoding.c_str(); }
+const std::string &recent_file_info_t::get_encoding() const { return encoding; }
 
 void recent_files_t::push_front(file_buffer_t *text) {
   if (text->get_name().empty()) {

@@ -18,55 +18,46 @@
   {                                                      \
     widget_group_t *widget_group = new widget_group_t(); \
     int widget_count = 0;
-#define END_WIDGET_GROUP(name, var)                                                         \
-  widget_group->set_size(widget_count, width - 4);                                          \
-  var = new expander_t(name);                                                               \
-  var->set_child(widget_group);                                                             \
-  var->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous)); \
-  var->connect_move_focus_down(signals::mem_fun(this, &attributes_dialog_t::focus_next));   \
-  expander_group->add_expander(var);                                                        \
+
+#define END_WIDGET_GROUP(name, var)                         \
+  widget_group->set_size(widget_count, width - 4);          \
+  var = emplace_back<expander_t>(name);                     \
+  var->set_child(wrap_unique(widget_group));                \
+  var->connect_move_focus_up([this] { focus_previous(); }); \
+  var->connect_move_focus_down([this] { focus_next(); });   \
+  expander_group->add_expander(var);                        \
   }
 
-#define ADD_ATTRIBUTE_ENTRY(name, sym, widget_name)                                          \
-  do {                                                                                       \
-    label = new smart_label_t(name);                                                         \
-    label->set_position(widget_count, 0);                                                    \
-    widget_group->add_child(label);                                                          \
-    change_button = new button_t("Change");                                                  \
-    change_button->set_anchor(widget_group,                                                  \
-                              T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT)); \
-    change_button->set_position(widget_count, 0);                                            \
-    change_button->connect_activate(signals::bind(                                           \
-        signals::mem_fun(this, &attributes_dialog_t::change_button_activated), sym));        \
-    change_button->connect_move_focus_up(                                                    \
-        signals::mem_fun(widget_group, &widget_group_t::focus_previous));                    \
-    change_button->connect_move_focus_down(                                                  \
-        signals::mem_fun(widget_group, &widget_group_t::focus_next));                        \
-    widget_group->add_child(change_button);                                                  \
-    widget_name = new attribute_test_line_t();                                               \
-    widget_name->set_anchor(change_button,                                                   \
-                            T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));    \
-    widget_name->set_position(0, -2);                                                        \
-    widget_group->add_child(widget_name);                                                    \
-    widget_count++;                                                                          \
+#define ADD_ATTRIBUTE_ENTRY(name, sym, widget_name)                                           \
+  do {                                                                                        \
+    smart_label_t *attribute_label = widget_group->emplace_back<smart_label_t>(name);         \
+    attribute_label->set_position(widget_count, 0);                                           \
+    button_t *change_button = widget_group->emplace_back<button_t>("Change");                 \
+    change_button->set_anchor(widget_group,                                                   \
+                              T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));  \
+    change_button->set_position(widget_count, 0);                                             \
+    change_button->connect_activate([this] { change_button_activated(sym); });                \
+    change_button->connect_move_focus_up([widget_group] { widget_group->focus_previous(); }); \
+    change_button->connect_move_focus_down([widget_group] { widget_group->focus_next(); });   \
+    widget_name = widget_group->emplace_back<attribute_test_line_t>();                        \
+    widget_name->set_anchor(change_button,                                                    \
+                            T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));     \
+    widget_name->set_position(0, -2);                                                         \
+    widget_count++;                                                                           \
   } while (false)
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
-attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interface") {
-  smart_label_t *label;
-  button_t *change_button, *ok_button, *cancel_button, *save_defaults_button;
-
-  label = new smart_label_t(_("Color _mode"));
+attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Interface")) {
+  smart_label_t *label = emplace_back<smart_label_t>(_("Color _mode"));
   label->set_position(1, 2);
-  push_back(label);
-  color_box = new checkbox_t();
+  color_box = emplace_back<checkbox_t>();
   color_box->set_label(label);
   color_box->set_anchor(this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   color_box->set_position(1, -2);
-  color_box->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  color_box->connect_move_focus_down(signals::mem_fun(this, &attributes_dialog_t::focus_next));
-  color_box->connect_activate(signals::mem_fun(this, &attributes_dialog_t::handle_activate));
-  color_box->connect_toggled(signals::mem_fun(this, &attributes_dialog_t::update_attribute_lines));
+  color_box->connect_move_focus_up([this] { focus_previous(); });
+  color_box->connect_move_focus_down([this] { focus_next(); });
+  color_box->connect_activate([this] { handle_activate(); });
+  color_box->connect_toggled([this] { update_attribute_lines(); });
 
   expander_group.reset(new expander_group_t());
 
@@ -115,60 +106,41 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, "Interf
                                T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
   syntax_highlight->set_position(0, 0);
 
-  expander_group->connect_expanded(
-      signals::mem_fun(this, &attributes_dialog_t::expander_size_change));
+  expander_group->connect_expanded([this](bool expanded) { expander_size_change(expanded); });
 
-  cancel_button = new button_t("_Cancel");
+  button_t *ok_button = emplace_back<button_t>("_Ok", true);
+  button_t *save_defaults_button = emplace_back<button_t>("Save as _defaults");
+  button_t *cancel_button = emplace_back<button_t>("_Cancel");
+
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
-  cancel_button->connect_activate(signals::mem_fun(this, &attributes_dialog_t::close));
-  cancel_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  cancel_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  cancel_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  cancel_button->connect_move_focus_left(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
+  cancel_button->connect_activate([this] { close(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_up([this] { focus_previous(); });
+  cancel_button->connect_move_focus_left([this] { focus_previous(); });
 
-  save_defaults_button = new button_t("Save as _defaults");
   save_defaults_button->set_anchor(cancel_button,
                                    T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   save_defaults_button->set_position(0, -2);
-  save_defaults_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  save_defaults_button->connect_move_focus_up(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  save_defaults_button->connect_move_focus_left(
-      signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  save_defaults_button->connect_move_focus_right(
-      signals::mem_fun(this, &attributes_dialog_t::focus_next));
-  save_defaults_button->connect_activate(
-      signals::mem_fun(this, &attributes_dialog_t::handle_save_defaults));
+  save_defaults_button->connect_move_focus_up([this] { focus_previous(); });
+  save_defaults_button->connect_move_focus_up([this] { focus_previous(); });
+  save_defaults_button->connect_move_focus_left([this] { focus_previous(); });
+  save_defaults_button->connect_move_focus_right([this] { focus_next(); });
+  save_defaults_button->connect_activate([this] { handle_save_defaults(); });
 
-  ok_button = new button_t("_Ok", true);
   ok_button->set_anchor(save_defaults_button,
                         T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
-  ok_button->connect_move_focus_up(signals::mem_fun(this, &attributes_dialog_t::focus_previous));
-  ok_button->connect_move_focus_right(signals::mem_fun(this, &attributes_dialog_t::focus_next));
-  ok_button->connect_activate(signals::mem_fun(this, &attributes_dialog_t::handle_activate));
-
-  push_back(color_box);
-  push_back(interface);
-  push_back(text_area);
-  push_back(syntax_highlight);
-  push_back(ok_button);
-  push_back(save_defaults_button);
-  push_back(cancel_button);
+  ok_button->connect_move_focus_up([this] { focus_previous(); });
+  ok_button->connect_move_focus_right([this] { focus_next(); });
+  ok_button->connect_activate([this] { handle_activate(); });
 
   picker.reset(new attribute_picker_dialog_t());
   picker->center_over(this);
-  picker->connect_attribute_selected(
-      signals::mem_fun(this, &attributes_dialog_t::attribute_selected));
-  picker->connect_default_selected(
-      signals::mem_fun(this, &attributes_dialog_t::default_attribute_selected));
+  picker->connect_attribute_selected(bind_front(&attributes_dialog_t::attribute_selected, this));
+  picker->connect_default_selected([this] { default_attribute_selected(); });
 }
 
 bool attributes_dialog_t::set_size(optint height, optint width) {
@@ -192,14 +164,14 @@ void attributes_dialog_t::show() {
 void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
   t3_attr_t text_attr;
 
-  text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
+  text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
   change_attribute = attribute;
 
   switch (attribute) {
 #define SET_WITH_DEFAULT(name, attr)                                                         \
   case attr:                                                                                 \
     picker->set_base_attributes(0);                                                          \
-    picker->set_attribute(name.is_valid() ? name()                                           \
+    picker->set_attribute(name.is_valid() ? name.value()                                     \
                                           : get_default_attr(attr, color_box->get_state())); \
     break;
     SET_WITH_DEFAULT(dialog, DIALOG);
@@ -224,7 +196,7 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
 #define SET_WITH_DEFAULT(name, attr)                                                         \
   case attr:                                                                                 \
     picker->set_base_attributes(text_attr);                                                  \
-    picker->set_attribute(name.is_valid() ? name()                                           \
+    picker->set_attribute(name.is_valid() ? name.value()                                     \
                                           : get_default_attr(attr, color_box->get_state())); \
     break;
     SET_WITH_DEFAULT(meta_text, META_TEXT);
@@ -288,11 +260,11 @@ void attributes_dialog_t::set_values_from_options() {
   SET_OPTION_VALUE(brace_highlight);
 #undef SET_OPTION_VALUE
 
-#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                                  \
-  do {                                                                                    \
-    name = term_specific_option.highlights[map_highlight(NULL, highlight_name)];          \
-    if (!name.is_valid())                                                                 \
-      name = default_option.term_options.highlights[map_highlight(NULL, highlight_name)]; \
+#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                                     \
+  do {                                                                                       \
+    name = term_specific_option.highlights[map_highlight(nullptr, highlight_name)];          \
+    if (!name.is_valid())                                                                    \
+      name = default_option.term_options.highlights[map_highlight(nullptr, highlight_name)]; \
   } while (false)
   SET_HIGHLIGHT_OPTION_VALUE(comment, "comment");
   SET_HIGHLIGHT_OPTION_VALUE(comment_keyword, "comment-keyword");
@@ -345,14 +317,14 @@ void attributes_dialog_t::set_default_options_from_values() {
 }
 
 void attributes_dialog_t::set_options_from_values(term_options_t *term_options) {
-  option.color = term_options->color = color_box->get_state();
+  term_options->color = option.color = color_box->get_state();
 
-#define SET_WITH_DEFAULT(name, attr)                                                        \
-  do {                                                                                      \
-    term_options->name = name;                                                              \
-    set_attribute(                                                                          \
-        attribute_t::attr,                                                                  \
-        name.is_valid() ? name() : get_default_attribute(attribute_t::attr, option.color)); \
+#define SET_WITH_DEFAULT(name, attr)                                                              \
+  do {                                                                                            \
+    term_options->name = name;                                                                    \
+    set_attribute(                                                                                \
+        attribute_t::attr,                                                                        \
+        name.is_valid() ? name.value() : get_default_attribute(attribute_t::attr, option.color)); \
   } while (false)
   SET_WITH_DEFAULT(dialog, DIALOG);
   SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
@@ -375,20 +347,20 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
 
   term_options->brace_highlight = brace_highlight;
   option.brace_highlight =
-      brace_highlight.is_valid() ? brace_highlight() : get_default_attr(BRACE_HIGHLIGHT);
+      brace_highlight.is_valid() ? brace_highlight.value() : get_default_attr(BRACE_HIGHLIGHT);
 
-#define SET_WITH_DEFAULT(name, attr)                                                      \
-  do {                                                                                    \
-    int highlight_idx = map_highlight(NULL, #name);                                       \
-    term_options->highlights[highlight_idx] = name;                                       \
-    option.highlights[highlight_idx] = name.is_valid() ? name() : get_default_attr(attr); \
+#define SET_WITH_DEFAULT(name, attr)                                                            \
+  do {                                                                                          \
+    int highlight_idx = map_highlight(nullptr, #name);                                          \
+    term_options->highlights[highlight_idx] = name;                                             \
+    option.highlights[highlight_idx] = name.is_valid() ? name.value() : get_default_attr(attr); \
   } while (false)
   SET_WITH_DEFAULT(comment, COMMENT);
   {
     int highlight_idx = map_highlight(nullptr, "comment-keyword");
     term_options->highlights[highlight_idx] = comment_keyword;
     option.highlights[highlight_idx] =
-        comment_keyword.is_valid() ? comment_keyword() : get_default_attr(COMMENT_KEYWORD);
+        comment_keyword.is_valid() ? comment_keyword.value() : get_default_attr(COMMENT_KEYWORD);
   }
   SET_WITH_DEFAULT(keyword, KEYWORD);
   SET_WITH_DEFAULT(number, NUMBER);
@@ -397,7 +369,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
     int highlight_idx = map_highlight(nullptr, "string-escape");
     term_options->highlights[highlight_idx] = string_escape;
     option.highlights[highlight_idx] =
-        string_escape.is_valid() ? string_escape() : get_default_attr(STRING_ESCAPE);
+        string_escape.is_valid() ? string_escape.value() : get_default_attr(STRING_ESCAPE);
   }
   SET_WITH_DEFAULT(misc, MISC);
   SET_WITH_DEFAULT(variable, VARIABLE);
@@ -414,7 +386,7 @@ void attributes_dialog_t::update_attribute_lines() {
   bool color = color_box->get_state();
 
 #define SET_WITH_DEFAULT(name, attr) \
-  name##_line->set_attribute(name.is_valid() ? name() : get_default_attr(attr, color))
+  name##_line->set_attribute(name.is_valid() ? name.value() : get_default_attr(attr, color))
   SET_WITH_DEFAULT(dialog, DIALOG);
   SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
   SET_WITH_DEFAULT(shadow, SHADOW);
@@ -434,11 +406,11 @@ void attributes_dialog_t::update_attribute_lines() {
   SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
 #undef SET_WITH_DEFAULT
 
-  text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color);
+  text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color);
 
-#define SET_WITH_DEFAULT(name, attr) \
-  name##_line->set_attribute(        \
-      t3_term_combine_attrs(name.is_valid() ? name() : get_default_attr(attr, color), text_attr))
+#define SET_WITH_DEFAULT(name, attr)                \
+  name##_line->set_attribute(t3_term_combine_attrs( \
+      name.is_valid() ? name.value() : get_default_attr(attr, color), text_attr))
   SET_WITH_DEFAULT(meta_text, META_TEXT);
   SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
 
@@ -458,7 +430,7 @@ void attributes_dialog_t::update_attribute_lines() {
 
 void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
   t3_attr_t text_attr;
-  text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
+  text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
   switch (change_attribute) {
 #define SET_WITH_DEFAULT(name, attr)       \
@@ -519,13 +491,13 @@ void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
 
 void attributes_dialog_t::default_attribute_selected() {
   t3_attr_t text_attr;
-  text_attr = text.is_valid() ? text() : get_default_attr(TEXT, color_box->get_state());
+  text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
   switch (change_attribute) {
 #define SET_DEFAULT(name, attr)                                                                   \
   case attr:                                                                                      \
     name = default_option.term_options.name;                                                      \
-    name##_line->set_attribute(name.is_valid() ? name()                                           \
+    name##_line->set_attribute(name.is_valid() ? name.value()                                     \
                                                : get_default_attr(attr, color_box->get_state())); \
     break;
     SET_DEFAULT(dialog, DIALOG);
@@ -550,7 +522,7 @@ void attributes_dialog_t::default_attribute_selected() {
 
 #define SET_DEFAULT(name, attr)                                                            \
   case attr:                                                                               \
-    name.unset();                                                                          \
+    name.reset();                                                                          \
     name##_line->set_attribute(                                                            \
         t3_term_combine_attrs(get_default_attr(attr, color_box->get_state()), text_attr)); \
     break;

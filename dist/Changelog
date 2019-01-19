@@ -1,3 +1,14 @@
+Version 1.0.0:
+	This release is the first based on libt3widget 1.0.0. It does not provide
+	new features.
+
+Version 0.4.3:
+	New features:
+	- A new dialog is available that shows the codepoints under the cursor.
+
+	Bug fixes:
+	- Allow Private-Use Area characters in input and output without substituion.
+
 Version 0.4.2:
 	This release is a re-release of 0.4.1 which removes a non-functional file.
 

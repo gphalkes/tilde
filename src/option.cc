@@ -23,7 +23,7 @@
 #include "tilde/optionMacros.h"
 #include "tilde/util.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 #define MAX_TAB 16
 
@@ -150,14 +150,14 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
   *attr = accumulated_attr;
 }
 
-#define GET_OPT(name, TYPE, type)                                                               \
-  do {                                                                                          \
-    t3_config_t *tmp;                                                                           \
-    if ((tmp = t3_config_get(&*config, #name)) != NULL) opts->name = t3_config_get_##type(tmp); \
+#define GET_OPT(name, TYPE, type)                                                                  \
+  do {                                                                                             \
+    t3_config_t *tmp;                                                                              \
+    if ((tmp = t3_config_get(&*config, #name)) != nullptr) opts->name = t3_config_get_##type(tmp); \
   } while (false)
 #define GET_ATTRIBUTE(name) read_config_attribute(attributes, #name, &opts->name)
 #define GET_HL_ATTRIBUTE(name) \
-  read_config_attribute(attributes, name, &opts->highlights[map_highlight(NULL, name)])
+  read_config_attribute(attributes, name, &opts->highlights[map_highlight(nullptr, name)])
 
 static void read_term_config_part(const t3_config_t *config, term_options_t *opts) {
   t3_config_t *attributes;
@@ -259,7 +259,7 @@ static void read_config() {
   const char *term;
 
   if (cli_option.config_file.is_valid()) {
-    config_file.reset(fopen(cli_option.config_file().c_str(), "r"));
+    config_file.reset(fopen(cli_option.config_file.value().c_str(), "r"));
   } else {
     config_file.reset(t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config"));
   }
@@ -341,17 +341,17 @@ static void read_config() {
   }
 }
 
-#define SET_OPT_FROM_FILE(name, deflt)                                        \
-  do {                                                                        \
-    if (term_specific_option.name.is_valid())                                 \
-      option.name = term_specific_option.name;                                \
-    else                                                                      \
-      option.name = default_option.term_options.name.value_or_default(deflt); \
+#define SET_OPT_FROM_FILE(name, deflt)                                \
+  do {                                                                \
+    if (term_specific_option.name.is_valid())                         \
+      option.name = term_specific_option.name.value();                \
+    else                                                              \
+      option.name = default_option.term_options.name.value_or(deflt); \
   } while (false)
 
-#define SET_OPT_FROM_DFLT(name, deflt)                         \
-  do {                                                         \
-    option.name = default_option.name.value_or_default(deflt); \
+#define SET_OPT_FROM_DFLT(name, deflt)                 \
+  do {                                                 \
+    option.name = default_option.name.value_or(deflt); \
   } while (false)
 
 static void post_process_options() {
@@ -361,7 +361,7 @@ static void post_process_options() {
   SET_OPT_FROM_DFLT(wrap, false);
 
   if (cli_option.color.is_valid()) {
-    option.color = cli_option.color;
+    option.color = cli_option.color.value();
   } else {
     SET_OPT_FROM_FILE(color, true);
   }
@@ -433,9 +433,9 @@ static void print_version() {
       t3_config_get_version() >> 16, (t3_config_get_version() >> 8) & 0xff,
       t3_config_get_version() & 0xff, t3_highlight_get_version() >> 16,
       (t3_highlight_get_version() >> 8) & 0xff, t3_highlight_get_version() & 0xff,
-      t3_widget::get_libt3key_version() >> 16, (t3_widget::get_libt3key_version() >> 8) & 0xff,
-      t3_widget::get_libt3key_version() & 0xff, t3_widget::get_version() >> 16,
-      (t3_widget::get_version() >> 8) & 0xff, t3_widget::get_version() & 0xff,
+      t3widget::get_libt3key_version() >> 16, (t3widget::get_libt3key_version() >> 8) & 0xff,
+      t3widget::get_libt3key_version() & 0xff, t3widget::get_version() >> 16,
+      (t3widget::get_version() >> 8) & 0xff, t3widget::get_version() & 0xff,
       t3_window_get_version() >> 16, (t3_window_get_version() >> 8) & 0xff,
       t3_window_get_version() & 0xff, transcript_get_version() >> 16,
       (transcript_get_version() >> 8) & 0xff, transcript_get_version() & 0xff,
@@ -475,7 +475,11 @@ PARSE_FUNCTION(parse_args)
       cli_option.config_file = optArg;
     END_OPTION
     OPTION('e', "encoding", OPTIONAL_ARG)
-      cli_option.encoding = optArg;
+      if (!optArg) {
+        cli_option.encoding = "";
+      } else {
+        cli_option.encoding = optArg;
+      }
     END_OPTION
     LONG_OPTION("ignore-running", NO_ARG)
       cli_option.ignore_running = true;
@@ -510,12 +514,12 @@ PARSE_FUNCTION(parse_args)
 END_FUNCTION
 // clang-format on
 
-#define SET_ATTR_FROM_FILE(name, const_name)                       \
-  do {                                                             \
-    if (term_specific_option.name.is_valid())                      \
-      set_attribute(const_name, term_specific_option.name);        \
-    else if (default_option.term_options.name.is_valid())          \
-      set_attribute(const_name, default_option.term_options.name); \
+#define SET_ATTR_FROM_FILE(name, const_name)                               \
+  do {                                                                     \
+    if (term_specific_option.name.is_valid())                              \
+      set_attribute(const_name, term_specific_option.name.value());        \
+    else if (default_option.term_options.name.is_valid())                  \
+      set_attribute(const_name, default_option.term_options.name.value()); \
   } while (false)
 
 void set_attributes() {
@@ -563,7 +567,7 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
   config = t3_config_add_list(attributes, name, nullptr);
 
   for (i = 0; i < ARRAY_SIZE(attribute_masks); i++) {
-    t3_attr_t search = attr & attribute_masks[i];
+    t3_attr_t search = attr.value() & attribute_masks[i];
     if (search == 0) {
       continue;
     }
@@ -588,12 +592,12 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
   }
 }
 
-#define SET_OPTION(name, type)                           \
-  do {                                                   \
-    if (opts->name.is_valid())                           \
-      t3_config_add_##type(&*config, #name, opts->name); \
-    else                                                 \
-      t3_config_erase(&*config, #name);                  \
+#define SET_OPTION(name, type)                                   \
+  do {                                                           \
+    if (opts->name.is_valid())                                   \
+      t3_config_add_##type(&*config, #name, opts->name.value()); \
+    else                                                         \
+      t3_config_erase(&*config, #name);                          \
   } while (false)
 #define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, opts->name)
 #define SET_HL_ATTRIBUTE(x, name) \
@@ -656,7 +660,7 @@ bool write_config() {
   }
 
   if (cli_option.config_file.is_valid()) {
-    config_file.reset(fopen(cli_option.config_file().c_str(), "r"));
+    config_file.reset(fopen(cli_option.config_file.value().c_str(), "r"));
   } else {
     config_file.reset(t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config"));
   }
@@ -683,7 +687,7 @@ bool write_config() {
     }
   }
 
-  default_option.term_options.key_timeout.unset();
+  default_option.term_options.key_timeout.reset();
   set_term_config_options(config.get(), &default_option.term_options);
 
 #define opts (&default_option)
@@ -733,7 +737,7 @@ bool write_config() {
   }
 
   if (cli_option.config_file.is_valid()) {
-    new_config_file = t3_config_open_write(cli_option.config_file().c_str());
+    new_config_file = t3_config_open_write(cli_option.config_file.value().c_str());
   } else {
     new_config_file = t3_config_xdg_open_write(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config");
   }

@@ -17,32 +17,27 @@
 #include "tilde/openfiles.h"
 
 open_recent_dialog_t::open_recent_dialog_t(int height, int width)
-    : dialog_t(height, width, "Open Recent"), known_version(INT_MIN) {
-  button_t *ok_button, *cancel_button;
-
-  list = new list_pane_t(true);
+    : dialog_t(height, width, _("Open Recent")), known_version(INT_MIN) {
+  list = emplace_back<list_pane_t>(true);
   list->set_size(height - 3, width - 2);
   list->set_position(1, 1);
-  list->connect_activate(signals::mem_fun(this, &open_recent_dialog_t::ok_activated));
+  list->connect_activate([this] { ok_activated(); });
 
-  cancel_button = new button_t("_Cancel", false);
+  button_t *ok_button = emplace_back<button_t>("_OK", true);
+  button_t *cancel_button = emplace_back<button_t>("_Cancel", false);
+
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
-  cancel_button->connect_activate(signals::mem_fun(this, &open_recent_dialog_t::close));
-  ok_button = new button_t("_OK", true);
+  cancel_button->connect_activate([this] { close(); });
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
-  ok_button->connect_activate(signals::mem_fun(this, &open_recent_dialog_t::ok_activated));
-
-  push_back(list);
-  push_back(ok_button);
-  push_back(cancel_button);
+  ok_button->connect_activate([this] { ok_activated(); });
 }
 
 bool open_recent_dialog_t::set_size(optint height, optint width) {
   bool result = dialog_t::set_size(height, width);
-  result &= list->set_size(height - 3, width - 2);
+  result &= list->set_size(height.value() - 3, width.value() - 2);
   return result;
 }
 
@@ -51,15 +46,13 @@ void open_recent_dialog_t::show() {
     known_version = recent_files.get_version();
 
     while (!list->empty()) {
-      widget_t *widget = list->back();
       list->pop_back();
-      delete widget;
     }
 
     for (recent_file_info_t *recent_file : recent_files) {
-      label_t *label = new label_t(recent_file->get_name().c_str());
+      std::unique_ptr<label_t> label(new label_t(recent_file->get_name().c_str()));
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
-      list->push_back(label);
+      list->push_back(std::move(label));
     }
   }
   list->reset();

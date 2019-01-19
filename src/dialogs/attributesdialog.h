@@ -20,7 +20,7 @@
 
 #include "tilde/option.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 class attributes_dialog_t : public dialog_t {
  private:
@@ -59,8 +59,8 @@ class attributes_dialog_t : public dialog_t {
   void set_default_options_from_values();
   void set_options_from_values(term_options_t *term_options);
 
-  T3_WIDGET_SIGNAL(activate, void);
-  T3_WIDGET_SIGNAL(save_defaults, void);
+  DEFINE_SIGNAL(activate);
+  DEFINE_SIGNAL(save_defaults);
 };
 
 #endif

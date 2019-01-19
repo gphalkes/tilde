@@ -13,6 +13,7 @@
 */
 #include "tilde/fileeditwindow.h"
 #include "tilde/fileautocompleter.h"
+#include "tilde/main.h"
 
 file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
   text_buffer_t *old_text = get_text();
@@ -22,7 +23,7 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 
   _text->set_has_window(true);
   rewrap_connection = _text->connect_rewrap_required(
-      signals::mem_fun(this, &file_edit_window_t::force_repaint_to_bottom));
+      bind_front(&file_edit_window_t::force_repaint_to_bottom, this));
   edit_window_t::set_text(_text, _text->get_view_parameters());
   edit_window_t::set_autocompleter(new file_autocompleter_t());
 
@@ -40,21 +41,21 @@ void file_edit_window_t::draw_info_window() {
   file_buffer_t *_text = static_cast<file_buffer_t *>(text);
   text_line_t *name_line = _text->get_name_line();
   text_line_t::paint_info_t paint_info;
-  int name_width = t3_win_get_width(info_window);
+  int name_width = info_window.get_width();
 
-  t3_win_set_paint(info_window, 0, 0);
-  t3_win_set_default_attrs(info_window, get_attribute(attribute_t::MENUBAR));
+  info_window.set_paint(0, 0);
+  info_window.set_default_attrs(get_attribute(attribute_t::MENUBAR));
 
-  if (name_line->calculate_screen_width(0, name_line->get_length(), 1) > name_width) {
-    t3_win_addstr(info_window, "..", 0);
-    paint_info.start = name_line->adjust_position(name_line->get_length(), -(name_width - 2));
+  if (name_line->calculate_screen_width(0, name_line->size(), 1) > name_width) {
+    info_window.addstr("..", 0);
+    paint_info.start = name_line->adjust_position(name_line->size(), -(name_width - 2));
     paint_info.size = name_width - 2;
   } else {
     paint_info.start = 0;
     paint_info.size = name_width;
   }
   paint_info.leftcol = 0;
-  paint_info.max = INT_MAX;
+  paint_info.max = std::numeric_limits<text_pos_t>::max();
   paint_info.tabsize = 1;
   paint_info.flags = text_line_t::TAB_AS_CONTROL | text_line_t::SPACECLEAR;
   paint_info.selection_start = -1;
@@ -63,8 +64,8 @@ void file_edit_window_t::draw_info_window() {
   paint_info.normal_attr = 0;
   paint_info.selected_attr = 0;
 
-  name_line->paint_line(info_window, &paint_info);
-  t3_win_clrtoeol(info_window);
+  name_line->paint_line(&info_window, paint_info);
+  info_window.clrtoeol();
 }
 
 void file_edit_window_t::set_text(file_buffer_t *_text) {
@@ -74,7 +75,7 @@ void file_edit_window_t::set_text(file_buffer_t *_text) {
   rewrap_connection.disconnect();
   _text->set_has_window(true);
   rewrap_connection = _text->connect_rewrap_required(
-      signals::mem_fun(this, &file_edit_window_t::force_repaint_to_bottom));
+      bind_front(&file_edit_window_t::force_repaint_to_bottom, this));
   edit_window_t::set_text(_text, _text->get_view_parameters());
 }
 
@@ -82,7 +83,7 @@ file_buffer_t *file_edit_window_t::get_text() const {
   return static_cast<file_buffer_t *>(edit_window_t::get_text());
 }
 
-bool file_edit_window_t::process_key(t3_widget::key_t key) {
+bool file_edit_window_t::process_key(t3widget::key_t key) {
   bool result = edit_window_t::process_key(key);
 
   if (!result) {
@@ -90,12 +91,15 @@ bool file_edit_window_t::process_key(t3_widget::key_t key) {
       case EKEY_CTRL | ']':
         if (get_text()->goto_matching_brace()) {
           ensure_cursor_on_screen();
-          redraw = true;
+          force_redraw();
         }
         return true;
       case EKEY_CTRL | '_':
         get_text()->toggle_line_comment();
-        redraw = true;
+        force_redraw();
+        return true;
+      case EKEY_F2:
+        show_character_details();
         return true;
       default:
         break;
@@ -107,7 +111,7 @@ bool file_edit_window_t::process_key(t3_widget::key_t key) {
 void file_edit_window_t::goto_matching_brace() {
   if (get_text()->goto_matching_brace()) {
     ensure_cursor_on_screen();
-    redraw = true;
+    force_redraw();
   }
 }
 
@@ -123,13 +127,23 @@ void file_edit_window_t::update_contents() {
      updates.
   */
   if (get_text()->update_matching_brace()) {
-    update_repaint_lines(0, INT_MAX);
+    update_repaint_lines(0, std::numeric_limits<text_pos_t>::max());
   }
   edit_window_t::update_contents();
 }
 
-void file_edit_window_t::force_repaint_to_bottom(rewrap_type_t type, int line, int pos) {
+void file_edit_window_t::force_repaint_to_bottom(rewrap_type_t type, text_pos_t line,
+                                                 text_pos_t pos) {
   (void)type;
   (void)pos;
-  update_repaint_lines(line, INT_MAX);
+  update_repaint_lines(line, std::numeric_limits<text_pos_t>::max());
+}
+
+void file_edit_window_t::show_character_details() {
+  size_t size;
+  const char *data = get_text()->get_char_under_cursor(&size);
+  if (data != nullptr) {
+    character_details_dialog->set_codepoints(data, size);
+    character_details_dialog->show();
+  }
 }

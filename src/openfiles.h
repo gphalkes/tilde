@@ -59,7 +59,7 @@ class recent_file_info_t {
   explicit recent_file_info_t(file_buffer_t *file);
 
   const std::string &get_name() const;
-  const char *get_encoding() const;
+  const std::string &get_encoding() const;
 };
 
 class recent_files_t {

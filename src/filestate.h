@@ -13,8 +13,10 @@
 */
 #ifndef FILESTATE_H
 #define FILESTATE_H
+#include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
+
 #include <t3widget/signals.h>
 #include <t3widget/widget.h>
 #include <transcript/transcript.h>
@@ -23,7 +25,7 @@
 #include "tilde/openfiles.h"
 #include "tilde/util.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 class file_buffer_t;
 
@@ -83,7 +85,7 @@ class load_process_t : public stepped_process_t {
   load_process_t(const callback_t &cb, const char *name, const char *_encoding, bool missing_ok);
   void abort();
   bool step() override;
-  virtual void file_selected(const std::string *name);
+  virtual void file_selected(const std::string &name);
   virtual void encoding_selected(const std::string *_encoding);
   ~load_process_t() override;
   void preserve_bom();
@@ -114,14 +116,14 @@ class save_as_process_t : public stepped_process_t {
   std::string real_name;
   std::string temp_name;
   int fd;
-  int i;
+  text_pos_t i;
   file_write_wrapper_t *wrapper;
   struct stat file_info;
 
   save_as_process_t(const callback_t &cb, file_buffer_t *_file,
                     bool _allow_highlight_change = true);
   bool step() override;
-  virtual void file_selected(const std::string *_name);
+  virtual void file_selected(const std::string &_name);
   virtual void encoding_selected(const std::string *_encoding);
   ~save_as_process_t() override;
 
@@ -182,10 +184,10 @@ class open_recent_process_t : public load_process_t {
 
 class load_cli_file_process_t : public stepped_process_t {
  private:
-  void attempt_file_position_parse(std::string *filename, int *line, int *pos);
+  void attempt_file_position_parse(std::string *filename, text_pos_t *line, text_pos_t *pos);
 
  protected:
-  std::list<const char *>::const_iterator iter;
+  std::list<std::string>::const_iterator iter;
   bool in_load, in_step, encoding_selected;
   std::string encoding;
 

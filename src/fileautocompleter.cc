@@ -17,63 +17,59 @@
 #include "tilde/fileautocompleter.h"
 #include "tilde/log.h"
 
-static bool compare_strings(std::string *a, std::string *b) { return a->compare(*b) < 0; }
-
-using comparator_t = bool (*)(std::string *, std::string *);
-using result_set_t = std::set<std::string *, comparator_t>;
-
 string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buffer_t *text,
-                                                                  int *position) {
-  const text_line_t *line;
-  int completion_end;
-  std::string current_word;
+                                                                  t3widget::text_pos_t *position) {
+  text_pos_t completion_end;
 
   if (current_list != nullptr) {
-    delete current_list;
-    current_list = nullptr;
+    current_list.reset();
   }
 
-  if (text->cursor.pos == 0) {
+  const text_coordinate_t cursor = text->get_cursor();
+  if (cursor.pos == 0) {
     return nullptr;
   }
 
-  line = text->get_line_data(text->cursor.line);
+  const text_line_t &line = text->get_line_data(cursor.line);
 
-  for (completion_start = line->adjust_position(text->cursor.pos, -1); completion_start > 0;
-       completion_start = line->adjust_position(completion_start, -1)) {
-    if (!line->is_alnum(completion_start)) {
+  for (completion_start = line.adjust_position(cursor.pos, -1); completion_start > 0;
+       completion_start = line.adjust_position(completion_start, -1)) {
+    if (!line.is_alnum(completion_start)) {
       break;
     }
   }
-  if (!line->is_alnum(completion_start)) {
-    completion_start = line->adjust_position(completion_start, 1);
+  if (!line.is_alnum(completion_start)) {
+    completion_start = line.adjust_position(completion_start, 1);
   }
 
   for (completion_end = completion_start;
-       completion_end < line->get_length() && line->is_alnum(completion_end);
-       completion_end = line->adjust_position(completion_end, 1)) {
+       completion_end < line.size() && line.is_alnum(completion_end);
+       completion_end = line.adjust_position(completion_end, 1)) {
   }
-  current_word = line->get_data()->substr(completion_start, completion_end - completion_start);
+  string_view current_word =
+      string_view(line.get_data()).substr(completion_start, completion_end - completion_start);
 
   text_coordinate_t start(0, 0);
-  text_coordinate_t eof(INT_MAX, INT_MAX);
-  std::string needle(*line->get_data(), completion_start, text->cursor.pos - completion_start);
-  finder_t finder(&needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
+  text_coordinate_t eof(std::numeric_limits<text_pos_t>::max(),
+                        std::numeric_limits<text_pos_t>::max());
+  std::string needle(line.get_data(), completion_start, cursor.pos - completion_start);
+  std::unique_ptr<finder_t> finder =
+      finder_t::create(needle, find_flags_t::ANCHOR_WORD_LEFT, nullptr);
   find_result_t find_result;
-  result_set_t result_set(compare_strings);
-  std::string word;
+  std::set<string_view> result_set;
 
-  while (text->find_limited(&finder, start, eof, &find_result)) {
-    line = text->get_line_data(find_result.start.line);
-    for (; find_result.end.pos < line->get_length() && line->is_alnum(find_result.end.pos);
-         find_result.end.pos = line->adjust_position(find_result.end.pos, 1)) {
+  while (text->find_limited(finder.get(), start, eof, &find_result)) {
+    const text_line_t &matching_line = text->get_line_data(find_result.start.line);
+    for (;
+         find_result.end.pos < matching_line.size() && matching_line.is_alnum(find_result.end.pos);
+         find_result.end.pos = matching_line.adjust_position(find_result.end.pos, 1)) {
     }
 
-    if (find_result.end.pos - find_result.start.pos != text->cursor.pos - completion_start) {
-      word = line->get_data()->substr(find_result.start.pos,
-                                      find_result.end.pos - find_result.start.pos);
-      if (result_set.count(&word) == 0 && word != current_word) {
-        result_set.insert(new std::string(word));
+    if (find_result.end.pos - find_result.start.pos != cursor.pos - completion_start) {
+      string_view word(matching_line.get_data());
+      word = word.substr(find_result.start.pos, find_result.end.pos - find_result.start.pos);
+      if (word != current_word) {
+        result_set.insert(word);
       }
     }
 
@@ -86,23 +82,22 @@ string_list_base_t *file_autocompleter_t::build_autocomplete_list(const text_buf
   }
 
   try {
-    current_list = new string_list_t();
+    current_list.reset(new string_list_t());
   } catch (const std::bad_alloc &) {
-    current_list = nullptr;
     return nullptr;
   }
 
-  for (std::string *result : result_set) {
-    current_list->push_back(result);
+  for (string_view word : result_set) {
+    current_list->push_back(std::string(word));
   }
   *position = completion_start;
 
-  return current_list;
+  return current_list.get();
 }
 
 void file_autocompleter_t::autocomplete(text_buffer_t *text, size_t idx) {
-  text_coordinate_t start(text->cursor.line, completion_start);
-  text->replace_block(start, text->cursor, (*current_list)[idx]);
-  delete current_list;
-  current_list = nullptr;
+  const text_coordinate_t cursor = text->get_cursor();
+  const text_coordinate_t start(cursor.line, completion_start);
+  text->replace_block(start, cursor, (*current_list)[idx]);
+  current_list.reset();
 }

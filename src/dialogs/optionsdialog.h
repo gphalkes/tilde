@@ -18,7 +18,7 @@
 
 #include "tilde/fileeditwindow.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 void init_charsets();
 
@@ -29,7 +29,7 @@ class buffer_options_dialog_t : public dialog_t {
   text_field_t *tabsize_field;
 
  public:
-  explicit buffer_options_dialog_t(const char *_title);
+  explicit buffer_options_dialog_t(optional<std::string> _title);
 
   void set_values_from_view(file_edit_window_t *view);
   void set_view_values(file_edit_window_t *view);
@@ -37,7 +37,7 @@ class buffer_options_dialog_t : public dialog_t {
   void set_options_from_values();
   void handle_activate();
 
-  T3_WIDGET_SIGNAL(activate, void);
+  DEFINE_SIGNAL(activate);
 };
 
 class misc_options_dialog_t : public dialog_t {
@@ -46,13 +46,13 @@ class misc_options_dialog_t : public dialog_t {
       *disable_selection_over_ssh_box;
 
  public:
-  explicit misc_options_dialog_t(const char *_title);
+  explicit misc_options_dialog_t(optional<std::string> _title);
 
   void set_values_from_options();
   void set_options_from_values();
   void handle_activate();
 
-  T3_WIDGET_SIGNAL(activate, void);
+  DEFINE_SIGNAL(activate);
 };
 
 #endif

@@ -19,7 +19,6 @@
 #include <list>
 #include <string>
 #include <t3widget/signals.h>
-#include <t3window/window.h>
 
 #ifdef __GNUC__
 void fatal(const char *fmt, ...) __attribute__((format(printf, 1, 2))) __attribute__((noreturn));
@@ -84,8 +83,8 @@ class version_t {
 
 class stepped_process_t {
  protected:
-  std::list<t3_widget::signals::connection> connections;
-  using callback_t = t3_widget::signals::slot<void, stepped_process_t *>;
+  std::list<t3widget::connection_t> connections;
+  using callback_t = std::function<void(stepped_process_t *)>;
   callback_t done_cb;
   bool result;
 
@@ -115,4 +114,14 @@ int map_highlight(void *data, const char *name);
 const char *reverse_map_highlight(int idx);
 
 #define ARRAY_SIZE(_x) (sizeof(_x) / sizeof(_x[0]))
+
+#define DEFINE_SIGNAL(_name, ...)                                        \
+ protected:                                                              \
+  signal_t<__VA_ARGS__> _name;                                           \
+                                                                         \
+ public:                                                                 \
+  connection_t connect_##_name(std::function<void(__VA_ARGS__)> _slot) { \
+    return _name.connect(_slot);                                         \
+  }
+
 #endif

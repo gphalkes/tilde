@@ -17,7 +17,9 @@
 #include <t3highlight/highlight.h>
 #include <t3widget/widget.h>
 
-using namespace t3_widget;
+#include "tilde/util.h"
+
+using namespace t3widget;
 
 struct t3_highlight_lang_deleter {
   void operator()(t3_highlight_lang_t *lang) { t3_highlight_free_list(lang); }
@@ -36,7 +38,7 @@ class highlight_dialog_t : public dialog_t {
   void ok_activated();
   void set_selected(const char *lang_file);
 
-  T3_WIDGET_SIGNAL(language_selected, void, t3_highlight_t *, const char *);
+  DEFINE_SIGNAL(language_selected, t3_highlight_t *, const char *);
 };
 
 #endif

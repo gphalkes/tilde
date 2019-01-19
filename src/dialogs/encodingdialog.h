@@ -17,7 +17,9 @@
 #include <string>
 #include <t3widget/widget.h>
 
-using namespace t3_widget;
+#include "tilde/util.h"
+
+using namespace t3widget;
 
 void init_charsets();
 
@@ -38,7 +40,7 @@ class encoding_dialog_t : public dialog_t {
 
   void set_encoding(const char *encoding);
 
-  T3_WIDGET_SIGNAL(activate, void, const std::string *);
+  DEFINE_SIGNAL(activate, const std::string *);
 };
 
 #endif

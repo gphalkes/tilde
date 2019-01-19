@@ -15,7 +15,7 @@
 #define SELECTBUFFERDIALOG_H
 
 #include <t3widget/widget.h>
-using namespace t3_widget;
+using namespace t3widget;
 
 #include "tilde/filebuffer.h"
 
@@ -30,7 +30,7 @@ class select_buffer_dialog_t : public dialog_t {
   void show() override;
   virtual void ok_activated();
 
-  T3_WIDGET_SIGNAL(activate, void, file_buffer_t *);
+  DEFINE_SIGNAL(activate, file_buffer_t *);
 };
 
 #endif

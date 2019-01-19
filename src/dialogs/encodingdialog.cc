@@ -19,6 +19,7 @@
 
 #include "tilde/dialogs/encodingdialog.h"
 #include "tilde/log.h"
+#include "tilde/util.h"
 
 struct charset_desc_t {
   const char *name;  // Display name for this character set
@@ -104,63 +105,56 @@ void init_charsets() {
 }
 
 encoding_dialog_t::encoding_dialog_t(int height, int width)
-    : dialog_t(height, width, "Encoding"), selected(-1), saved_tag(nullptr) {
-  button_t *ok_button, *cancel_button;
-
-  list = new list_pane_t(true);
+    : dialog_t(height, width, _("Encoding")), selected(-1), saved_tag(nullptr) {
+  list = emplace_back<list_pane_t>(true);
   list->set_size(height - 4, width - 2);
   list->set_position(1, 1);
-  list->connect_activate(signals::mem_fun(this, &encoding_dialog_t::ok_activated));
-  list->connect_selection_changed(signals::mem_fun(this, &encoding_dialog_t::selection_changed));
+  list->connect_activate([this] { ok_activated(); });
+  list->connect_selection_changed([this] { selection_changed(); });
 
   for (charset_descs_t::const_iterator iter = available_charsets.begin();
        iter != available_charsets.end(); iter++) {
-    label_t *label = new label_t(iter->name);
-    list->push_back(label);
+    list->push_back(make_unique<label_t>(iter->name));
   }
 
-  horizontal_separator = new separator_t();
+  horizontal_separator = emplace_back<separator_t>();
   horizontal_separator->set_anchor(
       this, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_BOTTOMLEFT));
   horizontal_separator->set_position(-2, 1);
   horizontal_separator->set_size(None, width - 2);
 
-  manual_entry = new text_field_t();
+  manual_entry = emplace_back<text_field_t>();
   manual_entry->set_anchor(this, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_BOTTOMLEFT));
   manual_entry->set_position(-1, 2);
   manual_entry->set_size(1, 25);
-  manual_entry->connect_activate(signals::mem_fun(this, &encoding_dialog_t::ok_activated));
+  manual_entry->connect_activate([this] { ok_activated(); });
   manual_entry->hide();
 
-  cancel_button = new button_t("_Cancel", false);
+  button_t *ok_button = emplace_back<button_t>("_OK", true);
+  button_t *cancel_button = emplace_back<button_t>("_Cancel", false);
+
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
-  cancel_button->connect_activate(signals::mem_fun(this, &encoding_dialog_t::close));
-  ok_button = new button_t("_OK", true);
+  cancel_button->connect_activate([this] { close(); });
+
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
-  ok_button->connect_activate(signals::mem_fun(this, &encoding_dialog_t::ok_activated));
-
-  push_back(list);
-  push_back(horizontal_separator);
-  push_back(manual_entry);
-  push_back(ok_button);
-  push_back(cancel_button);
+  ok_button->connect_activate([this] { ok_activated(); });
 }
 
 bool encoding_dialog_t::set_size(optint height, optint width) {
   bool result = true;
 
   if (!height.is_valid()) {
-    height = t3_win_get_height(window);
+    height = window.get_height();
   }
   if (!width.is_valid()) {
-    width = t3_win_get_width(window);
+    width = window.get_width();
   }
 
   result &= dialog_t::set_size(height, width);
-  result &= list->set_size(height - 4, width - 2);
+  result &= list->set_size(height.value() - 4, width.value() - 2);
   return result;
 }
 
@@ -170,12 +164,12 @@ void encoding_dialog_t::ok_activated() {
 
   if (idx + 1 == list->size()) {
     // User specified character set
-    encoding = *manual_entry->get_text();
+    encoding = manual_entry->get_text();
 
     lprintf("Testing encoding name: %s\n", encoding.c_str());
     if (!transcript_probe_converter(encoding.c_str())) {
       std::string message = "Requested character set is not available";
-      message_dialog->set_message(&message);
+      message_dialog->set_message(message);
       message_dialog->center_over(this);
       message_dialog->show();
       return;

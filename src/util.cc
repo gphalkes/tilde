@@ -27,7 +27,7 @@
 #include "tilde/option.h"
 #include "tilde/static_assert.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 #ifdef DEBUG
 static char debug_buffer[1024];
@@ -54,7 +54,7 @@ void stepped_process_t::run() {
 void stepped_process_t::abort() { done(false); }
 
 void stepped_process_t::disconnect() {
-  for (t3_widget::signals::connection &iter : connections) {
+  for (t3widget::connection_t &iter : connections) {
     iter.disconnect();
   }
   connections.clear();
@@ -126,15 +126,12 @@ std::string canonicalize_path(const char *path) {
   char *realpath_result = realpath(path, nullptr);
 
 #ifdef PATH_MAX
-  /* realpath in the POSIX.1-2001 and 2004 specifications is broken, in that
-     the size of the buffer for the 2nd parameter is ill defined. However,
-     most systems allow a NULL parameter to do automatic allocation. Those
-     that don't typically return EINVAL in that case. We can't work around
-     this for all situations, but when PATH_MAX is defined, we can. Any
-     system that does not define PATH_MAX and does not do automatic allocation
-     is broken by design, as that leaves no correct way to allocate a buffer
-     with the correct size to store the result.
-  */
+  /* realpath in the POSIX.1-2001 and 2004 specifications is broken, in that the size of the buffer
+     for the 2nd parameter is ill defined. However, most systems allow a nullptr parameter to do
+     automatic allocation. Those that don't typically return EINVAL in that case. We can't work
+     around this for all situations, but when PATH_MAX is defined, we can. Any system that does not
+     define PATH_MAX and does not do automatic allocation is broken by design, as that leaves no
+     correct way to allocate a buffer with the correct size to store the result. */
   if (realpath_result == nullptr && path != nullptr && errno == EINVAL) {
     char store_path[PATH_MAX];
     if (realpath(path, store_path) != nullptr) {

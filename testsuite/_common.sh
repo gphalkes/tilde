@@ -1,4 +1,11 @@
-
+setup_vars() {
+  if [[ "${DIR#.}" !=  "$DIR" ]] ; then
+    TERMINFO_DIR="$PWD/"
+  elif [[ "${DIR#~}" != "$DIR" ]] ; then
+    TERMINFO_DIR="$HOME${DIR#~}"
+  fi
+  export TERMINFO="$TERMINFO_DIR/terminfo"
+}
 
 fail() {
 	echo "$@" >&2

@@ -20,6 +20,7 @@
 
 #include "tilde/action.h"
 #include "tilde/dialogs/attributesdialog.h"
+#include "tilde/dialogs/characterdetailsdialog.h"
 #include "tilde/dialogs/encodingdialog.h"
 #include "tilde/dialogs/highlightdialog.h"
 #include "tilde/dialogs/openrecentdialog.h"
@@ -32,7 +33,7 @@
 #include "tilde/option.h"
 #include "tilde/string_util.h"
 
-using namespace t3_widget;
+using namespace t3widget;
 
 #define MESSAGE_DIALOG_WIDTH 50
 #define ATTRIBUTES_DIALOG_WIDTH 50
@@ -45,6 +46,7 @@ message_dialog_t *error_dialog;
 open_recent_dialog_t *open_recent_dialog;
 encoding_dialog_t *encoding_dialog;
 message_dialog_t *preserve_bom_dialog;
+character_details_dialog_t *character_details_dialog;
 
 static dialog_t *input_selection_dialog;
 
@@ -72,7 +74,7 @@ class main_t : public main_window_base_t {
  public:
   main_t();
   ~main_t() override;
-  bool process_key(t3_widget::key_t key) override;
+  bool process_key(t3widget::key_t key) override;
   bool set_size(optint height, optint width) override;
   void load_cli_files_done(stepped_process_t *process);
 
@@ -108,127 +110,122 @@ key_bindings_t<action_id_t> main_t::key_bindings{
 };
 
 main_t::main_t() {
-  button_t *encoding_button;
-  file_edit_window_t *edit;
+  menu = emplace_back<menu_bar_t>(option.hide_menubar);
+  menu->set_size(None, window.get_width());
+  menu->connect_activate(bind_front(&main_t::menu_activated, this));
 
-  menu = new menu_bar_t(option.hide_menubar);
-  menu->set_size(None, t3_win_get_width(window));
-  push_back(menu);
-  menu->connect_activate(signals::mem_fun(this, &main_t::menu_activated));
+  panel = menu->insert_menu(nullptr, "_File");
+  panel->insert_item(nullptr, "_New", "^N", action_id_t::FILE_NEW);
+  panel->insert_item(nullptr, "_Open...", "^O", action_id_t::FILE_OPEN);
+  panel->insert_item(nullptr, "Open _Recent...", "", action_id_t::FILE_OPEN_RECENT);
+  panel->insert_item(nullptr, "_Close", "^W", action_id_t::FILE_CLOSE);
+  panel->insert_item(nullptr, "_Save", "^S", action_id_t::FILE_SAVE);
+  panel->insert_item(nullptr, "Save _As...", "", action_id_t::FILE_SAVE_AS);
+  panel->insert_separator();
+  panel->insert_item(nullptr, "Re_draw Screen", "", action_id_t::FILE_REPAINT);
+  panel->insert_item(nullptr, "S_uspend", "", action_id_t::FILE_SUSPEND);
+  panel->insert_item(nullptr, "E_xit", "^Q", action_id_t::FILE_EXIT);
 
-  panel = new menu_panel_t("_File", menu);
-  panel->add_item("_New", "^N", action_id_t::FILE_NEW);
-  panel->add_item("_Open...", "^O", action_id_t::FILE_OPEN);
-  panel->add_item("Open _Recent...", nullptr, action_id_t::FILE_OPEN_RECENT);
-  panel->add_item("_Close", "^W", action_id_t::FILE_CLOSE);
-  panel->add_item("_Save", "^S", action_id_t::FILE_SAVE);
-  panel->add_item("Save _As...", nullptr, action_id_t::FILE_SAVE_AS);
-  panel->add_separator();
-  panel->add_item("Re_draw Screen", nullptr, action_id_t::FILE_REPAINT);
-  panel->add_item("S_uspend", nullptr, action_id_t::FILE_SUSPEND);
-  panel->add_item("E_xit", "^Q", action_id_t::FILE_EXIT);
+  panel = menu->insert_menu(nullptr, "_Edit");
+  panel->insert_item(nullptr, "_Undo", "^Z", action_id_t::EDIT_UNDO);
+  panel->insert_item(nullptr, "_Redo", "^Y", action_id_t::EDIT_REDO);
+  panel->insert_separator();
+  panel->insert_item(nullptr, "Cu_t", "^X", action_id_t::EDIT_CUT);
+  panel->insert_item(nullptr, "_Copy", "^C", action_id_t::EDIT_COPY);
+  panel->insert_item(nullptr, "_Paste", "^V", action_id_t::EDIT_PASTE);
+  panel->insert_separator();
+  panel->insert_item(nullptr, "Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
+  panel->insert_item(nullptr, "_Mark Selection", "^T", action_id_t::EDIT_MARK);
+  panel->insert_item(nullptr, "Paste _Selection", "S-Ins", action_id_t::EDIT_PASTE_SELECTION);
+  panel->insert_separator();
+  panel->insert_item(nullptr, "_Delete Line", "^K", action_id_t::EDIT_DELETE_LINE);
+  panel->insert_item(nullptr, "Character Detai_ls...", "F2", action_id_t::EDIT_CHAR_DETAILS);
+  panel->insert_item(nullptr, "Insert C_haracter...", "F9", action_id_t::EDIT_INSERT_CHAR);
+  panel->insert_item(nullptr, "T_oggle INS/OVR", "Ins", action_id_t::EDIT_TOGGLE_INSERT);
 
-  panel = new menu_panel_t("_Edit", menu);
-  panel->add_item("_Undo", "^Z", action_id_t::EDIT_UNDO);
-  panel->add_item("_Redo", "^Y", action_id_t::EDIT_REDO);
-  panel->add_separator();
-  panel->add_item("Cu_t", "^X", action_id_t::EDIT_CUT);
-  panel->add_item("_Copy", "^C", action_id_t::EDIT_COPY);
-  panel->add_item("_Paste", "^V", action_id_t::EDIT_PASTE);
-  panel->add_separator();
-  panel->add_item("Select _All", "^A", action_id_t::EDIT_SELECT_ALL);
-  panel->add_item("_Mark Selection", "^T", action_id_t::EDIT_MARK);
-  panel->add_item("Paste _Selection", "S-Ins", action_id_t::EDIT_PASTE_SELECTION);
-  panel->add_separator();
-  panel->add_item("_Delete Line", "^K", action_id_t::EDIT_DELETE_LINE);
-  panel->add_item("Insert C_haracter...", "F9", action_id_t::EDIT_INSERT_CHAR);
-  panel->add_item("T_oggle INS/OVR", "Ins", action_id_t::EDIT_TOGGLE_INSERT);
+  panel = menu->insert_menu(nullptr, "_Search");
+  panel->insert_item(nullptr, "_Find...", "^F", action_id_t::SEARCH_SEARCH);
+  panel->insert_item(nullptr, "Find _Next", "F3", action_id_t::SEARCH_AGAIN);
+  panel->insert_item(nullptr, "Find _Previous", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
+  panel->insert_item(nullptr, "_Replace...", "^R", action_id_t::SEARCH_REPLACE);
+  panel->insert_separator();
+  panel->insert_item(nullptr, "_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
+  panel->insert_item(nullptr, "Go to matching _brace", "^]",
+                     action_id_t::SEARCH_GOTO_MATCHING_BRACE);
 
-  panel = new menu_panel_t("_Search", menu);
-  panel->add_item("_Find...", "^F", action_id_t::SEARCH_SEARCH);
-  panel->add_item("Find _Next", "F3", action_id_t::SEARCH_AGAIN);
-  panel->add_item("Find _Previous", "S-F3", action_id_t::SEARCH_AGAIN_BACKWARD);
-  panel->add_item("_Replace...", "^R", action_id_t::SEARCH_REPLACE);
-  panel->add_separator();
-  panel->add_item("_Go to Line...", "^G", action_id_t::SEARCH_GOTO);
-  panel->add_item("Go to matching _brace", "^]", action_id_t::SEARCH_GOTO_MATCHING_BRACE);
+  panel = menu->insert_menu(nullptr, "_Window");
+  panel->insert_item(nullptr, "_Next Buffer", "F6", action_id_t::WINDOWS_NEXT_BUFFER);
+  panel->insert_item(nullptr, "_Previous Buffer", "S-F6", action_id_t::WINDOWS_PREV_BUFFER);
+  panel->insert_item(nullptr, "_Select Buffer...", "", action_id_t::WINDOWS_SELECT);
+  panel->insert_separator();
+  panel->insert_item(nullptr, "Split _Horizontal", "", action_id_t::WINDOWS_HSPLIT);
+  panel->insert_item(nullptr, "Split _Vertical", "", action_id_t::WINDOWS_VSPLIT);
+  panel->insert_item(nullptr, "_Close Window", "", action_id_t::WINDOWS_MERGE);
+  panel->insert_item(nullptr, "Next Window", "F8", action_id_t::WINDOWS_NEXT_WINDOW);
+  panel->insert_item(nullptr, "Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
 
-  panel = new menu_panel_t("_Window", menu);
-  panel->add_item("_Next Buffer", "F6", action_id_t::WINDOWS_NEXT_BUFFER);
-  panel->add_item("_Previous Buffer", "S-F6", action_id_t::WINDOWS_PREV_BUFFER);
-  panel->add_item("_Select Buffer...", nullptr, action_id_t::WINDOWS_SELECT);
-  panel->add_separator();
-  panel->add_item("Split _Horizontal", nullptr, action_id_t::WINDOWS_HSPLIT);
-  panel->add_item("Split _Vertical", nullptr, action_id_t::WINDOWS_VSPLIT);
-  panel->add_item("_Close Window", nullptr, action_id_t::WINDOWS_MERGE);
-  panel->add_item("Next Window", "F8", action_id_t::WINDOWS_NEXT_WINDOW);
-  panel->add_item("Previous Window", "S-F8", action_id_t::WINDOWS_PREV_WINDOW);
+  panel = menu->insert_menu(nullptr, "_Tools");
+  panel->insert_item(nullptr, "_Highlighting...", "", action_id_t::TOOLS_HIGHLIGHTING);
+  panel->insert_item(nullptr, "_Strip trailing spaces", "", action_id_t::TOOLS_STRIP_SPACES);
+  panel->insert_item(nullptr, "_Autocomplete", "C-Space", action_id_t::TOOLS_AUTOCOMPLETE);
+  panel->insert_item(nullptr, "_Toggle line comment", "C-/",
+                     action_id_t::TOOLS_TOGGLE_LINE_COMMENT);
+  panel->insert_item(nullptr, "_Indent Selection", "Tab", action_id_t::TOOLS_INDENT_SELECTION);
+  panel->insert_item(nullptr, "_Unindent Selection", "S-Tab",
+                     action_id_t::TOOLS_UNINDENT_SELECTION);
 
-  panel = new menu_panel_t("_Tools", menu);
-  panel->add_item("_Highlighting...", nullptr, action_id_t::TOOLS_HIGHLIGHTING);
-  panel->add_item("_Strip trailing spaces", nullptr, action_id_t::TOOLS_STRIP_SPACES);
-  panel->add_item("_Autocomplete", "C-Space", action_id_t::TOOLS_AUTOCOMPLETE);
-  panel->add_item("_Toggle line comment", "C-/", action_id_t::TOOLS_TOGGLE_LINE_COMMENT);
-  panel->add_item("_Indent Selection", "Tab", action_id_t::TOOLS_INDENT_SELECTION);
-  panel->add_item("_Unindent Selection", "S-Tab", action_id_t::TOOLS_UNINDENT_SELECTION);
+  panel = menu->insert_menu(nullptr, "_Options");
+  panel->insert_item(nullptr, "Input _Handling...", "", action_id_t::OPTIONS_INPUT);
+  panel->insert_item(nullptr, "_Current Buffer...", "", action_id_t::OPTIONS_BUFFER);
+  panel->insert_item(nullptr, "Buffer _Defaults...", "", action_id_t::OPTIONS_DEFAULTS);
+  panel->insert_item(nullptr, "_Interface...", "", action_id_t::OPTIONS_INTERFACE);
 
-  panel = new menu_panel_t("_Options", menu);
-  panel->add_item("Input _Handling...", nullptr, action_id_t::OPTIONS_INPUT);
-  panel->add_item("_Current Buffer...", nullptr, action_id_t::OPTIONS_BUFFER);
-  panel->add_item("Buffer _Defaults...", nullptr, action_id_t::OPTIONS_DEFAULTS);
-  panel->add_item("_Interface...", nullptr, action_id_t::OPTIONS_INTERFACE);
+  panel->insert_item(nullptr, "_Miscellaneous...", "", action_id_t::OPTIONS_MISC);
 
-  panel->add_item("_Miscellaneous...", nullptr, action_id_t::OPTIONS_MISC);
-
-  panel = new menu_panel_t("_Help", menu);
+  panel = menu->insert_menu(nullptr, "_Help");
   // FIXME: reinstate when help is actually available.
-  //~ panel->add_item("_Help", "F1", action_id_t::HELP_HELP);
-  panel->add_item("_About", nullptr, action_id_t::HELP_ABOUT);
+  //~ panel->insert_item(nullptr, "_Help", "F1", action_id_t::HELP_HELP);
+  panel->insert_item(nullptr, "_About", "", action_id_t::HELP_ABOUT);
 
-  edit = new file_edit_window_t();
-  split = new split_t(edit);
+  split = emplace_back<split_t>(make_unique<file_edit_window_t>());
   split->set_position(!option.hide_menubar, 0);
-  split->set_size(t3_win_get_height(window) - !option.hide_menubar, t3_win_get_width(window));
-  push_back(split);
+  split->set_size(window.get_height() - !option.hide_menubar, window.get_width());
 
-  select_buffer_dialog = new select_buffer_dialog_t(11, t3_win_get_width(window) - 4);
+  select_buffer_dialog = new select_buffer_dialog_t(11, window.get_width() - 4);
   select_buffer_dialog->center_over(this);
-  select_buffer_dialog->connect_activate(signals::mem_fun(this, &main_t::switch_buffer));
+  select_buffer_dialog->connect_activate(bind_front(&main_t::switch_buffer, this));
 
   continue_abort_dialog =
-      new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Continue", "_Abort", NULL);
+      new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", {"_Continue", "_Abort"});
   continue_abort_dialog->center_over(this);
 
-  encoding_dialog =
-      new encoding_dialog_t(t3_win_get_height(window) - 8, t3_win_get_width(window) - 8);
+  encoding_dialog = new encoding_dialog_t(window.get_height() - 8, window.get_width() - 8);
   encoding_dialog->center_over(this);
 
-  open_file_dialog =
-      new open_file_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
+  open_file_dialog = new open_file_dialog_t(window.get_height() - 4, window.get_width() - 4);
   open_file_dialog->center_over(this);
-  open_file_dialog->set_file(nullptr);
-  encoding_button = new button_t("_Encoding");
-  encoding_button->connect_activate(signals::mem_fun(encoding_dialog, &encoding_dialog_t::show));
-  open_file_dialog->set_options_widget(encoding_button);
+  open_file_dialog->set_from_file(string_view());
+  std::unique_ptr<button_t> encoding_button = make_unique<button_t>("_Encoding");
+  encoding_button->connect_activate([] { encoding_dialog->show(); });
+  open_file_dialog->set_options_widget(std::move(encoding_button));
 
-  save_as_dialog =
-      new save_as_dialog_t(t3_win_get_height(window) - 4, t3_win_get_width(window) - 4);
+  save_as_dialog = new save_as_dialog_t(window.get_height() - 4, window.get_width() - 4);
   save_as_dialog->center_over(this);
-  encoding_button = new button_t("_Encoding");
-  encoding_button->connect_activate(signals::mem_fun(encoding_dialog, &encoding_dialog_t::show));
-  save_as_dialog->set_options_widget(encoding_button);
+  encoding_button = make_unique<button_t>("_Encoding");
+  encoding_button->connect_activate([] { encoding_dialog->show(); });
+  save_as_dialog->set_options_widget(std::move(encoding_button));
 
   close_confirm_dialog =
-      new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", "_Yes", "_No", "_Cancel", NULL);
+      new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Confirm", {"_Yes", "_No", "_Cancel"});
   close_confirm_dialog->center_over(this);
 
-  error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", "Close", NULL);
+  error_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Error", {"Close"});
   error_dialog->center_over(this);
 
-  open_recent_dialog = new open_recent_dialog_t(11, t3_win_get_width(window) - 4);
+  open_recent_dialog = new open_recent_dialog_t(11, window.get_width() - 4);
   open_recent_dialog->center_over(this);
 
-  about_dialog = new message_dialog_t(45, "About", "Close", NULL);
+  about_dialog = new message_dialog_t(45, "About", {"Close"});
   about_dialog->center_over(this);
   about_dialog->set_max_text_height(13);
   about_dialog->set_message(
@@ -242,32 +239,34 @@ main_t::main_t() {
 
   buffer_options_dialog = new buffer_options_dialog_t("Current Buffer");
   buffer_options_dialog->center_over(this);
-  buffer_options_dialog->connect_activate(signals::mem_fun(this, &main_t::set_buffer_options));
+  buffer_options_dialog->connect_activate([this] { set_buffer_options(); });
 
   default_options_dialog = new buffer_options_dialog_t("Buffer Defaults");
   default_options_dialog->center_over(this);
-  default_options_dialog->connect_activate(signals::mem_fun(this, &main_t::set_default_options));
+  default_options_dialog->connect_activate([this] { set_default_options(); });
 
   misc_options_dialog = new misc_options_dialog_t("Miscellaneous");
   misc_options_dialog->center_over(this);
-  misc_options_dialog->connect_activate(signals::mem_fun(this, &main_t::set_misc_options));
+  misc_options_dialog->connect_activate([this] { set_misc_options(); });
 
-  highlight_dialog = new highlight_dialog_t(t3_win_get_height(window) - 4, 40);
+  highlight_dialog = new highlight_dialog_t(window.get_height() - 4, 40);
   highlight_dialog->center_over(this);
-  highlight_dialog->connect_language_selected(signals::mem_fun(this, &main_t::set_highlight));
+  highlight_dialog->connect_language_selected(bind_front(&main_t::set_highlight, this));
 
-  preserve_bom_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", "_Yes", "_No", NULL);
+  preserve_bom_dialog = new message_dialog_t(MESSAGE_DIALOG_WIDTH, "Question", {"_Yes", "_No"});
   preserve_bom_dialog->set_message(
       "The file starts with a Byte Order Mark (BOM). "
       "This is used on some platforms to recognise UTF-8 encoded files. On Unix-like systems "
       "however, the presence of the BOM is undesirable. Do you want to preserve the BOM?");
   preserve_bom_dialog->center_over(this);
 
+  character_details_dialog = new character_details_dialog_t(8, MESSAGE_DIALOG_WIDTH);
+  character_details_dialog->center_over(this);
+
   attributes_dialog = new attributes_dialog_t(ATTRIBUTES_DIALOG_WIDTH);
   attributes_dialog->center_over(this);
-  attributes_dialog->connect_activate(signals::mem_fun(this, &main_t::set_interface_options));
-  attributes_dialog->connect_save_defaults(
-      signals::mem_fun(this, &main_t::set_default_interface_options));
+  attributes_dialog->connect_activate([this] { set_interface_options(); });
+  attributes_dialog->connect_save_defaults([this] { set_default_interface_options(); });
 }
 
 main_t::~main_t() {
@@ -281,10 +280,10 @@ main_t::~main_t() {
 #endif
 }
 
-bool main_t::process_key(t3_widget::key_t key) {
+bool main_t::process_key(t3widget::key_t key) {
   optional<action_id_t> action = key_bindings.find_action(key);
   if (action.is_valid()) {
-    menu_activated(action());
+    menu_activated(action.value());
   } else {
     return main_window_base_t::process_key(key);
   }
@@ -295,17 +294,18 @@ bool main_t::set_size(optint height, optint width) {
   bool result;
 
   result = menu->set_size(None, width);
-  result &= split->set_size(height - !option.hide_menubar, width);
-  result &= select_buffer_dialog->set_size(None, width - 4);
-  result &= open_file_dialog->set_size(height - 4, width - 4);
-  result &= save_as_dialog->set_size(height - 4, width - 4);
-  result &= open_recent_dialog->set_size(11, width - 4);
-  result &= encoding_dialog->set_size(std::min(height - 8, 16), std::min(width - 8, 72));
-  result &= highlight_dialog->set_size(height - 4, None);
+  result &= split->set_size(height.value() - !option.hide_menubar, width.value());
+  result &= select_buffer_dialog->set_size(None, width.value() - 4);
+  result &= open_file_dialog->set_size(height.value() - 4, width.value() - 4);
+  result &= save_as_dialog->set_size(height.value() - 4, width.value() - 4);
+  result &= open_recent_dialog->set_size(11, width.value() - 4);
+  result &=
+      encoding_dialog->set_size(std::min(height.value() - 8, 16), std::min(width.value() - 8, 72));
+  result &= highlight_dialog->set_size(height.value() - 4, None);
   if (input_selection_dialog != nullptr &&
       dynamic_cast<input_selection_dialog_t *>(input_selection_dialog) != nullptr) {
-    int is_width = std::min(std::max(width - 16, 40), 100);
-    int is_height = std::min(std::max(height - 3, 15), 3200 / is_width);
+    int is_width = std::min(std::max(width.value() - 16, 40), 100);
+    int is_height = std::min(std::max(height.value() - 3, 15), 3200 / is_width);
     result &= input_selection_dialog->set_size(is_height, is_width);
   }
   return result;
@@ -338,38 +338,37 @@ void main_t::menu_activated(int id) {
     case action_id_t::FILE_OPEN: {
       const std::string &name = get_current()->get_text()->get_name();
       if (!name.empty()) {
-        open_file_dialog->set_file(name.c_str());
-        // Because set_file also selects the named file if possible, we need to reset the dialog
+        open_file_dialog->set_from_file(name);
+        // Because set_from_file also selects the named file if possible, we need to reset the
+        // dialog.
         open_file_dialog->reset();
       }
-      load_process_t::execute(signals::mem_fun(this, &main_t::switch_to_new_buffer));
+      load_process_t::execute(bind_front(&main_t::switch_to_new_buffer, this));
       break;
     }
 
     case action_id_t::FILE_CLOSE:
-      close_process_t::execute(signals::mem_fun(this, &main_t::close_cb),
-                               get_current()->get_text());
+      close_process_t::execute(bind_front(&main_t::close_cb, this), get_current()->get_text());
       break;
     case action_id_t::FILE_SAVE:
-      save_process_t::execute(signals::mem_fun(this, &main_t::save_as_done),
-                              get_current()->get_text());
+      save_process_t::execute(bind_front(&main_t::save_as_done, this), get_current()->get_text());
       break;
     case action_id_t::FILE_SAVE_AS:
-      save_as_process_t::execute(signals::mem_fun(this, &main_t::save_as_done),
+      save_as_process_t::execute(bind_front(&main_t::save_as_done, this),
                                  get_current()->get_text());
       break;
     case action_id_t::FILE_OPEN_RECENT:
-      open_recent_process_t::execute(signals::mem_fun(this, &main_t::switch_to_new_buffer));
+      open_recent_process_t::execute(bind_front(&main_t::switch_to_new_buffer, this));
       break;
     case action_id_t::FILE_REPAINT:
-      t3_widget::redraw();
+      t3widget::redraw();
       break;
     case action_id_t::FILE_SUSPEND:
       suspend();
       break;
 
     case action_id_t::FILE_EXIT:
-      exit_process_t::execute(signals::ptr_fun(stepped_process_t::ignore_result));
+      exit_process_t::execute(stepped_process_t::ignore_result);
       break;
 
     case action_id_t::EDIT_UNDO:
@@ -393,6 +392,9 @@ void main_t::menu_activated(int id) {
       break;
     case action_id_t::EDIT_PASTE_SELECTION:
       get_current()->paste_selection();
+      break;
+    case action_id_t::EDIT_CHAR_DETAILS:
+      get_current()->show_character_details();
       break;
     case action_id_t::EDIT_INSERT_CHAR:
       get_current()->insert_special();
@@ -441,8 +443,8 @@ void main_t::menu_activated(int id) {
     case action_id_t::WINDOWS_HSPLIT:
     case action_id_t::WINDOWS_VSPLIT: {
       file_buffer_t *new_file = open_files.next_buffer(nullptr);
-      // If new_file is NULL, a new file_buffer_t will be created
-      split->split(new file_edit_window_t(new_file), id == action_id_t::WINDOWS_HSPLIT);
+      // If new_file is nullptr, a new file_buffer_t will be created
+      split->split(make_unique<file_edit_window_t>(new_file), id == action_id_t::WINDOWS_HSPLIT);
       break;
     }
     case action_id_t::WINDOWS_NEXT_WINDOW:
@@ -452,17 +454,17 @@ void main_t::menu_activated(int id) {
       split->previous();
       break;
     case action_id_t::WINDOWS_MERGE: {
-      file_edit_window_t *widget = static_cast<file_edit_window_t *>(split->unsplit());
+      file_edit_window_t *widget = static_cast<file_edit_window_t *>(split->unsplit().release());
       if (widget == nullptr) {
         message_dialog->set_message("Can not close the last window.");
         message_dialog->center_over(this);
         message_dialog->show();
       } else {
         file_buffer_t *text = widget->get_text();
+        delete widget;
         if (text->get_name().empty() && !text->is_modified()) {
           delete text;
         }
-        delete widget;
       }
       break;
     }
@@ -586,7 +588,7 @@ void main_t::set_default_interface_options() {
 
 void main_t::set_misc_options() {
   misc_options_dialog->set_options_from_values();
-  split->set_size(t3_win_get_height(window) - !option.hide_menubar, None);
+  split->set_size(window.get_height() - !option.hide_menubar, None);
   split->set_position(!option.hide_menubar, 0);
   menu->set_hidden(option.hide_menubar);
   write_config();
@@ -626,10 +628,9 @@ static void configure_input(bool cancel_selects_default) {
   is_height = std::min(std::max(height - 3, 15), 3200 / is_width);
 
   input_selection = new input_selection_dialog_t(is_height, is_width);
-  input_selection->connect_activate(
-      signals::bind(signals::ptr_fun(input_selection_complete), true));
+  input_selection->connect_activate([] { input_selection_complete(true); });
   input_selection->connect_closed(
-      signals::bind(signals::ptr_fun(input_selection_complete), cancel_selects_default));
+      [cancel_selects_default] { input_selection_complete(cancel_selects_default); });
   input_selection->center_over(main_window);
   input_selection->show();
   input_selection_dialog = input_selection;
@@ -740,7 +741,7 @@ static void check_if_already_running() {
 
 static void terminate_handler(int sig) {
   lprintf("received signal %d\n", sig);
-  t3_widget::async_safe_exit_main_loop(sig + 128);
+  t3widget::async_safe_exit_main_loop(sig + 128);
 }
 
 static void setup_term_signal_handler(int sig) {
@@ -792,24 +793,26 @@ int main(int argc, char *argv[]) {
     getchar();
   }
 #endif
-  params->term = cli_option.term;
+  if (cli_option.term != nullptr) {
+    params->term = std::string(cli_option.term);
+  }
   params->program_name = "Tilde";
   params->disable_external_clipboard = cli_option.disable_external_clipboard;
-  if ((default_option.disable_primary_selection_over_ssh.value_or_default(false) &&
+  if ((default_option.disable_primary_selection_over_ssh.value_or(false) &&
        getenv("SSH_TTY") != nullptr) ||
       cli_option.disable_primary_selection) {
-    t3_widget::set_primary_selection_mode(false);
+    t3widget::set_primary_selection_mode(false);
   }
 
   if (!(result = init(params.get())).get_success()) {
-    fprintf(stderr, "Error: %s\n", result.get_string());
+    fprintf(stderr, "Error: %s\n", result.get_string().c_str());
     fprintf(stderr, "init failed\n");
     exit(EXIT_FAILURE);
   }
 
   params.reset();
 
-  connect_update_notification(signals::ptr_fun(sync_updates));
+  connect_update_notification(sync_updates);
 
   init_charsets();
   main_window = new main_t();
@@ -820,7 +823,7 @@ int main(int argc, char *argv[]) {
   main_window->show();
 
   if (option.key_timeout.is_valid()) {
-    set_key_timeout(option.key_timeout);
+    set_key_timeout(option.key_timeout.value());
   } else if (config_read_error) {
     std::string message = "Error loading configuration file ";
     if (!cli_option.config_file.is_valid()) {
@@ -829,7 +832,7 @@ int main(int argc, char *argv[]) {
       cli_option.config_file = strings::Cat(file_name.get(), "/config");
     }
 
-    strings::Append(&message, cli_option.config_file, ": ", config_read_error_string);
+    strings::Append(&message, cli_option.config_file.value(), ": ", config_read_error_string);
     if (config_read_error_line != 0) {
       strings::Append(&message, " at line ", config_read_error_line);
     }
@@ -844,16 +847,16 @@ int main(int argc, char *argv[]) {
     */
     if (config_read_error_line != 0) {
       cli_option.files.clear();
-      cli_option.files.push_back(cli_option.config_file().c_str());
+      cli_option.files.push_back(cli_option.config_file.value().c_str());
     }
 
-    message_dialog->set_message(&message);
+    message_dialog->set_message(message);
     message_dialog->center_over(main_window);
     message_dialog->show();
   } else {
     set_key_timeout(-1000);
     message_dialog_t *input_message =
-        new message_dialog_t(70, _("Input Handling"), _("Close"), _("Configure"), NULL);
+        new message_dialog_t(70, _("Input Handling"), {_("Close"), _("Configure")});
     input_message->set_message(
         "You have not configured the input handling for this terminal type yet. "
         "This means you:\n"
@@ -861,16 +864,15 @@ int main(int argc, char *argv[]) {
         "- must press escape twice to close a menu or dialog\n\n"
         "You can change the input handling by selecting the \"Options\" menu "
         "and choosing \"Input Handling\", or by choosing \"Configure\" below.");
-    input_message->connect_activate(signals::bind(signals::ptr_fun(input_selection_complete), true),
-                                    0);
-    input_message->connect_activate(signals::bind(signals::ptr_fun(configure_input), true), 1);
-    input_message->connect_closed(signals::bind(signals::ptr_fun(input_selection_complete), true));
+    input_message->connect_activate([] { input_selection_complete(true); }, 0);
+    input_message->connect_activate([] { configure_input(true); }, 1);
+    input_message->connect_closed([] { input_selection_complete(true); });
     input_message->center_over(main_window);
     input_message->show();
     input_selection_dialog = input_message;
   }
 
-  load_cli_file_process_t::execute(signals::mem_fun(main_window, &main_t::load_cli_files_done));
+  load_cli_file_process_t::execute(bind_front(&main_t::load_cli_files_done, main_window));
   setup_signal_handlers();
   int retval = main_loop();
 #ifdef TILDE_DEBUG

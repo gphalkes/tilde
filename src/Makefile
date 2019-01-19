@@ -24,6 +24,7 @@ SOURCES..objects/edit := \
 	option.cc \
 	util.cc \
 	dialogs/attributesdialog.cc \
+	dialogs/characterdetailsdialog.cc \
 	dialogs/encodingdialog.cc \
 	dialogs/highlightdialog.cc \
 	dialogs/openrecentdialog.cc \

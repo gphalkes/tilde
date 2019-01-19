@@ -26,18 +26,15 @@ static bool cmp_lang_names(t3_highlight_lang_t a, t3_highlight_lang_t b) {
 }
 
 highlight_dialog_t::highlight_dialog_t(int height, int width)
-    : dialog_t(height, width, "Highlighting Language") {
-  button_t *ok_button, *cancel_button;
-  label_t *label;
+    : dialog_t(height, width, _("Highlighting Language")) {
   t3_highlight_error_t error;
 
-  list = new list_pane_t(true);
+  list = emplace_back<list_pane_t>(true);
   list->set_size(height - 3, width - 2);
   list->set_position(1, 1);
-  list->connect_activate(signals::mem_fun(this, &highlight_dialog_t::ok_activated));
+  list->connect_activate([this] { ok_activated(); });
 
-  label = new label_t("Plain Text");
-  list->push_back(label);
+  list->push_back(make_unique<label_t>("Plain Text"));
 
   names.reset(t3_highlight_list(0, &error));
   if (names == nullptr) {
@@ -51,8 +48,7 @@ highlight_dialog_t::highlight_dialog_t(int height, int width)
     std::sort(names.get(), ptr, cmp_lang_names);
 
     for (ptr = names.get(); ptr->name != nullptr; ptr++) {
-      label = new label_t(ptr->name);
-      list->push_back(label);
+      list->push_back(make_unique<label_t>(ptr->name));
     }
   }
 
@@ -60,36 +56,34 @@ highlight_dialog_t::highlight_dialog_t(int height, int width)
      dialog allows. */
   dialog_t::set_size(height, width);
 
-  cancel_button = new button_t("_Cancel", false);
+  button_t *ok_button = emplace_back<button_t>("_OK", true);
+  button_t *cancel_button = emplace_back<button_t>("_Cancel", false);
+
   cancel_button->set_anchor(this,
                             T3_PARENT(T3_ANCHOR_BOTTOMRIGHT) | T3_CHILD(T3_ANCHOR_BOTTOMRIGHT));
   cancel_button->set_position(-1, -2);
-  cancel_button->connect_activate(signals::mem_fun(this, &highlight_dialog_t::close));
-  ok_button = new button_t("_OK", true);
+  cancel_button->connect_activate([this] { close(); });
+
   ok_button->set_anchor(cancel_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
-  ok_button->connect_activate(signals::mem_fun(this, &highlight_dialog_t::ok_activated));
-
-  push_back(list);
-  push_back(ok_button);
-  push_back(cancel_button);
+  ok_button->connect_activate([this] { ok_activated(); });
 }
 
 bool highlight_dialog_t::set_size(optint height, optint width) {
   bool result;
 
   if (!height.is_valid()) {
-    height = t3_win_get_height(window);
+    height = window.get_height();
   }
-  if (static_cast<int>(list->size()) < height - 3) {
+  if (static_cast<int>(list->size()) < height.value() - 3) {
     height = list->size() + 3;
   }
 
   result = dialog_t::set_size(height, width);
   if (!width.is_valid()) {
-    width = t3_win_get_width(window);
+    width = window.get_width();
   }
-  result &= list->set_size(height - 3, width - 2);
+  result &= list->set_size(height.value() - 3, width.value() - 2);
   return result;
 }
 
@@ -109,7 +103,7 @@ void highlight_dialog_t::ok_activated() {
       nullptr) {
     std::string message(_("Error loading highlighting patterns: "));
     message += t3_highlight_strerror(error.error);
-    error_dialog->set_message(&message);
+    error_dialog->set_message(message);
     error_dialog->center_over(this);
     error_dialog->show();
     return;
