@@ -17,6 +17,7 @@ if [ $# -ne 1 ] ; then
 fi
 
 setup_TEST "$1"
+setup_vars
 
 [ -d "$TEST.new" ] && rm -rf "$TEST.new"
 
