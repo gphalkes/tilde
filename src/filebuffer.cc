@@ -14,12 +14,6 @@
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
-#ifdef HAS_LIBATTR
-#include <attr/libattr.h>
-#endif
-#ifdef HAS_LIBACL
-#include <acl/libacl.h>
-#endif
 
 #include "tilde/copy_file.h"
 #include "tilde/filebuffer.h"
@@ -250,21 +244,22 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
     case save_as_process_t::OPEN_FILE: {
       if (state->conversion_handle) {
         transcript_from_unicode_reset(state->conversion_handle);
-        try {
-          for (; state->i < size(); state->i++) {
-            if (state->i != 0) {
-              state->wrapper->write("\n", 1);
-            }
-            const std::string &data = get_line_data(state->i).get_data();
-            // At this point the wrapper is initialized with -1 as fd, thus it is not writing
-            // anything. However, it will catch conversion errors, and this will result in asking
-            // the user what to do.
-            state->wrapper->write(data.data(), data.size());
-          }
-        } catch (rw_result_t error) {
-          return error;
-        }
       }
+      try {
+        for (; state->i < size(); state->i++) {
+          if (state->i != 0) {
+            state->wrapper->write("\n", 1);
+          }
+          const std::string &data = get_line_data(state->i).get_data();
+          /* At this point the wrapper is initialized with -1 as fd, thus it is not writing
+             anything. However, it will catch conversion errors, and this will result in asking
+             the user what to do. */
+          state->wrapper->write(data.data(), data.size());
+        }
+      } catch (rw_result_t error) {
+        return error;
+      }
+      state->computed_length = state->wrapper->written_size();
 
       if (state->name.empty()) {
         if (name.empty()) {
@@ -279,7 +274,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       state->real_name = canonicalize_path(state->save_name);
       if (state->real_name.empty()) {
         if (errno != ENOENT) {
-          return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+          return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED, errno);
         }
         state->real_name = state->save_name;
       }
@@ -293,7 +288,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
             return rw_result_t(rw_result_t::FILE_EXISTS);
           }
         } else {
-          return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+          return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED, errno);
         }
       }
     }
@@ -328,24 +323,40 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         if ((state->backup_fd = mkstemp(temp_name.data())) >= 0) {
           state->temp_name = temp_name.data();
         } else {
-          return rw_result_t(rw_result_t::BACKUP_FAILED, errno);
+          return rw_result_t(errno == ENOSPC ? rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED
+                                             : rw_result_t::BACKUP_FAILED,
+                             errno);
         }
       }
       int error = copy_file(state->fd, state->backup_fd);
       if (error != 0) {
-        return rw_result_t(rw_result_t::BACKUP_FAILED, error);
+        return rw_result_t(
+            errno == ENOSPC ? rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED : rw_result_t::BACKUP_FAILED,
+            error);
       }
       if (fsync(state->backup_fd) < 0 || close(state->backup_fd) < 0) {
-        return rw_result_t(rw_result_t::BACKUP_FAILED, errno);
+        return rw_result_t(
+            errno == ENOSPC ? rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED : rw_result_t::BACKUP_FAILED,
+            errno);
       }
+      state->backup_saved = true;
       state->backup_fd = -1;
     }
       // FALLTHROUGH
     case save_as_process_t::WRITING: {
-      // FIXME: use posix_fallocate to attempt to pre-allocate the required size of the file. If the
-      // call fails with ENOSPC, stop writing and report an error to the user. All other error codes
-      // should be ignored and writing continue.
-
+      // Use posix_fallocate to attempt to pre-allocate the required size of the file. If the call
+      // fails with ENOSPC or EFBIG, stop writing and report an error to the user. All other error
+      // codes are ignored.
+#ifdef HAS_POSIX_FALLOCATE
+      if (posix_fallocate(state->fd, 0, state->computed_length) < 0 &&
+          (errno == ENOSPC || errno == EFBIG)) {
+        // We want the backup to be removed (if it exists), and we didn't change anything, so we
+        // close the file here and set the fd to -1.
+        close(state->fd);
+        state->fd = -1;
+        return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED);
+      }
+#endif
       int conversion_flags = state->wrapper->conversion_flags();
       state->wrapper =
           t3widget::make_unique<file_write_wrapper_t>(state->fd, state->conversion_handle);
@@ -372,14 +383,20 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         return error;
       }
 
-      // FIXME: report errors in finalizing the file back to the user!
       // Truncate it to the written size.
-      off_t curr_pos = lseek(state->fd, 0, SEEK_CUR);
-      if (curr_pos >= 0) {
-        ftruncate(state->fd, curr_pos);
+      int result;
+      while ((result = ftruncate(state->fd, state->wrapper->written_size())) < 0 &&
+             errno == EINTR) {
       }
-      fsync(state->fd);
-      close(state->fd);
+      if (result < 0) {
+        return rw_result_t(rw_result_t::ERRNO_ERROR);
+      }
+      if (fsync(state->fd) < 0) {
+        return rw_result_t(rw_result_t::ERRNO_ERROR);
+      }
+      if (close(state->fd) < 0) {
+        return rw_result_t(rw_result_t::ERRNO_ERROR);
+      }
       state->fd = -1;
 
       if (!state->name.empty()) {

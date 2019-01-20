@@ -139,6 +139,7 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
     if (fd_ >= 0 && nosig_write(fd_, nfc_output.get(), nfc_output_len) < 0) {
       throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
     }
+    written_size_ += nfc_output_len;
     return;
   }
 
@@ -157,11 +158,11 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
         break;
       case TRANSCRIPT_FALLBACK:
       case TRANSCRIPT_UNASSIGNED:
-      case TRANSCRIPT_PRIVATE_USE:
         imprecise = true;
         conversion_flags_ |= TRANSCRIPT_ALLOW_FALLBACK | TRANSCRIPT_SUBST_UNASSIGNED;
         break;
       case TRANSCRIPT_INCOMPLETE:
+      case TRANSCRIPT_PRIVATE_USE:
       default:
         throw rw_result_t(rw_result_t::CONVERSION_ERROR);
     }
@@ -171,6 +172,7 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
           nosig_write(fd_, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0) {
         throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
       }
+      written_size_ += transcript_buffer_ptr - transcript_buffer;
     }
   }
 

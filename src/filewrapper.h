@@ -79,6 +79,7 @@ class file_write_wrapper_t {
  private:
   int fd_, conversion_flags_;
   transcript_t *handle_;
+  off_t written_size_ = 0;
 
  public:
   explicit file_write_wrapper_t(int fd, transcript_t *handle = nullptr)
@@ -100,6 +101,8 @@ class file_write_wrapper_t {
     conversion_flags_ |=
         conversion_flags & (TRANSCRIPT_ALLOW_FALLBACK | TRANSCRIPT_SUBST_UNASSIGNED);
   }
+
+  off_t written_size() const { return written_size_; }
 };
 
 #endif

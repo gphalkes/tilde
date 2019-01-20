@@ -44,14 +44,11 @@ include ../../t3shared/rules-base.mk
 LDLIBS += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
 LDFLAGS += $(T3LDFLAGS.t3widget) $(T3LDFLAGS.t3window) $(T3LDFLAGS.transcript) $(T3LDFLAGS.t3config) $(T3LDFLAGS.t3highlight)
 LDLIBS += -lunistring
-LDLIBS += -lacl
-LDLIBS += -lattr
 CXXFLAGS.option = -I.objects
 
 CXXFLAGS += -DTILDE_DEBUG
 CXXFLAGS += -DHAS_STRDUP
-CXXFLAGS += -DHAS_LIBACL
-CXXFLAGS += -DHAS_LIBATTR
+CXXFLAGS += -DHAS_POSIX_FALLOCATE
 #~ CXXFLAGS += -DUSE_GETTEXT -DLOCALEDIR=\"locales\"
 CXXFLAGS += -std=c++11
 CXXFLAGS += -DCXX11SWITCH=1

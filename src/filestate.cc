@@ -222,8 +222,28 @@ bool save_as_process_t::step() {
       continue_abort_dialog->show();
       return false;
     case rw_result_t::ERRNO_ERROR:
-      printf_into(&message, "Could not save file: %s", strerror(rw_result.get_errno_error()));
-      // FIXME: add information about how to recover!
+    case rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED:
+      printf_into(&message, "Could not save file: %s.", strerror(rw_result.get_errno_error()));
+      if (rw_result == rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED) {
+        message.append(
+            " The original file has not been touched. Save the current buffer to another location "
+            "to ensure its contents are preserved!");
+      } else if (backup_saved) {
+        message.append(" The original contents of the file can still be retrieved from ");
+        // FIXME: the file names probably needs to be converted from some other character set.
+        if (!temp_name.empty()) {
+          message.append(temp_name);
+        } else {
+          message.append(name);
+          message.append("~");
+        }
+        message.append(
+            ".  Save the current buffer to another location to ensure its contents are preserved!");
+      } else {
+        message.append(
+            " The original file contents are lost. Save the current buffer to some other location "
+            "to ensure its contents are preserved!");
+      }
       error_dialog->set_message(message);
       error_dialog->show();
       break;

@@ -1,8 +1,9 @@
-#include "tilde/copy_file.h"
-
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+
+#include "tilde/copy_file.h"
+
 #include <limits>
 #include <sys/stat.h>
 #include <sys/types.h>

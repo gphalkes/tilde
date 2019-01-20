@@ -13,6 +13,7 @@
 */
 #ifndef FILESTATE_H
 #define FILESTATE_H
+#include <cerrno>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -36,6 +37,7 @@ class rw_result_t {
     FILE_EXISTS,
     BACKUP_FAILED,
     ERRNO_ERROR,
+    ERRNO_ERROR_FILE_UNTOUCHED,
     CONVERSION_OPEN_ERROR,
     CONVERSION_IMPRECISE,
     CONVERSION_ERROR,
@@ -53,7 +55,7 @@ class rw_result_t {
 
  public:
   rw_result_t() = default;
-  explicit rw_result_t(stop_reason_t _reason) : reason(_reason) {}
+  explicit rw_result_t(stop_reason_t _reason) : reason(_reason), errno_error(errno) {}
   rw_result_t(stop_reason_t _reason, int _errno_error)
       : reason(_reason), errno_error(_errno_error) {}
   rw_result_t(stop_reason_t _reason, transcript_error_t _transcript_error)
@@ -123,6 +125,8 @@ class save_as_process_t : public stepped_process_t {
   std::string temp_name;
   int fd = -1;
   int backup_fd = -1;
+  bool backup_saved = false;
+  off_t computed_length = 0;
   text_pos_t i;
   transcript_t *conversion_handle = nullptr;
   std::unique_ptr<file_write_wrapper_t> wrapper = nullptr;

@@ -134,7 +134,6 @@ int main(int argc, char *argv[]) {
 	fd = creat("path", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 	stat("path", &statbuf);
 	fchmod(fd, 0644);
-	fchown(fd, 0, 0);
 	fsync(fd);
 	ftruncate(fd, 5);
 	off_t offset = lseek(fd, 0, SEEK_CUR);
@@ -154,7 +153,6 @@ EOF
 		checkfunction "creat" 'int fd = creat("path", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);' "<sys/types.h>" "<sys/stat.h>" "<fcntl.h>"
 		checkfunction "stat" 'struct stat statbuf; stat("path", &statbuf);' "<sys/types.h>" "<sys/stat.h>" "<unistd.h>"
 		checkfunction "fchmod" 'int fd; fchmod(fd, 0);' "<sys/stat.h>"
-		checkfunction "fchown" 'int fd; fchown(fd, 0, 0);' "<unistd.h>"
 		checkfunction "fsync" 'int fd; fsync(fd);' "<unistd.h>"
 		checkfunction "ftruncate" 'int fd; ftrucnate(fd, 5);' "<unistd.h>" "<sys/types.h>"
 		checkfunction "lseek" 'off_t offset = lseek(fd, 0, SEEK_CUR);' "<sys/types.h>" "<unistd.h>"
@@ -169,30 +167,58 @@ EOF
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
-#include <stdlib.h>
-#include <attr/libattr.h>
+#include <fcntl.h>
 
 int main(int argc, char *argv[]) {
-	attr_copy_file(argv[1], argv[2], NULL, NULL);
+	posix_fallocate(1, 0, 10);
 }
 EOF
-	if test_link_cxx "libattr" TESTLIBS=-lattr ; then
-		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_LIBATTR"
-		CONFIGLIBS="${CONFIGLIBS} -lattr"
+	if test_link_cxx "posix_fallocate" ; then
+		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_POSIX_FALLOCATE"
 	fi
 
 	clean_cxx
 	cat > .configcxx.cc <<EOF
-#include <stdlib.h>
-#include <acl/libacl.h>
+#ifndef __linux__
+#error sendfile should only be used on linux, as different platforms have different semantics
+#endif
+#include <sys/sendfile.h>
 
 int main(int argc, char *argv[]) {
-	perm_copy_file(argv[1], argv[2], NULL);
+  off_t offset = 0;
+	sendfile(1, 2, &offset, 10);
 }
 EOF
-	if test_link_cxx "libacl" TESTLIBS=-lacl ; then
-		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_LIBACL"
-		CONFIGLIBS="${CONFIGLIBS} -lacl"
+	if test_link_cxx "Linux sendfile" ; then
+		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_SENDFILE"
+	fi
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#define _GNU_SOURCE
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+	off_t in, out;
+	copy_file_range(1, &in, 2, &out, 10, 0);
+}
+EOF
+	if test_link_cxx "copy_file_range" ; then
+		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_COPY_FILE_RANGE"
+	fi
+
+	clean_cxx
+	cat > .configcxx.cc <<EOF
+#include <linux/fs.h>
+#include <sys/ioctl.h>
+
+int main(int argc, char *argv[]) {
+  int fd;
+	ioctl(1, FICLONE, fd);
+}
+EOF
+	if test_link_cxx "ficlone" ; then
+		CONFIGFLAGS="${CONFIGFLAGS} -DHAS_FICLONE"
 	fi
 
 	create_makefile "CONFIGFLAGS=${CONFIGFLAGS} ${LIBTRANSCRIPT_FLAGS} ${LIBT3WIDGET_FLAGS} ${LIBT3CONFIG_FLAGS} ${LIBT3HIGHLIGHT_FLAGS}" \
