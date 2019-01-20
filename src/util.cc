@@ -53,20 +53,18 @@ void stepped_process_t::run() {
 
 void stepped_process_t::abort() { done(false); }
 
-void stepped_process_t::disconnect() {
-  for (t3widget::connection_t &iter : connections) {
-    iter.disconnect();
-  }
-  connections.clear();
-}
-
 void stepped_process_t::done(bool _result) {
   result = _result;
   done_cb(this);
   delete this;
 }
 
-stepped_process_t::~stepped_process_t() { disconnect(); }
+stepped_process_t::~stepped_process_t() {
+  for (t3widget::connection_t &iter : connections) {
+    iter.disconnect();
+  }
+  connections.clear();
+}
 
 bool stepped_process_t::get_result() { return result; }
 

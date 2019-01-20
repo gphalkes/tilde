@@ -38,7 +38,22 @@ load_process_t::load_process_t(const callback_t &cb, const char *name, const cha
       wrapper(nullptr),
       encoding(_encoding == nullptr ? "UTF-8" : _encoding),
       fd(-1),
-      buffer_used(true) {}
+      buffer_used(true) {
+  connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
+  connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
+  connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
+
+  connections.push_back(preserve_bom_dialog->connect_activate([this] { preserve_bom(); }, 0));
+  connections.push_back(preserve_bom_dialog->connect_activate([this] { remove_bom(); }, 1));
+  connections.push_back(preserve_bom_dialog->connect_closed([this] { preserve_bom(); }));
+
+  connections.push_back(
+      open_file_dialog->connect_file_selected(bind_front(&load_process_t::file_selected, this)));
+  connections.push_back(open_file_dialog->connect_closed([this] { abort(); }));
+
+  connections.push_back(
+      encoding_dialog->connect_activate(bind_front(&load_process_t::encoding_selected, this)));
+}
 
 void load_process_t::abort() {
   delete file;
@@ -51,18 +66,12 @@ bool load_process_t::step() {
   rw_result_t rw_result;
 
   if (state == SELECT_FILE) {
-    connections.push_back(
-        open_file_dialog->connect_file_selected(bind_front(&load_process_t::file_selected, this)));
-    connections.push_back(open_file_dialog->connect_closed([this] { abort(); }));
     open_file_dialog->reset();
     open_file_dialog->show();
-    connections.push_back(
-        encoding_dialog->connect_activate(bind_front(&load_process_t::encoding_selected, this)));
     encoding_dialog->set_encoding(encoding.c_str());
     return false;
   }
 
-  disconnect();
   switch ((rw_result = file->load(this))) {
     case rw_result_t::SUCCESS:
       result = true;
@@ -92,18 +101,12 @@ bool load_process_t::step() {
       break;
     case rw_result_t::CONVERSION_IMPRECISE:
       printf_into(&message, "Conversion from encoding %s is irreversible", file->get_encoding());
-      connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
-      connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
-      connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
       continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
     case rw_result_t::CONVERSION_ILLEGAL:
       printf_into(&message, "Conversion from encoding %s encountered illegal characters",
                   file->get_encoding());
-      connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
-      connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
-      connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
       continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
@@ -114,9 +117,6 @@ bool load_process_t::step() {
       error_dialog->show();
       break;
     case rw_result_t::BOM_FOUND:
-      connections.push_back(preserve_bom_dialog->connect_activate([this] { preserve_bom(); }, 0));
-      connections.push_back(preserve_bom_dialog->connect_activate([this] { remove_bom(); }, 1));
-      connections.push_back(preserve_bom_dialog->connect_closed([this] { preserve_bom(); }));
       preserve_bom_dialog->show();
       return false;
     default:
@@ -180,52 +180,50 @@ save_as_process_t::save_as_process_t(const callback_t &cb, file_buffer_t *_file,
     : stepped_process_t(cb),
       state(SELECT_FILE),
       file(_file),
-      allow_highlight_change(_allow_highlight_change),
-      highlight_changed(false),
-      save_name(nullptr),
-      fd(-1),
-      wrapper(nullptr) {}
+      allow_highlight_change(_allow_highlight_change) {
+  connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
+  connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
+  connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
+
+  connections.push_back(
+      save_as_dialog->connect_file_selected(bind_front(&save_as_process_t::file_selected, this)));
+  connections.push_back(save_as_dialog->connect_closed([this] { abort(); }));
+
+  connections.push_back(
+      encoding_dialog->connect_activate(bind_front(&save_as_process_t::encoding_selected, this)));
+}
 
 bool save_as_process_t::step() {
   std::string message;
   rw_result_t rw_result;
 
   if (state == SELECT_FILE) {
-    connections.push_back(
-        save_as_dialog->connect_file_selected(bind_front(&save_as_process_t::file_selected, this)));
-    connections.push_back(save_as_dialog->connect_closed([this] { abort(); }));
-
     save_as_dialog->set_from_file(file->get_name());
     save_as_dialog->show();
-    connections.push_back(
-        encoding_dialog->connect_activate(bind_front(&save_as_process_t::encoding_selected, this)));
     encoding_dialog->set_encoding(file->get_encoding());
     return false;
   }
 
-  disconnect();
   switch ((rw_result = file->save(this))) {
     case rw_result_t::SUCCESS:
       result = true;
       break;
     case rw_result_t::FILE_EXISTS:
       printf_into(&message, "File '%s' already exists", name.c_str());
-      connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
-      connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
-      connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
       continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
-    case rw_result_t::FILE_EXISTS_READONLY:
-      printf_into(&message, "File '%s' is readonly", save_name);
-      connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
-      connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
-      connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
+    case rw_result_t::BACKUP_FAILED:
+      printf_into(&message,
+                  "Could not create a backup file: %s. This could result in data loss if Tilde is "
+                  "unable to complete writing the file",
+                  strerror(rw_result.get_errno_error()));
       continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
     case rw_result_t::ERRNO_ERROR:
       printf_into(&message, "Could not save file: %s", strerror(rw_result.get_errno_error()));
+      // FIXME: add information about how to recover!
       error_dialog->set_message(message);
       error_dialog->show();
       break;
@@ -244,9 +242,6 @@ bool save_as_process_t::step() {
       }
       i++;
       printf_into(&message, "Conversion into encoding %s is irreversible", encoding.c_str());
-      connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
-      connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
-      connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
       continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
@@ -270,15 +265,18 @@ void save_as_process_t::file_selected(const std::string &_name) {
 void save_as_process_t::encoding_selected(const std::string *_encoding) { encoding = *_encoding; }
 
 save_as_process_t::~save_as_process_t() {
+  if (backup_fd >= 0) {
+    close(backup_fd);
+  }
   if (fd >= 0) {
     close(fd);
-    if (temp_name.empty()) {
-      unlink(name.c_str());
-    } else {
-      unlink(temp_name.c_str());
-    }
+  } else if (!temp_name.empty()) {
+    // Remove the backup file (not the ~ backup, but the temporary file we may have created).
+    unlink(temp_name.c_str());
   }
-  delete wrapper;
+  if (conversion_handle) {
+    transcript_close_converter(conversion_handle);
+  }
 }
 
 void save_as_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
@@ -304,6 +302,10 @@ close_process_t::close_process_t(const callback_t &cb, file_buffer_t *_file)
   if (!_file->is_modified()) {
     state = CLOSE;
   }
+  connections.push_back(close_confirm_dialog->connect_activate([this] { do_save(); }, 0));
+  connections.push_back(close_confirm_dialog->connect_activate([this] { dont_save(); }, 1));
+  connections.push_back(close_confirm_dialog->connect_activate([this] { abort(); }, 2));
+  connections.push_back(close_confirm_dialog->connect_closed([this] { abort(); }));
 }
 
 bool close_process_t::step() {
@@ -318,7 +320,6 @@ bool close_process_t::step() {
     }
   }
 
-  disconnect();
   if (state == CLOSE) {
     recent_files.push_front(file);
     /* Can't delete the file_buffer_t here, because on switching buffers the
@@ -331,10 +332,6 @@ bool close_process_t::step() {
     std::string message;
     printf_into(&message, "Save changes to '%s'",
                 file->get_name().empty() ? "(Untitled)" : file->get_name().c_str());
-    connections.push_back(close_confirm_dialog->connect_activate([this] { do_save(); }, 0));
-    connections.push_back(close_confirm_dialog->connect_activate([this] { dont_save(); }, 1));
-    connections.push_back(close_confirm_dialog->connect_activate([this] { abort(); }, 2));
-    connections.push_back(close_confirm_dialog->connect_closed([this] { abort(); }));
     close_confirm_dialog->set_message(message);
     close_confirm_dialog->show();
   } else {
@@ -360,7 +357,12 @@ void close_process_t::execute(const callback_t &cb, file_buffer_t *_file) {
 const file_buffer_t *close_process_t::get_file_buffer_ptr() { return file; }
 
 exit_process_t::exit_process_t(const callback_t &cb)
-    : stepped_process_t(cb), iter(open_files.begin()) {}
+    : stepped_process_t(cb), iter(open_files.begin()) {
+  connections.push_back(close_confirm_dialog->connect_activate([this] { do_save(); }, 0));
+  connections.push_back(close_confirm_dialog->connect_activate([this] { dont_save(); }, 1));
+  connections.push_back(close_confirm_dialog->connect_activate([this] { abort(); }, 2));
+  connections.push_back(close_confirm_dialog->connect_closed([this] { abort(); }));
+}
 
 bool exit_process_t::step() {
   for (; iter != open_files.end(); iter++) {
@@ -368,10 +370,6 @@ bool exit_process_t::step() {
       std::string message;
       printf_into(&message, "Save changes to '%s'",
                   (*iter)->get_name().empty() ? "(Untitled)" : (*iter)->get_name().c_str());
-      connections.push_back(close_confirm_dialog->connect_activate([this] { do_save(); }, 0));
-      connections.push_back(close_confirm_dialog->connect_activate([this] { dont_save(); }, 1));
-      connections.push_back(close_confirm_dialog->connect_activate([this] { abort(); }, 2));
-      connections.push_back(close_confirm_dialog->connect_closed([this] { abort(); }));
       close_confirm_dialog->set_message(message);
       close_confirm_dialog->show();
       return false;
@@ -403,13 +401,14 @@ void exit_process_t::save_done(stepped_process_t *process) {
 
 void exit_process_t::execute(const callback_t &cb) { (new exit_process_t(cb))->run(); }
 
-open_recent_process_t::open_recent_process_t(const callback_t &cb) : load_process_t(cb) {}
+open_recent_process_t::open_recent_process_t(const callback_t &cb) : load_process_t(cb) {
+  connections.push_back(open_recent_dialog->connect_file_selected(
+      bind_front(&open_recent_process_t::recent_file_selected, this)));
+  connections.push_back(open_recent_dialog->connect_closed([this] { abort(); }));
+}
 
 bool open_recent_process_t::step() {
   if (state == SELECT_FILE) {
-    connections.push_back(open_recent_dialog->connect_file_selected(
-        bind_front(&open_recent_process_t::recent_file_selected, this)));
-    connections.push_back(open_recent_dialog->connect_closed([this] { abort(); }));
     open_recent_dialog->show();
     return false;
   }

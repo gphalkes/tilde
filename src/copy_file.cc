@@ -4,18 +4,18 @@
 #define _GNU_SOURCE
 #endif
 #include <limits>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <sys/types.h>
 #include <t3widget/util.h>
+#include <unistd.h>
 
 using namespace t3widget;
 
 static bool rewind_files(int src_fd, int dest_fd) {
-  if (lseek(src_fd, 0, SEEK_SET) == (off_t) -1) {
+  if (lseek(src_fd, 0, SEEK_SET) == (off_t)-1) {
     return false;
   }
-  if (lseek(dest_fd, 0, SEEK_SET) == (off_t) -1) {
+  if (lseek(dest_fd, 0, SEEK_SET) == (off_t)-1) {
     return false;
   }
   return true;
@@ -48,9 +48,7 @@ int copy_file_by_sendfile(int src_fd, int dest_fd, size_t bytes_to_copy) {
 #if defined(TILDE_UNITTEST) && defined(__linux__)
 #error Please define HAS_SENDFILE in unit tests
 #endif
-int copy_file_by_sendfile(int, int, size_t) {
-  return ENOTSUP;
-}
+int copy_file_by_sendfile(int, int, size_t) { return ENOTSUP; }
 #endif
 
 #if defined(HAS_COPY_FILE_RANGE)
@@ -78,14 +76,12 @@ int copy_file_by_copy_file_range(int src_fd, int dest_fd, size_t bytes_to_copy) 
 #if defined(TILDE_UNITTEST) && defined(__linux__)
 #error Please define HAS_COPY_FILE_RANGE in unit tests
 #endif
-int copy_file_by_copy_file_range(int, int, size_t) {
-  return ENOTSUP;
-}
+int copy_file_by_copy_file_range(int, int, size_t) { return ENOTSUP; }
 #endif
 
 #if defined(HAS_FICLONE)
-#include <sys/ioctl.h>
 #include <linux/fs.h>
+#include <sys/ioctl.h>
 
 int copy_file_by_ficlone(int src_fd, int dest_fd) {
   if (ioctl(dest_fd, FICLONE, src_fd) == -1) {
@@ -97,9 +93,7 @@ int copy_file_by_ficlone(int src_fd, int dest_fd) {
 #if defined(TILDE_UNITTEST) && defined(__linux__)
 #error Please define HAS_FICLONE in unit tests
 #endif
-int copy_file_by_ficlone(int, int) {
-  return ENOTSUP;
-}
+int copy_file_by_ficlone(int, int) { return ENOTSUP; }
 #endif
 
 int copy_file_by_read_write(int src_fd, int dest_fd) {

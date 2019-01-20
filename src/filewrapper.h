@@ -77,16 +77,29 @@ class file_read_wrapper_t {
 
 class file_write_wrapper_t {
  private:
-  int fd, conversion_flags;
-  transcript_t *handle;
+  int fd_, conversion_flags_;
+  transcript_t *handle_;
 
  public:
-  explicit file_write_wrapper_t(int _fd, transcript_t *_handle = nullptr)
-      : fd(_fd),
-        conversion_flags(TRANSCRIPT_FILE_START | TRANSCRIPT_ALLOW_PRIVATE_USE),
-        handle(_handle) {}
-  ~file_write_wrapper_t();
+  explicit file_write_wrapper_t(int fd, transcript_t *handle = nullptr)
+      : fd_(fd),
+        conversion_flags_(TRANSCRIPT_FILE_START | TRANSCRIPT_ALLOW_PRIVATE_USE),
+        handle_(handle) {
+    if (handle_) {
+      transcript_from_unicode_reset(handle_);
+    }
+  }
   void write(const char *buffer, size_t bytes);
+
+  // Get the state of the conversion flags. This may have changed from the initial setting by
+  // imprecise conversions.
+  int conversion_flags() const { return conversion_flags_; }
+  // Adds to the state of the conversion flags, based on the input flags. This ignores the flags
+  // that indicate the start or end of the conversion.
+  void add_conversion_flags(int conversion_flags) {
+    conversion_flags_ |=
+        conversion_flags & (TRANSCRIPT_ALLOW_FALLBACK | TRANSCRIPT_SUBST_UNASSIGNED);
+  }
 };
 
 #endif

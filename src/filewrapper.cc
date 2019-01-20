@@ -135,8 +135,8 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
   // FIXME: check return value
   nfc_output.reset(reinterpret_cast<char *>(u8_normalize(
       UNINORM_NFC, reinterpret_cast<const uint8_t *>(buffer), bytes, nullptr, &nfc_output_len)));
-  if (handle == nullptr) {
-    if (nosig_write(fd, nfc_output.get(), nfc_output_len) < 0) {
+  if (handle_ == nullptr) {
+    if (fd_ >= 0 && nosig_write(fd_, nfc_output.get(), nfc_output_len) < 0) {
       throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
     }
     return;
@@ -148,8 +148,8 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
 
   while (buffer < buffer_end) {
     transcript_buffer_ptr = transcript_buffer;
-    switch (transcript_from_unicode(handle, &buffer, buffer_end, &transcript_buffer_ptr,
-                                    transcript_buffer_end, conversion_flags)) {
+    switch (transcript_from_unicode(handle_, &buffer, buffer_end, &transcript_buffer_ptr,
+                                    transcript_buffer_end, conversion_flags_)) {
       case TRANSCRIPT_SUCCESS:
         ASSERT(buffer == buffer_end);
         break;
@@ -159,15 +159,16 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
       case TRANSCRIPT_UNASSIGNED:
       case TRANSCRIPT_PRIVATE_USE:
         imprecise = true;
-        conversion_flags |= TRANSCRIPT_ALLOW_FALLBACK | TRANSCRIPT_SUBST_UNASSIGNED;
+        conversion_flags_ |= TRANSCRIPT_ALLOW_FALLBACK | TRANSCRIPT_SUBST_UNASSIGNED;
         break;
       case TRANSCRIPT_INCOMPLETE:
       default:
         throw rw_result_t(rw_result_t::CONVERSION_ERROR);
     }
     if (transcript_buffer_ptr > transcript_buffer) {
-      conversion_flags &= ~TRANSCRIPT_FILE_START;
-      if (nosig_write(fd, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0) {
+      conversion_flags_ &= ~TRANSCRIPT_FILE_START;
+      if (fd_ >= 0 &&
+          nosig_write(fd_, transcript_buffer, transcript_buffer_ptr - transcript_buffer) < 0) {
         throw rw_result_t(rw_result_t::ERRNO_ERROR, errno);
       }
     }
@@ -175,11 +176,5 @@ void file_write_wrapper_t::write(const char *buffer, size_t bytes) {
 
   if (imprecise) {
     throw rw_result_t(rw_result_t::CONVERSION_IMPRECISE);
-  }
-}
-
-file_write_wrapper_t::~file_write_wrapper_t() {
-  if (handle != nullptr) {
-    transcript_close_converter(handle);
   }
 }

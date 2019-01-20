@@ -21,6 +21,7 @@
 #include <acl/libacl.h>
 #endif
 
+#include "tilde/copy_file.h"
 #include "tilde/filebuffer.h"
 #include "tilde/fileline.h"
 #include "tilde/filestate.h"
@@ -221,9 +222,53 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
   }
 
   switch (state->state) {
-    case save_as_process_t::INITIAL:
+    case save_as_process_t::INITIAL: {
+      if (strip_spaces.is_valid() ? strip_spaces.value() : option.strip_spaces) {
+        do_strip_spaces();
+      }
+
+      transcript_error_t error;
+      if (!state->encoding.empty()) {
+        if ((state->conversion_handle = transcript_open_converter(
+                 state->encoding.c_str(), TRANSCRIPT_UTF8, 0, &error)) == nullptr) {
+          return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
+        }
+        encoding = state->encoding;
+      } else if (encoding != "UTF-8") {
+        if ((state->conversion_handle = transcript_open_converter(encoding.c_str(), TRANSCRIPT_UTF8,
+                                                                  0, &error)) == nullptr) {
+          return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
+        }
+      } else {
+        state->conversion_handle = nullptr;
+      }
+      state->wrapper = t3widget::make_unique<file_write_wrapper_t>(-1, state->conversion_handle);
+      state->i = 0;
+      state->state = save_as_process_t::OPEN_FILE;
+    }
+      // FALLTHROUGH
+    case save_as_process_t::OPEN_FILE: {
+      if (state->conversion_handle) {
+        transcript_from_unicode_reset(state->conversion_handle);
+        try {
+          for (; state->i < size(); state->i++) {
+            if (state->i != 0) {
+              state->wrapper->write("\n", 1);
+            }
+            const std::string &data = get_line_data(state->i).get_data();
+            // At this point the wrapper is initialized with -1 as fd, thus it is not writing
+            // anything. However, it will catch conversion errors, and this will result in asking
+            // the user what to do.
+            state->wrapper->write(data.data(), data.size());
+          }
+        } catch (rw_result_t error) {
+          return error;
+        }
+      }
+
       if (state->name.empty()) {
         if (name.empty()) {
+          // FIXME: this should return some result instead of crashing!
           PANIC();
         }
         state->save_name = name.c_str();
@@ -239,101 +284,75 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         state->real_name = state->save_name;
       }
 
-      /* FIXME: to avoid race conditions, it is probably better to try open with O_CREAT|O_EXCL
-         However, this may cause issues with NFS, which is known to have isues with this. */
-      if (stat(state->real_name.c_str(), &state->file_info) < 0) {
-        if (errno == ENOENT) {
-          if ((state->fd = creat(state->real_name.c_str(), CREATE_MODE)) < 0) {
-            return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
+      /* This attempts to avoid race conditions, by trying to open with O_CREAT|O_EXCL. This is
+         known to have issues on NFSv3, but it's the best we can do. */
+      if ((state->fd = open(state->real_name.c_str(), O_CREAT | O_EXCL | O_RDWR, 0666)) < 0) {
+        if ((state->fd = open(state->real_name.c_str(), O_RDWR)) >= 0) {
+          state->state = save_as_process_t::CREATE_BACKUP;
+          if (!state->name.empty()) {
+            return rw_result_t(rw_result_t::FILE_EXISTS);
           }
         } else {
           return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
         }
+      }
+    }
+      // FALLTHROUGH
+    case save_as_process_t::CREATE_BACKUP: {
+      // If the creation of the backup file fails, the user either aborts or allows continuation
+      // without completing the backup. Thus the next state is always WRITING.
+      state->state = save_as_process_t::WRITING;
+      std::string temp_name_str = state->real_name;
+
+      if (option.make_backup) {
+        temp_name_str += "~";
+        if ((state->backup_fd = open(temp_name_str.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0600)) <
+            0) {
+          return rw_result_t(rw_result_t::BACKUP_FAILED, errno);
+        }
       } else {
-        state->state = save_as_process_t::ALLOW_OVERWRITE;
-        if (!state->name.empty()) {
-          return rw_result_t(rw_result_t::FILE_EXISTS);
-        }
-        /* Note that we have a new case in the middle of the else statement
-           here. It is an ugly hack, but it does prevent a lot of code
-           duplication and other hacks. */
-        case save_as_process_t::ALLOW_OVERWRITE:
-          state->state = save_as_process_t::ALLOW_OVERWRITE_READONLY;
-          if (access(state->save_name, W_OK) != 0) {
-            return rw_result_t(rw_result_t::FILE_EXISTS_READONLY);
-          }
-        case save_as_process_t::ALLOW_OVERWRITE_READONLY:
-          std::string temp_name_str = state->real_name;
-
-          if ((idx = temp_name_str.rfind('/')) == std::string::npos) {
-            idx = 0;
-          } else {
-            idx++;
-          }
-
-          temp_name_str.erase(idx);
-          try {
-            temp_name_str.append(".tildeXXXXXX");
-          } catch (std::bad_alloc &ba) {
-            return rw_result_t(rw_result_t::ERRNO_ERROR, ENOMEM);
-          }
-
-          /* Unfortunately, we can't pass the c_str result to mkstemp as we are not allowed
-             to change that string. So we'll just have to copy it into a vector :-( */
-          std::vector<char> temp_name(temp_name_str.begin(), temp_name_str.end());
-          // Ensure nul termination.
-          temp_name.push_back(0);
-          /* Attempt to create a temporary file. If this fails, just write the file
-             directly. The latter has some risk (e.g. file truncation due to full disk,
-             or corruption due to computer crashes), but these are so small that it is
-             worth permitting this if we can't create the temporary file. */
-          if (geteuid() == state->file_info.st_uid &&
-              (state->fd = mkstemp(temp_name.data())) >= 0) {
-            state->temp_name = temp_name.data();
-// Preserve ownership and attributes
-#ifdef HAS_LIBATTR
-            attr_copy_file(state->real_name.c_str(), state->temp_name.c_str(), nullptr, nullptr);
-#endif
-#ifdef HAS_LIBACL
-            perm_copy_file(state->real_name.c_str(), state->temp_name.c_str(), nullptr);
-#endif
-            fchmod(state->fd, state->file_info.st_mode);
-            fchown(state->fd, -1, state->file_info.st_gid);
-            fchown(state->fd, state->file_info.st_uid, -1);
-          } else {
-            state->temp_name.clear();
-            if ((state->fd = open(state->real_name.c_str(), O_WRONLY | O_CREAT, CREATE_MODE)) < 0) {
-              return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-            }
-          }
-      }
-
-      {
-        transcript_t *handle;
-        transcript_error_t error;
-        if (!state->encoding.empty()) {
-          if ((handle = transcript_open_converter(state->encoding.c_str(), TRANSCRIPT_UTF8, 0,
-                                                  &error)) == nullptr) {
-            return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
-          }
-          encoding = state->encoding;
-        } else if (encoding != "UTF-8") {
-          if ((handle = transcript_open_converter(encoding.c_str(), TRANSCRIPT_UTF8, 0, &error)) ==
-              nullptr) {
-            return rw_result_t(rw_result_t::CONVERSION_OPEN_ERROR);
-          }
+        if ((idx = temp_name_str.rfind('/')) == std::string::npos) {
+          idx = 0;
         } else {
-          handle = nullptr;
+          idx++;
         }
-        // FIXME: if the new fails, the handle will remain open!
-        // FIXME: if the new fails, this will abort with an exception! This should not happen!
-        state->wrapper = new file_write_wrapper_t(state->fd, handle);
-        state->i = 0;
-        state->state = save_as_process_t::WRITING;
+
+        temp_name_str.erase(idx);
+        temp_name_str.append(".tildeXXXXXX");
+
+        /* Unfortunately, we can't pass the c_str result to mkstemp as we are not allowed to change
+           that string. So we'll just have to copy it into a vector :-( */
+        std::vector<char> temp_name(temp_name_str.begin(), temp_name_str.end());
+        // Ensure nul termination.
+        temp_name.push_back(0);
+        if ((state->backup_fd = mkstemp(temp_name.data())) >= 0) {
+          state->temp_name = temp_name.data();
+        } else {
+          return rw_result_t(rw_result_t::BACKUP_FAILED, errno);
+        }
       }
+      int error = copy_file(state->fd, state->backup_fd);
+      if (error != 0) {
+        return rw_result_t(rw_result_t::BACKUP_FAILED, error);
+      }
+      if (fsync(state->backup_fd) < 0 || close(state->backup_fd) < 0) {
+        return rw_result_t(rw_result_t::BACKUP_FAILED, errno);
+      }
+      state->backup_fd = -1;
+    }
+      // FALLTHROUGH
     case save_as_process_t::WRITING: {
-      if (strip_spaces.is_valid() ? strip_spaces.value() : option.strip_spaces) {
-        do_strip_spaces();
+      // FIXME: use posix_fallocate to attempt to pre-allocate the required size of the file. If the
+      // call fails with ENOSPC, stop writing and report an error to the user. All other error codes
+      // should be ignored and writing continue.
+
+      int conversion_flags = state->wrapper->conversion_flags();
+      state->wrapper =
+          t3widget::make_unique<file_write_wrapper_t>(state->fd, state->conversion_handle);
+      state->wrapper->add_conversion_flags(conversion_flags);
+      state->i = 0;
+      if (lseek(state->fd, 0, SEEK_SET) < 0) {
+        return rw_result_t(rw_result_t::ERRNO_ERROR);
       }
       try {
         for (; state->i < size(); state->i++) {
@@ -344,30 +363,24 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
           state->wrapper->write(data.data(), data.size());
         }
       } catch (rw_result_t error) {
+        // Don't attempt to retry imprecise conversions, as they should have been caught earlier.
+        // Also, restarting the conversion may append the current line to an already partially
+        // written line.
+        if (error == rw_result_t::CONVERSION_IMPRECISE) {
+          return rw_result_t(rw_result_t::CONVERSION_ERROR);
+        }
         return error;
       }
 
-      // If the file is being overwritten, truncate it to the written size.
-      if (state->temp_name.empty()) {
-        off_t curr_pos = lseek(state->fd, 0, SEEK_CUR);
-        if (curr_pos >= 0) {
-          ftruncate(state->fd, curr_pos);
-        }
+      // FIXME: report errors in finalizing the file back to the user!
+      // Truncate it to the written size.
+      off_t curr_pos = lseek(state->fd, 0, SEEK_CUR);
+      if (curr_pos >= 0) {
+        ftruncate(state->fd, curr_pos);
       }
       fsync(state->fd);
       close(state->fd);
       state->fd = -1;
-      if (!state->temp_name.empty()) {
-        if (option.make_backup) {
-          std::string backup_name = state->real_name;
-          backup_name += '~';
-          unlink(backup_name.c_str());
-          link(state->real_name.c_str(), backup_name.c_str());
-        }
-        if (rename(state->temp_name.c_str(), state->real_name.c_str()) < 0) {
-          return rw_result_t(rw_result_t::ERRNO_ERROR, errno);
-        }
-      }
 
       if (!state->name.empty()) {
         name = state->name;
@@ -751,8 +764,9 @@ void file_buffer_t::toggle_line_comment() {
       }
       set_cursor_pos(new_pos);
     } else {
-      // FIXME: this causes the cursor position to be recorded incorrectly in the undo information.
-      // although one could argue this is to some extent better as it shows the actual edit.
+      // FIXME: this causes the cursor position to be recorded incorrectly in the undo
+      // information. although one could argue this is to some extent better as it shows the
+      // actual edit.
       set_cursor_pos(0);
       insert_block(line_comment);
       set_cursor_pos(saved_cursor.pos + line_comment.size());

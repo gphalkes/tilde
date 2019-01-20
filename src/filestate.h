@@ -34,7 +34,7 @@ class rw_result_t {
   enum stop_reason_t {
     SUCCESS,
     FILE_EXISTS,
-    FILE_EXISTS_READONLY,
+    BACKUP_FAILED,
     ERRNO_ERROR,
     CONVERSION_OPEN_ERROR,
     CONVERSION_IMPRECISE,
@@ -102,23 +102,30 @@ class save_as_process_t : public stepped_process_t {
   friend class file_buffer_t;
 
  protected:
-  enum { SELECT_FILE, INITIAL, ALLOW_OVERWRITE, ALLOW_OVERWRITE_READONLY, WRITING };
-  int state;
+  enum {
+    SELECT_FILE,
+    INITIAL,
+    OPEN_FILE,
+    CREATE_BACKUP,
+    WRITING
+  };
+  int state = SELECT_FILE;
 
   file_buffer_t *file;
   std::string name;
   std::string encoding;
   bool allow_highlight_change;
-  bool highlight_changed;
+  bool highlight_changed = false;
 
   // State for save file_buffer_t::save function
-  const char *save_name;
+  const char *save_name = nullptr;
   std::string real_name;
   std::string temp_name;
-  int fd;
+  int fd = -1;
+  int backup_fd = -1;
   text_pos_t i;
-  file_write_wrapper_t *wrapper;
-  struct stat file_info;
+  transcript_t *conversion_handle = nullptr;
+  std::unique_ptr<file_write_wrapper_t> wrapper = nullptr;
 
   save_as_process_t(const callback_t &cb, file_buffer_t *_file,
                     bool _allow_highlight_change = true);

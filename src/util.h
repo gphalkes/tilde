@@ -93,7 +93,6 @@ class stepped_process_t {
   virtual bool step() = 0;
   void run();
   void abort();
-  void disconnect();
   void done(bool _result);
 
  public:
