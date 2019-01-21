@@ -262,7 +262,10 @@ bool save_as_process_t::step() {
         encoding = file->get_encoding();
       }
       i++;
-      printf_into(&message, "Conversion into encoding %s is irreversible", encoding.c_str());
+      printf_into(&message,
+                  "Conversion into encoding %s is irreversible\n\nThe loaded buffer will continue "
+                  "to hold the original text, but the on-disk version will differ.",
+                  encoding.c_str());
       continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
