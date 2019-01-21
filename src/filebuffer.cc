@@ -288,12 +288,17 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
           if (!state->name.empty()) {
             return rw_result_t(rw_result_t::FILE_EXISTS);
           }
-        } else if (stat(state->real_name.c_str(), &file_info) == 0 &&
-                   file_info.st_uid == geteuid() && (file_info.st_mode & S_IRUSR) &&
-                   !(file_info.st_mode & S_IWUSR)) {
-          state->state = save_as_process_t::CHANGE_MODE;
-          state->original_mode = file_info.st_mode & 07777;
-          return rw_result_t(rw_result_t::READ_ONLY_FILE);
+        } else if ((state->readonly_fd = open(state->real_name.c_str(), O_RDONLY)) >= 0) {
+          if (fstat(state->readonly_fd, &file_info) == 0 && file_info.st_uid == geteuid() &&
+              (file_info.st_mode & S_IRUSR) && !(file_info.st_mode & S_IWUSR)) {
+            state->state = save_as_process_t::CHANGE_MODE;
+            state->original_mode = file_info.st_mode & 07777;
+            return rw_result_t(rw_result_t::READ_ONLY_FILE);
+          } else {
+            close(state->readonly_fd);
+            state->readonly_fd = -1;
+            return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED, EACCES);
+          }
         } else {
           return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED, errno);
         }
@@ -304,14 +309,16 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
              executing this code in the normal path, but allow continuing execution after this block
              once the file mode is changed. */
         case save_as_process_t::CHANGE_MODE:
-          if (chmod(state->real_name.c_str(), state->original_mode.value() | S_IWUSR)) {
+          if (fchmod(state->readonly_fd, state->original_mode.value() | S_IWUSR)) {
             return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED);
           }
           if ((state->fd = open(state->real_name.c_str(), O_RDWR)) < 0) {
             int saved_errno = errno;
-            chmod(state->real_name.c_str(), state->original_mode.value());
+            fchmod(state->readonly_fd, state->original_mode.value());
             return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED, saved_errno);
           }
+          close(state->readonly_fd);
+          state->readonly_fd = -1;
       }
       // FALLTHROUGH
     case save_as_process_t::CREATE_BACKUP: {
@@ -423,7 +430,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         fchmod_errno = errno;
       }
       state->original_mode.reset();
-      ;
+
       if (close(state->fd) < 0) {
         return rw_result_t(rw_result_t::ERRNO_ERROR);
       }

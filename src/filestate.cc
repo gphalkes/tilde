@@ -214,10 +214,11 @@ bool save_as_process_t::step() {
       continue_abort_dialog->show();
       return false;
     case rw_result_t::BACKUP_FAILED:
-      printf_into(&message,
-                  "Could not create a backup file: %s. This could result in data loss if Tilde is "
-                  "unable to complete writing the file",
-                  strerror(rw_result.get_errno_error()));
+      printf_into(
+          &message,
+          "Could not create a backup file: %s.\n\nThis could result in data loss if Tilde is "
+          "unable to complete writing the file",
+          strerror(rw_result.get_errno_error()));
       continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
@@ -226,10 +227,10 @@ bool save_as_process_t::step() {
       printf_into(&message, "Could not save file: %s.", strerror(rw_result.get_errno_error()));
       if (rw_result == rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED) {
         message.append(
-            " The original file has not been touched. Save the current buffer to another location "
-            "to ensure its contents are preserved!");
+            "\n\nThe original file has not been touched. Save the current buffer to another "
+            "location to ensure its contents are preserved!");
       } else if (backup_saved) {
-        message.append(" The original contents of the file can still be retrieved from ");
+        message.append("\n\nThe original contents of the file can still be retrieved from ");
         // FIXME: the file names probably needs to be converted from some other character set.
         if (!temp_name.empty()) {
           message.append(temp_name);
@@ -241,8 +242,8 @@ bool save_as_process_t::step() {
             ".  Save the current buffer to another location to ensure its contents are preserved!");
       } else {
         message.append(
-            " The original file contents are lost. Save the current buffer to some other location "
-            "to ensure its contents are preserved!");
+            "\n\nThe original file contents are lost. Save the current buffer to some other "
+            "location to ensure its contents are preserved!");
       }
       error_dialog->set_message(message);
       error_dialog->show();
@@ -302,14 +303,17 @@ save_as_process_t::~save_as_process_t() {
   if (backup_fd >= 0) {
     close(backup_fd);
   }
+  if (original_mode.is_valid()) {
+    fchmod(fd, original_mode.value());
+  }
   if (fd >= 0) {
     close(fd);
   } else if (!temp_name.empty()) {
     // Remove the backup file (not the ~ backup, but the temporary file we may have created).
     unlink(temp_name.c_str());
   }
-  if (original_mode.is_valid()) {
-    chmod(real_name.c_str(), original_mode.value());
+  if (readonly_fd >= 0) {
+    close(readonly_fd);
   }
   if (conversion_handle) {
     transcript_close_converter(conversion_handle);

@@ -121,6 +121,7 @@ class save_as_process_t : public stepped_process_t {
   std::string temp_name;
   int fd = -1;
   int backup_fd = -1;
+  int readonly_fd = -1;
   bool backup_saved = false;
   off_t computed_length = 0;
   optional<mode_t> original_mode;
