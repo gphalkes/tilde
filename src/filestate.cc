@@ -265,6 +265,20 @@ bool save_as_process_t::step() {
       continue_abort_dialog->set_message(message);
       continue_abort_dialog->show();
       return false;
+    case rw_result_t::READ_ONLY_FILE:
+      printf_into(&message, "File %s is read-only", save_name);
+      continue_abort_dialog->set_message(message);
+      continue_abort_dialog->show();
+      return false;
+    case rw_result_t::MODE_RESET_FAILED:
+      printf_into(
+          &message,
+          "The file %s was written successfully, but changing back the mode bits on the file "
+          "failed: %s",
+          name.c_str(), strerror(rw_result.get_errno_error()));
+      error_dialog->set_message(message);
+      error_dialog->show();
+      break;
     default:
       PANIC();
   }
@@ -293,6 +307,9 @@ save_as_process_t::~save_as_process_t() {
   } else if (!temp_name.empty()) {
     // Remove the backup file (not the ~ backup, but the temporary file we may have created).
     unlink(temp_name.c_str());
+  }
+  if (original_mode.is_valid()) {
+    chmod(real_name.c_str(), original_mode.value());
   }
   if (conversion_handle) {
     transcript_close_converter(conversion_handle);

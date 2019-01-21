@@ -35,6 +35,7 @@ class rw_result_t {
   enum stop_reason_t {
     SUCCESS,
     FILE_EXISTS,
+    READ_ONLY_FILE,
     BACKUP_FAILED,
     ERRNO_ERROR,
     ERRNO_ERROR_FILE_UNTOUCHED,
@@ -44,6 +45,7 @@ class rw_result_t {
     CONVERSION_ILLEGAL,
     CONVERSION_TRUNCATED,
     BOM_FOUND,
+    MODE_RESET_FAILED,
   };
 
  private:
@@ -104,13 +106,7 @@ class save_as_process_t : public stepped_process_t {
   friend class file_buffer_t;
 
  protected:
-  enum {
-    SELECT_FILE,
-    INITIAL,
-    OPEN_FILE,
-    CREATE_BACKUP,
-    WRITING
-  };
+  enum { SELECT_FILE, INITIAL, OPEN_FILE, CHANGE_MODE, CREATE_BACKUP, WRITING };
   int state = SELECT_FILE;
 
   file_buffer_t *file;
@@ -127,6 +123,7 @@ class save_as_process_t : public stepped_process_t {
   int backup_fd = -1;
   bool backup_saved = false;
   off_t computed_length = 0;
+  optional<mode_t> original_mode;
   text_pos_t i;
   transcript_t *conversion_handle = nullptr;
   std::unique_ptr<file_write_wrapper_t> wrapper = nullptr;

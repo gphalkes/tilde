@@ -282,16 +282,37 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       /* This attempts to avoid race conditions, by trying to open with O_CREAT|O_EXCL. This is
          known to have issues on NFSv3, but it's the best we can do. */
       if ((state->fd = open(state->real_name.c_str(), O_CREAT | O_EXCL | O_RDWR, 0666)) < 0) {
+        struct stat file_info;
         if ((state->fd = open(state->real_name.c_str(), O_RDWR)) >= 0) {
           state->state = save_as_process_t::CREATE_BACKUP;
           if (!state->name.empty()) {
             return rw_result_t(rw_result_t::FILE_EXISTS);
           }
+        } else if (stat(state->real_name.c_str(), &file_info) == 0 &&
+                   file_info.st_uid == geteuid() && (file_info.st_mode & S_IRUSR) &&
+                   !(file_info.st_mode & S_IWUSR)) {
+          state->state = save_as_process_t::CHANGE_MODE;
+          state->original_mode = file_info.st_mode & 07777;
+          return rw_result_t(rw_result_t::READ_ONLY_FILE);
         } else {
           return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED, errno);
         }
       }
     }
+      if (0) {
+          /* The code here is only reachable through the case label. This is an ugly hack to prevent
+             executing this code in the normal path, but allow continuing execution after this block
+             once the file mode is changed. */
+        case save_as_process_t::CHANGE_MODE:
+          if (chmod(state->real_name.c_str(), state->original_mode.value() | S_IWUSR)) {
+            return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED);
+          }
+          if ((state->fd = open(state->real_name.c_str(), O_RDWR)) < 0) {
+            int saved_errno = errno;
+            chmod(state->real_name.c_str(), state->original_mode.value());
+            return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED, saved_errno);
+          }
+      }
       // FALLTHROUGH
     case save_as_process_t::CREATE_BACKUP: {
       // If the creation of the backup file fails, the user either aborts or allows continuation
@@ -344,10 +365,10 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
     }
       // FALLTHROUGH
     case save_as_process_t::WRITING: {
+#ifdef HAS_POSIX_FALLOCATE
       // Use posix_fallocate to attempt to pre-allocate the required size of the file. If the call
       // fails with ENOSPC or EFBIG, stop writing and report an error to the user. All other error
       // codes are ignored.
-#ifdef HAS_POSIX_FALLOCATE
       if (posix_fallocate(state->fd, 0, state->computed_length) < 0 &&
           (errno == ENOSPC || errno == EFBIG)) {
         // We want the backup to be removed (if it exists), and we didn't change anything, so we
@@ -394,6 +415,15 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       if (fsync(state->fd) < 0) {
         return rw_result_t(rw_result_t::ERRNO_ERROR);
       }
+      /* Perform fchmod instead of chmod on the file name, to ensure that we actually change the
+         mode on the file we are interested in. However, we only want to report a problem after
+         cleaning up the rest, as it is more of an advisory nature. */
+      int fchmod_errno = 0;
+      if (state->original_mode.is_valid() && fchmod(state->fd, state->original_mode.value()) < 0) {
+        fchmod_errno = errno;
+      }
+      state->original_mode.reset();
+      ;
       if (close(state->fd) < 0) {
         return rw_result_t(rw_result_t::ERRNO_ERROR);
       }
@@ -405,6 +435,9 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         name_line.set_text(converted_name);
       }
       set_undo_mark();
+      if (fchmod_errno != 0) {
+        return rw_result_t(rw_result_t::MODE_RESET_FAILED, fchmod_errno);
+      }
       break;
     }
     default:
