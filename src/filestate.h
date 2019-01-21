@@ -46,6 +46,7 @@ class rw_result_t {
     CONVERSION_TRUNCATED,
     BOM_FOUND,
     MODE_RESET_FAILED,
+    INTERNAL_ERROR,
   };
 
  private:

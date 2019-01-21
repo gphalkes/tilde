@@ -281,7 +281,12 @@ bool save_as_process_t::step() {
       error_dialog->show();
       break;
     default:
-      PANIC();
+      printf_into(&message,
+                  "An unknown error occurred during saving. The file has not been saved and may be "
+                  "damaged!");
+      error_dialog->set_message(message);
+      error_dialog->show();
+      break;
   }
   return true;
 }

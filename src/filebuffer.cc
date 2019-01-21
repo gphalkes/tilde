@@ -264,7 +264,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       if (state->name.empty()) {
         if (name.empty()) {
           // FIXME: this should return some result instead of crashing!
-          PANIC();
+          return rw_result_t(rw_result_t::INTERNAL_ERROR);
         }
         state->save_name = name.c_str();
       } else {
@@ -448,7 +448,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
       break;
     }
     default:
-      PANIC();
+      return rw_result_t(rw_result_t::INTERNAL_ERROR);
   }
   return rw_result_t(rw_result_t::SUCCESS);
 }
