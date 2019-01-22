@@ -47,6 +47,7 @@ class rw_result_t {
     BOM_FOUND,
     MODE_RESET_FAILED,
     INTERNAL_ERROR,
+    RACE_ON_FILE,
   };
 
  private:
@@ -123,6 +124,8 @@ class save_as_process_t : public stepped_process_t {
   int fd = -1;
   int backup_fd = -1;
   int readonly_fd = -1;
+  dev_t readonly_dev;
+  ino_t readonly_ino;
   bool backup_saved = false;
   off_t computed_length = 0;
   optional<mode_t> original_mode;

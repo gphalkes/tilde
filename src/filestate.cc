@@ -283,6 +283,12 @@ bool save_as_process_t::step() {
       error_dialog->set_message(message);
       error_dialog->show();
       break;
+    case rw_result_t::RACE_ON_FILE:
+      printf_into(&message,
+                  "Opening file '%s' after changing the mode opened a different file. The file was "
+                  "not written.",
+                  name.c_str());
+      break;
     default:
       printf_into(&message,
                   "An unknown error occurred during saving. The file has not been saved and may be "
@@ -311,17 +317,21 @@ save_as_process_t::~save_as_process_t() {
   if (backup_fd >= 0) {
     close(backup_fd);
   }
-  if (original_mode.is_valid()) {
-    fchmod(fd, original_mode.value());
+  if (readonly_fd >= 0) {
+    if (original_mode.is_valid()) {
+      fchmod(fd, original_mode.value());
+      original_mode.reset();
+    }
+    close(readonly_fd);
   }
   if (fd >= 0) {
+    if (original_mode.is_valid()) {
+      fchmod(fd, original_mode.value());
+    }
     close(fd);
   } else if (!temp_name.empty()) {
     // Remove the backup file (not the ~ backup, but the temporary file we may have created).
     unlink(temp_name.c_str());
-  }
-  if (readonly_fd >= 0) {
-    close(readonly_fd);
   }
   if (conversion_handle) {
     transcript_close_converter(conversion_handle);

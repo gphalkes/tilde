@@ -293,6 +293,8 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
               (file_info.st_mode & S_IRUSR) && !(file_info.st_mode & S_IWUSR)) {
             state->state = save_as_process_t::CHANGE_MODE;
             state->original_mode = file_info.st_mode & 07777;
+            state->readonly_dev = file_info.st_dev;
+            state->readonly_ino = file_info.st_ino;
             return rw_result_t(rw_result_t::READ_ONLY_FILE);
           } else {
             close(state->readonly_fd);
@@ -316,6 +318,11 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
             int saved_errno = errno;
             fchmod(state->readonly_fd, state->original_mode.value());
             return rw_result_t(rw_result_t::ERRNO_ERROR_FILE_UNTOUCHED, saved_errno);
+          }
+          struct stat file_info;
+          if (fstat(state->fd, &file_info) == 0 && (file_info.st_dev != state->readonly_dev ||
+                                                    file_info.st_ino != state->readonly_ino)) {
+            return rw_result_t(rw_result_t::RACE_ON_FILE);
           }
           close(state->readonly_fd);
           state->readonly_fd = -1;
