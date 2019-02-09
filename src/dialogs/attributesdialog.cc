@@ -96,7 +96,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Inte
   ADD_ATTRIBUTE_ENTRY("Number", NUMBER, number_line);
   ADD_ATTRIBUTE_ENTRY("String", STRING, string_line);
   ADD_ATTRIBUTE_ENTRY("String escape", STRING_ESCAPE, string_escape_line);
-  ADD_ATTRIBUTE_ENTRY("Miscelaneous", MISC, misc_line);
+  ADD_ATTRIBUTE_ENTRY("Miscellaneous", MISC, misc_line);
   ADD_ATTRIBUTE_ENTRY("Variable", VARIABLE, variable_line);
   ADD_ATTRIBUTE_ENTRY("Error", ERROR, error_line);
   ADD_ATTRIBUTE_ENTRY("Addition", ADDITION, addition_line);
