@@ -348,7 +348,7 @@ rw_result_t file_buffer_t::save(save_as_process_t *state) {
         }
 
         temp_name_str.erase(idx);
-        temp_name_str.append(".tildeXXXXXX");
+        temp_name_str.append("tilde-backup-XXXXXX");
 
         /* Unfortunately, we can't pass the c_str result to mkstemp as we are not allowed to change
            that string. So we'll just have to copy it into a vector :-( */
