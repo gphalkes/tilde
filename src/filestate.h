@@ -98,6 +98,8 @@ class load_process_t : public stepped_process_t {
   void remove_bom();
 
  public:
+  void set_up_connections();
+
   virtual file_buffer_t *get_file_buffer();
   static void execute(const callback_t &cb);
   static void execute(const callback_t &cb, const char *name, const char *encoding = nullptr,

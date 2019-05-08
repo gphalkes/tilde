@@ -1,3 +1,8 @@
+Version 1.0.1:
+	Bug fixes:
+	- Writing of files has been completely re-written to ensure correct
+	  preservation of permissions and ownerships of the file.
+
 Version 1.0.0:
 	This release is the first based on libt3widget 1.0.0. It does not provide
 	new features.

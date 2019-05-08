@@ -27,7 +27,9 @@ load_process_t::load_process_t(const callback_t &cb)
       wrapper(nullptr),
       encoding("UTF-8"),
       fd(-1),
-      buffer_used(true) {}
+      buffer_used(true) {
+  set_up_connections();
+}
 
 load_process_t::load_process_t(const callback_t &cb, const char *name, const char *_encoding,
                                bool missing_ok)
@@ -39,6 +41,10 @@ load_process_t::load_process_t(const callback_t &cb, const char *name, const cha
       encoding(_encoding == nullptr ? "UTF-8" : _encoding),
       fd(-1),
       buffer_used(true) {
+  set_up_connections();
+}
+
+void load_process_t::set_up_connections() {
   connections.push_back(continue_abort_dialog->connect_activate([this] { run(); }, 0));
   connections.push_back(continue_abort_dialog->connect_activate([this] { abort(); }, 1));
   connections.push_back(continue_abort_dialog->connect_closed([this] { abort(); }));
