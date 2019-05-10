@@ -98,11 +98,24 @@ void highlight_dialog_t::ok_activated() {
     return;
   }
 
-  if ((highlight = t3_highlight_load(names.get()[idx - 1].lang_file, map_highlight, nullptr,
-                                     T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, &error)) ==
-      nullptr) {
+  if ((highlight =
+           t3_highlight_load(names.get()[idx - 1].lang_file, map_highlight, nullptr,
+                             T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH | T3_HIGHLIGHT_VERBOSE_ERROR,
+                             &error)) == nullptr) {
     std::string message(_("Error loading highlighting patterns: "));
+    if (error.file_name) {
+      std::string file_location;
+      std::string file_name = convert_lang_codeset(error.file_name, true);
+      printf_into(&file_location, "%s:%d: ", file_name, error.line_number);
+      message += file_location;
+      free(error.file_name);
+    }
     message += t3_highlight_strerror(error.error);
+    if (error.extra) {
+      message += ": ";
+      message += error.extra;
+      free(error.extra);
+    }
     error_dialog->set_message(message);
     error_dialog->center_over(this);
     error_dialog->show();
