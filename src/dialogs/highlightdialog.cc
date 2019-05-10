@@ -106,7 +106,7 @@ void highlight_dialog_t::ok_activated() {
     if (error.file_name) {
       std::string file_location;
       std::string file_name = convert_lang_codeset(error.file_name, true);
-      printf_into(&file_location, "%s:%d: ", file_name, error.line_number);
+      printf_into(&file_location, "%s:%d: ", file_name.c_str(), error.line_number);
       message += file_location;
       free(error.file_name);
     }
