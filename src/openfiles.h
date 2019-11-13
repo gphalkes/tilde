@@ -15,9 +15,12 @@
 #define OPENFILES_H
 
 #include <deque>
+#include <t3widget/util.h>
 #include <vector>
 
 #include "tilde/util.h"
+
+using namespace t3widget;
 
 class file_buffer_t;
 
@@ -54,12 +57,14 @@ class recent_file_info_t {
  private:
   std::string name;
   std::string encoding;
+  text_coordinate_t position;
 
  public:
   explicit recent_file_info_t(file_buffer_t *file);
 
   const std::string &get_name() const;
   const std::string &get_encoding() const;
+  const text_coordinate_t get_position() const;
 };
 
 class recent_files_t {

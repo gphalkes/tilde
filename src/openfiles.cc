@@ -114,11 +114,13 @@ void open_files_t::cleanup() {
 }
 
 recent_file_info_t::recent_file_info_t(file_buffer_t *file)
-    : name(file->get_name()), encoding(file->get_encoding()) {}
+    : name(file->get_name()), encoding(file->get_encoding()), position(file->get_cursor()) {}
 
 const std::string &recent_file_info_t::get_name() const { return name; }
 
 const std::string &recent_file_info_t::get_encoding() const { return encoding; }
+
+const text_coordinate_t recent_file_info_t::get_position() const { return position; }
 
 void recent_files_t::push_front(file_buffer_t *text) {
   if (text->get_name().empty()) {

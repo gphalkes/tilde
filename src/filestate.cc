@@ -477,7 +477,11 @@ bool open_recent_process_t::step() {
     open_recent_dialog->show();
     return false;
   }
-  return load_process_t::step();
+  bool result = load_process_t::step();
+  if (result) {
+    file->set_cursor(info->get_position());
+  }
+  return result;
 }
 
 void open_recent_process_t::recent_file_selected(recent_file_info_t *_info) {
