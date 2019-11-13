@@ -88,10 +88,6 @@ static const char config_schema[] = {
 #include "config.bytes"
 };
 
-static const char base_config_schema[] = {
-#include "base_config.bytes"
-};
-
 static t3_bool find_term_config(const t3_config_t *config, const void *data) {
   if (t3_config_get_type(config) != T3_CONFIG_SECTION) {
     return t3_false;
@@ -120,7 +116,7 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
     return 0;
   }
 
-  color = strtol(attr + 3, &endptr, 0);
+  color = static_cast<int>(std::strtol(attr + 3, &endptr, 0));
   if (*endptr != 0) {
     return 0;
   }
@@ -208,70 +204,12 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
   }
 }
 
-static void read_base_config() {
-  std::unique_ptr<FILE, fclose_deleter> config_file;
-  t3_config_error_t error;
-  std::unique_ptr<t3_config_t, t3_config_deleter> config;
-  std::unique_ptr<t3_config_schema_t, t3_schema_deleter> schema;
-
-  config_file.reset(fopen(DATADIR "/base.config", "r"));
-  if (config_file == nullptr) {
-    lprintf("Failed to open file: %s %m\n", DATADIR "/base.config");
-    return;
-  }
-
-  config.reset(t3_config_read_file(config_file.get(), &error, nullptr));
-  if (config == nullptr) {
-    lprintf("Error loading base config: %d: %s\n", error.line_number,
-            t3_config_strerror(error.error));
-    return;
-  }
-
-  schema.reset(t3_config_read_schema_buffer(base_config_schema, sizeof(base_config_schema), &error,
-                                            nullptr));
-  if (schema == nullptr) {
-    lprintf("Error loading schema: %d: %s\n", error.line_number, t3_config_strerror(error.error));
-    return;
-  }
-
-  if (!t3_config_validate(config.get(), schema.get(), &error, 0)) {
-    lprintf("Error validating base config: %d: %s\n", error.line_number,
-            t3_config_strerror(error.error));
-    return;
-  }
-
-  for (t3_config_t *lang = t3_config_get(t3_config_get(config.get(), "lang"), nullptr);
-       lang != nullptr; lang = t3_config_get_next(lang)) {
-    const char *name = t3_config_get_string(t3_config_get(lang, "name"));
-    const char *line_comment = t3_config_get_string(t3_config_get(lang, "line_comment"));
-    if (name != nullptr && line_comment != nullptr) {
-      option.line_comment_map[std::string(name)] = line_comment;
-    }
-  }
-}
-
-static void read_config() {
-  std::unique_ptr<FILE, fclose_deleter> config_file;
+static void read_config(std::unique_ptr<FILE, fclose_deleter> config_file) {
   t3_config_error_t error;
   std::unique_ptr<t3_config_t, t3_config_deleter> config;
   std::unique_ptr<t3_config_schema_t, t3_schema_deleter> schema;
   t3_config_t *term_specific_config;
   const char *term;
-
-  if (cli_option.config_file.is_valid()) {
-    config_file.reset(fopen(cli_option.config_file.value().c_str(), "r"));
-  } else {
-    config_file.reset(t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config"));
-  }
-
-  if (config_file == nullptr) {
-    if (errno != ENOENT) {
-      config_read_error = true;
-      config_read_error_string = strerror(errno);
-      config_read_error_line = 0;
-    }
-    return;
-  }
 
   config.reset(t3_config_read_file(config_file.get(), &error, nullptr));
   if (config == nullptr) {
@@ -339,6 +277,38 @@ static void read_config() {
            t3_config_find(term_specific_config, find_term_config, term, nullptr)) != nullptr) {
     read_term_config_part(term_specific_config, &term_specific_option);
   }
+}
+
+static void read_base_config_file() {
+  std::unique_ptr<FILE, fclose_deleter> config_file;
+
+  config_file.reset(fopen(DATADIR "/base.config", "r"));
+  if (config_file == nullptr) {
+    lprintf("Failed to open file: %s %m\n", DATADIR "/base.config");
+    return;
+  }
+
+  read_config(std::move(config_file));
+}
+
+static void read_user_config_file() {
+  std::unique_ptr<FILE, fclose_deleter> config_file;
+
+  if (cli_option.config_file.is_valid()) {
+    config_file.reset(fopen(cli_option.config_file.value().c_str(), "r"));
+  } else {
+    config_file.reset(t3_config_xdg_open_read(T3_CONFIG_XDG_CONFIG_HOME, "tilde", "config"));
+  }
+
+  if (config_file == nullptr) {
+    if (errno != ENOENT) {
+      config_read_error = true;
+      config_read_error_string = strerror(errno);
+      config_read_error_line = 0;
+    }
+    return;
+  }
+  read_config(std::move(config_file));
 }
 
 #define SET_OPT_FROM_FILE(name, deflt)                                \
@@ -507,8 +477,8 @@ PARSE_FUNCTION(parse_args)
     cli_option.files.push_back(optcurrent);
   END_OPTIONS
 
-  read_base_config();
-  read_config();
+  read_base_config_file();
+  read_user_config_file();
 
   post_process_options();
 END_FUNCTION

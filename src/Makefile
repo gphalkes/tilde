@@ -74,7 +74,7 @@ xgettext: all
 	$(GENOBJDIR)
 	$(_VERBOSE_GEN) ../../t3config/src/data2bytes -s -- $< > $@
 
-.objects/option.o: .objects/config.bytes .objects/base_config.bytes
+.objects/option.o: .objects/config.bytes
 
 clang-format:
 	clang-format -i *.cc *.h */*.cc */*.h

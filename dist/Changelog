@@ -1,3 +1,9 @@
+Version 1.0.2:
+	New features:
+	- The base config, loaded before the user config from
+	  /usr/share/tilde/base.config, now accepts the same configuration as the user
+	  config.
+
 Version 1.0.1:
 	Bug fixes:
 	- Writing of files has been completely re-written to ensure correct

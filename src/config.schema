@@ -59,6 +59,15 @@ types {
 		item-type = "any"
 		%constraint = "name"
 	}
+	lang_desc {
+		type = "section"
+		allowed-keys {
+			name { type = "string" }
+			line_comment { type = "string" }
+		}
+		item-type = "any"
+		%constraint = "name"
+	}
 }
 
 allowed-keys {
@@ -85,6 +94,11 @@ allowed-keys {
 	highlight_attributes { type = "highlight_attributes" }
 	parse_file_positions { type = "bool" }
 	disable_primary_selection_over_ssh { type = "bool" }
+
+	lang {
+		type = "list"
+		item-type = "lang_desc"
+	}
 }
 item-type = "any"
 
