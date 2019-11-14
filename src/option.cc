@@ -33,18 +33,6 @@ using namespace t3widget;
 #define INT_TYPE long
 #endif
 
-struct fclose_deleter {
-  void operator()(FILE *file) { fclose(file); }
-};
-
-struct t3_config_deleter {
-  void operator()(t3_config_t *config) { t3_config_delete(config); }
-};
-
-struct t3_schema_deleter {
-  void operator()(t3_config_schema_t *schema) { t3_config_delete_schema(schema); }
-};
-
 cli_options_t cli_option;
 runtime_options_t option; /* Merged version of all possible sources. */
 
@@ -249,6 +237,8 @@ static void read_config(std::unique_ptr<FILE, fclose_deleter> config_file) {
   GET_OPT(hide_menubar, BOOL, bool);
   GET_OPT(parse_file_positions, BOOL, bool);
   GET_OPT(disable_primary_selection_over_ssh, BOOL, bool);
+  GET_OPT(save_recent_files, BOOL, bool);
+  GET_OPT(restore_cursor_position, BOOL, bool);
 
   GET_OPT(tabsize, INT, int);
   GET_OPT(max_recent_files, INT, int);
@@ -341,6 +331,8 @@ static void post_process_options() {
   SET_OPT_FROM_DFLT(indent_aware_home, true);
   SET_OPT_FROM_DFLT(show_tabs, false);
   SET_OPT_FROM_DFLT(make_backup, false);
+  SET_OPT_FROM_DFLT(save_recent_files, true);
+  SET_OPT_FROM_DFLT(restore_cursor_position, true);
 
   SET_OPT_FROM_DFLT(max_recent_files, 16);
   SET_OPT_FROM_DFLT(strip_spaces, false);
@@ -671,6 +663,8 @@ bool write_config() {
   SET_OPTION(hide_menubar, bool);
   SET_OPTION(parse_file_positions, bool);
   SET_OPTION(disable_primary_selection_over_ssh, bool);
+  SET_OPTION(save_recent_files, bool);
+  SET_OPTION(restore_cursor_position, bool);
 
   SET_OPTION(tabsize, int);
   SET_OPTION(max_recent_files, int);

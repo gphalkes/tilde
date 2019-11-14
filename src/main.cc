@@ -872,9 +872,16 @@ int main(int argc, char *argv[]) {
     input_selection_dialog = input_message;
   }
 
+  if (option.save_recent_files) {
+    recent_files.load_from_disk();
+  }
+
   load_cli_file_process_t::execute(bind_front(&main_t::load_cli_files_done, main_window));
   setup_signal_handlers();
   int retval = main_loop();
+  if (option.save_recent_files) {
+    recent_files.write_to_disk();
+  }
 #ifdef TILDE_DEBUG
   delete continue_abort_dialog;
   delete open_file_dialog;

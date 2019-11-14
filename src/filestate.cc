@@ -128,6 +128,14 @@ bool load_process_t::step() {
     default:
       PANIC();
   }
+  auto recent_files_iter = recent_files.find(open_files.back()->get_name());
+  if (recent_files_iter != recent_files.end()) {
+    if (option.restore_cursor_position) {
+      text_coordinate_t position = (*recent_files_iter)->get_position();
+      open_files.back()->goto_pos(position.line + 1, position.pos + 1);
+    }
+    recent_files.erase(recent_files_iter);
+  }
   return true;
 }
 
@@ -439,11 +447,11 @@ bool exit_process_t::step() {
       close_confirm_dialog->show();
       return false;
     }
+    recent_files.push_front(*iter);
   }
   delete this;
   exit_main_loop(EXIT_SUCCESS);
-  /*	in_step = false;
-          return true;*/
+  /* exit_main_loop never returns, so this point is never reached. */
 }
 
 void exit_process_t::do_save() {
@@ -451,13 +459,15 @@ void exit_process_t::do_save() {
 }
 
 void exit_process_t::dont_save() {
-  iter++;
+  recent_files.push_front(*iter);
+  ++iter;
   run();
 }
 
 void exit_process_t::save_done(stepped_process_t *process) {
   if (process->get_result()) {
-    iter++;
+    recent_files.push_front(*iter);
+    ++iter;
     run();
   } else {
     abort();
@@ -477,11 +487,7 @@ bool open_recent_process_t::step() {
     open_recent_dialog->show();
     return false;
   }
-  bool result = load_process_t::step();
-  if (result) {
-    file->set_cursor(info->get_position());
-  }
-  return result;
+  return load_process_t::step();
 }
 
 void open_recent_process_t::recent_file_selected(recent_file_info_t *_info) {
@@ -551,7 +557,7 @@ void load_cli_file_process_t::load_done(stepped_process_t *process) {
   (void)process;
 
   in_load = false;
-  iter++;
+  ++iter;
   if (!in_step) {
     run();
   }

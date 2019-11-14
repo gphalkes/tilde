@@ -45,6 +45,7 @@ LDLIBS += -lt3widget -lt3window -ltranscript -lt3config -lt3highlight
 LDFLAGS += $(T3LDFLAGS.t3widget) $(T3LDFLAGS.t3window) $(T3LDFLAGS.transcript) $(T3LDFLAGS.t3config) $(T3LDFLAGS.t3highlight)
 LDLIBS += -lunistring
 CXXFLAGS.option = -I.objects
+CXXFLAGS.openfiles = -I.objects
 
 CXXFLAGS += -DTILDE_DEBUG
 CXXFLAGS += -DHAS_STRDUP
@@ -75,6 +76,8 @@ xgettext: all
 	$(_VERBOSE_GEN) ../../t3config/src/data2bytes -s -- $< > $@
 
 .objects/option.o: .objects/config.bytes
+
+.objects/openfiles.o: .objects/recent_files.bytes
 
 clang-format:
 	clang-format -i *.cc *.h */*.cc */*.h

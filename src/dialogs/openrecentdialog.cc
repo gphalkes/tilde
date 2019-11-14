@@ -15,6 +15,7 @@
 
 #include "tilde/dialogs/openrecentdialog.h"
 #include "tilde/openfiles.h"
+#include "tilde/option.h"
 
 open_recent_dialog_t::open_recent_dialog_t(int height, int width)
     : dialog_t(height, width, _("Open Recent")), known_version(INT_MIN) {
@@ -49,10 +50,15 @@ void open_recent_dialog_t::show() {
       list->pop_back();
     }
 
-    for (recent_file_info_t *recent_file : recent_files) {
+    size_t count = 0;
+    for (const std::unique_ptr<recent_file_info_t> &recent_file : recent_files) {
       std::unique_ptr<label_t> label(new label_t(recent_file->get_name().c_str()));
       label->set_align(label_t::ALIGN_LEFT_UNDERFLOW);
       list->push_back(std::move(label));
+      ++count;
+      if (count >= option.max_recent_files) {
+        break;
+      }
     }
   }
   list->reset();

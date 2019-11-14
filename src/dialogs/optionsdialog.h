@@ -43,7 +43,7 @@ class buffer_options_dialog_t : public dialog_t {
 class misc_options_dialog_t : public dialog_t {
  protected:
   checkbox_t *hide_menu_box, *save_backup_box, *parse_file_positions_box,
-      *disable_selection_over_ssh_box;
+      *disable_selection_over_ssh_box, *save_recent_files_box, *restore_cursor_position_box;
 
  public:
   explicit misc_options_dialog_t(optional<std::string> _title);

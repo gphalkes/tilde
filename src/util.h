@@ -16,9 +16,11 @@
 
 #include <climits>
 #include <cstdlib>
+#include <cstdio>
 #include <list>
 #include <string>
 #include <t3widget/signals.h>
+#include <t3config/config.h>
 
 #ifdef __GNUC__
 void fatal(const char *fmt, ...) __attribute__((format(printf, 1, 2))) __attribute__((noreturn));
@@ -122,5 +124,17 @@ const char *reverse_map_highlight(int idx);
   connection_t connect_##_name(std::function<void(__VA_ARGS__)> _slot) { \
     return _name.connect(_slot);                                         \
   }
+
+struct fclose_deleter {
+  void operator()(FILE *file) { fclose(file); }
+};
+
+struct t3_config_deleter {
+  void operator()(t3_config_t *config) { t3_config_delete(config); }
+};
+
+struct t3_schema_deleter {
+  void operator()(t3_config_schema_t *schema) { t3_config_delete_schema(schema); }
+};
 
 #endif

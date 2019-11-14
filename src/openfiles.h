@@ -58,18 +58,23 @@ class recent_file_info_t {
   std::string name;
   std::string encoding;
   text_coordinate_t position;
+  int64_t close_time;
 
  public:
   explicit recent_file_info_t(file_buffer_t *file);
+  recent_file_info_t(string_view name, string_view encoding, text_coordinate_t position,
+                     int64_t close_time);
 
   const std::string &get_name() const;
   const std::string &get_encoding() const;
   const text_coordinate_t get_position() const;
+  int64_t get_close_time() const;
 };
 
 class recent_files_t {
  private:
-  std::deque<recent_file_info_t *> names;
+  using recent_file_info_container_t = std::deque<std::unique_ptr<recent_file_info_t>>;
+  recent_file_info_container_t recent_file_infos;
   version_t version;
 
  public:
@@ -78,10 +83,14 @@ class recent_files_t {
   void erase(recent_file_info_t *info);
 
   int get_version();
-  using iterator = std::deque<recent_file_info_t *>::iterator;
+  using iterator = recent_file_info_container_t::iterator;
   iterator begin();
   iterator end();
+  iterator erase(iterator iter);
+  iterator find(const std::string &name);
 
+  void load_from_disk();
+  void write_to_disk();
   void cleanup();
 };
 

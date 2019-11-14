@@ -1,8 +1,14 @@
 Version 1.0.2:
 	New features:
-	- The base config, loaded before the user config from
+	- The base config, loaded before the user config from (by default)
 	  /usr/share/tilde/base.config, now accepts the same configuration as the user
 	  config.
+	- The list of recent files is stored, such that closing and restarting Tilde
+	  retains the list of recent files. This is limited to the last 100 files, to
+    keep the storage space and processing required small.
+	- When opening files that were opened before, the cursor is set back to its
+	  last used position. This is limited to the last 100 files, to keep the
+	  storage space and processing required small.
 
 Version 1.0.1:
 	Bug fixes:

@@ -88,6 +88,8 @@ struct options_t {
   optional<bool> hide_menubar;
   optional<bool> parse_file_positions;
   optional<bool> disable_primary_selection_over_ssh;
+  optional<bool> save_recent_files;
+  optional<bool> restore_cursor_position;
 
   optional<int> tabsize;
   optional<size_t> max_recent_files;
@@ -114,6 +116,8 @@ struct runtime_options_t {
   bool show_tabs;
   bool strip_spaces;
   bool make_backup;
+  bool save_recent_files;
+  bool restore_cursor_position;
   size_t max_recent_files;
   optional<int> key_timeout;
   t3_attr_t highlights[MAX_HIGHLIGHTS];

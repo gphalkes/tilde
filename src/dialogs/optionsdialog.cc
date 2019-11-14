@@ -196,7 +196,7 @@ void buffer_options_dialog_t::handle_activate() {
 //===============================================================
 
 misc_options_dialog_t::misc_options_dialog_t(optional<std::string> _title)
-    : dialog_t(7, 26, std::move(_title)) {
+    : dialog_t(9, 26, std::move(_title)) {
   smart_label_t *label;
   int width = 0;
 
@@ -250,6 +250,32 @@ misc_options_dialog_t::misc_options_dialog_t(optional<std::string> _title)
 
   width = std::max<int>(label->get_width() + 2 + 3, width);
 
+  label = emplace_back<smart_label_t>(_("Save recent _files list"));
+  label->set_position(5, 2);
+  save_recent_files_box = emplace_back<checkbox_t>();
+  save_recent_files_box->set_label(label);
+  save_recent_files_box->set_anchor(this,
+                                    T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+  save_recent_files_box->set_position(5, -2);
+  save_recent_files_box->connect_move_focus_up([this] { focus_previous(); });
+  save_recent_files_box->connect_move_focus_down([this] { focus_next(); });
+  save_recent_files_box->connect_activate([this] { handle_activate(); });
+
+  width = std::max<int>(label->get_width() + 2 + 3, width);
+
+  label = emplace_back<smart_label_t>(_("_Restore cursor position on open"));
+  label->set_position(6, 2);
+  restore_cursor_position_box = emplace_back<checkbox_t>();
+  restore_cursor_position_box->set_label(label);
+  restore_cursor_position_box->set_anchor(
+      this, T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+  restore_cursor_position_box->set_position(6, -2);
+  restore_cursor_position_box->connect_move_focus_up([this] { focus_previous(); });
+  restore_cursor_position_box->connect_move_focus_down([this] { focus_next(); });
+  restore_cursor_position_box->connect_activate([this] { handle_activate(); });
+
+  width = std::max<int>(label->get_width() + 2 + 3, width);
+
   button_t *ok_button = emplace_back<button_t>("_Ok", true);
   button_t *cancel_button = emplace_back<button_t>("_Cancel");
 
@@ -278,17 +304,24 @@ void misc_options_dialog_t::set_values_from_options() {
   parse_file_positions_box->set_state(default_option.parse_file_positions.value_or(true));
   disable_selection_over_ssh_box->set_state(
       default_option.disable_primary_selection_over_ssh.value_or(false));
+  save_recent_files_box->set_state(default_option.save_recent_files.value_or(true));
+  restore_cursor_position_box->set_state(default_option.restore_cursor_position.value_or(true));
 }
 
 void misc_options_dialog_t::set_options_from_values() {
   default_option.hide_menubar = option.hide_menubar = hide_menu_box->get_state();
   default_option.make_backup = option.make_backup = save_backup_box->get_state();
+  /* parse_file_positions and disable_primary_selection_over_ssh only affect start-up, so there is
+   * no value in the option struct. */
   default_option.parse_file_positions = parse_file_positions_box->get_state();
   default_option.disable_primary_selection_over_ssh = disable_selection_over_ssh_box->get_state();
   if (!cli_option.disable_primary_selection && getenv("SSH_TTY") != nullptr) {
     t3widget::set_primary_selection_mode(
         !default_option.disable_primary_selection_over_ssh.value_or(false));
   }
+  default_option.save_recent_files = option.save_recent_files = save_recent_files_box->get_state();
+  default_option.restore_cursor_position = option.restore_cursor_position =
+      restore_cursor_position_box->get_state();
 }
 
 void misc_options_dialog_t::handle_activate() {
