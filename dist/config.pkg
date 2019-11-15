@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 EOF
-	pkgconfig libt3config/0.2.6 LIBT3CONFIG test_link_cxx || \
+	pkgconfig libt3config/1.0.0 LIBT3CONFIG test_link_cxx || \
 		error "!! Can not find libt3config. libt3config is required to compile tilde."
 
 	clean_cxx
