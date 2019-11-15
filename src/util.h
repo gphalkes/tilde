@@ -15,12 +15,12 @@
 #define UTIL_H
 
 #include <climits>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <list>
 #include <string>
-#include <t3widget/signals.h>
 #include <t3config/config.h>
+#include <t3widget/signals.h>
 
 #ifdef __GNUC__
 void fatal(const char *fmt, ...) __attribute__((format(printf, 1, 2))) __attribute__((noreturn));
@@ -95,7 +95,8 @@ class stepped_process_t {
   virtual bool step() = 0;
   void run();
   void abort();
-  void done(bool _result);
+  void done();
+  virtual void cleanup() {}
 
  public:
   bool get_result();

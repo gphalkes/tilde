@@ -15,6 +15,7 @@
 
 #include "tilde/filebuffer.h"
 #include "tilde/filestate.h"
+#include "tilde/log.h"
 #include "tilde/main.h"
 #include "tilde/openfiles.h"
 #include "tilde/option.h"
@@ -143,7 +144,7 @@ void load_process_t::file_selected(const std::string &name) {
   open_files_t::iterator iter;
   if ((iter = open_files.contains(name.c_str())) != open_files.end()) {
     file = *iter;
-    done(true);
+    done();
     return;
   }
 
@@ -161,7 +162,7 @@ file_buffer_t *load_process_t::get_file_buffer() {
   return nullptr;
 }
 
-load_process_t::~load_process_t() {
+void load_process_t::cleanup() {
 #ifdef DEBUG
   ASSERT(result || file == nullptr);
 #endif
@@ -327,7 +328,7 @@ void save_as_process_t::file_selected(const std::string &_name) {
 
 void save_as_process_t::encoding_selected(const std::string *_encoding) { encoding = *_encoding; }
 
-save_as_process_t::~save_as_process_t() {
+void save_as_process_t::cleanup() {
   if (backup_fd >= 0) {
     close(backup_fd);
   }
@@ -438,6 +439,9 @@ exit_process_t::exit_process_t(const callback_t &cb)
 }
 
 bool exit_process_t::step() {
+  if (!get_result()) {
+    return true;
+  }
   for (; iter != open_files.end(); iter++) {
     if ((*iter)->is_modified()) {
       std::string message;
@@ -449,9 +453,7 @@ bool exit_process_t::step() {
     }
     recent_files.push_front(*iter);
   }
-  delete this;
-  exit_main_loop(EXIT_SUCCESS);
-  /* exit_main_loop never returns, so this point is never reached. */
+  return true;
 }
 
 void exit_process_t::do_save() {
@@ -474,7 +476,15 @@ void exit_process_t::save_done(stepped_process_t *process) {
   }
 }
 
-void exit_process_t::execute(const callback_t &cb) { (new exit_process_t(cb))->run(); }
+void exit_process_t::execute(const callback_t &cb) {
+  (new exit_process_t([cb](stepped_process_t *process) {
+    lprintf("Exit process callback with result %d\n", process->get_result());
+    cb(process);
+    if (process->get_result()) {
+      exit_main_loop(EXIT_SUCCESS);
+    }
+  }))->run();
+}
 
 open_recent_process_t::open_recent_process_t(const callback_t &cb) : load_process_t(cb) {
   connections.push_back(open_recent_dialog->connect_file_selected(
@@ -497,7 +507,7 @@ void open_recent_process_t::recent_file_selected(recent_file_info_t *_info) {
   run();
 }
 
-open_recent_process_t::~open_recent_process_t() {
+void open_recent_process_t::cleanup() {
   if (result) {
     recent_files.erase(info);
   }
