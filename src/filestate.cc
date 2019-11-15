@@ -439,9 +439,6 @@ exit_process_t::exit_process_t(const callback_t &cb)
 }
 
 bool exit_process_t::step() {
-  if (!get_result()) {
-    return true;
-  }
   for (; iter != open_files.end(); iter++) {
     if ((*iter)->is_modified()) {
       std::string message;
