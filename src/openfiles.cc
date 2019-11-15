@@ -185,11 +185,6 @@ recent_files_t::iterator recent_files_t::find(const std::string &name) {
   return recent_file_infos.end();
 }
 
-static int64_t close_time_from_config(t3_config_t *config) {
-  return static_cast<int64_t>(
-      std::strtoll(t3_config_get_string(t3_config_get(config, "close-time")), nullptr, 0));
-}
-
 void recent_files_t::load_from_disk() {
   lprintf("Starting recent files load\n");
   std::unique_ptr<char, free_deleter> xdg_path(
@@ -254,10 +249,10 @@ void recent_files_t::load_from_disk() {
     const char *encoding = t3_config_get_string(t3_config_get(recent_file, "encoding"));
     t3_config_t *position_config = t3_config_get(t3_config_get(recent_file, "position"), nullptr);
     text_coordinate_t position;
-    position.line = std::max(t3_config_get_int(position_config) - 1, 0);
+    position.line = t3_config_get_int64(position_config);
     position_config = t3_config_get_next(position_config);
-    position.pos = std::max(t3_config_get_int(position_config) - 1, 0);
-    int64_t close_time = close_time_from_config(recent_file);
+    position.pos = t3_config_get_int64(position_config);
+    int64_t close_time = t3_config_get_int64(t3_config_get(recent_file, "close-time"));
     recent_file_infos.push_back(
         make_unique<recent_file_info_t>(name, encoding, position, close_time));
   }
@@ -374,25 +369,24 @@ void recent_files_t::write_to_disk() {
           t3_config_add_string(new_recent_file, "encoding", recent_file->get_encoding().c_str());
       t3_config_t *position_list = t3_config_add_list(new_recent_file, "position", nullptr);
       combined_result |=
-          t3_config_add_int(position_list, nullptr, recent_file->get_position().line + 1);
+          t3_config_add_int64(position_list, nullptr, recent_file->get_position().line);
       combined_result |=
-          t3_config_add_int(position_list, nullptr, recent_file->get_position().pos + 1);
-      combined_result |= t3_config_add_string(new_recent_file, "close-time",
-                                              strings::Cat(recent_file->get_close_time()).c_str());
+          t3_config_add_int64(position_list, nullptr, recent_file->get_position().pos);
+      combined_result |=
+          t3_config_add_int64(new_recent_file, "close-time", recent_file->get_close_time());
       if (combined_result != 0) {
         lprintf("Error in adding a new item to the recent-files list");
         return;
       }
     } else {
-      int64_t close_time = close_time_from_config(existing_iter->second);
+      int64_t close_time = t3_config_get_int64(t3_config_get(existing_iter->second, "close-time"));
       lprintf("Updating recent file: %s %ld %ld\n", recent_file->get_name().c_str(), close_time,
               recent_file->get_close_time());
       if (close_time < recent_file->get_close_time()) {
-        t3_config_add_string(existing_iter->second, "close-time",
-                             strings::Cat(recent_file->get_close_time()).c_str());
+        t3_config_add_int64(existing_iter->second, "close-time", recent_file->get_close_time());
         t3_config_t *position_list = t3_config_add_list(existing_iter->second, "position", nullptr);
-        t3_config_add_int(position_list, nullptr, recent_file->get_position().line + 1);
-        t3_config_add_int(position_list, nullptr, recent_file->get_position().pos + 1);
+        t3_config_add_int64(position_list, nullptr, recent_file->get_position().line);
+        t3_config_add_int64(position_list, nullptr, recent_file->get_position().pos);
       }
     }
   }
@@ -403,7 +397,8 @@ void recent_files_t::write_to_disk() {
   timestamped_configs.reserve(kMaxSavedRecentFiles + recent_file_infos.size());
   for (t3_config_t *recent_file = t3_config_get(recent_files_list, nullptr); recent_file != nullptr;
        recent_file = t3_config_get_next(recent_file)) {
-    timestamped_configs.push_back({close_time_from_config(recent_file), recent_file});
+    timestamped_configs.push_back(
+        {t3_config_get_int64(t3_config_get(recent_file, "close-time")), recent_file});
   }
   if (timestamped_configs.size() > kMaxSavedRecentFiles) {
     std::sort(timestamped_configs.begin(), timestamped_configs.end(),
@@ -412,6 +407,13 @@ void recent_files_t::write_to_disk() {
     for (size_t i = kMaxSavedRecentFiles; i < timestamped_configs.size(); ++i) {
       t3_config_erase_from_list(recent_files_list, timestamped_configs[i].second);
     }
+  }
+
+  if (!t3_config_validate(config.get(), schema.get(), &error, T3_CONFIG_VERBOSE_ERROR)) {
+    lprintf("Invalid recent_files data created: %s: %s\n", t3_config_strerror(error.error),
+            error.extra);
+    free(error.extra);
+    return;
   }
 
   while (ftruncate(fd, 0) != 0) {
