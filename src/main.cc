@@ -64,16 +64,15 @@ class main_t : public main_window_base_t {
   menu_panel_t *panel;
   split_t *split;
 
-  select_buffer_dialog_t *select_buffer_dialog;
-  message_dialog_t *about_dialog;
-  buffer_options_dialog_t *buffer_options_dialog, *default_options_dialog;
-  misc_options_dialog_t *misc_options_dialog;
-  highlight_dialog_t *highlight_dialog;
-  attributes_dialog_t *attributes_dialog;
+  std::unique_ptr<select_buffer_dialog_t> select_buffer_dialog;
+  std::unique_ptr<message_dialog_t> about_dialog;
+  std::unique_ptr<buffer_options_dialog_t> buffer_options_dialog, default_options_dialog;
+  std::unique_ptr<misc_options_dialog_t> misc_options_dialog;
+  std::unique_ptr<highlight_dialog_t> highlight_dialog;
+  std::unique_ptr<attributes_dialog_t> attributes_dialog;
 
  public:
   main_t();
-  ~main_t() override;
   bool process_key(t3widget::key_t key) override;
   bool set_size(optint height, optint width) override;
   void load_cli_files_done(stepped_process_t *process);
@@ -191,7 +190,7 @@ main_t::main_t() {
   split->set_position(!option.hide_menubar, 0);
   split->set_size(window.get_height() - !option.hide_menubar, window.get_width());
 
-  select_buffer_dialog = new select_buffer_dialog_t(11, window.get_width() - 4);
+  select_buffer_dialog = make_unique<select_buffer_dialog_t>(11, window.get_width() - 4);
   select_buffer_dialog->center_over(this);
   select_buffer_dialog->connect_activate(bind_front(&main_t::switch_buffer, this));
 
@@ -225,7 +224,8 @@ main_t::main_t() {
   open_recent_dialog = new open_recent_dialog_t(11, window.get_width() - 4);
   open_recent_dialog->center_over(this);
 
-  about_dialog = new message_dialog_t(45, "About", {"Close"});
+  about_dialog = make_unique<message_dialog_t>(45, std::string("About"),
+                                               std::initializer_list<string_view>{"Close"});
   about_dialog->center_over(this);
   about_dialog->set_max_text_height(13);
   about_dialog->set_message(
@@ -237,19 +237,19 @@ main_t::main_t() {
       "If not, see <http://www.gnu.org/licenses/>.");
   // clang-format on
 
-  buffer_options_dialog = new buffer_options_dialog_t("Current Buffer");
+  buffer_options_dialog = make_unique<buffer_options_dialog_t>("Current Buffer");
   buffer_options_dialog->center_over(this);
   buffer_options_dialog->connect_activate([this] { set_buffer_options(); });
 
-  default_options_dialog = new buffer_options_dialog_t("Buffer Defaults");
+  default_options_dialog = make_unique<buffer_options_dialog_t>("Buffer Defaults");
   default_options_dialog->center_over(this);
   default_options_dialog->connect_activate([this] { set_default_options(); });
 
-  misc_options_dialog = new misc_options_dialog_t("Miscellaneous");
+  misc_options_dialog = make_unique<misc_options_dialog_t>("Miscellaneous");
   misc_options_dialog->center_over(this);
   misc_options_dialog->connect_activate([this] { set_misc_options(); });
 
-  highlight_dialog = new highlight_dialog_t(window.get_height() - 4, 40);
+  highlight_dialog = make_unique<highlight_dialog_t>(window.get_height() - 4, 40);
   highlight_dialog->center_over(this);
   highlight_dialog->connect_language_selected(bind_front(&main_t::set_highlight, this));
 
@@ -263,21 +263,10 @@ main_t::main_t() {
   character_details_dialog = new character_details_dialog_t(8, MESSAGE_DIALOG_WIDTH);
   character_details_dialog->center_over(this);
 
-  attributes_dialog = new attributes_dialog_t(ATTRIBUTES_DIALOG_WIDTH);
+  attributes_dialog = make_unique<attributes_dialog_t>(ATTRIBUTES_DIALOG_WIDTH);
   attributes_dialog->center_over(this);
   attributes_dialog->connect_activate([this] { set_interface_options(); });
   attributes_dialog->connect_save_defaults([this] { set_default_interface_options(); });
-}
-
-main_t::~main_t() {
-#ifdef TILDE_DEBUG
-  delete select_buffer_dialog;
-  delete about_dialog;
-  delete buffer_options_dialog, delete default_options_dialog;
-  delete attributes_dialog;
-  delete misc_options_dialog;
-  delete highlight_dialog;
-#endif
 }
 
 bool main_t::process_key(t3widget::key_t key) {
@@ -892,8 +881,11 @@ int main(int argc, char *argv[]) {
   delete encoding_dialog;
   delete main_window;
   delete preserve_bom_dialog;
+  delete character_details_dialog;
   recent_files.cleanup();
-  open_files.cleanup();
+  while (!open_files.empty()) {
+    delete *open_files.begin();
+  }
   cleanup();
   transcript_finalize();
 #endif

@@ -119,12 +119,6 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
   return start;
 }
 
-void open_files_t::cleanup() {
-  while (!files.empty()) {
-    delete files.front();
-  }
-}
-
 recent_file_info_t::recent_file_info_t(file_buffer_t *file)
     : recent_file_info_t(file->get_name(), file->get_encoding(), file->get_cursor(),
                          static_cast<int64_t>(std::time(nullptr))) {}
