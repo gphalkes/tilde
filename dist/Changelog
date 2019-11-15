@@ -10,6 +10,9 @@ Version 1.0.2:
 	  last used position. This is limited to the last 100 files, to keep the
 	  storage space and processing required small.
 
+	Bug fixes:
+	- Tilde would leave tilde-backup-?????? files when saving files on exit.
+
 Version 1.0.1:
 	Bug fixes:
 	- Writing of files has been completely re-written to ensure correct
@@ -24,7 +27,7 @@ Version 0.4.3:
 	- A new dialog is available that shows the codepoints under the cursor.
 
 	Bug fixes:
-	- Allow Private-Use Area characters in input and output without substituion.
+	- Allow Private-Use Area characters in input and output without substitution.
 
 Version 0.4.2:
 	This release is a re-release of 0.4.1 which removes a non-functional file.

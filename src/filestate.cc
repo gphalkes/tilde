@@ -134,6 +134,9 @@ bool load_process_t::step() {
     if (option.restore_cursor_position) {
       text_coordinate_t position = (*recent_files_iter)->get_position();
       open_files.back()->goto_pos(position.line + 1, position.pos + 1);
+      lprintf("Setting top_left %ld %ld in view params\n",
+              (*recent_files_iter)->get_top_left().line, (*recent_files_iter)->get_top_left().pos);
+      open_files.back()->set_top_left_in_view_parameters((*recent_files_iter)->get_top_left());
     }
     recent_files.erase(recent_files_iter);
   }
@@ -448,7 +451,9 @@ bool exit_process_t::step() {
       close_confirm_dialog->show();
       return false;
     }
-    recent_files.push_front(*iter);
+  }
+  for (file_buffer_t *buffer : open_files) {
+    recent_files.push_front(buffer);
   }
   return true;
 }
@@ -458,14 +463,12 @@ void exit_process_t::do_save() {
 }
 
 void exit_process_t::dont_save() {
-  recent_files.push_front(*iter);
   ++iter;
   run();
 }
 
 void exit_process_t::save_done(stepped_process_t *process) {
   if (process->get_result()) {
-    recent_files.push_front(*iter);
     ++iter;
     run();
   } else {

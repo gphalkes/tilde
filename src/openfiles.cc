@@ -119,27 +119,38 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
   return start;
 }
 
-recent_file_info_t::recent_file_info_t(file_buffer_t *file)
+recent_file_info_t::recent_file_info_t(const file_buffer_t *file)
     : recent_file_info_t(file->get_name(), file->get_encoding(), file->get_cursor(),
+                         file->get_view_parameters()->get_top_left(),
                          static_cast<int64_t>(std::time(nullptr))) {}
 
 recent_file_info_t::recent_file_info_t(string_view _name, string_view _encoding,
-                                       text_coordinate_t _position, int64_t _close_time)
-    : name(_name), encoding(_encoding), position(_position), close_time(_close_time) {}
+                                       text_coordinate_t _position, text_coordinate_t _top_left,
+                                       int64_t _close_time)
+    : name(_name),
+      encoding(_encoding),
+      position(_position),
+      top_left(_top_left),
+      close_time(_close_time) {
+  lprintf("Top left: %ld %ld\n", top_left.line, top_left.pos);
+}
 
 const std::string &recent_file_info_t::get_name() const { return name; }
 const std::string &recent_file_info_t::get_encoding() const { return encoding; }
-const text_coordinate_t recent_file_info_t::get_position() const { return position; }
+text_coordinate_t recent_file_info_t::get_position() const { return position; }
+text_coordinate_t recent_file_info_t::get_top_left() const { return top_left; }
 int64_t recent_file_info_t::get_close_time() const { return close_time; }
 
-void recent_files_t::push_front(file_buffer_t *text) {
+void recent_files_t::push_front(const file_buffer_t *text) {
   if (text->get_name().empty()) {
     return;
   }
 
-  for (const std::unique_ptr<recent_file_info_t> &name : recent_file_infos) {
-    if (name->get_name() == text->get_name()) {
-      return;
+  for (auto iter = recent_file_infos.begin(); iter != recent_file_infos.end();) {
+    if ((*iter)->get_name() == text->get_name()) {
+      iter = recent_file_infos.erase(iter);
+    } else {
+      ++iter;
     }
   }
 
@@ -168,6 +179,7 @@ int recent_files_t::get_version() { return version; }
 recent_files_t::iterator recent_files_t::begin() { return recent_file_infos.begin(); }
 recent_files_t::iterator recent_files_t::end() { return recent_file_infos.end(); }
 recent_files_t::iterator recent_files_t::erase(iterator iter) {
+  version++;
   return recent_file_infos.erase(iter);
 }
 recent_files_t::iterator recent_files_t::find(const std::string &name) {
@@ -243,12 +255,18 @@ void recent_files_t::load_from_disk() {
     const char *encoding = t3_config_get_string(t3_config_get(recent_file, "encoding"));
     t3_config_t *position_config = t3_config_get(t3_config_get(recent_file, "position"), nullptr);
     text_coordinate_t position;
+    text_coordinate_t top_left;
     position.line = t3_config_get_int64(position_config);
     position_config = t3_config_get_next(position_config);
     position.pos = t3_config_get_int64(position_config);
+
+    position_config = t3_config_get_next(position_config);
+    top_left.line = t3_config_get_int64(position_config);
+    position_config = t3_config_get_next(position_config);
+    top_left.pos = t3_config_get_int64(position_config);
     int64_t close_time = t3_config_get_int64(t3_config_get(recent_file, "close-time"));
     recent_file_infos.push_back(
-        make_unique<recent_file_info_t>(name, encoding, position, close_time));
+        make_unique<recent_file_info_t>(name, encoding, position, top_left, close_time));
   }
   std::sort(recent_file_infos.begin(), recent_file_infos.end(),
             [](const std::unique_ptr<recent_file_info_t> &a,
@@ -367,6 +385,10 @@ void recent_files_t::write_to_disk() {
       combined_result |=
           t3_config_add_int64(position_list, nullptr, recent_file->get_position().pos);
       combined_result |=
+          t3_config_add_int64(position_list, nullptr, recent_file->get_top_left().line);
+      combined_result |=
+          t3_config_add_int64(position_list, nullptr, recent_file->get_top_left().pos);
+      combined_result |=
           t3_config_add_int64(new_recent_file, "close-time", recent_file->get_close_time());
       if (combined_result != 0) {
         lprintf("Error in adding a new item to the recent-files list");
@@ -381,6 +403,8 @@ void recent_files_t::write_to_disk() {
         t3_config_t *position_list = t3_config_add_list(existing_iter->second, "position", nullptr);
         t3_config_add_int64(position_list, nullptr, recent_file->get_position().line);
         t3_config_add_int64(position_list, nullptr, recent_file->get_position().pos);
+        t3_config_add_int64(position_list, nullptr, recent_file->get_top_left().line);
+        t3_config_add_int64(position_list, nullptr, recent_file->get_top_left().pos);
       }
     }
   }

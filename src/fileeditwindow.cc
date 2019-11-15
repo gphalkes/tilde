@@ -147,3 +147,8 @@ void file_edit_window_t::show_character_details() {
     character_details_dialog->show();
   }
 }
+
+void file_edit_window_t::save_view_parameters_in_buffer() {
+  save_view_parameters(
+      static_cast<file_buffer_t *>(edit_window_t::get_text())->view_parameters.get());
+}

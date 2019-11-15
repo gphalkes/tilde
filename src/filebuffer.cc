@@ -902,3 +902,7 @@ const char *file_buffer_t::get_char_under_cursor(size_t *size) const {
   *size = end - cursor.pos;
   return line.get_data().data() + cursor.pos;
 }
+
+void file_buffer_t::set_top_left_in_view_parameters(text_coordinate_t pos) {
+  view_parameters->set_top_left(pos);
+}

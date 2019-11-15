@@ -81,6 +81,8 @@ class file_buffer_t : public text_buffer_t {
   void toggle_line_comment();
 
   const char *get_char_under_cursor(size_t *size) const;
+
+  void set_top_left_in_view_parameters(text_coordinate_t pos);
 };
 
 #endif

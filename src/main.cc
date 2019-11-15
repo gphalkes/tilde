@@ -14,7 +14,9 @@
 
 #include <csignal>
 #include <cstdlib>
+#include <list>
 #include <memory.h>
+#include <set>
 #include <t3widget/key_binding.h>
 #include <t3widget/widget.h>
 
@@ -63,6 +65,7 @@ class main_t : public main_window_base_t {
   menu_bar_t *menu;
   menu_panel_t *panel;
   split_t *split;
+  std::set<file_edit_window_t *> edit_windows;
 
   std::unique_ptr<select_buffer_dialog_t> select_buffer_dialog;
   std::unique_ptr<message_dialog_t> about_dialog;
@@ -186,7 +189,11 @@ main_t::main_t() {
   //~ panel->insert_item(nullptr, "_Help", "F1", action_id_t::HELP_HELP);
   panel->insert_item(nullptr, "_About", "", action_id_t::HELP_ABOUT);
 
-  split = emplace_back<split_t>(make_unique<file_edit_window_t>());
+  {
+    std::unique_ptr<file_edit_window_t> new_window = make_unique<file_edit_window_t>();
+    edit_windows.insert(new_window.get());
+    split = emplace_back<split_t>(std::move(new_window));
+  }
   split->set_position(!option.hide_menubar, 0);
   split->set_size(window.get_height() - !option.hide_menubar, window.get_width());
 
@@ -337,6 +344,7 @@ void main_t::menu_activated(int id) {
     }
 
     case action_id_t::FILE_CLOSE:
+      get_current()->save_view_parameters_in_buffer();
       close_process_t::execute(bind_front(&main_t::close_cb, this), get_current()->get_text());
       break;
     case action_id_t::FILE_SAVE:
@@ -357,6 +365,10 @@ void main_t::menu_activated(int id) {
       break;
 
     case action_id_t::FILE_EXIT:
+      /* Save the view parameters such that saving of the recent file info works correctly. */
+      for (auto *window : edit_windows) {
+        window->save_view_parameters_in_buffer();
+      }
       exit_process_t::execute(stepped_process_t::ignore_result);
       break;
 
@@ -417,12 +429,12 @@ void main_t::menu_activated(int id) {
       break;
 
     case action_id_t::WINDOWS_NEXT_BUFFER: {
-      file_edit_window_t *current = static_cast<file_edit_window_t *>(split->get_current());
+      file_edit_window_t *current = get_current();
       current->set_text(open_files.next_buffer(current->get_text()));
       break;
     }
     case action_id_t::WINDOWS_PREV_BUFFER: {
-      file_edit_window_t *current = static_cast<file_edit_window_t *>(split->get_current());
+      file_edit_window_t *current = get_current();
       current->set_text(open_files.previous_buffer(current->get_text()));
       break;
     }
@@ -432,8 +444,10 @@ void main_t::menu_activated(int id) {
     case action_id_t::WINDOWS_HSPLIT:
     case action_id_t::WINDOWS_VSPLIT: {
       file_buffer_t *new_file = open_files.next_buffer(nullptr);
+      std::unique_ptr<file_edit_window_t> new_window = make_unique<file_edit_window_t>(new_file);
+      edit_windows.insert(new_window.get());
       // If new_file is nullptr, a new file_buffer_t will be created
-      split->split(make_unique<file_edit_window_t>(new_file), id == action_id_t::WINDOWS_HSPLIT);
+      split->split(std::move(new_window), id == action_id_t::WINDOWS_HSPLIT);
       break;
     }
     case action_id_t::WINDOWS_NEXT_WINDOW:
@@ -443,14 +457,16 @@ void main_t::menu_activated(int id) {
       split->previous();
       break;
     case action_id_t::WINDOWS_MERGE: {
-      file_edit_window_t *widget = static_cast<file_edit_window_t *>(split->unsplit().release());
+      std::unique_ptr<file_edit_window_t> widget(
+          static_cast<file_edit_window_t *>(split->unsplit().release()));
       if (widget == nullptr) {
         message_dialog->set_message("Can not close the last window.");
         message_dialog->center_over(this);
         message_dialog->show();
       } else {
         file_buffer_t *text = widget->get_text();
-        delete widget;
+        edit_windows.erase(widget.get());
+        widget.reset();
         if (text->get_name().empty() && !text->is_modified()) {
           delete text;
         }

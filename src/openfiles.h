@@ -56,16 +56,18 @@ class recent_file_info_t {
   std::string name;
   std::string encoding;
   text_coordinate_t position;
+  text_coordinate_t top_left;
   int64_t close_time;
 
  public:
-  explicit recent_file_info_t(file_buffer_t *file);
+  explicit recent_file_info_t(const file_buffer_t *file);
   recent_file_info_t(string_view name, string_view encoding, text_coordinate_t position,
-                     int64_t close_time);
+                     text_coordinate_t top_left, int64_t close_time);
 
   const std::string &get_name() const;
   const std::string &get_encoding() const;
-  const text_coordinate_t get_position() const;
+  text_coordinate_t get_position() const;
+  text_coordinate_t get_top_left() const;
   int64_t get_close_time() const;
 };
 
@@ -76,7 +78,7 @@ class recent_files_t {
   version_t version;
 
  public:
-  void push_front(file_buffer_t *text);
+  void push_front(const file_buffer_t *text);
   recent_file_info_t *get_info(size_t idx);
   void erase(recent_file_info_t *info);
 
