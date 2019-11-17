@@ -26,13 +26,13 @@ using namespace t3widget;
 class file_edit_window_t;
 
 class file_buffer_t : public text_buffer_t {
-  friend class file_edit_window_t;  // Required to access view_parameters and set_has_window
+  friend class file_edit_window_t;  // Required to access behavior_parameters and set_has_window
   friend class file_line_t;
 
  private:
   std::string name, encoding;
   text_line_t name_line;
-  std::unique_ptr<edit_window_t::view_parameters_t> view_parameters;
+  std::unique_ptr<edit_window_t::behavior_parameters_t> behavior_parameters;
   bool has_window;
   text_pos_t highlight_valid;
   optional<bool> strip_spaces;
@@ -57,7 +57,7 @@ class file_buffer_t : public text_buffer_t {
 
   const std::string &get_name() const;
   const char *get_encoding() const;
-  const edit_window_t::view_parameters_t *get_view_parameters() const;
+  const edit_window_t::behavior_parameters_t *get_behavior_parameters() const;
   text_line_t *get_name_line();
 
   bool get_has_window() const;
@@ -82,7 +82,7 @@ class file_buffer_t : public text_buffer_t {
 
   const char *get_char_under_cursor(size_t *size) const;
 
-  void set_top_left_in_view_parameters(text_coordinate_t pos);
+  void set_top_left_in_behavior_parameters(text_coordinate_t pos);
 };
 
 #endif

@@ -121,7 +121,7 @@ file_buffer_t *open_files_t::previous_buffer(file_buffer_t *start) {
 
 recent_file_info_t::recent_file_info_t(const file_buffer_t *file)
     : recent_file_info_t(file->get_name(), file->get_encoding(), file->get_cursor(),
-                         file->get_view_parameters()->get_top_left(),
+                         file->get_behavior_parameters()->get_top_left(),
                          static_cast<int64_t>(std::time(nullptr))) {}
 
 recent_file_info_t::recent_file_info_t(string_view _name, string_view _encoding,

@@ -27,7 +27,7 @@
 
 file_buffer_t::file_buffer_t(string_view _name, string_view _encoding)
     : text_buffer_t(new file_line_factory_t(this)),
-      view_parameters(new edit_window_t::view_parameters_t()),
+      behavior_parameters(new edit_window_t::behavior_parameters_t()),
       has_window(false),
       highlight_valid(0),
       highlight_info(nullptr),
@@ -51,12 +51,12 @@ file_buffer_t::file_buffer_t(string_view _name, string_view _encoding)
 
   connect_rewrap_required(bind_front(&file_buffer_t::invalidate_highlight, this));
 
-  view_parameters->set_tabsize(option.tabsize);
-  view_parameters->set_wrap(option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE);
-  view_parameters->set_auto_indent(option.auto_indent);
-  view_parameters->set_tab_spaces(option.tab_spaces);
-  view_parameters->set_indent_aware_home(option.indent_aware_home);
-  view_parameters->set_show_tabs(option.show_tabs);
+  behavior_parameters->set_tabsize(option.tabsize);
+  behavior_parameters->set_wrap(option.wrap ? wrap_type_t::WORD : wrap_type_t::NONE);
+  behavior_parameters->set_auto_indent(option.auto_indent);
+  behavior_parameters->set_tab_spaces(option.tab_spaces);
+  behavior_parameters->set_indent_aware_home(option.indent_aware_home);
+  behavior_parameters->set_show_tabs(option.show_tabs);
   open_files.push_back(this);
 }
 
@@ -466,8 +466,8 @@ const char *file_buffer_t::get_encoding() const { return encoding.c_str(); }
 
 text_line_t *file_buffer_t::get_name_line() { return &name_line; }
 
-const edit_window_t::view_parameters_t *file_buffer_t::get_view_parameters() const {
-  return view_parameters.get();
+const edit_window_t::behavior_parameters_t *file_buffer_t::get_behavior_parameters() const {
+  return behavior_parameters.get();
 }
 
 void file_buffer_t::prepare_paint_line(text_pos_t line) {
@@ -895,7 +895,7 @@ const char *file_buffer_t::get_char_under_cursor(size_t *size) const {
     *size = 1;
     return "\n";
   }
-  int end = line.adjust_position(cursor.pos, 1);
+  text_pos_t end = line.adjust_position(cursor.pos, 1);
   if (cursor.pos == end) {
     return nullptr;
   }
@@ -903,6 +903,6 @@ const char *file_buffer_t::get_char_under_cursor(size_t *size) const {
   return line.get_data().data() + cursor.pos;
 }
 
-void file_buffer_t::set_top_left_in_view_parameters(text_coordinate_t pos) {
-  view_parameters->set_top_left(pos);
+void file_buffer_t::set_top_left_in_behavior_parameters(text_coordinate_t pos) {
+  behavior_parameters->set_top_left(pos);
 }

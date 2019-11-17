@@ -24,7 +24,7 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
   _text->set_has_window(true);
   rewrap_connection = _text->connect_rewrap_required(
       bind_front(&file_edit_window_t::force_repaint_to_bottom, this));
-  edit_window_t::set_text(_text, _text->get_view_parameters());
+  edit_window_t::set_text(_text, _text->get_behavior_parameters());
   edit_window_t::set_autocompleter(new file_autocompleter_t());
 
   delete old_text;
@@ -33,7 +33,7 @@ file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
 file_edit_window_t::~file_edit_window_t() {
   file_buffer_t *_text = static_cast<file_buffer_t *>(text);
   _text->set_has_window(false);
-  save_view_parameters(_text->view_parameters.get());
+  save_behavior_parameters(_text->behavior_parameters.get());
   rewrap_connection.disconnect();
 }
 
@@ -71,12 +71,12 @@ void file_edit_window_t::draw_info_window() {
 void file_edit_window_t::set_text(file_buffer_t *_text) {
   file_buffer_t *old_text = static_cast<file_buffer_t *>(edit_window_t::get_text());
   old_text->set_has_window(false);
-  save_view_parameters(old_text->view_parameters.get());
+  save_behavior_parameters(old_text->behavior_parameters.get());
   rewrap_connection.disconnect();
   _text->set_has_window(true);
   rewrap_connection = _text->connect_rewrap_required(
       bind_front(&file_edit_window_t::force_repaint_to_bottom, this));
-  edit_window_t::set_text(_text, _text->get_view_parameters());
+  edit_window_t::set_text(_text, _text->get_behavior_parameters());
 }
 
 file_buffer_t *file_edit_window_t::get_text() const {
@@ -148,7 +148,7 @@ void file_edit_window_t::show_character_details() {
   }
 }
 
-void file_edit_window_t::save_view_parameters_in_buffer() {
-  save_view_parameters(
-      static_cast<file_buffer_t *>(edit_window_t::get_text())->view_parameters.get());
+void file_edit_window_t::save_behavior_parameters_in_buffer() {
+  save_behavior_parameters(
+      static_cast<file_buffer_t *>(edit_window_t::get_text())->behavior_parameters.get());
 }

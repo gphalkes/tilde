@@ -344,7 +344,7 @@ void main_t::menu_activated(int id) {
     }
 
     case action_id_t::FILE_CLOSE:
-      get_current()->save_view_parameters_in_buffer();
+      get_current()->save_behavior_parameters_in_buffer();
       close_process_t::execute(bind_front(&main_t::close_cb, this), get_current()->get_text());
       break;
     case action_id_t::FILE_SAVE:
@@ -367,7 +367,7 @@ void main_t::menu_activated(int id) {
     case action_id_t::FILE_EXIT:
       /* Save the view parameters such that saving of the recent file info works correctly. */
       for (auto *window : edit_windows) {
-        window->save_view_parameters_in_buffer();
+        window->save_behavior_parameters_in_buffer();
       }
       exit_process_t::execute(stepped_process_t::ignore_result);
       break;

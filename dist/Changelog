@@ -1,4 +1,4 @@
-Version 1.0.2:
+Version 1.0.3:
 	New features:
 	- The base config, loaded before the user config from (by default)
 	  /usr/share/tilde/base.config, now accepts the same configuration as the user
@@ -10,6 +10,7 @@ Version 1.0.2:
 	  last used position. This is limited to the last 100 files, to keep the
 	  storage space and processing required small.
 
+Version 1.0.2:
 	Bug fixes:
 	- Tilde would leave tilde-backup-?????? files when saving files on exit.
 
