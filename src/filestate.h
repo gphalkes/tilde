@@ -93,7 +93,7 @@ class load_process_t : public stepped_process_t {
   bool step() override;
   virtual void file_selected(const std::string &name);
   virtual void encoding_selected(const std::string *_encoding);
-  ~load_process_t() override;
+  void cleanup() override;
   void preserve_bom();
   void remove_bom();
 
@@ -140,7 +140,7 @@ class save_as_process_t : public stepped_process_t {
   bool step() override;
   virtual void file_selected(const std::string &_name);
   virtual void encoding_selected(const std::string *_encoding);
-  ~save_as_process_t() override;
+  void cleanup() override;
 
  public:
   static void execute(const callback_t &cb, file_buffer_t *_file);
@@ -189,7 +189,7 @@ class open_recent_process_t : public load_process_t {
   recent_file_info_t *info;
 
   explicit open_recent_process_t(const callback_t &cb);
-  ~open_recent_process_t() override;
+  void cleanup() override;
   virtual void recent_file_selected(recent_file_info_t *_info);
   bool step() override;
 

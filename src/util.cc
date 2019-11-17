@@ -43,18 +43,21 @@ static const char *highlight_names[] = {"normal",   "comment", "comment-keyword"
 static_assert(ARRAY_SIZE(highlight_names) <= MAX_HIGHLIGHTS);
 
 stepped_process_t::stepped_process_t() : result(true) {}
-stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(false) {}
+stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(true) {}
 
 void stepped_process_t::run() {
   if (step()) {
-    done(result);
+    done();
   }
 }
 
-void stepped_process_t::abort() { done(false); }
+void stepped_process_t::abort() {
+  result = false;
+  done();
+}
 
-void stepped_process_t::done(bool _result) {
-  result = _result;
+void stepped_process_t::done() {
+  cleanup();
   done_cb(this);
   delete this;
 }

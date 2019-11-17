@@ -93,7 +93,8 @@ class stepped_process_t {
   virtual bool step() = 0;
   void run();
   void abort();
-  void done(bool _result);
+  void done();
+  virtual void cleanup() {}
 
  public:
   bool get_result();
