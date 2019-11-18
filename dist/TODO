@@ -3,10 +3,8 @@ the Tilde text editor (although some features will necessarily be implemented
 in its libraries). The order in which the items appear has no bearing on their
 priority.
 
-- Allow users to find out which character(s) is (are) under the cursor
 - Auto save and restore on crash
 - fmt-like rewrapping of text to a specific width
-- Insertion of characters by their Unicode name instead of their codepoint
 - Improve terminal capabilities detection
 - End-of-line type selection and conversion (LF, CR/LF, CR)
 - Convert indentation from tabs to spaces and vice-versa

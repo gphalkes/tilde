@@ -134,8 +134,6 @@ bool load_process_t::step() {
     if (option.restore_cursor_position) {
       text_coordinate_t position = (*recent_files_iter)->get_position();
       open_files.back()->goto_pos(position.line + 1, position.pos + 1);
-      lprintf("Setting top_left %ld %ld in view params\n",
-              (*recent_files_iter)->get_top_left().line, (*recent_files_iter)->get_top_left().pos);
       open_files.back()->set_top_left_in_behavior_parameters((*recent_files_iter)->get_top_left());
     }
     recent_files.erase(recent_files_iter);

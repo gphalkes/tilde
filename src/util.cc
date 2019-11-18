@@ -183,10 +183,8 @@ void printf_into(std::string *message, const char *format, ...) {
   *message = message_buffer.data();
 }
 
-int map_highlight(void *data, const char *name) {
+int map_highlight(void *, const char *name) {
   int i;
-
-  (void)data;
 
   for (i = 0; static_cast<size_t>(i) < ARRAY_SIZE(highlight_names); i++) {
     if (strcmp(name, highlight_names[i]) == 0) {

@@ -131,9 +131,7 @@ recent_file_info_t::recent_file_info_t(string_view _name, string_view _encoding,
       encoding(_encoding),
       position(_position),
       top_left(_top_left),
-      close_time(_close_time) {
-  lprintf("Top left: %ld %ld\n", top_left.line, top_left.pos);
-}
+      close_time(_close_time) {}
 
 const std::string &recent_file_info_t::get_name() const { return name; }
 const std::string &recent_file_info_t::get_encoding() const { return encoding; }
