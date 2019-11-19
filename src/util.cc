@@ -34,14 +34,6 @@ static char debug_buffer[1024];
 static const std::string *executable;
 #endif
 
-/* The 'normal' attributes should always be the first in this list. Other code
-   depends on that. */
-static const char *highlight_names[] = {"normal",   "comment", "comment-keyword", "keyword",
-                                        "number",   "string",  "string-escape",   "misc",
-                                        "variable", "error",   "addition",        "deletion"};
-
-static_assert(ARRAY_SIZE(highlight_names) <= MAX_HIGHLIGHTS);
-
 stepped_process_t::stepped_process_t() : result(true) {}
 stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(true) {}
 
@@ -184,19 +176,5 @@ void printf_into(std::string *message, const char *format, ...) {
 }
 
 int map_highlight(void *, const char *name) {
-  int i;
-
-  for (i = 0; static_cast<size_t>(i) < ARRAY_SIZE(highlight_names); i++) {
-    if (strcmp(name, highlight_names[i]) == 0) {
-      return i;
-    }
-  }
-  return 0;
-}
-
-const char *reverse_map_highlight(int idx) {
-  if (idx < 0 || static_cast<size_t>(idx) >= ARRAY_SIZE(highlight_names)) {
-    return nullptr;
-  }
-  return highlight_names[idx];
+  return option.highlights.lookup_mapping(name).value_or(0);
 }

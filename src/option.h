@@ -21,6 +21,7 @@
 #include <t3widget/util.h>
 #include <t3window/window.h>
 
+#include "tilde/attributemap.h"
 #include "tilde/util.h"
 
 using namespace t3widget;
@@ -72,7 +73,7 @@ struct term_options_t {
   optional<t3_attr_t> meta_text;
   optional<t3_attr_t> background;
 
-  optional<t3_attr_t> highlights[MAX_HIGHLIGHTS];
+  attribute_map_t highlights;
   optional<t3_attr_t> brace_highlight;
 };
 
@@ -95,16 +96,6 @@ struct options_t {
   optional<size_t> max_recent_files;
 };
 
-struct highlight_attrs_t {
-  t3_attr_t comment;
-  t3_attr_t comment_keyword;
-  t3_attr_t keyword;
-  t3_attr_t string;
-  t3_attr_t string_escape;
-  t3_attr_t number;
-  t3_attr_t misc;
-};
-
 struct runtime_options_t {
   int tabsize;
   bool wrap;
@@ -120,7 +111,7 @@ struct runtime_options_t {
   bool restore_cursor_position;
   size_t max_recent_files;
   optional<int> key_timeout;
-  t3_attr_t highlights[MAX_HIGHLIGHTS];
+  attribute_map_t highlights;
   t3_attr_t brace_highlight;
 
   std::map<std::string, std::string> line_comment_map;

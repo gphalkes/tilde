@@ -110,10 +110,7 @@ void set_limits();
 std::string canonicalize_path(const char *path);
 void printf_into(std::string *message, const char *format, ...);
 
-#define MAX_HIGHLIGHTS 20
-
 int map_highlight(void *data, const char *name);
-const char *reverse_map_highlight(int idx);
 
 #define ARRAY_SIZE(_x) (sizeof(_x) / sizeof(_x[0]))
 

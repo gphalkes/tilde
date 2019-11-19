@@ -196,7 +196,14 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
   }
   if (success) {
     highlight = t3_highlight_load(lang.lang_file, map_highlight, nullptr,
-                                  T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH, nullptr);
+                                  T3_HIGHLIGHT_UTF8 | T3_HIGHLIGHT_USE_PATH
+/* If T3_HIGHLIGHT_USE_SCOPE is not available, all the other code is still compatible, so we simply
+   omit the flag here. */
+#ifdef T3_HIGHLIGHT_USE_SCOPE
+                                      | T3_HIGHLIGHT_USE_SCOPE
+#endif
+                                  ,
+                                  nullptr);
     set_highlight(highlight);
     std::map<std::string, std::string>::iterator iter = option.line_comment_map.find(lang.name);
     if (iter != option.line_comment_map.end()) {

@@ -54,7 +54,7 @@ int file_line_t::get_highlight_idx(text_pos_t i) const {
 t3_attr_t file_line_t::get_base_attr(text_pos_t i, const paint_info_t &info) const {
   file_buffer_t *file = static_cast<file_line_factory_t *>(get_line_factory())->get_file_buffer();
   int idx = get_highlight_idx(i);
-  t3_attr_t result = idx < 0 ? info.normal_attr : option.highlights[idx];
+  t3_attr_t result = option.highlights.lookup_attributes(idx).value_or(info.normal_attr);
 
   if (file->matching_brace_valid &&
       (i == info.cursor || (this == &file->get_line_data(file->matching_brace_coordinate.line) &&

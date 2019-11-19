@@ -18,6 +18,7 @@
 #include <transcript/transcript.h>
 #include <unistring/version.h>
 
+#include "tilde/attributemap.h"
 #include "tilde/log.h"
 #include "tilde/option.h"
 #include "tilde/optionMacros.h"
@@ -115,7 +116,7 @@ static t3_attr_t attribute_string_to_bin(const char *attr) {
 }
 
 static void read_config_attribute(const t3_config_t *config, const char *name,
-                                  optional<t3_attr_t> *attr) {
+                                  std::function<void(t3_attr_t attr)> update) {
   t3_config_t *attr_config;
   t3_attr_t accumulated_attr = 0;
 
@@ -131,7 +132,7 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
     }
   }
 
-  *attr = accumulated_attr;
+  update(accumulated_attr);
 }
 
 #define GET_OPT(name, TYPE, type)                                                                  \
@@ -139,9 +140,11 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
     t3_config_t *tmp;                                                                              \
     if ((tmp = t3_config_get(&*config, #name)) != nullptr) opts->name = t3_config_get_##type(tmp); \
   } while (false)
-#define GET_ATTRIBUTE(name) read_config_attribute(attributes, #name, &opts->name)
-#define GET_HL_ATTRIBUTE(name) \
-  read_config_attribute(attributes, name, &opts->highlights[map_highlight(nullptr, name)])
+#define GET_ATTRIBUTE(name) \
+  read_config_attribute(attributes, #name, [&](t3_attr_t value) { opts->name = value; })
+#define GET_HL_ATTRIBUTE(name)            \
+  read_config_attribute(attributes, name, \
+                        [&](t3_attr_t value) { opts->highlights.insert_mapping(name, value); })
 
 static void read_term_config_part(const t3_config_t *config, term_options_t *opts) {
   t3_config_t *attributes;
@@ -185,10 +188,6 @@ static void read_term_config_part(const t3_config_t *config, term_options_t *opt
     GET_HL_ATTRIBUTE("error");
     GET_HL_ATTRIBUTE("addition");
     GET_HL_ATTRIBUTE("deletion");
-    /* NOTE: normal must always be reset, because unknown attributes get mapped to
-       the same index as normal. Therefore, they would overwrite the correct
-       attribute for normal. */
-    opts->highlights[0] = 0;
   }
 }
 
@@ -301,13 +300,11 @@ static void read_user_config_file() {
   read_config(std::move(config_file));
 }
 
-#define SET_OPT_FROM_FILE(name, deflt)                                \
-  do {                                                                \
-    if (term_specific_option.name.is_valid())                         \
-      option.name = term_specific_option.name.value();                \
-    else                                                              \
-      option.name = default_option.term_options.name.value_or(deflt); \
-  } while (false)
+#define SET_OPT_FROM_FILE(name, deflt)                                                        \
+  do {                                                                                        \
+    option.name =                                                                             \
+        term_specific_option.name.value_or(default_option.term_options.name.value_or(deflt)); \
+  } while (0)
 
 #define SET_OPT_FROM_DFLT(name, deflt)                 \
   do {                                                 \
@@ -341,20 +338,23 @@ static void post_process_options() {
     option.key_timeout = term_specific_option.key_timeout;
   }
 
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "comment")], get_default_attr(COMMENT));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "comment-keyword")],
-                    get_default_attr(COMMENT_KEYWORD));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "keyword")], get_default_attr(KEYWORD));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "number")], get_default_attr(NUMBER));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "string")], get_default_attr(STRING));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "string-escape")],
-                    get_default_attr(STRING_ESCAPE));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "misc")], get_default_attr(MISC));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "variable")], get_default_attr(VARIABLE));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "error")], get_default_attr(ERROR));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "addition")], get_default_attr(ADDITION));
-  SET_OPT_FROM_FILE(highlights[map_highlight(nullptr, "deletion")], get_default_attr(DELETION));
-  option.highlights[0] = 0;
+  option.highlights.insert_mapping("comment", get_default_attr(COMMENT));
+  option.highlights.insert_mapping("comment-keyword", get_default_attr(COMMENT_KEYWORD));
+  option.highlights.insert_mapping("keyword", get_default_attr(KEYWORD));
+  option.highlights.insert_mapping("number", get_default_attr(NUMBER));
+  option.highlights.insert_mapping("string", get_default_attr(STRING));
+  option.highlights.insert_mapping("string-escape", get_default_attr(STRING_ESCAPE));
+  option.highlights.insert_mapping("misc", get_default_attr(MISC));
+  option.highlights.insert_mapping("variable", get_default_attr(VARIABLE));
+  option.highlights.insert_mapping("error", get_default_attr(ERROR));
+  option.highlights.insert_mapping("addition", get_default_attr(ADDITION));
+  option.highlights.insert_mapping("deletion", get_default_attr(DELETION));
+  for (const auto &attribute : default_option.term_options.highlights) {
+    option.highlights.insert_mapping(attribute.first, attribute.second);
+  }
+  for (const auto &attribute : term_specific_option.highlights) {
+    option.highlights.insert_mapping(attribute.first, attribute.second);
+  }
 
   SET_OPT_FROM_FILE(brace_highlight, get_default_attr(BRACE_HIGHLIGHT));
 }
@@ -588,10 +588,10 @@ static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
   SET_ATTRIBUTE(meta_text);
   SET_ATTRIBUTE(background);
 
-  int i;
-  const char *highlight_name;
-  for (i = 1; (highlight_name = reverse_map_highlight(i)) != nullptr; i++) {
-    SET_HL_ATTRIBUTE(i, highlight_name);
+  t3_config_add_section(config, "highlight_attributes", nullptr);
+  for (const auto &attribute : opts->highlights) {
+    set_config_attribute(config, "highlight_attributes", std::string(attribute.first).c_str(),
+                         attribute.second);
   }
 
   SET_ATTRIBUTE(brace_highlight);

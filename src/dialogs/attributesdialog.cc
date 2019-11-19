@@ -260,11 +260,11 @@ void attributes_dialog_t::set_values_from_options() {
   SET_OPTION_VALUE(brace_highlight);
 #undef SET_OPTION_VALUE
 
-#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                                     \
-  do {                                                                                       \
-    name = term_specific_option.highlights[map_highlight(nullptr, highlight_name)];          \
-    if (!name.is_valid())                                                                    \
-      name = default_option.term_options.highlights[map_highlight(nullptr, highlight_name)]; \
+#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                               \
+  do {                                                                                 \
+    name = term_specific_option.highlights.lookup_attributes(highlight_name);          \
+    if (!name.is_valid())                                                              \
+      name = default_option.term_options.highlights.lookup_attributes(highlight_name); \
   } while (false)
   SET_HIGHLIGHT_OPTION_VALUE(comment, "comment");
   SET_HIGHLIGHT_OPTION_VALUE(comment_keyword, "comment-keyword");
@@ -310,9 +310,7 @@ void attributes_dialog_t::set_default_options_from_values() {
   term_specific_option.meta_text = nullopt;
   term_specific_option.background = nullopt;
 
-  for (optional<t3_attr_t> &highlight : term_specific_option.highlights) {
-    highlight = nullopt;
-  }
+  term_specific_option.highlights.clear_mappings();
   term_specific_option.brace_highlight = nullopt;
 }
 
@@ -349,35 +347,27 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
   option.brace_highlight =
       brace_highlight.is_valid() ? brace_highlight.value() : get_default_attr(BRACE_HIGHLIGHT);
 
-#define SET_WITH_DEFAULT(name, attr)                                                            \
-  do {                                                                                          \
-    int highlight_idx = map_highlight(nullptr, #name);                                          \
-    term_options->highlights[highlight_idx] = name;                                             \
-    option.highlights[highlight_idx] = name.is_valid() ? name.value() : get_default_attr(attr); \
+#define SET_WITH_DEFAULT(name, name_str, attr)                                         \
+  do {                                                                                 \
+    if (name.is_valid()) {                                                             \
+      term_options->highlights.insert_mapping(name_str, name.value());                 \
+    } else {                                                                           \
+      term_options->highlights.erase_mapping(name_str);                                \
+    }                                                                                  \
+    option.highlights.insert_mapping(name_str, name.value_or(get_default_attr(attr))); \
   } while (false)
-  SET_WITH_DEFAULT(comment, COMMENT);
-  {
-    int highlight_idx = map_highlight(nullptr, "comment-keyword");
-    term_options->highlights[highlight_idx] = comment_keyword;
-    option.highlights[highlight_idx] =
-        comment_keyword.is_valid() ? comment_keyword.value() : get_default_attr(COMMENT_KEYWORD);
-  }
-  SET_WITH_DEFAULT(keyword, KEYWORD);
-  SET_WITH_DEFAULT(number, NUMBER);
-  SET_WITH_DEFAULT(string, STRING);
-  {
-    int highlight_idx = map_highlight(nullptr, "string-escape");
-    term_options->highlights[highlight_idx] = string_escape;
-    option.highlights[highlight_idx] =
-        string_escape.is_valid() ? string_escape.value() : get_default_attr(STRING_ESCAPE);
-  }
-  SET_WITH_DEFAULT(misc, MISC);
-  SET_WITH_DEFAULT(variable, VARIABLE);
-  SET_WITH_DEFAULT(error, ERROR);
-  SET_WITH_DEFAULT(addition, ADDITION);
-  SET_WITH_DEFAULT(deletion, DELETION);
+  SET_WITH_DEFAULT(comment, "comment", COMMENT);
+  SET_WITH_DEFAULT(comment_keyword, "comment-keyword", COMMENT_KEYWORD);
+  SET_WITH_DEFAULT(keyword, "keyword", KEYWORD);
+  SET_WITH_DEFAULT(number, "number", NUMBER);
+  SET_WITH_DEFAULT(string, "string", STRING);
+  SET_WITH_DEFAULT(string_escape, "string-escape", STRING_ESCAPE);
+  SET_WITH_DEFAULT(misc, "misc", MISC);
+  SET_WITH_DEFAULT(variable, "variable", VARIABLE);
+  SET_WITH_DEFAULT(error, "error", ERROR);
+  SET_WITH_DEFAULT(addition, "addition", ADDITION);
+  SET_WITH_DEFAULT(deletion, "deletion", DELETION);
 #undef SET_WITH_DEFAULT
-  option.highlights[0] = 0;
   force_redraw_all();
 }
 
