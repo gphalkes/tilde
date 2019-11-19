@@ -50,8 +50,10 @@ void stepped_process_t::abort() {
 
 void stepped_process_t::done() {
   cleanup();
+  /* Ensure that this object is always deleted. Simply calling delete after the done_cb won't do the
+     trick, as it is not guaranteed that done_cb actually returns. */
+  std::unique_ptr<stepped_process_t> deleter(this);
   done_cb(this);
-  delete this;
 }
 
 stepped_process_t::~stepped_process_t() {
