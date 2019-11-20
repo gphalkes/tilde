@@ -303,6 +303,7 @@ void recent_files_t::write_to_disk() {
   strings::Append(&recent_files_path, xdg_path.get(), "/", kRecentFiles);
   xdg_path.reset();
 
+  creat(recent_files_path.c_str(), 0700);
   std::unique_ptr<FILE, fclose_deleter> recent_files_file(fopen(recent_files_path.c_str(), "r+"));
   if (recent_files_file == nullptr) {
     lprintf("Could not open recent files file: %s: %m\n", recent_files_path.c_str());
@@ -349,7 +350,7 @@ void recent_files_t::write_to_disk() {
     lprintf("Error loading recent_files data: %s: %s\n", t3_config_strerror(error.error),
             error.extra);
     free(error.extra);
-    return;
+    /* This is not an error. We simply overwrite. The data is not particularly important. */
   }
 
   std::map<string_view, t3_config_t *> name_to_config;
@@ -424,7 +425,9 @@ void recent_files_t::write_to_disk() {
       t3_config_erase_from_list(recent_files_list, timestamped_configs[i].second);
     }
   }
-
+  /* Ensure the format is set to the correct value. It may be unset if the file did not exist
+     before. */
+  t3_config_add_int(config.get(), "format", 1);
   if (!t3_config_validate(config.get(), schema.get(), &error, T3_CONFIG_VERBOSE_ERROR)) {
     lprintf("Invalid recent_files data created: %s: %s\n", t3_config_strerror(error.error),
             error.extra);

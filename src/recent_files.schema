@@ -1,0 +1,40 @@
+# Copyright (C) 2019 G.P. Halkes
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3, as
+# published by the Free Software Foundation.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+types {
+  recent-file {
+    type = "section"
+    allowed-keys {
+      name { type = "string" }
+      encoding { type = "string" }
+      position {
+        type = "list"
+        item-type = "int"
+        # Require 2 or 4 values. The possibility to set 4 values will be used
+        # in the future to hold the top-left position of the window, such that
+        # the screen is restored as best possible.
+        %constraint = "# = 2 | # = 4"
+      }
+      close-time { type = "int" }
+    }
+  }
+}
+allowed-keys {
+  format { type = "int" }
+  recent-files {
+    type = "list"
+    item-type = "recent-file"
+  }
+}
+
+%constraint = "format = 1"  # Assert that the number key must have value 1

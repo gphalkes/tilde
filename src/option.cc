@@ -135,10 +135,12 @@ static void read_config_attribute(const t3_config_t *config, const char *name,
   update(accumulated_attr);
 }
 
-#define GET_OPT(name, TYPE, type)                                                                  \
-  do {                                                                                             \
-    t3_config_t *tmp;                                                                              \
-    if ((tmp = t3_config_get(&*config, #name)) != nullptr) opts->name = t3_config_get_##type(tmp); \
+#define GET_OPT(name, TYPE, type)                            \
+  do {                                                       \
+    t3_config_t *tmp;                                        \
+    if ((tmp = t3_config_get(&*config, #name)) != nullptr) { \
+      opts->name = t3_config_get_##type(tmp);                \
+    }                                                        \
   } while (false)
 #define GET_ATTRIBUTE(name) \
   read_config_attribute(attributes, #name, [&](t3_attr_t value) { opts->name = value; })
