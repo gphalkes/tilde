@@ -476,6 +476,7 @@ void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
 #endif
       break;
   }
+  update_attribute_lines();
   picker->hide();
 }
 
@@ -539,6 +540,7 @@ void attributes_dialog_t::default_attribute_selected() {
 #endif
       break;
   }
+  update_attribute_lines();
   picker->hide();
 }
 
