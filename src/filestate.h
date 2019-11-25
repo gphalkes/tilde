@@ -203,7 +203,7 @@ class load_cli_file_process_t : public stepped_process_t {
 
  protected:
   std::list<std::string>::const_iterator iter;
-  bool in_load, in_step, encoding_selected;
+  bool in_load, encoding_selected;
   std::string encoding;
 
   explicit load_cli_file_process_t(const callback_t &cb);

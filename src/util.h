@@ -89,6 +89,7 @@ class stepped_process_t {
   using callback_t = std::function<void(stepped_process_t *)>;
   callback_t done_cb;
   bool result;
+  bool in_step = false;
 
   stepped_process_t();
   explicit stepped_process_t(const callback_t &cb);
