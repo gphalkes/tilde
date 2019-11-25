@@ -254,6 +254,7 @@ bool save_as_process_t::step() {
       }
       error_dialog->set_message(message);
       error_dialog->show();
+      abort();
       break;
     case rw_result_t::CONVERSION_ERROR:
       if (encoding.empty()) {
@@ -263,6 +264,7 @@ bool save_as_process_t::step() {
                   transcript_strerror(rw_result.get_transcript_error()));
       error_dialog->set_message(message);
       error_dialog->show();
+      abort();
       break;
     case rw_result_t::CONVERSION_IMPRECISE:
       if (encoding.empty()) {
@@ -289,12 +291,14 @@ bool save_as_process_t::step() {
           name.c_str(), strerror(rw_result.get_errno_error()));
       error_dialog->set_message(message);
       error_dialog->show();
+      abort();
       break;
     case rw_result_t::RACE_ON_FILE:
       printf_into(&message,
                   "Opening file '%s' after changing the mode opened a different file. The file was "
                   "not written.",
                   name.c_str());
+      abort();
       break;
     default:
       printf_into(&message,
@@ -302,6 +306,7 @@ bool save_as_process_t::step() {
                   "damaged!");
       error_dialog->set_message(message);
       error_dialog->show();
+      abort();
       break;
   }
   return true;
@@ -507,7 +512,6 @@ load_cli_file_process_t::load_cli_file_process_t(const callback_t &cb)
     : stepped_process_t(cb),
       iter(cli_option.files.begin()),
       in_load(false),
-      in_step(false),
       encoding_selected(false) {}
 
 bool load_cli_file_process_t::step() {
@@ -527,7 +531,6 @@ bool load_cli_file_process_t::step() {
     }
   }
 
-  in_step = true;
   while (iter != cli_option.files.end()) {
     text_pos_t line = -1, pos = -1;
     std::string filename = *iter;
@@ -540,7 +543,6 @@ bool load_cli_file_process_t::step() {
     load_process_t::execute(bind_front(&load_cli_file_process_t::load_done, this), filename.c_str(),
                             encoding.c_str(), true);
     if (in_load) {
-      in_step = false;
       return false;
     }
     open_files.back()->goto_pos(line, pos);

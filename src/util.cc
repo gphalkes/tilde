@@ -46,14 +46,19 @@ stepped_process_t::stepped_process_t() : result(true) {}
 stepped_process_t::stepped_process_t(const callback_t &cb) : done_cb(cb), result(true) {}
 
 void stepped_process_t::run() {
-  if (step()) {
+  in_step = true;
+  bool step_result = step();
+  in_step = false;
+  if (step_result) {
     done();
   }
 }
 
 void stepped_process_t::abort() {
   result = false;
-  done();
+  if (!in_step) {
+    done();
+  }
 }
 
 void stepped_process_t::done() {
