@@ -1,4 +1,4 @@
-Version 1.0.3:
+Version :
 	New features:
 	- The base config, loaded before the user config from (by default)
 	  /usr/share/tilde/base.config, now accepts the same configuration as the user
@@ -9,6 +9,10 @@ Version 1.0.3:
 	- When opening files that were opened before, the cursor is set back to its
 	  last used position. This is limited to the last 100 files, to keep the
 	  storage space and processing required small.
+
+Version 1.0.3:
+	Bug fixes:
+	- Errors during saving files on exit would not be presented to the user.
 
 Version 1.0.2:
 	Bug fixes:
