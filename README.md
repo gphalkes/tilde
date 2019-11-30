@@ -49,7 +49,7 @@ follow the steps below to build Tilde from the git repositories:
    * libattr1-dev
    * libgpm-dev
    * libncurses5-dev
-   * libpcre3-dev
+   * libpcre2-dev
    * libtool-bin
    * libunistring-dev
    * libxcb1-dev and/or libx11-dev
