@@ -41,6 +41,9 @@ class attributes_dialog_t : public dialog_t {
   std::unique_ptr<expander_group_t> expander_group;
   std::unique_ptr<attribute_picker_dialog_t> picker;
   attribute_key_t change_attribute;
+  bool change_defaults = false;
+  const term_options_t default_term_opts;
+  const term_options_t *defaults;
 
   void change_button_activated(attribute_key_t attribute);
   void expander_size_change(bool);
@@ -49,18 +52,18 @@ class attributes_dialog_t : public dialog_t {
   void default_attribute_selected();
   void handle_activate();
   void handle_save_defaults();
+  void set_options_from_values(term_options_t *term_options);
+  void reset_values();
 
  public:
   explicit attributes_dialog_t(int width);
   bool set_size(optint height, optint width) override;
   void show() override;
   void set_values_from_options();
-  void set_term_options_from_values();
-  void set_default_options_from_values();
-  void set_options_from_values(term_options_t *term_options);
+  void set_options_from_values();
+  void set_change_defaults(bool value);
 
   DEFINE_SIGNAL(activate);
-  DEFINE_SIGNAL(save_defaults);
 };
 
 #endif

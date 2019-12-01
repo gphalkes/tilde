@@ -47,11 +47,17 @@ int config_read_error_line;
 static struct {
   const char *string;
   t3_attr_t attr;
-} attribute_map[] = {{"underline", T3_ATTR_UNDERLINE},
-                     {"bold", T3_ATTR_BOLD},
-                     {"reverse", T3_ATTR_REVERSE},
-                     {"blink", T3_ATTR_BLINK},
-                     {"dim", T3_ATTR_DIM},
+} attribute_map[] = {{"underline", T3_ATTR_UNDERLINE | T3_ATTR_UNDERLINE_SET},
+                     {"bold", T3_ATTR_BOLD | T3_ATTR_BOLD_SET},
+                     {"reverse", T3_ATTR_REVERSE | T3_ATTR_REVERSE_SET},
+                     {"blink", T3_ATTR_BLINK | T3_ATTR_BLINK_SET},
+                     {"dim", T3_ATTR_DIM | T3_ATTR_DIM_SET},
+
+                     {"no underline", T3_ATTR_UNDERLINE_SET},
+                     {"no bold", T3_ATTR_BOLD_SET},
+                     {"no reverse", T3_ATTR_REVERSE_SET},
+                     {"no blink", T3_ATTR_BLINK_SET},
+                     {"no dim", T3_ATTR_DIM_SET},
 
                      {"fg default", T3_ATTR_FG_DEFAULT},
                      {"fg black", T3_ATTR_FG_BLACK},
@@ -508,9 +514,13 @@ void set_attributes() {
 
 static void set_config_attribute(t3_config_t *config, const char *section_name, const char *name,
                                  optional<t3_attr_t> attr) {
-  static t3_attr_t attribute_masks[] = {T3_ATTR_FG_MASK, T3_ATTR_BG_MASK, T3_ATTR_UNDERLINE,
-                                        T3_ATTR_BOLD,    T3_ATTR_REVERSE, T3_ATTR_BLINK,
-                                        T3_ATTR_DIM};
+  static t3_attr_t attribute_masks[] = {T3_ATTR_FG_MASK,
+                                        T3_ATTR_BG_MASK,
+                                        T3_ATTR_UNDERLINE | T3_ATTR_UNDERLINE_SET,
+                                        T3_ATTR_BOLD | T3_ATTR_BOLD_SET,
+                                        T3_ATTR_REVERSE | T3_ATTR_REVERSE_SET,
+                                        T3_ATTR_BLINK | T3_ATTR_BLINK_SET,
+                                        T3_ATTR_DIM | T3_ATTR_DIM_SET};
 
   t3_config_t *attributes;
   size_t i, j;

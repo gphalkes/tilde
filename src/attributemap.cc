@@ -14,7 +14,7 @@ optional<int> attribute_map_t::lookup_mapping(string_view name) {
   return nullopt;
 }
 
-optional<t3_attr_t> attribute_map_t::lookup_attributes(string_view name) {
+optional<t3_attr_t> attribute_map_t::lookup_attributes(string_view name) const {
   auto iter = mapping.find(name);
   if (iter != mapping.end()) {
     return attributes[iter->second];
@@ -22,7 +22,7 @@ optional<t3_attr_t> attribute_map_t::lookup_attributes(string_view name) {
   return nullopt;
 }
 
-optional<t3_attr_t> attribute_map_t::lookup_attributes(int idx) {
+optional<t3_attr_t> attribute_map_t::lookup_attributes(int idx) const {
   if (idx >= 0 && static_cast<size_t>(idx) < attributes.size()) {
     return attributes[idx];
   }

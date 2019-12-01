@@ -91,7 +91,6 @@ class main_t : public main_window_base_t {
   void set_buffer_options();
   void set_default_options();
   void set_interface_options();
-  void set_default_interface_options();
   void set_misc_options();
   void set_highlight(t3_highlight_t *highlight, const char *name);
   void save_as_done(stepped_process_t *process);
@@ -181,6 +180,8 @@ main_t::main_t() {
   panel->insert_item(nullptr, "_Current Buffer...", "", action_id_t::OPTIONS_BUFFER);
   panel->insert_item(nullptr, "Buffer _Defaults...", "", action_id_t::OPTIONS_DEFAULTS);
   panel->insert_item(nullptr, "_Interface...", "", action_id_t::OPTIONS_INTERFACE);
+  panel->insert_item(nullptr, "Inter_face defaults...", "",
+                     action_id_t::OPTIONS_INTERFACE_DEFAULTS);
 
   panel->insert_item(nullptr, "_Miscellaneous...", "", action_id_t::OPTIONS_MISC);
 
@@ -273,7 +274,6 @@ main_t::main_t() {
   attributes_dialog = make_unique<attributes_dialog_t>(ATTRIBUTES_DIALOG_WIDTH);
   attributes_dialog->center_over(this);
   attributes_dialog->connect_activate([this] { set_interface_options(); });
-  attributes_dialog->connect_save_defaults([this] { set_default_interface_options(); });
 }
 
 bool main_t::process_key(t3widget::key_t key) {
@@ -501,6 +501,12 @@ void main_t::menu_activated(int id) {
       default_options_dialog->show();
       break;
     case action_id_t::OPTIONS_INTERFACE:
+      attributes_dialog->set_change_defaults(false);
+      attributes_dialog->set_values_from_options();
+      attributes_dialog->show();
+      break;
+    case action_id_t::OPTIONS_INTERFACE_DEFAULTS:
+      attributes_dialog->set_change_defaults(true);
       attributes_dialog->set_values_from_options();
       attributes_dialog->show();
       break;
@@ -580,14 +586,7 @@ void main_t::set_default_options() {
 void main_t::set_interface_options() {
   /* First set color mode, because that resets all the attributes to the defaults. */
   set_color_mode(option.color);
-  attributes_dialog->set_term_options_from_values();
-  write_config();
-}
-
-void main_t::set_default_interface_options() {
-  /* First set color mode, because that resets all the attributes to the defaults. */
-  set_color_mode(option.color);
-  attributes_dialog->set_default_options_from_values();
+  attributes_dialog->set_options_from_values();
   write_config();
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012,2018 G.P. Halkes
+/* Copyright (C) 2012,2018-2019 G.P. Halkes
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License version 3, as
    published by the Free Software Foundation.
@@ -13,6 +13,42 @@
 */
 
 #include "tilde/dialogs/attributesdialog.h"
+
+namespace {
+
+const char *kAttributeToNameMapping[] = {
+    "dialog",
+    "dialog_selected",
+    "shadow",
+    "button_selected",
+    "scrollbar",
+    "menubar",
+    "menubar_selected",
+    "background",
+    "hotkey_highlight",
+    "bad_draw",
+    "non_print",
+    "text",
+    "text_selected",
+    "text_cursor",
+    "text_selection_cursor",
+    "text_selection_cursor2",
+    "meta_text",
+    "brace_highlight",
+    "comment",
+    "comment-keyword",
+    "keyword",
+    "number",
+    "string",
+    "string-escape",
+    "misc",
+    "variable",
+    "error",
+    "addition",
+    "deletion",
+};
+
+}  // namespace
 
 #define START_WIDGET_GROUP                               \
   {                                                      \
@@ -47,7 +83,8 @@
   } while (false)
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
-attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Interface")) {
+attributes_dialog_t::attributes_dialog_t(int width)
+    : dialog_t(7, width, _("Interface")), defaults(&default_option.term_options) {
   smart_label_t *label = emplace_back<smart_label_t>(_("Color _mode"));
   label->set_position(1, 2);
   color_box = emplace_back<checkbox_t>();
@@ -83,7 +120,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Inte
   ADD_ATTRIBUTE_ENTRY("Selection cursor at end", TEXT_SELECTION_CURSOR, text_selection_cursor_line);
   ADD_ATTRIBUTE_ENTRY("Selection cursor at start", TEXT_SELECTION_CURSOR2,
                       text_selection_cursor2_line);
-  ADD_ATTRIBUTE_ENTRY("Meta text", META_TEXT, meta_text_line);
+  ADD_ATTRIBUTE_ENTRY("Wrap indicators", META_TEXT, meta_text_line);
   ADD_ATTRIBUTE_ENTRY("Brace highlight", BRACE_HIGHLIGHT, brace_highlight_line);
   END_WIDGET_GROUP("_Text area attributes", text_area)
   text_area->set_anchor(interface, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
@@ -109,7 +146,7 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Inte
   expander_group->connect_expanded([this](bool expanded) { expander_size_change(expanded); });
 
   button_t *ok_button = emplace_back<button_t>("_Ok", true);
-  button_t *save_defaults_button = emplace_back<button_t>("Save as _defaults");
+  button_t *reset_to_defaults_button = emplace_back<button_t>(_("_Reset to defaults"));
   button_t *cancel_button = emplace_back<button_t>("_Cancel");
 
   cancel_button->set_anchor(this,
@@ -121,16 +158,19 @@ attributes_dialog_t::attributes_dialog_t(int width) : dialog_t(7, width, _("Inte
   cancel_button->connect_move_focus_up([this] { focus_previous(); });
   cancel_button->connect_move_focus_left([this] { focus_previous(); });
 
-  save_defaults_button->set_anchor(cancel_button,
-                                   T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
-  save_defaults_button->set_position(0, -2);
-  save_defaults_button->connect_move_focus_up([this] { focus_previous(); });
-  save_defaults_button->connect_move_focus_up([this] { focus_previous(); });
-  save_defaults_button->connect_move_focus_left([this] { focus_previous(); });
-  save_defaults_button->connect_move_focus_right([this] { focus_next(); });
-  save_defaults_button->connect_activate([this] { handle_save_defaults(); });
+  reset_to_defaults_button->set_anchor(cancel_button,
+                                       T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+  reset_to_defaults_button->set_position(0, -2);
+  reset_to_defaults_button->connect_move_focus_up([this] { focus_previous(); });
+  reset_to_defaults_button->connect_move_focus_up([this] { focus_previous(); });
+  reset_to_defaults_button->connect_move_focus_left([this] { focus_previous(); });
+  reset_to_defaults_button->connect_move_focus_right([this] { focus_next(); });
+  reset_to_defaults_button->connect_activate([this] {
+    reset_values();
+    handle_activate();
+  });
 
-  ok_button->set_anchor(save_defaults_button,
+  ok_button->set_anchor(reset_to_defaults_button,
                         T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
   ok_button->set_position(0, -2);
   ok_button->connect_move_focus_up([this] { focus_previous(); });
@@ -231,12 +271,15 @@ void attributes_dialog_t::expander_size_change(bool expanded) {
 }
 
 void attributes_dialog_t::set_values_from_options() {
+  const term_options_t *source_options =
+      change_defaults ? &default_option.term_options : &term_specific_option;
+
   color_box->set_state(option.color);
 
-#define SET_OPTION_VALUE(name)                                     \
-  do {                                                             \
-    name = term_specific_option.name;                              \
-    if (!name.is_valid()) name = default_option.term_options.name; \
+#define SET_OPTION_VALUE(name)                   \
+  do {                                           \
+    name = source_options->name;                 \
+    if (!name.is_valid()) name = defaults->name; \
   } while (false)
 
   SET_OPTION_VALUE(dialog);
@@ -260,11 +303,10 @@ void attributes_dialog_t::set_values_from_options() {
   SET_OPTION_VALUE(brace_highlight);
 #undef SET_OPTION_VALUE
 
-#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                               \
-  do {                                                                                 \
-    name = term_specific_option.highlights.lookup_attributes(highlight_name);          \
-    if (!name.is_valid())                                                              \
-      name = default_option.term_options.highlights.lookup_attributes(highlight_name); \
+#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                                 \
+  do {                                                                                   \
+    name = source_options->highlights.lookup_attributes(highlight_name);                 \
+    if (!name.is_valid()) name = defaults->highlights.lookup_attributes(highlight_name); \
   } while (false)
   SET_HIGHLIGHT_OPTION_VALUE(comment, "comment");
   SET_HIGHLIGHT_OPTION_VALUE(comment_keyword, "comment-keyword");
@@ -281,48 +323,23 @@ void attributes_dialog_t::set_values_from_options() {
   update_attribute_lines();
 }
 
-void attributes_dialog_t::set_term_options_from_values() {
-  set_options_from_values(&term_specific_option);
-}
-
-void attributes_dialog_t::set_default_options_from_values() {
-  set_options_from_values(&default_option.term_options);
-
-  // Make this terminal obey the defaults.
-  term_specific_option.color = nullopt;
-  term_specific_option.non_print = nullopt;
-  term_specific_option.text_selection_cursor = nullopt;
-  term_specific_option.text_selection_cursor2 = nullopt;
-  term_specific_option.bad_draw = nullopt;
-  term_specific_option.text_cursor = nullopt;
-  term_specific_option.text = nullopt;
-  term_specific_option.text_selected = nullopt;
-  term_specific_option.hotkey_highlight = nullopt;
-
-  term_specific_option.dialog = nullopt;
-  term_specific_option.dialog_selected = nullopt;
-  term_specific_option.button_selected = nullopt;
-  term_specific_option.scrollbar = nullopt;
-  term_specific_option.menubar = nullopt;
-  term_specific_option.menubar_selected = nullopt;
-
-  term_specific_option.shadow = nullopt;
-  term_specific_option.meta_text = nullopt;
-  term_specific_option.background = nullopt;
-
-  term_specific_option.highlights.clear_mappings();
-  term_specific_option.brace_highlight = nullopt;
+void attributes_dialog_t::set_options_from_values() {
+  if (change_defaults) {
+    set_options_from_values(&default_option.term_options);
+  } else {
+    set_options_from_values(&term_specific_option);
+  }
 }
 
 void attributes_dialog_t::set_options_from_values(term_options_t *term_options) {
   term_options->color = option.color = color_box->get_state();
 
-#define SET_WITH_DEFAULT(name, attr)                                                              \
-  do {                                                                                            \
-    term_options->name = name;                                                                    \
-    set_attribute(                                                                                \
-        attribute_t::attr,                                                                        \
-        name.is_valid() ? name.value() : get_default_attribute(attribute_t::attr, option.color)); \
+#define SET_WITH_DEFAULT(name, attr)                                                            \
+  do {                                                                                          \
+    term_options->name = name;                                                                  \
+    set_attribute(attribute_t::attr,                                                            \
+                  term_specific_option.name.value_or(default_option.term_options.name.value_or( \
+                      get_default_attribute(attribute_t::attr, option.color))));                \
   } while (false)
   SET_WITH_DEFAULT(dialog, DIALOG);
   SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
@@ -344,29 +361,34 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
 #undef SET_WITH_DEFAULT
 
   term_options->brace_highlight = brace_highlight;
-  option.brace_highlight =
-      brace_highlight.is_valid() ? brace_highlight.value() : get_default_attr(BRACE_HIGHLIGHT);
+  option.brace_highlight = term_specific_option.brace_highlight.value_or(
+      default_option.term_options.brace_highlight.value_or(get_default_attr(BRACE_HIGHLIGHT)));
 
-#define SET_WITH_DEFAULT(name, name_str, attr)                                         \
-  do {                                                                                 \
-    if (name.is_valid()) {                                                             \
-      term_options->highlights.insert_mapping(name_str, name.value());                 \
-    } else {                                                                           \
-      term_options->highlights.erase_mapping(name_str);                                \
-    }                                                                                  \
-    option.highlights.insert_mapping(name_str, name.value_or(get_default_attr(attr))); \
+#define SET_WITH_DEFAULT(name, attr)                                                        \
+  do {                                                                                      \
+    if (name.is_valid()) {                                                                  \
+      term_options->highlights.insert_mapping(kAttributeToNameMapping[attr], name.value()); \
+    } else {                                                                                \
+      term_options->highlights.erase_mapping(kAttributeToNameMapping[attr]);                \
+    }                                                                                       \
+    option.highlights.insert_mapping(                                                       \
+        kAttributeToNameMapping[attr],                                                      \
+        term_specific_option.highlights.lookup_attributes(kAttributeToNameMapping[attr])    \
+            .value_or(default_option.term_options.highlights                                \
+                          .lookup_attributes(kAttributeToNameMapping[attr])                 \
+                          .value_or(get_default_attr(attr))));                              \
   } while (false)
-  SET_WITH_DEFAULT(comment, "comment", COMMENT);
-  SET_WITH_DEFAULT(comment_keyword, "comment-keyword", COMMENT_KEYWORD);
-  SET_WITH_DEFAULT(keyword, "keyword", KEYWORD);
-  SET_WITH_DEFAULT(number, "number", NUMBER);
-  SET_WITH_DEFAULT(string, "string", STRING);
-  SET_WITH_DEFAULT(string_escape, "string-escape", STRING_ESCAPE);
-  SET_WITH_DEFAULT(misc, "misc", MISC);
-  SET_WITH_DEFAULT(variable, "variable", VARIABLE);
-  SET_WITH_DEFAULT(error, "error", ERROR);
-  SET_WITH_DEFAULT(addition, "addition", ADDITION);
-  SET_WITH_DEFAULT(deletion, "deletion", DELETION);
+  SET_WITH_DEFAULT(comment, COMMENT);
+  SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
+  SET_WITH_DEFAULT(keyword, KEYWORD);
+  SET_WITH_DEFAULT(number, NUMBER);
+  SET_WITH_DEFAULT(string, STRING);
+  SET_WITH_DEFAULT(string_escape, STRING_ESCAPE);
+  SET_WITH_DEFAULT(misc, MISC);
+  SET_WITH_DEFAULT(variable, VARIABLE);
+  SET_WITH_DEFAULT(error, ERROR);
+  SET_WITH_DEFAULT(addition, ADDITION);
+  SET_WITH_DEFAULT(deletion, DELETION);
 #undef SET_WITH_DEFAULT
   force_redraw_all();
 }
@@ -376,7 +398,7 @@ void attributes_dialog_t::update_attribute_lines() {
   bool color = color_box->get_state();
 
 #define SET_WITH_DEFAULT(name, attr) \
-  name##_line->set_attribute(name.is_valid() ? name.value() : get_default_attr(attr, color))
+  name##_line->set_attribute(name.value_or(defaults->name.value_or(get_default_attr(attr, color))))
   SET_WITH_DEFAULT(dialog, DIALOG);
   SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
   SET_WITH_DEFAULT(shadow, SHADOW);
@@ -400,9 +422,16 @@ void attributes_dialog_t::update_attribute_lines() {
 
 #define SET_WITH_DEFAULT(name, attr)                \
   name##_line->set_attribute(t3_term_combine_attrs( \
-      name.is_valid() ? name.value() : get_default_attr(attr, color), text_attr))
+      name.value_or(defaults->name.value_or(get_default_attr(attr, color))), text_attr))
   SET_WITH_DEFAULT(meta_text, META_TEXT);
   SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
+#undef SET_WITH_DEFAULT
+
+#define SET_WITH_DEFAULT(name, attr)                                                      \
+  name##_line->set_attribute(t3_term_combine_attrs(                                       \
+      name.value_or(defaults->highlights.lookup_attributes(kAttributeToNameMapping[attr]) \
+                        .value_or(get_default_attr(attr, color))),                        \
+      text_attr))
 
   SET_WITH_DEFAULT(comment, COMMENT);
   SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
@@ -485,11 +514,11 @@ void attributes_dialog_t::default_attribute_selected() {
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
   switch (change_attribute) {
-#define SET_DEFAULT(name, attr)                                                                   \
-  case attr:                                                                                      \
-    name = default_option.term_options.name;                                                      \
-    name##_line->set_attribute(name.is_valid() ? name.value()                                     \
-                                               : get_default_attr(attr, color_box->get_state())); \
+#define SET_DEFAULT(name, attr)                                                   \
+  case attr:                                                                      \
+    name.reset();                                                                 \
+    name##_line->set_attribute(                                                   \
+        defaults->name.value_or(get_default_attr(attr, color_box->get_state()))); \
     break;
     SET_DEFAULT(dialog, DIALOG);
     SET_DEFAULT(dialog_selected, DIALOG_SELECTED);
@@ -511,14 +540,26 @@ void attributes_dialog_t::default_attribute_selected() {
 
 #undef SET_DEFAULT
 
-#define SET_DEFAULT(name, attr)                                                            \
-  case attr:                                                                               \
-    name.reset();                                                                          \
-    name##_line->set_attribute(                                                            \
-        t3_term_combine_attrs(get_default_attr(attr, color_box->get_state()), text_attr)); \
+#define SET_DEFAULT(name, attr)                                                               \
+  case attr:                                                                                  \
+    name.reset();                                                                             \
+    name##_line->set_attribute(t3_term_combine_attrs(                                         \
+        defaults->name.value_or(get_default_attr(attr, color_box->get_state())), text_attr)); \
     break;
+
     SET_DEFAULT(meta_text, META_TEXT);
     SET_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
+
+#undef SET_DEFAULT
+
+#define SET_DEFAULT(name, attr)                                               \
+  case attr:                                                                  \
+    name.reset();                                                             \
+    name##_line->set_attribute(t3_term_combine_attrs(                         \
+        defaults->highlights.lookup_attributes(kAttributeToNameMapping[attr]) \
+            .value_or(get_default_attr(attr, color_box->get_state())),        \
+        text_attr));                                                          \
+    break;
 
     SET_DEFAULT(comment, COMMENT);
     SET_DEFAULT(comment_keyword, COMMENT_KEYWORD);
@@ -550,8 +591,41 @@ void attributes_dialog_t::handle_activate() {
   activate();
 }
 
-void attributes_dialog_t::handle_save_defaults() {
-  /* Do required validation here. */
-  hide();
-  save_defaults();
+void attributes_dialog_t::set_change_defaults(bool value) {
+  change_defaults = value;
+  set_title(change_defaults ? _("Interface defaults") : _("Interface"));
+  defaults = change_defaults ? &default_term_opts : &default_option.term_options;
+}
+
+void attributes_dialog_t::reset_values() {
+  dialog.reset();
+  dialog_selected.reset();
+  shadow.reset();
+  button_selected.reset();
+  scrollbar.reset();
+  menubar.reset();
+  menubar_selected.reset();
+  background.reset();
+  hotkey_highlight.reset();
+  bad_draw.reset();
+  non_print.reset();
+  text.reset();
+  text_selected.reset();
+  text_cursor.reset();
+  text_selection_cursor.reset();
+  text_selection_cursor2.reset();
+  meta_text.reset();
+  brace_highlight.reset();
+  comment.reset();
+  comment_keyword.reset();
+  keyword.reset();
+  number.reset();
+  string.reset();
+  string_escape.reset();
+  misc.reset();
+  variable.reset();
+  error.reset();
+  addition.reset();
+  deletion.reset();
+  update_attribute_lines();
 }

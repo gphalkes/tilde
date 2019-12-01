@@ -24,10 +24,10 @@ class attribute_map_t {
   optional<int> lookup_mapping(string_view name);
 
   /** Looks up the attributes associated with name or @c nullopt if name has not been inserted. */
-  optional<t3_attr_t> lookup_attributes(string_view name);
+  optional<t3_attr_t> lookup_attributes(string_view name) const;
 
   /** Looks up the attributes associated with idx or @c nullpt if idx is out of range. */
-  optional<t3_attr_t> lookup_attributes(int idx);
+  optional<t3_attr_t> lookup_attributes(int idx) const;
 
   /** Inserts or overwrites the mapping with the given attributes. */
   void insert_mapping(string_view name, t3_attr_t attr);
