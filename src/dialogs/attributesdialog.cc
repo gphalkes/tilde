@@ -208,11 +208,11 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
   change_attribute = attribute;
 
   switch (attribute) {
-#define SET_WITH_DEFAULT(name, attr)                                                         \
-  case attr:                                                                                 \
-    picker->set_base_attributes(0);                                                          \
-    picker->set_attribute(name.is_valid() ? name.value()                                     \
-                                          : get_default_attr(attr, color_box->get_state())); \
+#define SET_WITH_DEFAULT(name, attr)                                                             \
+  case attr:                                                                                     \
+    picker->set_base_attributes(0);                                                              \
+    picker->set_attribute(                                                                       \
+        name.value_or(defaults->name.value_or(get_default_attr(attr, color_box->get_state())))); \
     break;
     SET_WITH_DEFAULT(dialog, DIALOG);
     SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
@@ -233,14 +233,23 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
     SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
 #undef SET_WITH_DEFAULT
 
-#define SET_WITH_DEFAULT(name, attr)                                                         \
-  case attr:                                                                                 \
-    picker->set_base_attributes(text_attr);                                                  \
-    picker->set_attribute(name.is_valid() ? name.value()                                     \
-                                          : get_default_attr(attr, color_box->get_state())); \
+#define SET_WITH_DEFAULT(name, attr)                                                             \
+  case attr:                                                                                     \
+    picker->set_base_attributes(text_attr);                                                      \
+    picker->set_attribute(                                                                       \
+        name.value_or(defaults->name.value_or(get_default_attr(attr, color_box->get_state())))); \
     break;
     SET_WITH_DEFAULT(meta_text, META_TEXT);
     SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
+#undef SET_WITH_DEFAULT
+
+#define SET_WITH_DEFAULT(name, attr)                                                        \
+  case attr:                                                                                \
+    picker->set_base_attributes(text_attr);                                                 \
+    picker->set_attribute(                                                                  \
+        name.value_or(defaults->highlights.lookup_attributes(kAttributeToNameMapping[attr]) \
+                          .value_or(get_default_attr(attr, color_box->get_state()))));      \
+    break;
 
     SET_WITH_DEFAULT(comment, COMMENT);
     SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
