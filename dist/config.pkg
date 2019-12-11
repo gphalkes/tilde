@@ -116,10 +116,9 @@ EOF
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdarg>
+#include <cstdio>
 #include <signal.h>
 #include <fnmatch.h>
 #include <dirent.h>
@@ -131,8 +130,7 @@ int main(int argc, char *argv[]) {
 	va_list ap;
 
 	close(fd);
-	fd = creat("path", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-	stat("path", &statbuf);
+	fstat(fd, &statbuf);
 	fchmod(fd, 0644);
 	fsync(fd);
 	ftruncate(fd, 5);
@@ -142,7 +140,7 @@ int main(int argc, char *argv[]) {
 	bufsiz = readlink("path", buf, sizeof(buf));
 	fd = mkstemp("pathXXXXXX");
 	vsnprintf(buf, sizeof(buf), "fmt", ap);
-	pathconf("/", _PC_PATH_MAX);
+	fdopen(fd, "r+");
 	return 0;
 }
 EOF
@@ -150,18 +148,17 @@ EOF
 		check_message_result "Testing required functions seperatly for debugging purposes"
 
 		checkfunction "close" 'int fd; close(fd);' "<unistd.h>"
-		checkfunction "creat" 'int fd = creat("path", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);' "<sys/types.h>" "<sys/stat.h>" "<fcntl.h>"
-		checkfunction "stat" 'struct stat statbuf; stat("path", &statbuf);' "<sys/types.h>" "<sys/stat.h>" "<unistd.h>"
+		checkfunction "fstat" 'int fd; struct stat statbuf; fstat(fd, &statbuf);' "<sys/types.h>" "<sys/stat.h>" "<unistd.h>"
 		checkfunction "fchmod" 'int fd; fchmod(fd, 0);' "<sys/stat.h>"
 		checkfunction "fsync" 'int fd; fsync(fd);' "<unistd.h>"
-		checkfunction "ftruncate" 'int fd; ftrucnate(fd, 5);' "<unistd.h>" "<sys/types.h>"
-		checkfunction "lseek" 'off_t offset = lseek(fd, 0, SEEK_CUR);' "<sys/types.h>" "<unistd.h>"
+		checkfunction "ftruncate" 'int fd; ftruncate(fd, 5);' "<unistd.h>" "<sys/types.h>"
+		checkfunction "lseek" 'int fd; off_t offset = lseek(fd, 0, SEEK_CUR);' "<sys/types.h>" "<unistd.h>"
 		checkfunction "open" 'int fd = open("name", O_RDONLY);' "<fcntl.h>" "<sys/stat.h>" "<sys/types.h>"
 		checkfunction "unlink" 'unlink("name");' "<unistd.h>"
 		checkfunction "readlink" 'char buf[1024]; size_t bufsiz; bufsiz = readlink("path", buf, sizeof(buf));' "<unistd.h>"
-		checkfunction "mkstemp" 'mkstemp("pathXXXXXX");' "<stdlib.h>"
-		checkfunction "vsnprintf" 'char buf[1024]; va_list ap; vsnprintf(buf, sizeof(buf), "fmt", ap);' "<stdio.h>" "<stdarg.h>"
-		checkfunction "pathconf" 'pathconf("/", _PC_PATH_MAX);' "<unistd.h>"
+		checkfunction "mkstemp" 'mkstemp("pathXXXXXX");' "<cstdlib>"
+		checkfunction "vsnprintf" 'char buf[1024]; va_list ap; vsnprintf(buf, sizeof(buf), "fmt", ap);' "<cstdio>" "<cstdarg>"
+		checkfunction "fdopen" 'int fd; fdopen(fd, "r+");' "<cstdio>"
 		error "!! A required Un*x function was not found. See config.log for details."
 	}
 

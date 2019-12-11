@@ -1,4 +1,4 @@
-Version :
+Version 1.1.0:
 	New features:
 	- The base config, loaded before the user config from (by default)
 	  /usr/share/tilde/base.config, now accepts the same configuration as the user
