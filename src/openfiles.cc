@@ -197,9 +197,12 @@ void recent_files_t::load_from_disk() {
   strings::Append(&recent_files_path, xdg_path.get(), "/", kRecentFiles);
   xdg_path.reset();
 
+  lprintf("Operating on file %s\n", recent_files_path.c_str());
+
   std::unique_ptr<FILE, fclose_deleter> recent_files_file(fopen(recent_files_path.c_str(), "r"));
   if (recent_files_file == nullptr) {
-    lprintf("Could not open recent files file: %s: %m\n", recent_files_path.c_str());
+    lprintf("Could not open recent files file: %s: %s\n", recent_files_path.c_str(),
+            strerror(errno));
     return;
   }
   int fd = fileno(recent_files_file.get());
@@ -211,7 +214,7 @@ void recent_files_t::load_from_disk() {
   flock.l_type = F_RDLCK;
   while (fcntl(fd, F_SETLKW, &flock) != 0) {
     if (errno != EINTR) {
-      lprintf("Could not lock recent files file: %m\n");
+      lprintf("Could not lock recent files file: %s\n", strerror(errno));
       return;
     }
   }
@@ -294,22 +297,31 @@ static bool make_dirs(char *dir) {
 
 void recent_files_t::write_to_disk() {
   std::unique_ptr<char, free_deleter> xdg_path(
-      t3_config_xdg_get_path(T3_CONFIG_XDG_CACHE_HOME, "tilde", strlen(kRecentFiles)));
+      t3_config_xdg_get_path(T3_CONFIG_XDG_CACHE_HOME, "tilde", 0));
   if (!make_dirs(xdg_path.get())) {
+    lprintf("Could not create cache dir: %s\n", strerror(errno));
     return;
   }
 
   std::string recent_files_path;
   strings::Append(&recent_files_path, xdg_path.get(), "/", kRecentFiles);
   xdg_path.reset();
+  lprintf("Operating on file %s\n", recent_files_path.c_str());
 
-  creat(recent_files_path.c_str(), 0700);
-  std::unique_ptr<FILE, fclose_deleter> recent_files_file(fopen(recent_files_path.c_str(), "r+"));
-  if (recent_files_file == nullptr) {
-    lprintf("Could not open recent files file: %s: %m\n", recent_files_path.c_str());
+  /* Create the file if necessary, as fopen with "r+" mode won't do that. Thus we use open and
+     fdopen to work around this issue. */
+  int fd = open(recent_files_path.c_str(), O_CREAT | O_RDWR, 0600);
+  if (fd == -1) {
+    lprintf("Could not open recent files file: %s: %s\n", recent_files_path.c_str(),
+            strerror(errno));
     return;
   }
-  int fd = fileno(recent_files_file.get());
+  std::unique_ptr<FILE, fclose_deleter> recent_files_file(fdopen(fd, "r+"));
+  if (recent_files_file == nullptr) {
+    lprintf("Could not open recent files file: %s: %s\n", recent_files_path.c_str(),
+            strerror(errno));
+    return;
+  }
 
   struct flock flock;
   flock.l_len = 1;
@@ -318,7 +330,7 @@ void recent_files_t::write_to_disk() {
   flock.l_type = F_WRLCK;
   while (fcntl(fd, F_SETLKW, &flock) != 0) {
     if (errno != EINTR) {
-      lprintf("Could not lock recent files file: %m\n");
+      lprintf("Could not lock recent files file: %s\n", strerror(errno));
       return;
     }
   }
@@ -437,11 +449,14 @@ void recent_files_t::write_to_disk() {
 
   while (ftruncate(fd, 0) != 0) {
     if (errno != EINTR) {
+      lprintf("Error while truncating the recent files file: %s\n", strerror(errno));
       return;
     }
   }
   t3_config_write_file(config.get(), recent_files_file.get());
+  fflush(recent_files_file.get());
   fsync(fd);
+  lprintf("Finished writing recent_files\n");
 }
 
 void recent_files_t::cleanup() { recent_file_infos.clear(); }
