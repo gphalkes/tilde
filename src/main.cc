@@ -232,8 +232,8 @@ main_t::main_t() {
   open_recent_dialog = new open_recent_dialog_t(11, window.get_width() - 4);
   open_recent_dialog->center_over(this);
 
-  about_dialog = make_unique<message_dialog_t>(45, std::string("About"),
-                                               std::initializer_list<string_view>{"Close"});
+  about_dialog = t3widget::make_unique<message_dialog_t>(
+      45, std::string("About"), std::initializer_list<string_view>{"Close"});
   about_dialog->center_over(this);
   about_dialog->set_max_text_height(13);
   about_dialog->set_message(

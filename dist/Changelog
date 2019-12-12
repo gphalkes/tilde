@@ -1,3 +1,6 @@
+Version 1.1.1:
+	Fix build on C++14 and later compilers.
+
 Version 1.1.0:
 	New features:
 	- The base config, loaded before the user config from (by default)
