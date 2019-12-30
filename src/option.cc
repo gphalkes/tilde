@@ -22,6 +22,7 @@
 #include "tilde/log.h"
 #include "tilde/option.h"
 #include "tilde/optionMacros.h"
+#include "tilde/option_access.h"
 #include "tilde/util.h"
 
 using namespace t3widget;
@@ -44,41 +45,6 @@ bool config_read_error;
 std::string config_read_error_string;
 int config_read_error_line;
 
-static struct {
-  const char *string;
-  t3_attr_t attr;
-} attribute_map[] = {{"underline", T3_ATTR_UNDERLINE | T3_ATTR_UNDERLINE_SET},
-                     {"bold", T3_ATTR_BOLD | T3_ATTR_BOLD_SET},
-                     {"reverse", T3_ATTR_REVERSE | T3_ATTR_REVERSE_SET},
-                     {"blink", T3_ATTR_BLINK | T3_ATTR_BLINK_SET},
-                     {"dim", T3_ATTR_DIM | T3_ATTR_DIM_SET},
-
-                     {"no underline", T3_ATTR_UNDERLINE_SET},
-                     {"no bold", T3_ATTR_BOLD_SET},
-                     {"no reverse", T3_ATTR_REVERSE_SET},
-                     {"no blink", T3_ATTR_BLINK_SET},
-                     {"no dim", T3_ATTR_DIM_SET},
-
-                     {"fg default", T3_ATTR_FG_DEFAULT},
-                     {"fg black", T3_ATTR_FG_BLACK},
-                     {"fg red", T3_ATTR_FG_RED},
-                     {"fg green", T3_ATTR_FG_GREEN},
-                     {"fg yellow", T3_ATTR_FG_YELLOW},
-                     {"fg blue", T3_ATTR_FG_BLUE},
-                     {"fg magenta", T3_ATTR_FG_MAGENTA},
-                     {"fg cyan", T3_ATTR_FG_CYAN},
-                     {"fg white", T3_ATTR_FG_WHITE},
-
-                     {"bg default", T3_ATTR_BG_DEFAULT},
-                     {"bg black", T3_ATTR_BG_BLACK},
-                     {"bg red", T3_ATTR_BG_RED},
-                     {"bg green", T3_ATTR_BG_GREEN},
-                     {"bg yellow", T3_ATTR_BG_YELLOW},
-                     {"bg blue", T3_ATTR_BG_BLUE},
-                     {"bg magenta", T3_ATTR_BG_MAGENTA},
-                     {"bg cyan", T3_ATTR_BG_CYAN},
-                     {"bg white", T3_ATTR_BG_WHITE}};
-
 static const char config_schema[] = {
 #include "config.bytes"
 };
@@ -89,114 +55,6 @@ static t3_bool find_term_config(const t3_config_t *config, const void *data) {
   }
   return strcmp(reinterpret_cast<const char *>(data),
                 t3_config_get_string(t3_config_get(config, "name"))) == 0;
-}
-
-static t3_attr_t attribute_string_to_bin(const char *attr) {
-  size_t i;
-  bool foreground;
-  char *endptr;
-  int color;
-
-  for (i = 0; i < ARRAY_SIZE(attribute_map); i++) {
-    if (strcmp(attr, attribute_map[i].string) == 0) {
-      return attribute_map[i].attr;
-    }
-  }
-
-  if (strncmp(attr, "fg ", 3) == 0) {
-    foreground = true;
-  } else if (strncmp(attr, "bg ", 3) == 0) {
-    foreground = false;
-  } else {
-    return 0;
-  }
-
-  color = static_cast<int>(std::strtol(attr + 3, &endptr, 0));
-  if (*endptr != 0) {
-    return 0;
-  }
-  if (color < 0 || color > 255) {
-    return 0;
-  }
-  return foreground ? T3_ATTR_FG(color) : T3_ATTR_BG(color);
-}
-
-static void read_config_attribute(const t3_config_t *config, const char *name,
-                                  std::function<void(t3_attr_t attr)> update) {
-  t3_config_t *attr_config;
-  t3_attr_t accumulated_attr = 0;
-
-  if ((attr_config = t3_config_get(config, name)) == nullptr) {
-    return;
-  }
-
-  for (attr_config = t3_config_get(attr_config, nullptr); attr_config != nullptr;
-       attr_config = t3_config_get_next(attr_config)) {
-    if (t3_config_get_type(attr_config) == T3_CONFIG_STRING) {
-      accumulated_attr = t3_term_combine_attrs(
-          attribute_string_to_bin(t3_config_get_string(attr_config)), accumulated_attr);
-    }
-  }
-
-  update(accumulated_attr);
-}
-
-#define GET_OPT(name, TYPE, type)                            \
-  do {                                                       \
-    t3_config_t *tmp;                                        \
-    if ((tmp = t3_config_get(&*config, #name)) != nullptr) { \
-      opts->name = t3_config_get_##type(tmp);                \
-    }                                                        \
-  } while (false)
-#define GET_ATTRIBUTE(name) \
-  read_config_attribute(attributes, #name, [&](t3_attr_t value) { opts->name = value; })
-#define GET_HL_ATTRIBUTE(name)            \
-  read_config_attribute(attributes, name, \
-                        [&](t3_attr_t value) { opts->highlights.insert_mapping(name, value); })
-
-static void read_term_config_part(const t3_config_t *config, term_options_t *opts) {
-  t3_config_t *attributes;
-
-  GET_OPT(color, BOOL, bool);
-
-  GET_OPT(key_timeout, INT, int);
-
-  attributes = t3_config_get(config, "attributes");
-  if (attributes != nullptr) {
-    GET_ATTRIBUTE(non_print);
-    GET_ATTRIBUTE(text_selection_cursor);
-    GET_ATTRIBUTE(text_selection_cursor2);
-    GET_ATTRIBUTE(bad_draw);
-    GET_ATTRIBUTE(text_cursor);
-    GET_ATTRIBUTE(text);
-    GET_ATTRIBUTE(text_selected);
-    GET_ATTRIBUTE(hotkey_highlight);
-    GET_ATTRIBUTE(dialog);
-    GET_ATTRIBUTE(dialog_selected);
-    GET_ATTRIBUTE(button_selected);
-    GET_ATTRIBUTE(scrollbar);
-    GET_ATTRIBUTE(menubar);
-    GET_ATTRIBUTE(menubar_selected);
-    GET_ATTRIBUTE(shadow);
-    GET_ATTRIBUTE(meta_text);
-    GET_ATTRIBUTE(background);
-
-    GET_ATTRIBUTE(brace_highlight);
-  }
-  attributes = t3_config_get(config, "highlight_attributes");
-  if (attributes != nullptr) {
-    GET_HL_ATTRIBUTE("comment");
-    GET_HL_ATTRIBUTE("comment-keyword");
-    GET_HL_ATTRIBUTE("keyword");
-    GET_HL_ATTRIBUTE("number");
-    GET_HL_ATTRIBUTE("string");
-    GET_HL_ATTRIBUTE("string-escape");
-    GET_HL_ATTRIBUTE("misc");
-    GET_HL_ATTRIBUTE("variable");
-    GET_HL_ATTRIBUTE("error");
-    GET_HL_ATTRIBUTE("addition");
-    GET_HL_ATTRIBUTE("deletion");
-  }
 }
 
 static void read_config(std::unique_ptr<FILE, fclose_deleter> config_file) {
@@ -231,25 +89,7 @@ static void read_config(std::unique_ptr<FILE, fclose_deleter> config_file) {
     return;
   }
 
-  read_term_config_part(config.get(), &default_option.term_options);
-
-#define opts (&default_option)
-  GET_OPT(wrap, BOOL, bool);
-  GET_OPT(auto_indent, BOOL, bool);
-  GET_OPT(tab_spaces, BOOL, bool);
-  GET_OPT(indent_aware_home, BOOL, bool);
-  GET_OPT(show_tabs, BOOL, bool);
-  GET_OPT(strip_spaces, BOOL, bool);
-  GET_OPT(make_backup, BOOL, bool);
-  GET_OPT(hide_menubar, BOOL, bool);
-  GET_OPT(parse_file_positions, BOOL, bool);
-  GET_OPT(disable_primary_selection_over_ssh, BOOL, bool);
-  GET_OPT(save_recent_files, BOOL, bool);
-  GET_OPT(restore_cursor_position, BOOL, bool);
-
-  GET_OPT(tabsize, INT, int);
-  GET_OPT(max_recent_files, INT, int);
-#undef opts
+  get_default_options(config.get());
 
   for (t3_config_t *lang = t3_config_get(t3_config_get(config.get(), "lang"), nullptr);
        lang != nullptr; lang = t3_config_get_next(lang)) {
@@ -272,7 +112,7 @@ static void read_config(std::unique_ptr<FILE, fclose_deleter> config_file) {
 
   if ((term_specific_config =
            t3_config_find(term_specific_config, find_term_config, term, nullptr)) != nullptr) {
-    read_term_config_part(term_specific_config, &term_specific_option);
+    get_term_options(term_specific_config, &term_specific_option);
   }
 }
 
@@ -306,65 +146,6 @@ static void read_user_config_file() {
     return;
   }
   read_config(std::move(config_file));
-}
-
-#define SET_OPT_FROM_FILE(name, deflt)                                                        \
-  do {                                                                                        \
-    option.name =                                                                             \
-        term_specific_option.name.value_or(default_option.term_options.name.value_or(deflt)); \
-  } while (0)
-
-#define SET_OPT_FROM_DFLT(name, deflt)                 \
-  do {                                                 \
-    option.name = default_option.name.value_or(deflt); \
-  } while (false)
-
-static void post_process_options() {
-  SET_OPT_FROM_DFLT(tabsize, 8);
-  SET_OPT_FROM_DFLT(hide_menubar, false);
-
-  SET_OPT_FROM_DFLT(wrap, false);
-
-  if (cli_option.color.is_valid()) {
-    option.color = cli_option.color.value();
-  } else {
-    SET_OPT_FROM_FILE(color, true);
-  }
-
-  SET_OPT_FROM_DFLT(tab_spaces, false);
-  SET_OPT_FROM_DFLT(auto_indent, true);
-  SET_OPT_FROM_DFLT(indent_aware_home, true);
-  SET_OPT_FROM_DFLT(show_tabs, false);
-  SET_OPT_FROM_DFLT(make_backup, false);
-  SET_OPT_FROM_DFLT(save_recent_files, true);
-  SET_OPT_FROM_DFLT(restore_cursor_position, true);
-
-  SET_OPT_FROM_DFLT(max_recent_files, 16);
-  SET_OPT_FROM_DFLT(strip_spaces, false);
-
-  if (!cli_option.ask_input_method && term_specific_option.key_timeout.is_valid()) {
-    option.key_timeout = term_specific_option.key_timeout;
-  }
-
-  option.highlights.insert_mapping("comment", get_default_attr(COMMENT));
-  option.highlights.insert_mapping("comment-keyword", get_default_attr(COMMENT_KEYWORD));
-  option.highlights.insert_mapping("keyword", get_default_attr(KEYWORD));
-  option.highlights.insert_mapping("number", get_default_attr(NUMBER));
-  option.highlights.insert_mapping("string", get_default_attr(STRING));
-  option.highlights.insert_mapping("string-escape", get_default_attr(STRING_ESCAPE));
-  option.highlights.insert_mapping("misc", get_default_attr(MISC));
-  option.highlights.insert_mapping("variable", get_default_attr(VARIABLE));
-  option.highlights.insert_mapping("error", get_default_attr(ERROR));
-  option.highlights.insert_mapping("addition", get_default_attr(ADDITION));
-  option.highlights.insert_mapping("deletion", get_default_attr(DELETION));
-  for (const auto &attribute : default_option.term_options.highlights) {
-    option.highlights.insert_mapping(attribute.first, attribute.second);
-  }
-  for (const auto &attribute : term_specific_option.highlights) {
-    option.highlights.insert_mapping(attribute.first, attribute.second);
-  }
-
-  SET_OPT_FROM_FILE(brace_highlight, get_default_attr(BRACE_HIGHLIGHT));
 }
 
 static void print_help() {
@@ -480,141 +261,9 @@ PARSE_FUNCTION(parse_args)
   read_base_config_file();
   read_user_config_file();
 
-  post_process_options();
+  derive_runtime_options();
 END_FUNCTION
 // clang-format on
-
-#define SET_ATTR_FROM_FILE(name, const_name)                               \
-  do {                                                                     \
-    if (term_specific_option.name.is_valid())                              \
-      set_attribute(const_name, term_specific_option.name.value());        \
-    else if (default_option.term_options.name.is_valid())                  \
-      set_attribute(const_name, default_option.term_options.name.value()); \
-  } while (false)
-
-void set_attributes() {
-  SET_ATTR_FROM_FILE(non_print, attribute_t::NON_PRINT);
-  SET_ATTR_FROM_FILE(text_selection_cursor, attribute_t::TEXT_SELECTION_CURSOR);
-  SET_ATTR_FROM_FILE(text_selection_cursor2, attribute_t::TEXT_SELECTION_CURSOR2);
-  SET_ATTR_FROM_FILE(bad_draw, attribute_t::BAD_DRAW);
-  SET_ATTR_FROM_FILE(text_cursor, attribute_t::TEXT_CURSOR);
-  SET_ATTR_FROM_FILE(text, attribute_t::TEXT);
-  SET_ATTR_FROM_FILE(text_selected, attribute_t::TEXT_SELECTED);
-  SET_ATTR_FROM_FILE(hotkey_highlight, attribute_t::HOTKEY_HIGHLIGHT);
-  SET_ATTR_FROM_FILE(dialog, attribute_t::DIALOG);
-  SET_ATTR_FROM_FILE(dialog_selected, attribute_t::DIALOG_SELECTED);
-  SET_ATTR_FROM_FILE(button_selected, attribute_t::BUTTON_SELECTED);
-  SET_ATTR_FROM_FILE(scrollbar, attribute_t::SCROLLBAR);
-  SET_ATTR_FROM_FILE(menubar, attribute_t::MENUBAR);
-  SET_ATTR_FROM_FILE(menubar_selected, attribute_t::MENUBAR_SELECTED);
-  SET_ATTR_FROM_FILE(shadow, attribute_t::SHADOW);
-  SET_ATTR_FROM_FILE(meta_text, attribute_t::META_TEXT);
-  SET_ATTR_FROM_FILE(background, attribute_t::BACKGROUND);
-}
-
-static void set_config_attribute(t3_config_t *config, const char *section_name, const char *name,
-                                 optional<t3_attr_t> attr) {
-  static t3_attr_t attribute_masks[] = {T3_ATTR_FG_MASK,
-                                        T3_ATTR_BG_MASK,
-                                        T3_ATTR_UNDERLINE | T3_ATTR_UNDERLINE_SET,
-                                        T3_ATTR_BOLD | T3_ATTR_BOLD_SET,
-                                        T3_ATTR_REVERSE | T3_ATTR_REVERSE_SET,
-                                        T3_ATTR_BLINK | T3_ATTR_BLINK_SET,
-                                        T3_ATTR_DIM | T3_ATTR_DIM_SET};
-
-  t3_config_t *attributes;
-  size_t i, j;
-
-  if ((attributes = t3_config_get(config, section_name)) == nullptr ||
-      t3_config_get_type(attributes) != T3_CONFIG_SECTION) {
-    if (!attr.is_valid()) {
-      return;
-    }
-    attributes = t3_config_add_section(config, section_name, nullptr);
-  }
-
-  if (!attr.is_valid()) {
-    t3_config_erase(attributes, name);
-    return;
-  }
-
-  config = t3_config_add_list(attributes, name, nullptr);
-
-  for (i = 0; i < ARRAY_SIZE(attribute_masks); i++) {
-    t3_attr_t search = attr.value() & attribute_masks[i];
-    if (search == 0) {
-      continue;
-    }
-
-    for (j = 0; j < ARRAY_SIZE(attribute_map); j++) {
-      if (attribute_map[j].attr == search) {
-        t3_config_add_string(config, nullptr, attribute_map[j].string);
-        break;
-      }
-    }
-
-    if (j == ARRAY_SIZE(attribute_map) &&
-        (attribute_masks[i] == T3_ATTR_FG_MASK || attribute_masks[i] == T3_ATTR_BG_MASK)) {
-      char color_name_buffer[32];
-      if (attribute_masks[i] == T3_ATTR_FG_MASK) {
-        sprintf(color_name_buffer, "fg %d", (search >> T3_ATTR_COLOR_SHIFT) - 1);
-      } else {
-        sprintf(color_name_buffer, "bg %d", (search >> (T3_ATTR_COLOR_SHIFT + 9)) - 1);
-      }
-      t3_config_add_string(config, nullptr, color_name_buffer);
-    }
-  }
-}
-
-#define SET_OPTION(name, type)                                   \
-  do {                                                           \
-    if (opts->name.is_valid())                                   \
-      t3_config_add_##type(&*config, #name, opts->name.value()); \
-    else                                                         \
-      t3_config_erase(&*config, #name);                          \
-  } while (false)
-#define SET_ATTRIBUTE(name) set_config_attribute(config, "attributes", #name, opts->name)
-#define SET_HL_ATTRIBUTE(x, name) \
-  set_config_attribute(config, "highlight_attributes", name, opts->highlights[x])
-
-static void set_term_config_options(t3_config_t *config, term_options_t *opts) {
-  SET_OPTION(color, bool);
-
-  SET_OPTION(key_timeout, int);
-
-  SET_ATTRIBUTE(non_print);
-  SET_ATTRIBUTE(text_selection_cursor);
-  SET_ATTRIBUTE(text_selection_cursor2);
-  SET_ATTRIBUTE(bad_draw);
-  SET_ATTRIBUTE(text_cursor);
-  SET_ATTRIBUTE(text);
-  SET_ATTRIBUTE(text_selected);
-  SET_ATTRIBUTE(hotkey_highlight);
-  SET_ATTRIBUTE(dialog);
-  SET_ATTRIBUTE(dialog_selected);
-  SET_ATTRIBUTE(button_selected);
-  SET_ATTRIBUTE(scrollbar);
-  SET_ATTRIBUTE(menubar);
-  SET_ATTRIBUTE(menubar_selected);
-  SET_ATTRIBUTE(shadow);
-  SET_ATTRIBUTE(meta_text);
-  SET_ATTRIBUTE(background);
-
-  t3_config_add_section(config, "highlight_attributes", nullptr);
-  for (const auto &attribute : opts->highlights) {
-    set_config_attribute(config, "highlight_attributes", std::string(attribute.first).c_str(),
-                         attribute.second);
-  }
-
-  SET_ATTRIBUTE(brace_highlight);
-
-  if (t3_config_get(t3_config_get(config, "highlight_attributes"), nullptr) == nullptr) {
-    t3_config_erase(config, "highlight_attributes");
-  }
-  if (t3_config_get(t3_config_get(config, "attributes"), nullptr) == nullptr) {
-    t3_config_erase(config, "attributes");
-  }
-}
 
 bool write_config() {
   std::unique_ptr<FILE, fclose_deleter> config_file;
@@ -662,25 +311,7 @@ bool write_config() {
   }
 
   default_option.term_options.key_timeout.reset();
-  set_term_config_options(config.get(), &default_option.term_options);
-
-#define opts (&default_option)
-  SET_OPTION(wrap, bool);
-  SET_OPTION(tab_spaces, bool);
-  SET_OPTION(auto_indent, bool);
-  SET_OPTION(indent_aware_home, bool);
-  SET_OPTION(show_tabs, bool);
-  SET_OPTION(strip_spaces, bool);
-  SET_OPTION(make_backup, bool);
-  SET_OPTION(hide_menubar, bool);
-  SET_OPTION(parse_file_positions, bool);
-  SET_OPTION(disable_primary_selection_over_ssh, bool);
-  SET_OPTION(save_recent_files, bool);
-  SET_OPTION(restore_cursor_position, bool);
-
-  SET_OPTION(tabsize, int);
-  SET_OPTION(max_recent_files, int);
-#undef opts
+  set_default_options(config.get());
 
   t3_config_add_int(config.get(), "config_version", 1);
 
@@ -702,7 +333,7 @@ bool write_config() {
       t3_config_add_string(terminal_config, "name", term);
     }
 
-    set_term_config_options(terminal_config, &term_specific_option);
+    set_term_options(terminal_config, term_specific_option);
   }
 
   /* Validate config using schema, such that we can be sure that we won't

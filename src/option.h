@@ -98,15 +98,15 @@ struct options_t {
 
 struct runtime_options_t {
   int tabsize;
-  bool wrap;
-  bool hide_menubar;
   bool color;
+  bool wrap;
   bool tab_spaces;
   bool auto_indent;
   bool indent_aware_home;
   bool show_tabs;
   bool strip_spaces;
   bool make_backup;
+  bool hide_menubar;
   bool save_recent_files;
   bool restore_cursor_position;
   size_t max_recent_files;
@@ -162,7 +162,6 @@ extern term_options_t term_specific_option;
 extern options_t default_option;
 
 void parse_args(int argc, char **argv);
-void set_attributes();
 bool write_config();
 t3_attr_t get_default_attr(attribute_key_t attr);
 t3_attr_t get_default_attr(attribute_key_t attr, bool color);

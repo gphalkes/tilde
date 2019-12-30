@@ -301,18 +301,20 @@ misc_options_dialog_t::misc_options_dialog_t(optional<std::string> _title)
 void misc_options_dialog_t::set_values_from_options() {
   hide_menu_box->set_state(option.hide_menubar);
   save_backup_box->set_state(option.make_backup);
+  /* parse_file_positions and disable_primary_selection_over_ssh only affect start-up, so there is
+     no value in the option struct. */
   parse_file_positions_box->set_state(default_option.parse_file_positions.value_or(true));
   disable_selection_over_ssh_box->set_state(
       default_option.disable_primary_selection_over_ssh.value_or(false));
-  save_recent_files_box->set_state(default_option.save_recent_files.value_or(true));
-  restore_cursor_position_box->set_state(default_option.restore_cursor_position.value_or(true));
+  save_recent_files_box->set_state(option.save_recent_files);
+  restore_cursor_position_box->set_state(option.restore_cursor_position);
 }
 
 void misc_options_dialog_t::set_options_from_values() {
   default_option.hide_menubar = option.hide_menubar = hide_menu_box->get_state();
   default_option.make_backup = option.make_backup = save_backup_box->get_state();
   /* parse_file_positions and disable_primary_selection_over_ssh only affect start-up, so there is
-   * no value in the option struct. */
+     no value in the option struct. */
   default_option.parse_file_positions = parse_file_positions_box->get_state();
   default_option.disable_primary_selection_over_ssh = disable_selection_over_ssh_box->get_state();
   if (!cli_option.disable_primary_selection && getenv("SSH_TTY") != nullptr) {

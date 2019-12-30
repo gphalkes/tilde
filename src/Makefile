@@ -24,6 +24,7 @@ SOURCES..objects/edit := \
 	main.cc \
 	openfiles.cc \
 	option.cc \
+	option_access.cc \
 	util.cc \
 	dialogs/attributesdialog.cc \
 	dialogs/characterdetailsdialog.cc \

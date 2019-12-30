@@ -33,6 +33,7 @@
 #include "tilde/log.h"
 #include "tilde/openfiles.h"
 #include "tilde/option.h"
+#include "tilde/option_access.h"
 #include "tilde/string_util.h"
 
 using namespace t3widget;
