@@ -24,6 +24,9 @@ using namespace t3widget;
 
 class attributes_dialog_t : public dialog_t {
  private:
+  struct attribute_access_t;
+  static const attribute_access_t attribute_access[];
+
   attribute_test_line_t *dialog_line, *dialog_selected_line, *shadow_line, *button_selected_line,
       *scrollbar_line, *menubar_line, *menubar_selected_line, *background_line,
       *hotkey_highlight_line, *bad_draw_line, *non_print_line, *text_line, *text_selected_line,

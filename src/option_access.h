@@ -100,11 +100,21 @@ struct OptionAccess {
         attribute(attribute_arg) {}
 };
 
-extern OptionAccess option_access[];
+/** Retrieve the OptionAccess instance for option with name @p name.
+    @returns nullptr if no option is found with the given name. */
+const OptionAccess *get_option_access(const std::string &name);
 
+/** Convert the options from @p config into the @c term_options_t struct passed in @p term_options.
+ */
 void get_term_options(t3_config_t *config, term_options_t *term_options);
+
+/** Convert the options from @p config into the @c default_options struct. */
 void get_default_options(t3_config_t *config);
+
+/** Convert the options from the @p term_options struct into the appropriate @c t3_config_t. */
 void set_term_options(t3_config_t *config, const term_options_t &term_options);
+
+/** Convert the options from the @c default_options struct into the appropriate @c t3_config_t. */
 void set_default_options(t3_config_t *config);
 
 void derive_runtime_options();

@@ -4,6 +4,8 @@
 
 #include <t3widget/widget.h>
 
+namespace {
+
 static struct {
   const char *string;
   t3_attr_t attr;
@@ -91,6 +93,8 @@ OptionAccess option_access[] = {
     OptionAccess("meta_text", nullptr, &term_options_t::meta_text, attribute_t::META_TEXT),
     OptionAccess("background", nullptr, &term_options_t::background, attribute_t::BACKGROUND),
 };
+
+}  // namespace
 
 const OptionAccess *get_option_access(const std::string &name) {
   static std::map<std::string, const OptionAccess *> *mapping = [] {
@@ -435,9 +439,8 @@ void set_attributes() {
       if (!attr.is_valid()) {
         attr = default_option.term_options.*access.t3_attr_t_term_opt;
       }
-      if (attr.is_valid()) {
-        set_attribute(access.attribute.value(), attr.value());
-      }
+      set_attribute(access.attribute.value(),
+                    attr.value_or(get_default_attribute(access.attribute.value(), option.color)));
     }
   }
 }

@@ -14,41 +14,77 @@
 
 #include "tilde/dialogs/attributesdialog.h"
 
-namespace {
+#include "tilde/option_access.h"
 
-const char *kAttributeToNameMapping[] = {
-    "dialog",
-    "dialog_selected",
-    "shadow",
-    "button_selected",
-    "scrollbar",
-    "menubar",
-    "menubar_selected",
-    "background",
-    "hotkey_highlight",
-    "bad_draw",
-    "non_print",
-    "text",
-    "text_selected",
-    "text_cursor",
-    "text_selection_cursor",
-    "text_selection_cursor2",
-    "meta_text",
-    "brace_highlight",
-    "comment",
-    "comment-keyword",
-    "keyword",
-    "number",
-    "string",
-    "string-escape",
-    "misc",
-    "variable",
-    "error",
-    "addition",
-    "deletion",
+struct attributes_dialog_t::attribute_access_t {
+  std::string name;
+  attribute_key_t attribute;
+  optional<t3_attr_t> attributes_dialog_t::*dialog_member;
+  attribute_test_line_t *attributes_dialog_t::*dialog_line;
+  optional<t3_attr_t> term_options_t::*term_options_member;
+  bool text_background;
 };
 
-}  // namespace
+const attributes_dialog_t::attribute_access_t attributes_dialog_t::attribute_access[] = {
+    {"dialog", DIALOG, &attributes_dialog_t::dialog, &attributes_dialog_t::dialog_line,
+     &term_options_t::dialog, false},
+    {"dialog_selected", DIALOG_SELECTED, &attributes_dialog_t::dialog_selected,
+     &attributes_dialog_t::dialog_selected_line, &term_options_t::dialog_selected, false},
+    {"shadow", SHADOW, &attributes_dialog_t::shadow, &attributes_dialog_t::shadow_line,
+     &term_options_t::shadow, false},
+    {"button_selected", BUTTON_SELECTED, &attributes_dialog_t::button_selected,
+     &attributes_dialog_t::button_selected_line, &term_options_t::button_selected, false},
+    {"scrollbar", SCROLLBAR, &attributes_dialog_t::scrollbar, &attributes_dialog_t::scrollbar_line,
+     &term_options_t::scrollbar, false},
+    {"menubar", MENUBAR, &attributes_dialog_t::menubar, &attributes_dialog_t::menubar_line,
+     &term_options_t::menubar, false},
+    {"menubar_selected", MENUBAR_SELECTED, &attributes_dialog_t::menubar_selected,
+     &attributes_dialog_t::menubar_selected_line, &term_options_t::menubar_selected, false},
+    {"background", BACKGROUND, &attributes_dialog_t::background,
+     &attributes_dialog_t::background_line, &term_options_t::background, false},
+    {"hotkey_highlight", HOTKEY_HIGHLIGHT, &attributes_dialog_t::hotkey_highlight,
+     &attributes_dialog_t::hotkey_highlight_line, &term_options_t::hotkey_highlight, false},
+    {"bad_draw", BAD_DRAW, &attributes_dialog_t::bad_draw, &attributes_dialog_t::bad_draw_line,
+     &term_options_t::bad_draw, false},
+    {"non_print", NON_PRINT, &attributes_dialog_t::non_print, &attributes_dialog_t::non_print_line,
+     &term_options_t::non_print, false},
+    {"text", TEXT, &attributes_dialog_t::text, &attributes_dialog_t::text_line,
+     &term_options_t::text, false},
+    {"text_selected", TEXT_SELECTED, &attributes_dialog_t::text_selected,
+     &attributes_dialog_t::text_selected_line, &term_options_t::text_selected, false},
+    {"text_cursor", TEXT_CURSOR, &attributes_dialog_t::text_cursor,
+     &attributes_dialog_t::text_cursor_line, &term_options_t::text_cursor, false},
+    {"text_selection_cursor", TEXT_SELECTION_CURSOR, &attributes_dialog_t::text_selection_cursor,
+     &attributes_dialog_t::text_selection_cursor_line, &term_options_t::text_selection_cursor,
+     false},
+    {"text_selection_cursor2", TEXT_SELECTION_CURSOR2, &attributes_dialog_t::text_selection_cursor2,
+     &attributes_dialog_t::text_selection_cursor2_line, &term_options_t::text_selection_cursor2,
+     false},
+    {"meta_text", META_TEXT, &attributes_dialog_t::meta_text, &attributes_dialog_t::meta_text_line,
+     &term_options_t::meta_text, true},
+    {"brace_highlight", BRACE_HIGHLIGHT, &attributes_dialog_t::brace_highlight,
+     &attributes_dialog_t::brace_highlight_line, &term_options_t::brace_highlight, true},
+    {"comment", COMMENT, &attributes_dialog_t::comment, &attributes_dialog_t::comment_line, nullptr,
+     true},
+    {"comment-keyword", COMMENT_KEYWORD, &attributes_dialog_t::comment_keyword,
+     &attributes_dialog_t::comment_keyword_line, nullptr, true},
+    {"keyword", KEYWORD, &attributes_dialog_t::keyword, &attributes_dialog_t::keyword_line, nullptr,
+     true},
+    {"number", NUMBER, &attributes_dialog_t::number, &attributes_dialog_t::number_line, nullptr,
+     true},
+    {"string", STRING, &attributes_dialog_t::string, &attributes_dialog_t::string_line, nullptr,
+     true},
+    {"string-escape", STRING_ESCAPE, &attributes_dialog_t::string_escape,
+     &attributes_dialog_t::string_escape_line, nullptr, true},
+    {"misc", MISC, &attributes_dialog_t::misc, &attributes_dialog_t::misc_line, nullptr, true},
+    {"variable", VARIABLE, &attributes_dialog_t::variable, &attributes_dialog_t::variable_line,
+     nullptr, true},
+    {"error", ERROR, &attributes_dialog_t::error, &attributes_dialog_t::error_line, nullptr, true},
+    {"addition", ADDITION, &attributes_dialog_t::addition, &attributes_dialog_t::addition_line,
+     nullptr, true},
+    {"deletion", DELETION, &attributes_dialog_t::deletion, &attributes_dialog_t::deletion_line,
+     nullptr, true},
+};
 
 #define START_WIDGET_GROUP                               \
   {                                                      \
@@ -207,70 +243,20 @@ void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
   change_attribute = attribute;
 
-  switch (attribute) {
-#define SET_WITH_DEFAULT(name, attr)                                                             \
-  case attr:                                                                                     \
-    picker->set_base_attributes(0);                                                              \
-    picker->set_attribute(                                                                       \
-        name.value_or(defaults->name.value_or(get_default_attr(attr, color_box->get_state())))); \
-    break;
-    SET_WITH_DEFAULT(dialog, DIALOG);
-    SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
-    SET_WITH_DEFAULT(shadow, SHADOW);
-    SET_WITH_DEFAULT(background, BACKGROUND);
-    SET_WITH_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
-    SET_WITH_DEFAULT(bad_draw, BAD_DRAW);
-    SET_WITH_DEFAULT(non_print, NON_PRINT);
-    SET_WITH_DEFAULT(button_selected, BUTTON_SELECTED);
-    SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
-    SET_WITH_DEFAULT(menubar, MENUBAR);
-    SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
-
-    SET_WITH_DEFAULT(text, TEXT);
-    SET_WITH_DEFAULT(text_selected, TEXT_SELECTED);
-    SET_WITH_DEFAULT(text_cursor, TEXT_CURSOR);
-    SET_WITH_DEFAULT(text_selection_cursor, TEXT_SELECTION_CURSOR);
-    SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
-#undef SET_WITH_DEFAULT
-
-#define SET_WITH_DEFAULT(name, attr)                                                             \
-  case attr:                                                                                     \
-    picker->set_base_attributes(text_attr);                                                      \
-    picker->set_attribute(                                                                       \
-        name.value_or(defaults->name.value_or(get_default_attr(attr, color_box->get_state())))); \
-    break;
-    SET_WITH_DEFAULT(meta_text, META_TEXT);
-    SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
-#undef SET_WITH_DEFAULT
-
-#define SET_WITH_DEFAULT(name, attr)                                                        \
-  case attr:                                                                                \
-    picker->set_base_attributes(text_attr);                                                 \
-    picker->set_attribute(                                                                  \
-        name.value_or(defaults->highlights.lookup_attributes(kAttributeToNameMapping[attr]) \
-                          .value_or(get_default_attr(attr, color_box->get_state()))));      \
-    break;
-
-    SET_WITH_DEFAULT(comment, COMMENT);
-    SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
-    SET_WITH_DEFAULT(keyword, KEYWORD);
-    SET_WITH_DEFAULT(number, NUMBER);
-    SET_WITH_DEFAULT(string, STRING);
-    SET_WITH_DEFAULT(string_escape, STRING_ESCAPE);
-    SET_WITH_DEFAULT(misc, MISC);
-    SET_WITH_DEFAULT(variable, VARIABLE);
-    SET_WITH_DEFAULT(error, ERROR);
-    SET_WITH_DEFAULT(addition, ADDITION);
-    SET_WITH_DEFAULT(deletion, DELETION);
-#undef SET_WITH_DEFAULT
-    default:
-// This means we somehow got a bad attribute key, which is a logic error.
-// However, we don't want to crash on this (at least outside of debug mode).
-#ifdef DEBUG
-      PANIC();
-#endif
+  for (const attribute_access_t &access : attribute_access) {
+    if (access.attribute == attribute) {
+      picker->set_base_attributes(access.text_background ? text_attr : 0);
+      optional<t3_attr_t> default_attribute =
+          access.term_options_member == nullptr
+              ? defaults->highlights.lookup_attributes(access.name)
+              : defaults->*access.term_options_member;
+      picker->set_attribute((this->*access.dialog_member)
+                                .value_or(default_attribute.value_or(
+                                    get_default_attr(attribute, color_box->get_state()))));
       break;
+    }
   }
+
   picker->show();
 }
 
@@ -285,50 +271,20 @@ void attributes_dialog_t::set_values_from_options() {
 
   color_box->set_state(option.color);
 
-#define SET_OPTION_VALUE(name)                   \
-  do {                                           \
-    name = source_options->name;                 \
-    if (!name.is_valid()) name = defaults->name; \
-  } while (false)
+  for (const attribute_access_t &access : attribute_access) {
+    if (access.term_options_member == nullptr) {
+      this->*access.dialog_member = source_options->highlights.lookup_attributes(access.name);
+      if (!(this->*access.dialog_member).is_valid()) {
+        this->*access.dialog_member = defaults->highlights.lookup_attributes(access.name);
+      }
+    } else {
+      this->*access.dialog_member = source_options->*access.term_options_member;
+      if (!(this->*access.dialog_member).is_valid()) {
+        this->*access.dialog_member = defaults->*access.term_options_member;
+      }
+    }
+  }
 
-  SET_OPTION_VALUE(dialog);
-  SET_OPTION_VALUE(dialog_selected);
-  SET_OPTION_VALUE(shadow);
-  SET_OPTION_VALUE(background);
-  SET_OPTION_VALUE(hotkey_highlight);
-  SET_OPTION_VALUE(bad_draw);
-  SET_OPTION_VALUE(non_print);
-  SET_OPTION_VALUE(button_selected);
-  SET_OPTION_VALUE(scrollbar);
-  SET_OPTION_VALUE(menubar);
-  SET_OPTION_VALUE(menubar_selected);
-
-  SET_OPTION_VALUE(text);
-  SET_OPTION_VALUE(text_selected);
-  SET_OPTION_VALUE(text_cursor);
-  SET_OPTION_VALUE(text_selection_cursor);
-  SET_OPTION_VALUE(text_selection_cursor2);
-  SET_OPTION_VALUE(meta_text);
-  SET_OPTION_VALUE(brace_highlight);
-#undef SET_OPTION_VALUE
-
-#define SET_HIGHLIGHT_OPTION_VALUE(name, highlight_name)                                 \
-  do {                                                                                   \
-    name = source_options->highlights.lookup_attributes(highlight_name);                 \
-    if (!name.is_valid()) name = defaults->highlights.lookup_attributes(highlight_name); \
-  } while (false)
-  SET_HIGHLIGHT_OPTION_VALUE(comment, "comment");
-  SET_HIGHLIGHT_OPTION_VALUE(comment_keyword, "comment-keyword");
-  SET_HIGHLIGHT_OPTION_VALUE(keyword, "keyword");
-  SET_HIGHLIGHT_OPTION_VALUE(number, "number");
-  SET_HIGHLIGHT_OPTION_VALUE(string, "string");
-  SET_HIGHLIGHT_OPTION_VALUE(string_escape, "string-escape");
-  SET_HIGHLIGHT_OPTION_VALUE(misc, "misc");
-  SET_HIGHLIGHT_OPTION_VALUE(variable, "variable");
-  SET_HIGHLIGHT_OPTION_VALUE(error, "error");
-  SET_HIGHLIGHT_OPTION_VALUE(addition, "addition");
-  SET_HIGHLIGHT_OPTION_VALUE(deletion, "deletion");
-#undef SET_HIGHLIGHT_OPTION_VALUE
   update_attribute_lines();
 }
 
@@ -343,62 +299,28 @@ void attributes_dialog_t::set_options_from_values() {
 void attributes_dialog_t::set_options_from_values(term_options_t *term_options) {
   term_options->color = option.color = color_box->get_state();
 
-#define SET_WITH_DEFAULT(name, attr)                                                            \
-  do {                                                                                          \
-    term_options->name = name;                                                                  \
-    set_attribute(attribute_t::attr,                                                            \
-                  term_specific_option.name.value_or(default_option.term_options.name.value_or( \
-                      get_default_attribute(attribute_t::attr, option.color))));                \
-  } while (false)
-  SET_WITH_DEFAULT(dialog, DIALOG);
-  SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
-  SET_WITH_DEFAULT(shadow, SHADOW);
-  SET_WITH_DEFAULT(background, BACKGROUND);
-  SET_WITH_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
-  SET_WITH_DEFAULT(bad_draw, BAD_DRAW);
-  SET_WITH_DEFAULT(non_print, NON_PRINT);
-  SET_WITH_DEFAULT(button_selected, BUTTON_SELECTED);
-  SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
-  SET_WITH_DEFAULT(menubar, MENUBAR);
-  SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
-  SET_WITH_DEFAULT(text, TEXT);
-  SET_WITH_DEFAULT(text_selected, TEXT_SELECTED);
-  SET_WITH_DEFAULT(text_cursor, TEXT_CURSOR);
-  SET_WITH_DEFAULT(text_selection_cursor, TEXT_SELECTION_CURSOR);
-  SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
-  SET_WITH_DEFAULT(meta_text, META_TEXT);
-#undef SET_WITH_DEFAULT
-
-  term_options->brace_highlight = brace_highlight;
+  for (const attribute_access_t &access : attribute_access) {
+    if (access.term_options_member == nullptr) {
+      if ((this->*access.dialog_member).is_valid()) {
+        term_options->highlights.insert_mapping(access.name, (this->*access.dialog_member).value());
+      } else {
+        term_options->highlights.erase_mapping(access.name);
+      }
+      option.highlights.insert_mapping(
+          access.name,
+          term_specific_option.highlights.lookup_attributes(access.name)
+              .value_or(default_option.term_options.highlights.lookup_attributes(access.name)
+                            .value_or(get_default_attr(access.attribute))));
+    } else {
+      /* Actual setting will be done below by copying to option.brace_highlight and calling
+         set_attributes. */
+      term_options->*access.term_options_member = this->*access.dialog_member;
+    }
+  }
   option.brace_highlight = term_specific_option.brace_highlight.value_or(
       default_option.term_options.brace_highlight.value_or(get_default_attr(BRACE_HIGHLIGHT)));
+  set_attributes();
 
-#define SET_WITH_DEFAULT(name, attr)                                                        \
-  do {                                                                                      \
-    if (name.is_valid()) {                                                                  \
-      term_options->highlights.insert_mapping(kAttributeToNameMapping[attr], name.value()); \
-    } else {                                                                                \
-      term_options->highlights.erase_mapping(kAttributeToNameMapping[attr]);                \
-    }                                                                                       \
-    option.highlights.insert_mapping(                                                       \
-        kAttributeToNameMapping[attr],                                                      \
-        term_specific_option.highlights.lookup_attributes(kAttributeToNameMapping[attr])    \
-            .value_or(default_option.term_options.highlights                                \
-                          .lookup_attributes(kAttributeToNameMapping[attr])                 \
-                          .value_or(get_default_attr(attr))));                              \
-  } while (false)
-  SET_WITH_DEFAULT(comment, COMMENT);
-  SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
-  SET_WITH_DEFAULT(keyword, KEYWORD);
-  SET_WITH_DEFAULT(number, NUMBER);
-  SET_WITH_DEFAULT(string, STRING);
-  SET_WITH_DEFAULT(string_escape, STRING_ESCAPE);
-  SET_WITH_DEFAULT(misc, MISC);
-  SET_WITH_DEFAULT(variable, VARIABLE);
-  SET_WITH_DEFAULT(error, ERROR);
-  SET_WITH_DEFAULT(addition, ADDITION);
-  SET_WITH_DEFAULT(deletion, DELETION);
-#undef SET_WITH_DEFAULT
   force_redraw_all();
 }
 
@@ -406,114 +328,32 @@ void attributes_dialog_t::update_attribute_lines() {
   t3_attr_t text_attr;
   bool color = color_box->get_state();
 
-#define SET_WITH_DEFAULT(name, attr) \
-  name##_line->set_attribute(name.value_or(defaults->name.value_or(get_default_attr(attr, color))))
-  SET_WITH_DEFAULT(dialog, DIALOG);
-  SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
-  SET_WITH_DEFAULT(shadow, SHADOW);
-  SET_WITH_DEFAULT(background, BACKGROUND);
-  SET_WITH_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
-  SET_WITH_DEFAULT(bad_draw, BAD_DRAW);
-  SET_WITH_DEFAULT(non_print, NON_PRINT);
-  SET_WITH_DEFAULT(button_selected, BUTTON_SELECTED);
-  SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
-  SET_WITH_DEFAULT(menubar, MENUBAR);
-  SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
-
-  SET_WITH_DEFAULT(text, TEXT);
-  SET_WITH_DEFAULT(text_selected, TEXT_SELECTED);
-  SET_WITH_DEFAULT(text_cursor, TEXT_CURSOR);
-  SET_WITH_DEFAULT(text_selection_cursor, TEXT_SELECTION_CURSOR);
-  SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
-#undef SET_WITH_DEFAULT
-
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color);
-
-#define SET_WITH_DEFAULT(name, attr)                \
-  name##_line->set_attribute(t3_term_combine_attrs( \
-      name.value_or(defaults->name.value_or(get_default_attr(attr, color))), text_attr))
-  SET_WITH_DEFAULT(meta_text, META_TEXT);
-  SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
-#undef SET_WITH_DEFAULT
-
-#define SET_WITH_DEFAULT(name, attr)                                                      \
-  name##_line->set_attribute(t3_term_combine_attrs(                                       \
-      name.value_or(defaults->highlights.lookup_attributes(kAttributeToNameMapping[attr]) \
-                        .value_or(get_default_attr(attr, color))),                        \
-      text_attr))
-
-  SET_WITH_DEFAULT(comment, COMMENT);
-  SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
-  SET_WITH_DEFAULT(keyword, KEYWORD);
-  SET_WITH_DEFAULT(number, NUMBER);
-  SET_WITH_DEFAULT(string, STRING);
-  SET_WITH_DEFAULT(string_escape, STRING_ESCAPE);
-  SET_WITH_DEFAULT(misc, MISC);
-  SET_WITH_DEFAULT(variable, VARIABLE);
-  SET_WITH_DEFAULT(error, ERROR);
-  SET_WITH_DEFAULT(addition, ADDITION);
-  SET_WITH_DEFAULT(deletion, DELETION);
-#undef SET_WITH_DEFAULT
+  for (const attribute_access_t &access : attribute_access) {
+    optional<t3_attr_t> default_attribute =
+        access.term_options_member == nullptr ? defaults->highlights.lookup_attributes(access.name)
+                                              : defaults->*access.term_options_member;
+    (this->*access.dialog_line)
+        ->set_attribute(t3_term_combine_attrs(
+            (this->*access.dialog_member)
+                .value_or(default_attribute.value_or(get_default_attr(access.attribute, color))),
+            access.text_background ? text_attr : 0));
+  }
 }
 
 void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
   t3_attr_t text_attr;
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
-  switch (change_attribute) {
-#define SET_WITH_DEFAULT(name, attr)       \
-  case attr:                               \
-    name = attribute;                      \
-    name##_line->set_attribute(attribute); \
-    break;
-    SET_WITH_DEFAULT(dialog, DIALOG);
-    SET_WITH_DEFAULT(dialog_selected, DIALOG_SELECTED);
-    SET_WITH_DEFAULT(shadow, SHADOW);
-    SET_WITH_DEFAULT(background, BACKGROUND);
-    SET_WITH_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
-    SET_WITH_DEFAULT(bad_draw, BAD_DRAW);
-    SET_WITH_DEFAULT(non_print, NON_PRINT);
-    SET_WITH_DEFAULT(button_selected, BUTTON_SELECTED);
-    SET_WITH_DEFAULT(scrollbar, SCROLLBAR);
-    SET_WITH_DEFAULT(menubar, MENUBAR);
-    SET_WITH_DEFAULT(menubar_selected, MENUBAR_SELECTED);
-
-    SET_WITH_DEFAULT(text, TEXT);
-    SET_WITH_DEFAULT(text_selected, TEXT_SELECTED);
-    SET_WITH_DEFAULT(text_cursor, TEXT_CURSOR);
-    SET_WITH_DEFAULT(text_selection_cursor, TEXT_SELECTION_CURSOR);
-    SET_WITH_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
-
-#undef SET_WITH_DEFAULT
-
-#define SET_WITH_DEFAULT(name, attr)                                         \
-  case attr:                                                                 \
-    name = attribute;                                                        \
-    name##_line->set_attribute(t3_term_combine_attrs(attribute, text_attr)); \
-    break;
-    SET_WITH_DEFAULT(meta_text, META_TEXT);
-    SET_WITH_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
-
-    SET_WITH_DEFAULT(comment, COMMENT);
-    SET_WITH_DEFAULT(comment_keyword, COMMENT_KEYWORD);
-    SET_WITH_DEFAULT(keyword, KEYWORD);
-    SET_WITH_DEFAULT(number, NUMBER);
-    SET_WITH_DEFAULT(string, STRING);
-    SET_WITH_DEFAULT(string_escape, STRING_ESCAPE);
-    SET_WITH_DEFAULT(misc, MISC);
-    SET_WITH_DEFAULT(variable, VARIABLE);
-    SET_WITH_DEFAULT(error, ERROR);
-    SET_WITH_DEFAULT(addition, ADDITION);
-    SET_WITH_DEFAULT(deletion, DELETION);
-#undef SET_WITH_DEFAULT
-    default:
-// This means we somehow got a bad attribute key, which is a logic error.
-// However, we don't want to crash on this (at least outside of debug mode).
-#ifdef DEBUG
-      PANIC();
-#endif
+  for (const attribute_access_t &access : attribute_access) {
+    if (access.attribute == change_attribute) {
+      this->*access.dialog_member = attribute;
+      (this->*access.dialog_line)
+          ->set_attribute(t3_term_combine_attrs(attribute, access.text_background ? text_attr : 0));
       break;
+    }
   }
+
   update_attribute_lines();
   picker->hide();
 }
@@ -522,73 +362,19 @@ void attributes_dialog_t::default_attribute_selected() {
   t3_attr_t text_attr;
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
-  switch (change_attribute) {
-#define SET_DEFAULT(name, attr)                                                   \
-  case attr:                                                                      \
-    name.reset();                                                                 \
-    name##_line->set_attribute(                                                   \
-        defaults->name.value_or(get_default_attr(attr, color_box->get_state()))); \
-    break;
-    SET_DEFAULT(dialog, DIALOG);
-    SET_DEFAULT(dialog_selected, DIALOG_SELECTED);
-    SET_DEFAULT(shadow, SHADOW);
-    SET_DEFAULT(background, BACKGROUND);
-    SET_DEFAULT(hotkey_highlight, HOTKEY_HIGHLIGHT);
-    SET_DEFAULT(bad_draw, BAD_DRAW);
-    SET_DEFAULT(non_print, NON_PRINT);
-    SET_DEFAULT(button_selected, BUTTON_SELECTED);
-    SET_DEFAULT(scrollbar, SCROLLBAR);
-    SET_DEFAULT(menubar, MENUBAR);
-    SET_DEFAULT(menubar_selected, MENUBAR_SELECTED);
-
-    SET_DEFAULT(text, TEXT);
-    SET_DEFAULT(text_selected, TEXT_SELECTED);
-    SET_DEFAULT(text_cursor, TEXT_CURSOR);
-    SET_DEFAULT(text_selection_cursor, TEXT_SELECTION_CURSOR);
-    SET_DEFAULT(text_selection_cursor2, TEXT_SELECTION_CURSOR2);
-
-#undef SET_DEFAULT
-
-#define SET_DEFAULT(name, attr)                                                               \
-  case attr:                                                                                  \
-    name.reset();                                                                             \
-    name##_line->set_attribute(t3_term_combine_attrs(                                         \
-        defaults->name.value_or(get_default_attr(attr, color_box->get_state())), text_attr)); \
-    break;
-
-    SET_DEFAULT(meta_text, META_TEXT);
-    SET_DEFAULT(brace_highlight, BRACE_HIGHLIGHT);
-
-#undef SET_DEFAULT
-
-#define SET_DEFAULT(name, attr)                                               \
-  case attr:                                                                  \
-    name.reset();                                                             \
-    name##_line->set_attribute(t3_term_combine_attrs(                         \
-        defaults->highlights.lookup_attributes(kAttributeToNameMapping[attr]) \
-            .value_or(get_default_attr(attr, color_box->get_state())),        \
-        text_attr));                                                          \
-    break;
-
-    SET_DEFAULT(comment, COMMENT);
-    SET_DEFAULT(comment_keyword, COMMENT_KEYWORD);
-    SET_DEFAULT(keyword, KEYWORD);
-    SET_DEFAULT(number, NUMBER);
-    SET_DEFAULT(string, STRING);
-    SET_DEFAULT(string_escape, STRING_ESCAPE);
-    SET_DEFAULT(misc, MISC);
-    SET_DEFAULT(variable, VARIABLE);
-    SET_DEFAULT(error, ERROR);
-    SET_DEFAULT(addition, ADDITION);
-    SET_DEFAULT(deletion, DELETION);
-#undef SET_DEFAULT
-    default:
-// This means we somehow got a bad attribute key, which is a logic error.
-// However, we don't want to crash on this (at least outside of debug mode).
-#ifdef DEBUG
-      PANIC();
-#endif
+  for (const attribute_access_t &access : attribute_access) {
+    if (access.attribute == change_attribute) {
+      (this->*access.dialog_member).reset();
+      optional<t3_attr_t> default_attribute =
+          access.term_options_member == nullptr
+              ? defaults->highlights.lookup_attributes(access.name)
+              : defaults->*access.term_options_member;
+      (this->*access.dialog_line)
+          ->set_attribute(t3_term_combine_attrs(default_attribute.value_or(get_default_attr(
+                                                    change_attribute, color_box->get_state())),
+                                                access.text_background ? text_attr : 0));
       break;
+    }
   }
   update_attribute_lines();
   picker->hide();
@@ -607,34 +393,8 @@ void attributes_dialog_t::set_change_defaults(bool value) {
 }
 
 void attributes_dialog_t::reset_values() {
-  dialog.reset();
-  dialog_selected.reset();
-  shadow.reset();
-  button_selected.reset();
-  scrollbar.reset();
-  menubar.reset();
-  menubar_selected.reset();
-  background.reset();
-  hotkey_highlight.reset();
-  bad_draw.reset();
-  non_print.reset();
-  text.reset();
-  text_selected.reset();
-  text_cursor.reset();
-  text_selection_cursor.reset();
-  text_selection_cursor2.reset();
-  meta_text.reset();
-  brace_highlight.reset();
-  comment.reset();
-  comment_keyword.reset();
-  keyword.reset();
-  number.reset();
-  string.reset();
-  string_escape.reset();
-  misc.reset();
-  variable.reset();
-  error.reset();
-  addition.reset();
-  deletion.reset();
+  for (const attribute_access_t &access : attribute_access) {
+    (this->*access.dialog_member).reset();
+  }
   update_attribute_lines();
 }
