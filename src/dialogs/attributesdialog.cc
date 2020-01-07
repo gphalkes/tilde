@@ -100,8 +100,9 @@ const attributes_dialog_t::attribute_access_t attributes_dialog_t::attribute_acc
      nullptr, true, HIGHLIGHT, "Deletion"},
 };
 
-void attributes_dialog_t::new_widget_group(WidgetGroup group, const std::string &group_name,
-                                           expander_t **var, int width) {
+t3widget::expander_t *attributes_dialog_t::new_widget_group(WidgetGroup group,
+                                                            const std::string &group_name,
+                                                            int width) {
   widget_group_t *widget_group = new widget_group_t();
   int widget_count = 0;
 
@@ -125,11 +126,12 @@ void attributes_dialog_t::new_widget_group(WidgetGroup group, const std::string 
     widget_count++;
   }
   widget_group->set_size(widget_count, width - 4);
-  *var = emplace_back<expander_t>(group_name);
-  (*var)->set_child(wrap_unique(widget_group));
-  (*var)->connect_move_focus_up([this] { focus_previous(); });
-  (*var)->connect_move_focus_down([this] { focus_next(); });
-  expander_group->add_expander(*var);
+  expander_t *expander = emplace_back<expander_t>(group_name);
+  expander->set_child(wrap_unique(widget_group));
+  expander->connect_move_focus_up([this] { focus_previous(); });
+  expander->connect_move_focus_down([this] { focus_next(); });
+  expander_group->add_expander(expander);
+  return expander;
 }
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
@@ -148,14 +150,14 @@ attributes_dialog_t::attributes_dialog_t(int width)
 
   expander_group.reset(new expander_group_t());
 
-  new_widget_group(INTERFACE, "_Interface attributes", &interface, width);
+  interface = new_widget_group(INTERFACE, "_Interface attributes", width);
   interface->set_position(2, 2);
 
-  new_widget_group(TEXT_AREA, "_Text area attributes", &text_area, width);
+  text_area = new_widget_group(TEXT_AREA, "_Text area attributes", width);
   text_area->set_anchor(interface, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
   text_area->set_position(0, 0);
 
-  new_widget_group(HIGHLIGHT, "_Syntax highlighting attributes", &syntax_highlight, width);
+  syntax_highlight = new_widget_group(HIGHLIGHT, "_Syntax highlighting attributes", width);
   syntax_highlight->set_anchor(text_area,
                                T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
   syntax_highlight->set_position(0, 0);

@@ -64,8 +64,7 @@ class attributes_dialog_t : public dialog_t {
   void set_options_from_values(term_options_t *term_options);
   void reset_values();
 
-  void new_widget_group(WidgetGroup group, const std::string &group_name, expander_t **var,
-                        int width);
+  expander_t *new_widget_group(WidgetGroup group, const std::string &group_name, int width);
 
  public:
   explicit attributes_dialog_t(int width);
