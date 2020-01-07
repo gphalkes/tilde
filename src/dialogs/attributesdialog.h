@@ -27,6 +27,12 @@ class attributes_dialog_t : public dialog_t {
   struct attribute_access_t;
   static const attribute_access_t attribute_access[];
 
+  enum WidgetGroup {
+    INTERFACE,
+    TEXT_AREA,
+    HIGHLIGHT,
+  };
+
   attribute_test_line_t *dialog_line, *dialog_selected_line, *shadow_line, *button_selected_line,
       *scrollbar_line, *menubar_line, *menubar_selected_line, *background_line,
       *hotkey_highlight_line, *bad_draw_line, *non_print_line, *text_line, *text_selected_line,
@@ -43,12 +49,12 @@ class attributes_dialog_t : public dialog_t {
   checkbox_t *color_box;
   std::unique_ptr<expander_group_t> expander_group;
   std::unique_ptr<attribute_picker_dialog_t> picker;
-  attribute_key_t change_attribute;
+  const attribute_access_t *change_access = nullptr;
   bool change_defaults = false;
   const term_options_t default_term_opts;
   const term_options_t *defaults;
 
-  void change_button_activated(attribute_key_t attribute);
+  void change_button_activated(const attribute_access_t *attribute);
   void expander_size_change(bool);
   void update_attribute_lines();
   void attribute_selected(t3_attr_t attribute);
@@ -58,6 +64,9 @@ class attributes_dialog_t : public dialog_t {
   void set_options_from_values(term_options_t *term_options);
   void reset_values();
 
+  void new_widget_group(WidgetGroup group, const std::string &group_name, expander_t **var,
+                        int width);
+
  public:
   explicit attributes_dialog_t(int width);
   bool set_size(optint height, optint width) override;
@@ -66,7 +75,7 @@ class attributes_dialog_t : public dialog_t {
   void set_options_from_values();
   void set_change_defaults(bool value);
 
-  DEFINE_SIGNAL(activate);
+  DEFINE_SIGNAL(activate)
 };
 
 #endif

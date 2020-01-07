@@ -23,100 +23,114 @@ struct attributes_dialog_t::attribute_access_t {
   attribute_test_line_t *attributes_dialog_t::*dialog_line;
   optional<t3_attr_t> term_options_t::*term_options_member;
   bool text_background;
+  WidgetGroup widget_group;
+  std::string desc;
 };
 
 const attributes_dialog_t::attribute_access_t attributes_dialog_t::attribute_access[] = {
     {"dialog", DIALOG, &attributes_dialog_t::dialog, &attributes_dialog_t::dialog_line,
-     &term_options_t::dialog, false},
+     &term_options_t::dialog, false, INTERFACE, "Dialog"},
     {"dialog_selected", DIALOG_SELECTED, &attributes_dialog_t::dialog_selected,
-     &attributes_dialog_t::dialog_selected_line, &term_options_t::dialog_selected, false},
+     &attributes_dialog_t::dialog_selected_line, &term_options_t::dialog_selected, false, INTERFACE,
+     "Dialog selected"},
     {"shadow", SHADOW, &attributes_dialog_t::shadow, &attributes_dialog_t::shadow_line,
-     &term_options_t::shadow, false},
-    {"button_selected", BUTTON_SELECTED, &attributes_dialog_t::button_selected,
-     &attributes_dialog_t::button_selected_line, &term_options_t::button_selected, false},
-    {"scrollbar", SCROLLBAR, &attributes_dialog_t::scrollbar, &attributes_dialog_t::scrollbar_line,
-     &term_options_t::scrollbar, false},
-    {"menubar", MENUBAR, &attributes_dialog_t::menubar, &attributes_dialog_t::menubar_line,
-     &term_options_t::menubar, false},
-    {"menubar_selected", MENUBAR_SELECTED, &attributes_dialog_t::menubar_selected,
-     &attributes_dialog_t::menubar_selected_line, &term_options_t::menubar_selected, false},
+     &term_options_t::shadow, false, INTERFACE, "Shadow"},
     {"background", BACKGROUND, &attributes_dialog_t::background,
-     &attributes_dialog_t::background_line, &term_options_t::background, false},
+     &attributes_dialog_t::background_line, &term_options_t::background, false, INTERFACE,
+     "Background"},
     {"hotkey_highlight", HOTKEY_HIGHLIGHT, &attributes_dialog_t::hotkey_highlight,
-     &attributes_dialog_t::hotkey_highlight_line, &term_options_t::hotkey_highlight, false},
+     &attributes_dialog_t::hotkey_highlight_line, &term_options_t::hotkey_highlight, false,
+     INTERFACE, "Hotkey highlight"},
     {"bad_draw", BAD_DRAW, &attributes_dialog_t::bad_draw, &attributes_dialog_t::bad_draw_line,
-     &term_options_t::bad_draw, false},
+     &term_options_t::bad_draw, false, INTERFACE, "Badly drawn character"},
     {"non_print", NON_PRINT, &attributes_dialog_t::non_print, &attributes_dialog_t::non_print_line,
-     &term_options_t::non_print, false},
+     &term_options_t::non_print, false, INTERFACE, "Unprintable character"},
+    {"button_selected", BUTTON_SELECTED, &attributes_dialog_t::button_selected,
+     &attributes_dialog_t::button_selected_line, &term_options_t::button_selected, false, INTERFACE,
+     "Button Selected"},
+    {"scrollbar", SCROLLBAR, &attributes_dialog_t::scrollbar, &attributes_dialog_t::scrollbar_line,
+     &term_options_t::scrollbar, false, INTERFACE, "Scrollbar"},
+    {"menubar", MENUBAR, &attributes_dialog_t::menubar, &attributes_dialog_t::menubar_line,
+     &term_options_t::menubar, false, INTERFACE, "Menu bar"},
+    {"menubar_selected", MENUBAR_SELECTED, &attributes_dialog_t::menubar_selected,
+     &attributes_dialog_t::menubar_selected_line, &term_options_t::menubar_selected, false,
+     INTERFACE, "Menu bar selected"},
+
     {"text", TEXT, &attributes_dialog_t::text, &attributes_dialog_t::text_line,
-     &term_options_t::text, false},
+     &term_options_t::text, false, TEXT_AREA, "Text"},
     {"text_selected", TEXT_SELECTED, &attributes_dialog_t::text_selected,
-     &attributes_dialog_t::text_selected_line, &term_options_t::text_selected, false},
+     &attributes_dialog_t::text_selected_line, &term_options_t::text_selected, false, TEXT_AREA,
+     "Selected text"},
     {"text_cursor", TEXT_CURSOR, &attributes_dialog_t::text_cursor,
-     &attributes_dialog_t::text_cursor_line, &term_options_t::text_cursor, false},
+     &attributes_dialog_t::text_cursor_line, &term_options_t::text_cursor, false, TEXT_AREA,
+     "Cursor"},
     {"text_selection_cursor", TEXT_SELECTION_CURSOR, &attributes_dialog_t::text_selection_cursor,
      &attributes_dialog_t::text_selection_cursor_line, &term_options_t::text_selection_cursor,
-     false},
+     false, TEXT_AREA, "Selection cursor at end"},
     {"text_selection_cursor2", TEXT_SELECTION_CURSOR2, &attributes_dialog_t::text_selection_cursor2,
      &attributes_dialog_t::text_selection_cursor2_line, &term_options_t::text_selection_cursor2,
-     false},
+     false, TEXT_AREA, "Selection cursor at start"},
     {"meta_text", META_TEXT, &attributes_dialog_t::meta_text, &attributes_dialog_t::meta_text_line,
-     &term_options_t::meta_text, true},
+     &term_options_t::meta_text, true, TEXT_AREA, "Wrap indicators"},
     {"brace_highlight", BRACE_HIGHLIGHT, &attributes_dialog_t::brace_highlight,
-     &attributes_dialog_t::brace_highlight_line, &term_options_t::brace_highlight, true},
+     &attributes_dialog_t::brace_highlight_line, &term_options_t::brace_highlight, true, TEXT_AREA,
+     "Brace highlight"},
+
     {"comment", COMMENT, &attributes_dialog_t::comment, &attributes_dialog_t::comment_line, nullptr,
-     true},
+     true, HIGHLIGHT, "Comment"},
     {"comment-keyword", COMMENT_KEYWORD, &attributes_dialog_t::comment_keyword,
-     &attributes_dialog_t::comment_keyword_line, nullptr, true},
+     &attributes_dialog_t::comment_keyword_line, nullptr, true, HIGHLIGHT, "Comment keyword"},
     {"keyword", KEYWORD, &attributes_dialog_t::keyword, &attributes_dialog_t::keyword_line, nullptr,
-     true},
+     true, HIGHLIGHT, "Keyword"},
     {"number", NUMBER, &attributes_dialog_t::number, &attributes_dialog_t::number_line, nullptr,
-     true},
+     true, HIGHLIGHT, "Number"},
     {"string", STRING, &attributes_dialog_t::string, &attributes_dialog_t::string_line, nullptr,
-     true},
+     true, HIGHLIGHT, "String"},
     {"string-escape", STRING_ESCAPE, &attributes_dialog_t::string_escape,
-     &attributes_dialog_t::string_escape_line, nullptr, true},
-    {"misc", MISC, &attributes_dialog_t::misc, &attributes_dialog_t::misc_line, nullptr, true},
+     &attributes_dialog_t::string_escape_line, nullptr, true, HIGHLIGHT, "String escape"},
+    {"misc", MISC, &attributes_dialog_t::misc, &attributes_dialog_t::misc_line, nullptr, true,
+     HIGHLIGHT, "Miscellaneous"},
     {"variable", VARIABLE, &attributes_dialog_t::variable, &attributes_dialog_t::variable_line,
-     nullptr, true},
-    {"error", ERROR, &attributes_dialog_t::error, &attributes_dialog_t::error_line, nullptr, true},
+     nullptr, true, HIGHLIGHT, "Variable"},
+    {"error", ERROR, &attributes_dialog_t::error, &attributes_dialog_t::error_line, nullptr, true,
+     HIGHLIGHT, "Error"},
     {"addition", ADDITION, &attributes_dialog_t::addition, &attributes_dialog_t::addition_line,
-     nullptr, true},
+     nullptr, true, HIGHLIGHT, "Addition"},
     {"deletion", DELETION, &attributes_dialog_t::deletion, &attributes_dialog_t::deletion_line,
-     nullptr, true},
+     nullptr, true, HIGHLIGHT, "Deletion"},
 };
 
-#define START_WIDGET_GROUP                               \
-  {                                                      \
-    widget_group_t *widget_group = new widget_group_t(); \
-    int widget_count = 0;
+void attributes_dialog_t::new_widget_group(WidgetGroup group, const std::string &group_name,
+                                           expander_t **var, int width) {
+  widget_group_t *widget_group = new widget_group_t();
+  int widget_count = 0;
 
-#define END_WIDGET_GROUP(name, var)                         \
-  widget_group->set_size(widget_count, width - 4);          \
-  var = emplace_back<expander_t>(name);                     \
-  var->set_child(wrap_unique(widget_group));                \
-  var->connect_move_focus_up([this] { focus_previous(); }); \
-  var->connect_move_focus_down([this] { focus_next(); });   \
-  expander_group->add_expander(var);                        \
+  for (const attribute_access_t &access : attribute_access) {
+    if (access.widget_group != group) {
+      continue;
+    }
+    smart_label_t *attribute_label = widget_group->emplace_back<smart_label_t>(access.desc);
+    attribute_label->set_position(widget_count, 0);
+    button_t *change_button = widget_group->emplace_back<button_t>("Change");
+    change_button->set_anchor(widget_group,
+                              T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+    change_button->set_position(widget_count, 0);
+    change_button->connect_activate([this, &access] { change_button_activated(&access); });
+    change_button->connect_move_focus_up([widget_group] { widget_group->focus_previous(); });
+    change_button->connect_move_focus_down([widget_group] { widget_group->focus_next(); });
+    this->*access.dialog_line = widget_group->emplace_back<attribute_test_line_t>();
+    (this->*access.dialog_line)
+        ->set_anchor(change_button, T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));
+    (this->*access.dialog_line)->set_position(0, -2);
+    widget_count++;
   }
-
-#define ADD_ATTRIBUTE_ENTRY(name, sym, widget_name)                                           \
-  do {                                                                                        \
-    smart_label_t *attribute_label = widget_group->emplace_back<smart_label_t>(name);         \
-    attribute_label->set_position(widget_count, 0);                                           \
-    button_t *change_button = widget_group->emplace_back<button_t>("Change");                 \
-    change_button->set_anchor(widget_group,                                                   \
-                              T3_PARENT(T3_ANCHOR_TOPRIGHT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));  \
-    change_button->set_position(widget_count, 0);                                             \
-    change_button->connect_activate([this] { change_button_activated(sym); });                \
-    change_button->connect_move_focus_up([widget_group] { widget_group->focus_previous(); }); \
-    change_button->connect_move_focus_down([widget_group] { widget_group->focus_next(); });   \
-    widget_name = widget_group->emplace_back<attribute_test_line_t>();                        \
-    widget_name->set_anchor(change_button,                                                    \
-                            T3_PARENT(T3_ANCHOR_TOPLEFT) | T3_CHILD(T3_ANCHOR_TOPRIGHT));     \
-    widget_name->set_position(0, -2);                                                         \
-    widget_count++;                                                                           \
-  } while (false)
+  widget_group->set_size(widget_count, width - 4);
+  *var = emplace_back<expander_t>(group_name);
+  (*var)->set_child(wrap_unique(widget_group));
+  (*var)->connect_move_focus_up([this] { focus_previous(); });
+  (*var)->connect_move_focus_down([this] { focus_next(); });
+  expander_group->add_expander(*var);
+}
 
 // FIXME: we may be better of using a list_pane_t for the longer divisions
 attributes_dialog_t::attributes_dialog_t(int width)
@@ -134,47 +148,14 @@ attributes_dialog_t::attributes_dialog_t(int width)
 
   expander_group.reset(new expander_group_t());
 
-  START_WIDGET_GROUP
-  ADD_ATTRIBUTE_ENTRY("Dialog", DIALOG, dialog_line);
-  ADD_ATTRIBUTE_ENTRY("Dialog selected", DIALOG_SELECTED, dialog_selected_line);
-  ADD_ATTRIBUTE_ENTRY("Shadow", SHADOW, shadow_line);
-  ADD_ATTRIBUTE_ENTRY("Background", BACKGROUND, background_line);
-  ADD_ATTRIBUTE_ENTRY("Hotkey highlight", HOTKEY_HIGHLIGHT, hotkey_highlight_line);
-  ADD_ATTRIBUTE_ENTRY("Badly drawn character", BAD_DRAW, bad_draw_line);
-  ADD_ATTRIBUTE_ENTRY("Unprintable character", NON_PRINT, non_print_line);
-  ADD_ATTRIBUTE_ENTRY("Button selected", BUTTON_SELECTED, button_selected_line);
-  ADD_ATTRIBUTE_ENTRY("Scrollbar", SCROLLBAR, scrollbar_line);
-  ADD_ATTRIBUTE_ENTRY("Menu bar", MENUBAR, menubar_line);
-  ADD_ATTRIBUTE_ENTRY("Menu bar selected", MENUBAR_SELECTED, menubar_selected_line);
-  END_WIDGET_GROUP("_Interface attributes", interface)
+  new_widget_group(INTERFACE, "_Interface attributes", &interface, width);
   interface->set_position(2, 2);
 
-  START_WIDGET_GROUP
-  ADD_ATTRIBUTE_ENTRY("Text", TEXT, text_line);
-  ADD_ATTRIBUTE_ENTRY("Selected text", TEXT_SELECTED, text_selected_line);
-  ADD_ATTRIBUTE_ENTRY("Cursor", TEXT_CURSOR, text_cursor_line);
-  ADD_ATTRIBUTE_ENTRY("Selection cursor at end", TEXT_SELECTION_CURSOR, text_selection_cursor_line);
-  ADD_ATTRIBUTE_ENTRY("Selection cursor at start", TEXT_SELECTION_CURSOR2,
-                      text_selection_cursor2_line);
-  ADD_ATTRIBUTE_ENTRY("Wrap indicators", META_TEXT, meta_text_line);
-  ADD_ATTRIBUTE_ENTRY("Brace highlight", BRACE_HIGHLIGHT, brace_highlight_line);
-  END_WIDGET_GROUP("_Text area attributes", text_area)
+  new_widget_group(TEXT_AREA, "_Text area attributes", &text_area, width);
   text_area->set_anchor(interface, T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
   text_area->set_position(0, 0);
 
-  START_WIDGET_GROUP
-  ADD_ATTRIBUTE_ENTRY("Comment", COMMENT, comment_line);
-  ADD_ATTRIBUTE_ENTRY("Comment keyword", COMMENT_KEYWORD, comment_keyword_line);
-  ADD_ATTRIBUTE_ENTRY("Keyword", KEYWORD, keyword_line);
-  ADD_ATTRIBUTE_ENTRY("Number", NUMBER, number_line);
-  ADD_ATTRIBUTE_ENTRY("String", STRING, string_line);
-  ADD_ATTRIBUTE_ENTRY("String escape", STRING_ESCAPE, string_escape_line);
-  ADD_ATTRIBUTE_ENTRY("Miscellaneous", MISC, misc_line);
-  ADD_ATTRIBUTE_ENTRY("Variable", VARIABLE, variable_line);
-  ADD_ATTRIBUTE_ENTRY("Error", ERROR, error_line);
-  ADD_ATTRIBUTE_ENTRY("Addition", ADDITION, addition_line);
-  ADD_ATTRIBUTE_ENTRY("Deletion", DELETION, deletion_line);
-  END_WIDGET_GROUP("_Syntax highlighting attributes", syntax_highlight)
+  new_widget_group(HIGHLIGHT, "_Syntax highlighting attributes", &syntax_highlight, width);
   syntax_highlight->set_anchor(text_area,
                                T3_PARENT(T3_ANCHOR_BOTTOMLEFT) | T3_CHILD(T3_ANCHOR_TOPLEFT));
   syntax_highlight->set_position(0, 0);
@@ -237,25 +218,19 @@ void attributes_dialog_t::show() {
   dialog_t::show();
 }
 
-void attributes_dialog_t::change_button_activated(attribute_key_t attribute) {
+void attributes_dialog_t::change_button_activated(const attribute_access_t *access) {
   t3_attr_t text_attr;
 
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
-  change_attribute = attribute;
 
-  for (const attribute_access_t &access : attribute_access) {
-    if (access.attribute == attribute) {
-      picker->set_base_attributes(access.text_background ? text_attr : 0);
-      optional<t3_attr_t> default_attribute =
-          access.term_options_member == nullptr
-              ? defaults->highlights.lookup_attributes(access.name)
-              : defaults->*access.term_options_member;
-      picker->set_attribute((this->*access.dialog_member)
-                                .value_or(default_attribute.value_or(
-                                    get_default_attr(attribute, color_box->get_state()))));
-      break;
-    }
-  }
+  change_access = access;
+  picker->set_base_attributes(access->text_background ? text_attr : 0);
+  optional<t3_attr_t> default_attribute = access->term_options_member == nullptr
+                                              ? defaults->highlights.lookup_attributes(access->name)
+                                              : defaults->*access->term_options_member;
+  picker->set_attribute((this->*access->dialog_member)
+                            .value_or(default_attribute.value_or(
+                                get_default_attr(access->attribute, color_box->get_state()))));
 
   picker->show();
 }
@@ -345,14 +320,10 @@ void attributes_dialog_t::attribute_selected(t3_attr_t attribute) {
   t3_attr_t text_attr;
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
-  for (const attribute_access_t &access : attribute_access) {
-    if (access.attribute == change_attribute) {
-      this->*access.dialog_member = attribute;
-      (this->*access.dialog_line)
-          ->set_attribute(t3_term_combine_attrs(attribute, access.text_background ? text_attr : 0));
-      break;
-    }
-  }
+  this->*change_access->dialog_member = attribute;
+  (this->*change_access->dialog_line)
+      ->set_attribute(
+          t3_term_combine_attrs(attribute, change_access->text_background ? text_attr : 0));
 
   update_attribute_lines();
   picker->hide();
@@ -362,20 +333,15 @@ void attributes_dialog_t::default_attribute_selected() {
   t3_attr_t text_attr;
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
-  for (const attribute_access_t &access : attribute_access) {
-    if (access.attribute == change_attribute) {
-      (this->*access.dialog_member).reset();
-      optional<t3_attr_t> default_attribute =
-          access.term_options_member == nullptr
-              ? defaults->highlights.lookup_attributes(access.name)
-              : defaults->*access.term_options_member;
-      (this->*access.dialog_line)
-          ->set_attribute(t3_term_combine_attrs(default_attribute.value_or(get_default_attr(
-                                                    change_attribute, color_box->get_state())),
-                                                access.text_background ? text_attr : 0));
-      break;
-    }
-  }
+  (this->*change_access->dialog_member).reset();
+  optional<t3_attr_t> default_attribute =
+      change_access->term_options_member == nullptr
+          ? defaults->highlights.lookup_attributes(change_access->name)
+          : defaults->*change_access->term_options_member;
+  (this->*change_access->dialog_line)
+      ->set_attribute(t3_term_combine_attrs(default_attribute.value_or(get_default_attr(
+                                                change_access->attribute, color_box->get_state())),
+                                            change_access->text_background ? text_attr : 0));
   update_attribute_lines();
   picker->hide();
 }
