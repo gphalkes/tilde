@@ -21,84 +21,79 @@ struct attributes_dialog_t::attribute_access_t {
   attribute_key_t attribute;
   optional<t3_attr_t> attributes_dialog_t::*dialog_member;
   attribute_test_line_t *attributes_dialog_t::*dialog_line;
-  optional<t3_attr_t> term_options_t::*term_options_member;
   bool text_background;
   WidgetGroup widget_group;
   std::string desc;
 };
 
 const attributes_dialog_t::attribute_access_t attributes_dialog_t::attribute_access[] = {
-    {"dialog", DIALOG, &attributes_dialog_t::dialog, &attributes_dialog_t::dialog_line,
-     &term_options_t::dialog, false, INTERFACE, "Dialog"},
+    {"dialog", DIALOG, &attributes_dialog_t::dialog, &attributes_dialog_t::dialog_line, false,
+     INTERFACE, "Dialog"},
     {"dialog_selected", DIALOG_SELECTED, &attributes_dialog_t::dialog_selected,
-     &attributes_dialog_t::dialog_selected_line, &term_options_t::dialog_selected, false, INTERFACE,
-     "Dialog selected"},
-    {"shadow", SHADOW, &attributes_dialog_t::shadow, &attributes_dialog_t::shadow_line,
-     &term_options_t::shadow, false, INTERFACE, "Shadow"},
+     &attributes_dialog_t::dialog_selected_line, false, INTERFACE, "Dialog selected"},
+    {"shadow", SHADOW, &attributes_dialog_t::shadow, &attributes_dialog_t::shadow_line, false,
+     INTERFACE, "Shadow"},
     {"background", BACKGROUND, &attributes_dialog_t::background,
-     &attributes_dialog_t::background_line, &term_options_t::background, false, INTERFACE,
-     "Background"},
+     &attributes_dialog_t::background_line, false, INTERFACE, "Background"},
     {"hotkey_highlight", HOTKEY_HIGHLIGHT, &attributes_dialog_t::hotkey_highlight,
-     &attributes_dialog_t::hotkey_highlight_line, &term_options_t::hotkey_highlight, false,
-     INTERFACE, "Hotkey highlight"},
+     &attributes_dialog_t::hotkey_highlight_line, false, INTERFACE, "Hotkey highlight"},
     {"bad_draw", BAD_DRAW, &attributes_dialog_t::bad_draw, &attributes_dialog_t::bad_draw_line,
-     &term_options_t::bad_draw, false, INTERFACE, "Badly drawn character"},
+     false, INTERFACE, "Badly drawn character"},
     {"non_print", NON_PRINT, &attributes_dialog_t::non_print, &attributes_dialog_t::non_print_line,
-     &term_options_t::non_print, false, INTERFACE, "Unprintable character"},
+     false, INTERFACE, "Unprintable character"},
     {"button_selected", BUTTON_SELECTED, &attributes_dialog_t::button_selected,
-     &attributes_dialog_t::button_selected_line, &term_options_t::button_selected, false, INTERFACE,
-     "Button Selected"},
+     &attributes_dialog_t::button_selected_line, false, INTERFACE, "Button Selected"},
     {"scrollbar", SCROLLBAR, &attributes_dialog_t::scrollbar, &attributes_dialog_t::scrollbar_line,
-     &term_options_t::scrollbar, false, INTERFACE, "Scrollbar"},
-    {"menubar", MENUBAR, &attributes_dialog_t::menubar, &attributes_dialog_t::menubar_line,
-     &term_options_t::menubar, false, INTERFACE, "Menu bar"},
+     false, INTERFACE, "Scrollbar"},
+    {"menubar", MENUBAR, &attributes_dialog_t::menubar, &attributes_dialog_t::menubar_line, false,
+     INTERFACE, "Menu bar"},
     {"menubar_selected", MENUBAR_SELECTED, &attributes_dialog_t::menubar_selected,
-     &attributes_dialog_t::menubar_selected_line, &term_options_t::menubar_selected, false,
-     INTERFACE, "Menu bar selected"},
+     &attributes_dialog_t::menubar_selected_line, false, INTERFACE, "Menu bar selected"},
 
-    {"text", TEXT, &attributes_dialog_t::text, &attributes_dialog_t::text_line,
-     &term_options_t::text, false, TEXT_AREA, "Text"},
+    {"text", TEXT, &attributes_dialog_t::text, &attributes_dialog_t::text_line, false, TEXT_AREA,
+     "Text"},
     {"text_selected", TEXT_SELECTED, &attributes_dialog_t::text_selected,
-     &attributes_dialog_t::text_selected_line, &term_options_t::text_selected, false, TEXT_AREA,
-     "Selected text"},
+     &attributes_dialog_t::text_selected_line, false, TEXT_AREA, "Selected text"},
     {"text_cursor", TEXT_CURSOR, &attributes_dialog_t::text_cursor,
-     &attributes_dialog_t::text_cursor_line, &term_options_t::text_cursor, false, TEXT_AREA,
-     "Cursor"},
+     &attributes_dialog_t::text_cursor_line, false, TEXT_AREA, "Cursor"},
     {"text_selection_cursor", TEXT_SELECTION_CURSOR, &attributes_dialog_t::text_selection_cursor,
-     &attributes_dialog_t::text_selection_cursor_line, &term_options_t::text_selection_cursor,
-     false, TEXT_AREA, "Selection cursor at end"},
+     &attributes_dialog_t::text_selection_cursor_line, false, TEXT_AREA, "Selection cursor at end"},
     {"text_selection_cursor2", TEXT_SELECTION_CURSOR2, &attributes_dialog_t::text_selection_cursor2,
-     &attributes_dialog_t::text_selection_cursor2_line, &term_options_t::text_selection_cursor2,
-     false, TEXT_AREA, "Selection cursor at start"},
+     &attributes_dialog_t::text_selection_cursor2_line, false, TEXT_AREA,
+     "Selection cursor at start"},
     {"meta_text", META_TEXT, &attributes_dialog_t::meta_text, &attributes_dialog_t::meta_text_line,
-     &term_options_t::meta_text, true, TEXT_AREA, "Wrap indicators"},
+     true, TEXT_AREA, "Wrap indicators"},
     {"brace_highlight", BRACE_HIGHLIGHT, &attributes_dialog_t::brace_highlight,
-     &attributes_dialog_t::brace_highlight_line, &term_options_t::brace_highlight, true, TEXT_AREA,
-     "Brace highlight"},
+     &attributes_dialog_t::brace_highlight_line, true, TEXT_AREA, "Brace highlight"},
 
-    {"comment", COMMENT, &attributes_dialog_t::comment, &attributes_dialog_t::comment_line, nullptr,
-     true, HIGHLIGHT, "Comment"},
+    {"comment", COMMENT, &attributes_dialog_t::comment, &attributes_dialog_t::comment_line, true,
+     HIGHLIGHT, "Comment"},
     {"comment-keyword", COMMENT_KEYWORD, &attributes_dialog_t::comment_keyword,
-     &attributes_dialog_t::comment_keyword_line, nullptr, true, HIGHLIGHT, "Comment keyword"},
-    {"keyword", KEYWORD, &attributes_dialog_t::keyword, &attributes_dialog_t::keyword_line, nullptr,
-     true, HIGHLIGHT, "Keyword"},
-    {"number", NUMBER, &attributes_dialog_t::number, &attributes_dialog_t::number_line, nullptr,
-     true, HIGHLIGHT, "Number"},
-    {"string", STRING, &attributes_dialog_t::string, &attributes_dialog_t::string_line, nullptr,
-     true, HIGHLIGHT, "String"},
+     &attributes_dialog_t::comment_keyword_line, true, HIGHLIGHT, "Comment keyword"},
+    {"keyword", KEYWORD, &attributes_dialog_t::keyword, &attributes_dialog_t::keyword_line, true,
+     HIGHLIGHT, "Keyword"},
+    {"number", NUMBER, &attributes_dialog_t::number, &attributes_dialog_t::number_line, true,
+     HIGHLIGHT, "Number"},
+    {"string", STRING, &attributes_dialog_t::string, &attributes_dialog_t::string_line, true,
+     HIGHLIGHT, "String"},
     {"string-escape", STRING_ESCAPE, &attributes_dialog_t::string_escape,
-     &attributes_dialog_t::string_escape_line, nullptr, true, HIGHLIGHT, "String escape"},
-    {"misc", MISC, &attributes_dialog_t::misc, &attributes_dialog_t::misc_line, nullptr, true,
-     HIGHLIGHT, "Miscellaneous"},
+     &attributes_dialog_t::string_escape_line, true, HIGHLIGHT, "String escape"},
+    {"misc", MISC, &attributes_dialog_t::misc, &attributes_dialog_t::misc_line, true, HIGHLIGHT,
+     "Miscellaneous"},
     {"variable", VARIABLE, &attributes_dialog_t::variable, &attributes_dialog_t::variable_line,
-     nullptr, true, HIGHLIGHT, "Variable"},
-    {"error", ERROR, &attributes_dialog_t::error, &attributes_dialog_t::error_line, nullptr, true,
-     HIGHLIGHT, "Error"},
+     true, HIGHLIGHT, "Variable"},
+    {"error", ERROR, &attributes_dialog_t::error, &attributes_dialog_t::error_line, true, HIGHLIGHT,
+     "Error"},
     {"addition", ADDITION, &attributes_dialog_t::addition, &attributes_dialog_t::addition_line,
-     nullptr, true, HIGHLIGHT, "Addition"},
+     true, HIGHLIGHT, "Addition"},
     {"deletion", DELETION, &attributes_dialog_t::deletion, &attributes_dialog_t::deletion_line,
-     nullptr, true, HIGHLIGHT, "Deletion"},
+     true, HIGHLIGHT, "Deletion"},
 };
+
+optional<t3_attr_t> term_options_t::*get_term_options_member(const std::string &name) {
+  const option_access_t *option_access = get_option_access(name);
+  return option_access == nullptr ? nullptr : option_access->t3_attr_t_term_opt;
+}
 
 t3widget::expander_t *attributes_dialog_t::new_widget_group(WidgetGroup group,
                                                             const std::string &group_name,
@@ -227,9 +222,10 @@ void attributes_dialog_t::change_button_activated(const attribute_access_t *acce
 
   change_access = access;
   picker->set_base_attributes(access->text_background ? text_attr : 0);
-  optional<t3_attr_t> default_attribute = access->term_options_member == nullptr
+  optional<t3_attr_t> term_options_t::*term_options_member = get_term_options_member(access->name);
+  optional<t3_attr_t> default_attribute = term_options_member == nullptr
                                               ? defaults->highlights.lookup_attributes(access->name)
-                                              : defaults->*access->term_options_member;
+                                              : defaults->*term_options_member;
   picker->set_attribute((this->*access->dialog_member)
                             .value_or(default_attribute.value_or(
                                 get_default_attr(access->attribute, color_box->get_state()))));
@@ -249,15 +245,16 @@ void attributes_dialog_t::set_values_from_options() {
   color_box->set_state(option.color);
 
   for (const attribute_access_t &access : attribute_access) {
-    if (access.term_options_member == nullptr) {
+    optional<t3_attr_t> term_options_t::*term_options_member = get_term_options_member(access.name);
+    if (term_options_member == nullptr) {
       this->*access.dialog_member = source_options->highlights.lookup_attributes(access.name);
       if (!(this->*access.dialog_member).is_valid()) {
         this->*access.dialog_member = defaults->highlights.lookup_attributes(access.name);
       }
     } else {
-      this->*access.dialog_member = source_options->*access.term_options_member;
+      this->*access.dialog_member = source_options->*term_options_member;
       if (!(this->*access.dialog_member).is_valid()) {
-        this->*access.dialog_member = defaults->*access.term_options_member;
+        this->*access.dialog_member = defaults->*term_options_member;
       }
     }
   }
@@ -277,7 +274,8 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
   term_options->color = option.color = color_box->get_state();
 
   for (const attribute_access_t &access : attribute_access) {
-    if (access.term_options_member == nullptr) {
+    optional<t3_attr_t> term_options_t::*term_options_member = get_term_options_member(access.name);
+    if (term_options_member == nullptr) {
       if ((this->*access.dialog_member).is_valid()) {
         term_options->highlights.insert_mapping(access.name, (this->*access.dialog_member).value());
       } else {
@@ -291,7 +289,7 @@ void attributes_dialog_t::set_options_from_values(term_options_t *term_options) 
     } else {
       /* Actual setting will be done below by copying to option.brace_highlight and calling
          set_attributes. */
-      term_options->*access.term_options_member = this->*access.dialog_member;
+      term_options->*term_options_member = this->*access.dialog_member;
     }
   }
   option.brace_highlight = term_specific_option.brace_highlight.value_or(
@@ -307,9 +305,10 @@ void attributes_dialog_t::update_attribute_lines() {
 
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color);
   for (const attribute_access_t &access : attribute_access) {
+    optional<t3_attr_t> term_options_t::*term_options_member = get_term_options_member(access.name);
     optional<t3_attr_t> default_attribute =
-        access.term_options_member == nullptr ? defaults->highlights.lookup_attributes(access.name)
-                                              : defaults->*access.term_options_member;
+        term_options_member == nullptr ? defaults->highlights.lookup_attributes(access.name)
+                                       : defaults->*term_options_member;
     (this->*access.dialog_line)
         ->set_attribute(t3_term_combine_attrs(
             (this->*access.dialog_member)
@@ -336,10 +335,11 @@ void attributes_dialog_t::default_attribute_selected() {
   text_attr = text.is_valid() ? text.value() : get_default_attr(TEXT, color_box->get_state());
 
   (this->*change_access->dialog_member).reset();
+  optional<t3_attr_t> term_options_t::*term_options_member =
+      get_term_options_member(change_access->name);
   optional<t3_attr_t> default_attribute =
-      change_access->term_options_member == nullptr
-          ? defaults->highlights.lookup_attributes(change_access->name)
-          : defaults->*change_access->term_options_member;
+      term_options_member == nullptr ? defaults->highlights.lookup_attributes(change_access->name)
+                                     : defaults->*term_options_member;
   (this->*change_access->dialog_line)
       ->set_attribute(t3_term_combine_attrs(default_attribute.value_or(get_default_attr(
                                                 change_access->attribute, color_box->get_state())),

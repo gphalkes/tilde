@@ -5,7 +5,7 @@
 
 using namespace t3widget;
 
-struct OptionAccess {
+struct option_access_t {
   enum Type {
     BOOL,
     INT,
@@ -44,8 +44,8 @@ struct OptionAccess {
 
   optional<attribute_t> attribute;
 
-  OptionAccess(const std::string &name_arg, bool runtime_options_t::*bool_runtime_opt_arg,
-               optional<bool> options_t::*bool_option_arg, bool dflt)
+  option_access_t(const std::string &name_arg, bool runtime_options_t::*bool_runtime_opt_arg,
+                  optional<bool> options_t::*bool_option_arg, bool dflt)
       : type(BOOL),
         name(name_arg),
         bool_runtime_opt(bool_runtime_opt_arg),
@@ -53,8 +53,8 @@ struct OptionAccess {
         bool_term_opt(nullptr),
         bool_default(dflt) {}
 
-  OptionAccess(const std::string &name_arg, int runtime_options_t::*int_runtime_opt_arg,
-               optional<int> options_t::*int_option_arg, int dflt)
+  option_access_t(const std::string &name_arg, int runtime_options_t::*int_runtime_opt_arg,
+                  optional<int> options_t::*int_option_arg, int dflt)
       : type(INT),
         name(name_arg),
         int_runtime_opt(int_runtime_opt_arg),
@@ -62,8 +62,8 @@ struct OptionAccess {
         int_term_opt(nullptr),
         int_default(dflt) {}
 
-  OptionAccess(const std::string &name_arg, size_t runtime_options_t::*size_t_runtime_opt_arg,
-               optional<size_t> options_t::*size_t_option_arg, size_t dflt)
+  option_access_t(const std::string &name_arg, size_t runtime_options_t::*size_t_runtime_opt_arg,
+                  optional<size_t> options_t::*size_t_option_arg, size_t dflt)
       : type(SIZE_T),
         name(name_arg),
         size_t_runtime_opt(size_t_runtime_opt_arg),
@@ -71,8 +71,8 @@ struct OptionAccess {
         int_term_opt(nullptr),
         size_t_default(dflt) {}
 
-  OptionAccess(const std::string &name_arg, bool runtime_options_t::*bool_runtime_opt_arg,
-               optional<bool> term_options_t::*bool_term_opt_arg, bool dflt)
+  option_access_t(const std::string &name_arg, bool runtime_options_t::*bool_runtime_opt_arg,
+                  optional<bool> term_options_t::*bool_term_opt_arg, bool dflt)
       : type(TERM_BOOL),
         name(name_arg),
         bool_runtime_opt(bool_runtime_opt_arg),
@@ -80,18 +80,19 @@ struct OptionAccess {
         bool_term_opt(bool_term_opt_arg),
         bool_default(dflt) {}
 
-  OptionAccess(const std::string &name_arg,
-               optional<int> runtime_options_t::*optional_int_runtime_opt_arg,
-               optional<int> term_options_t::*int_term_opt_arg)
+  option_access_t(const std::string &name_arg,
+                  optional<int> runtime_options_t::*optional_int_runtime_opt_arg,
+                  optional<int> term_options_t::*int_term_opt_arg)
       : type(TERM_OPTIONAL_INT),
         name(name_arg),
         optional_int_runtime_opt(optional_int_runtime_opt_arg),
         int_option(nullptr),
         int_term_opt(int_term_opt_arg) {}
 
-  OptionAccess(const std::string &name_arg, t3_attr_t runtime_options_t::*t3_attr_t_runtime_opt_arg,
-               optional<t3_attr_t> term_options_t::*t3_attr_t_term_opt_arg,
-               optional<attribute_t> attribute_arg)
+  option_access_t(const std::string &name_arg,
+                  t3_attr_t runtime_options_t::*t3_attr_t_runtime_opt_arg,
+                  optional<t3_attr_t> term_options_t::*t3_attr_t_term_opt_arg,
+                  optional<attribute_t> attribute_arg)
       : type(TERM_T3_ATTR_T),
         name(name_arg),
         t3_attr_t_runtime_opt(t3_attr_t_runtime_opt_arg),
@@ -100,9 +101,9 @@ struct OptionAccess {
         attribute(attribute_arg) {}
 };
 
-/** Retrieve the OptionAccess instance for option with name @p name.
+/** Retrieve the option_access_t instance for option with name @p name.
     @returns nullptr if no option is found with the given name. */
-const OptionAccess *get_option_access(const std::string &name);
+const option_access_t *get_option_access(const std::string &name);
 
 /** Convert the options from @p config into the @c term_options_t struct passed in @p term_options.
  */

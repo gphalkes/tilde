@@ -41,65 +41,67 @@ static struct {
                      {"bg cyan", T3_ATTR_BG_CYAN},
                      {"bg white", T3_ATTR_BG_WHITE}};
 
-OptionAccess option_access[] = {
-    OptionAccess("color", &runtime_options_t::color, &term_options_t::color, true),
-    OptionAccess("wrap", &runtime_options_t::wrap, &options_t::wrap, false),
-    OptionAccess("tab_spaces", &runtime_options_t::tab_spaces, &options_t::tab_spaces, false),
-    OptionAccess("auto_indent", &runtime_options_t::auto_indent, &options_t::auto_indent, true),
-    OptionAccess("indent_aware_home", &runtime_options_t::indent_aware_home,
-                 &options_t::indent_aware_home, true),
-    OptionAccess("show_tabs", &runtime_options_t::show_tabs, &options_t::show_tabs, false),
-    OptionAccess("strip_spaces", &runtime_options_t::strip_spaces, &options_t::strip_spaces, false),
-    OptionAccess("make_backup", &runtime_options_t::make_backup, &options_t::make_backup, false),
-    OptionAccess("hide_menubar", &runtime_options_t::hide_menubar, &options_t::hide_menubar, false),
-    OptionAccess("parse_file_positions", nullptr, &options_t::parse_file_positions, true),
-    OptionAccess("disable_primary_selection_over_ssh", nullptr,
-                 &options_t::disable_primary_selection_over_ssh, false),
-    OptionAccess("save_recent_files", &runtime_options_t::save_recent_files,
-                 &options_t::save_recent_files, true),
-    OptionAccess("restore_cursor_position", &runtime_options_t::restore_cursor_position,
-                 &options_t::restore_cursor_position, true),
-    OptionAccess("tabsize", &runtime_options_t::tabsize, &options_t::tabsize, 8),
-    OptionAccess("max_recent_files", &runtime_options_t::max_recent_files,
-                 &options_t::max_recent_files, 16),
-    OptionAccess("key_timeout", &runtime_options_t::key_timeout, &term_options_t::key_timeout),
+option_access_t option_access[] = {
+    option_access_t("color", &runtime_options_t::color, &term_options_t::color, true),
+    option_access_t("wrap", &runtime_options_t::wrap, &options_t::wrap, false),
+    option_access_t("tab_spaces", &runtime_options_t::tab_spaces, &options_t::tab_spaces, false),
+    option_access_t("auto_indent", &runtime_options_t::auto_indent, &options_t::auto_indent, true),
+    option_access_t("indent_aware_home", &runtime_options_t::indent_aware_home,
+                    &options_t::indent_aware_home, true),
+    option_access_t("show_tabs", &runtime_options_t::show_tabs, &options_t::show_tabs, false),
+    option_access_t("strip_spaces", &runtime_options_t::strip_spaces, &options_t::strip_spaces,
+                    false),
+    option_access_t("make_backup", &runtime_options_t::make_backup, &options_t::make_backup, false),
+    option_access_t("hide_menubar", &runtime_options_t::hide_menubar, &options_t::hide_menubar,
+                    false),
+    option_access_t("parse_file_positions", nullptr, &options_t::parse_file_positions, true),
+    option_access_t("disable_primary_selection_over_ssh", nullptr,
+                    &options_t::disable_primary_selection_over_ssh, false),
+    option_access_t("save_recent_files", &runtime_options_t::save_recent_files,
+                    &options_t::save_recent_files, true),
+    option_access_t("restore_cursor_position", &runtime_options_t::restore_cursor_position,
+                    &options_t::restore_cursor_position, true),
+    option_access_t("tabsize", &runtime_options_t::tabsize, &options_t::tabsize, 8),
+    option_access_t("max_recent_files", &runtime_options_t::max_recent_files,
+                    &options_t::max_recent_files, 16),
+    option_access_t("key_timeout", &runtime_options_t::key_timeout, &term_options_t::key_timeout),
 
-    OptionAccess("brace_highlight", &runtime_options_t::brace_highlight,
-                 &term_options_t::brace_highlight, nullopt),
-    OptionAccess("non_print", nullptr, &term_options_t::non_print, attribute_t::NON_PRINT),
-    OptionAccess("text_selection_cursor", nullptr, &term_options_t::text_selection_cursor,
-                 attribute_t::TEXT_SELECTION_CURSOR),
-    OptionAccess("text_selection_cursor2", nullptr, &term_options_t::text_selection_cursor2,
-                 attribute_t::TEXT_SELECTION_CURSOR2),
-    OptionAccess("bad_draw", nullptr, &term_options_t::bad_draw, attribute_t::BAD_DRAW),
-    OptionAccess("text_cursor", nullptr, &term_options_t::text_cursor, attribute_t::TEXT_CURSOR),
-    OptionAccess("text", nullptr, &term_options_t::text, attribute_t::TEXT),
-    OptionAccess("text_selected", nullptr, &term_options_t::text_selected,
-                 attribute_t::TEXT_SELECTED),
-    OptionAccess("hotkey_highlight", nullptr, &term_options_t::hotkey_highlight,
-                 attribute_t::HOTKEY_HIGHLIGHT),
+    option_access_t("brace_highlight", &runtime_options_t::brace_highlight,
+                    &term_options_t::brace_highlight, nullopt),
+    option_access_t("non_print", nullptr, &term_options_t::non_print, attribute_t::NON_PRINT),
+    option_access_t("text_selection_cursor", nullptr, &term_options_t::text_selection_cursor,
+                    attribute_t::TEXT_SELECTION_CURSOR),
+    option_access_t("text_selection_cursor2", nullptr, &term_options_t::text_selection_cursor2,
+                    attribute_t::TEXT_SELECTION_CURSOR2),
+    option_access_t("bad_draw", nullptr, &term_options_t::bad_draw, attribute_t::BAD_DRAW),
+    option_access_t("text_cursor", nullptr, &term_options_t::text_cursor, attribute_t::TEXT_CURSOR),
+    option_access_t("text", nullptr, &term_options_t::text, attribute_t::TEXT),
+    option_access_t("text_selected", nullptr, &term_options_t::text_selected,
+                    attribute_t::TEXT_SELECTED),
+    option_access_t("hotkey_highlight", nullptr, &term_options_t::hotkey_highlight,
+                    attribute_t::HOTKEY_HIGHLIGHT),
 
-    OptionAccess("dialog", nullptr, &term_options_t::dialog, attribute_t::DIALOG),
-    OptionAccess("dialog_selected", nullptr, &term_options_t::dialog_selected,
-                 attribute_t::DIALOG_SELECTED),
-    OptionAccess("button_selected", nullptr, &term_options_t::button_selected,
-                 attribute_t::BUTTON_SELECTED),
-    OptionAccess("scrollbar", nullptr, &term_options_t::scrollbar, attribute_t::SCROLLBAR),
-    OptionAccess("menubar", nullptr, &term_options_t::menubar, attribute_t::MENUBAR),
-    OptionAccess("menubar_selected", nullptr, &term_options_t::menubar_selected,
-                 attribute_t::MENUBAR_SELECTED),
+    option_access_t("dialog", nullptr, &term_options_t::dialog, attribute_t::DIALOG),
+    option_access_t("dialog_selected", nullptr, &term_options_t::dialog_selected,
+                    attribute_t::DIALOG_SELECTED),
+    option_access_t("button_selected", nullptr, &term_options_t::button_selected,
+                    attribute_t::BUTTON_SELECTED),
+    option_access_t("scrollbar", nullptr, &term_options_t::scrollbar, attribute_t::SCROLLBAR),
+    option_access_t("menubar", nullptr, &term_options_t::menubar, attribute_t::MENUBAR),
+    option_access_t("menubar_selected", nullptr, &term_options_t::menubar_selected,
+                    attribute_t::MENUBAR_SELECTED),
 
-    OptionAccess("shadow", nullptr, &term_options_t::shadow, attribute_t::SHADOW),
-    OptionAccess("meta_text", nullptr, &term_options_t::meta_text, attribute_t::META_TEXT),
-    OptionAccess("background", nullptr, &term_options_t::background, attribute_t::BACKGROUND),
+    option_access_t("shadow", nullptr, &term_options_t::shadow, attribute_t::SHADOW),
+    option_access_t("meta_text", nullptr, &term_options_t::meta_text, attribute_t::META_TEXT),
+    option_access_t("background", nullptr, &term_options_t::background, attribute_t::BACKGROUND),
 };
 
 }  // namespace
 
-const OptionAccess *get_option_access(const std::string &name) {
-  static std::map<std::string, const OptionAccess *> *mapping = [] {
-    auto *mapping = new std::map<std::string, const OptionAccess *>;
-    for (const OptionAccess &access : option_access) {
+const option_access_t *get_option_access(const std::string &name) {
+  static std::map<std::string, const option_access_t *> *mapping = [] {
+    auto *mapping = new std::map<std::string, const option_access_t *>;
+    for (const option_access_t &access : option_access) {
       (*mapping)[access.name] = &access;
     }
     return mapping;
@@ -160,25 +162,25 @@ static optional<t3_attr_t> convert_config_attribute(t3_config_t *attr_config) {
 
 void get_term_options(t3_config_t *config, term_options_t *term_options) {
   t3_config_t *attributes = t3_config_get(config, "attributes");
-  for (const OptionAccess &access : option_access) {
+  for (const option_access_t &access : option_access) {
     t3_config_t *tmp = t3_config_get(
-        access.type == OptionAccess::TERM_T3_ATTR_T ? attributes : config, access.name.c_str());
+        access.type == option_access_t::TERM_T3_ATTR_T ? attributes : config, access.name.c_str());
     switch (access.type) {
-      case OptionAccess::BOOL:
-      case OptionAccess::INT:
-      case OptionAccess::SIZE_T:
+      case option_access_t::BOOL:
+      case option_access_t::INT:
+      case option_access_t::SIZE_T:
         break;
-      case OptionAccess::TERM_BOOL:
+      case option_access_t::TERM_BOOL:
         if (tmp != nullptr) {
           term_options->*access.bool_term_opt = t3_config_get_bool(tmp);
         }
         break;
-      case OptionAccess::TERM_OPTIONAL_INT:
+      case option_access_t::TERM_OPTIONAL_INT:
         if (tmp != nullptr) {
           term_options->*access.int_term_opt = t3_config_get_int(tmp);
         }
         break;
-      case OptionAccess::TERM_T3_ATTR_T:
+      case option_access_t::TERM_T3_ATTR_T:
         term_options->*access.t3_attr_t_term_opt = convert_config_attribute(tmp);
         break;
     }
@@ -194,22 +196,22 @@ void get_term_options(t3_config_t *config, term_options_t *term_options) {
 }
 
 void get_default_options(t3_config_t *config) {
-  for (const OptionAccess &access : option_access) {
+  for (const option_access_t &access : option_access) {
     t3_config_t *tmp = t3_config_get(config, access.name.c_str());
     if (tmp != nullptr) {
       switch (access.type) {
-        case OptionAccess::BOOL:
+        case option_access_t::BOOL:
           default_option.*access.bool_option = t3_config_get_bool(tmp);
           break;
-        case OptionAccess::INT:
+        case option_access_t::INT:
           default_option.*access.int_option = t3_config_get_int(tmp);
           break;
-        case OptionAccess::SIZE_T:
+        case option_access_t::SIZE_T:
           default_option.*access.size_t_option = t3_config_get_int64(tmp);
           break;
-        case OptionAccess::TERM_BOOL:
-        case OptionAccess::TERM_OPTIONAL_INT:
-        case OptionAccess::TERM_T3_ATTR_T:
+        case option_access_t::TERM_BOOL:
+        case option_access_t::TERM_OPTIONAL_INT:
+        case option_access_t::TERM_T3_ATTR_T:
           break;
       }
     }
@@ -300,19 +302,19 @@ static void set_config_attribute(t3_config_t *config, const char *section_name, 
 }
 
 void set_term_options(t3_config_t *config, const term_options_t &term_options) {
-  for (const OptionAccess &access : option_access) {
+  for (const option_access_t &access : option_access) {
     switch (access.type) {
-      case OptionAccess::BOOL:
-      case OptionAccess::INT:
-      case OptionAccess::SIZE_T:
+      case option_access_t::BOOL:
+      case option_access_t::INT:
+      case option_access_t::SIZE_T:
         break;
-      case OptionAccess::TERM_BOOL:
+      case option_access_t::TERM_BOOL:
         set_option(config, access.name, term_options, access.bool_term_opt);
         break;
-      case OptionAccess::TERM_OPTIONAL_INT:
+      case option_access_t::TERM_OPTIONAL_INT:
         set_option(config, access.name, term_options, access.int_term_opt);
         break;
-      case OptionAccess::TERM_T3_ATTR_T:
+      case option_access_t::TERM_T3_ATTR_T:
         set_config_attribute(config, "attributes", access.name.c_str(),
                              term_options.*access.t3_attr_t_term_opt);
         break;
@@ -333,20 +335,20 @@ void set_term_options(t3_config_t *config, const term_options_t &term_options) {
 }
 
 void set_default_options(t3_config_t *config) {
-  for (const OptionAccess &access : option_access) {
+  for (const option_access_t &access : option_access) {
     switch (access.type) {
-      case OptionAccess::BOOL:
+      case option_access_t::BOOL:
         set_option(config, access.name, default_option, access.bool_option);
         break;
-      case OptionAccess::INT:
+      case option_access_t::INT:
         set_option(config, access.name, default_option, access.int_option);
         break;
-      case OptionAccess::SIZE_T:
+      case option_access_t::SIZE_T:
         set_option(config, access.name, default_option, access.size_t_option);
         break;
-      case OptionAccess::TERM_BOOL:
-      case OptionAccess::TERM_OPTIONAL_INT:
-      case OptionAccess::TERM_T3_ATTR_T:
+      case option_access_t::TERM_BOOL:
+      case option_access_t::TERM_OPTIONAL_INT:
+      case option_access_t::TERM_T3_ATTR_T:
         break;
     }
   }
@@ -355,27 +357,27 @@ void set_default_options(t3_config_t *config) {
 }
 
 void derive_runtime_options() {
-  for (const OptionAccess &access : option_access) {
+  for (const option_access_t &access : option_access) {
     switch (access.type) {
-      case OptionAccess::BOOL:
+      case option_access_t::BOOL:
         if (access.bool_runtime_opt != nullptr) {
           option.*access.bool_runtime_opt =
               (default_option.*access.bool_option).value_or(access.bool_default);
         }
         break;
-      case OptionAccess::INT:
+      case option_access_t::INT:
         if (access.int_runtime_opt != nullptr) {
           option.*access.int_runtime_opt =
               (default_option.*access.int_option).value_or(access.int_default);
         }
         break;
-      case OptionAccess::SIZE_T:
+      case option_access_t::SIZE_T:
         if (access.size_t_runtime_opt != nullptr) {
           option.*access.size_t_runtime_opt =
               (default_option.*access.size_t_option).value_or(access.size_t_default);
         }
         break;
-      case OptionAccess::TERM_BOOL:
+      case option_access_t::TERM_BOOL:
         if (access.bool_runtime_opt != nullptr) {
           option.*access.bool_runtime_opt =
               (term_specific_option.*access.bool_term_opt)
@@ -383,7 +385,7 @@ void derive_runtime_options() {
                                 .value_or(access.bool_default));
         }
         break;
-      case OptionAccess::TERM_OPTIONAL_INT:
+      case option_access_t::TERM_OPTIONAL_INT:
         if (access.optional_int_runtime_opt) {
           option.*access.optional_int_runtime_opt = term_specific_option.*access.int_term_opt;
           if (!(option.*access.optional_int_runtime_opt).is_valid()) {
@@ -392,7 +394,7 @@ void derive_runtime_options() {
           }
         }
         break;
-      case OptionAccess::TERM_T3_ATTR_T:
+      case option_access_t::TERM_T3_ATTR_T:
         if (access.t3_attr_t_runtime_opt) {
           option.*access.t3_attr_t_runtime_opt =
               (term_specific_option.*access.t3_attr_t_term_opt)
@@ -433,8 +435,8 @@ void derive_runtime_options() {
 }
 
 void set_attributes() {
-  for (const OptionAccess &access : option_access) {
-    if (access.type == OptionAccess::TERM_T3_ATTR_T && access.attribute.is_valid()) {
+  for (const option_access_t &access : option_access) {
+    if (access.type == option_access_t::TERM_T3_ATTR_T && access.attribute.is_valid()) {
       optional<t3_attr_t> attr = term_specific_option.*access.t3_attr_t_term_opt;
       if (!attr.is_valid()) {
         attr = default_option.term_options.*access.t3_attr_t_term_opt;
