@@ -73,6 +73,10 @@ bool transcript_buffer_t::fill_buffer(int used) {
   buffer_index = inbuf - wrapped_buffer->get_buffer();
   fill = outbuf - buffer;
 
+  if (buffer_index > 0) {
+    conversion_flags &= ~TRANSCRIPT_FILE_START;
+  }
+
   switch (retval) {
     case TRANSCRIPT_SUCCESS:
     case TRANSCRIPT_NO_SPACE:
@@ -95,9 +99,6 @@ bool transcript_buffer_t::fill_buffer(int used) {
     case TRANSCRIPT_INTERNAL_ERROR:
     default:
       throw rw_result_t(rw_result_t::CONVERSION_ERROR);
-  }
-  if (buffer_index > 0) {
-    conversion_flags &= ~TRANSCRIPT_FILE_START;
   }
   return fill > 0;
 }

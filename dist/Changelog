@@ -1,3 +1,8 @@
+Version 1.1.2:
+	Bug fixes:
+	- When continuing reading after detecting an invalid character conversion,
+	  some or all of the text leading up to the invalid character was discarded.
+
 Version 1.1.1:
 	Fix build on C++14 and later compilers.
 

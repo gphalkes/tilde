@@ -158,6 +158,7 @@ rw_result_t file_buffer_t::load(load_process_t *state) {
         }
         set_cursor({0, 0});
       } catch (rw_result_t &result) {
+        state->buffer_used = false;
         return result;
       }
       break;
