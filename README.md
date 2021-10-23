@@ -6,6 +6,8 @@ Windows. For example, the short-cut to copy the current selection is Control-C,
 and to paste the previously copied text the short-cut Control-V can be used.
 As another example, the File menu can be accessed by pressing Meta-F.
 
+![Tilde screenshot](https://os.ghalkes.nl/tilde/tilde-screenshot.png)
+
 For more information, see [the homepage](https://os.ghalkes.nl/tilde)
 
 ## Installing Tilde
