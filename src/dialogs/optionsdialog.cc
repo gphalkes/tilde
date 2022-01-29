@@ -144,7 +144,7 @@ void buffer_options_dialog_t::set_values_from_view(file_edit_window_t *view) {
 
 void buffer_options_dialog_t::set_view_values(file_edit_window_t *view) {
   int tabsize = atoi(tabsize_field->get_text().c_str());
-  if (tabsize > 0 || tabsize < 17) {
+  if (tabsize > 0 && tabsize < 17) {
     view->set_tabsize(tabsize);
   }
   view->set_wrap(wrap_box->get_state() ? wrap_type_t::WORD : wrap_type_t::NONE);
@@ -170,7 +170,7 @@ void buffer_options_dialog_t::set_values_from_options() {
 
 void buffer_options_dialog_t::set_options_from_values() {
   int tabsize = atoi(tabsize_field->get_text().c_str());
-  if (tabsize > 0 || tabsize < 17) {
+  if (tabsize > 0 && tabsize < 17) {
     default_option.tabsize = option.tabsize = tabsize;
   }
   default_option.wrap = option.wrap = wrap_box->get_state();
