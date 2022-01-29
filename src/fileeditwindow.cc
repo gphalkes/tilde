@@ -13,6 +13,7 @@
 */
 #include "tilde/fileeditwindow.h"
 #include "tilde/fileautocompleter.h"
+#include "tilde/log.h"
 #include "tilde/main.h"
 
 file_edit_window_t::file_edit_window_t(file_buffer_t *_text) {
@@ -42,13 +43,19 @@ void file_edit_window_t::draw_info_window() {
   text_line_t *name_line = _text->get_name_line();
   text_line_t::paint_info_t paint_info;
   int name_width = info_window.get_width();
+  text_pos_t screen_width = name_line->calculate_screen_width(0, name_line->size(), 1);
 
   info_window.set_paint(0, 0);
   info_window.set_default_attrs(get_attribute(attribute_t::MENUBAR));
 
-  if (name_line->calculate_screen_width(0, name_line->size(), 1) > name_width) {
+  if (screen_width > name_width) {
+    paint_info.start = 0;
     info_window.addstr("..", 0);
-    paint_info.start = name_line->adjust_position(name_line->size(), -(name_width - 2));
+
+    while (screen_width > name_width - 2) {
+      screen_width -= name_line->width_at(paint_info.start);
+      paint_info.start = name_line->adjust_position(paint_info.start, 1);
+    }
     paint_info.size = name_width - 2;
   } else {
     paint_info.start = 0;

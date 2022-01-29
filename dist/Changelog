@@ -1,3 +1,8 @@
+Version 1.1.3:
+  Bug fixes:
+  - The file name in the info line would not be displayed as intended if it contained
+    double-width characters.
+
 Version 1.1.2:
 	Bug fixes:
 	- When continuing reading after detecting an invalid character conversion,
