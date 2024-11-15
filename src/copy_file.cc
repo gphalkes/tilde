@@ -132,11 +132,11 @@ int copy_file(int src_fd, int dest_fd) {
   }
   // FIXME: these routines may fail if the file changed in between and are now shorter!
   result = copy_file_by_copy_file_range(src_fd, dest_fd, statbuf.st_size);
-  if (result != ENOTSUP) {
+  if (result != ENOTSUP && result != ENOSYS) {
     return result;
   }
   result = copy_file_by_sendfile(src_fd, dest_fd, statbuf.st_size);
-  if (result != ENOTSUP) {
+  if (result != ENOTSUP && result != ENOSYS) {
     return result;
   }
   return copy_file_by_read_write(src_fd, dest_fd);
