@@ -28,9 +28,7 @@ the git repositories be used.
 There are several ways to get help, should you have problems using, installing
 or building Tilde:
 
-* For online support, try the #tilde IRC channel on freenode
-  ([webchat](http://webchat.freenode.net/?channels=tilde)).
-* Alternatively, questions, discussions etc. can be posted on the mailing list
+* Questions and discussions can be posted on the mailing list
   tilde-text-editor &lt;at&gt; googlegroups.com.
 * For bug reports or feature suggestions, please file a bug in the github
   [bugtracker](https://github.com/gphalkes/tilde/issues).
@@ -73,6 +71,4 @@ recording the input and output for debugging purposes.
 
 ## Other ways to contribute
 
-* Answer questions on the IRC channel (see the [Getting help](#getting-help)
-  section).
 * Creating and maintaining packages for different distributions.
