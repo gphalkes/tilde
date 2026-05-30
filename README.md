@@ -50,13 +50,15 @@ follow the steps below to build Tilde from the git repositories:
    * libacl1-dev
    * libattr1-dev
    * libgpm-dev
-   * libncurses5-dev
+   * libncurses-dev (called `libncurses5-dev` on older distributions)
    * libpcre2-dev
    * libtool-bin
    * libunistring-dev
    * libxcb1-dev and/or libx11-dev
    * pkg-config
-   * LLnextgen (available [here](https://os.ghalkes.nl/LLnextgen/download.html))
+   * LLnextgen — download the `.deb` package from the
+     [download page](https://os.ghalkes.nl/LLnextgen/download.html) and install
+     it with `sudo apt install ./llnextgen_*.deb`
    * clang (unless building using COMPILER=gcc)
 2. Clone the repositories:
 ```bash
